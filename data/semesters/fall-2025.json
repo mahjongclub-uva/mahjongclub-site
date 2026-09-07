@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "id": "fall-2025",
+  "label": "Fall 2025",
+  "sessions": 8,
+  "last_session": "2025-11-22",
+  "min_tables_to_rank": 2,
+  "standings": [
+    {
+      "id": "p010",
+      "rank": 1,
+      "display": "Eddie Z.",
+      "tables_played": 7,
+      "total_gain": 648,
+      "avg_gain": 92.6,
+      "best_table": 288,
+      "total_net": 542,
+      "avg_net": 77.4
+    },
+    {
+      "id": "p017",
+      "rank": 2,
+      "display": "Kevin J.",
+      "tables_played": 12,
+      "total_gain": 647,
+      "avg_gain": 53.9,
+      "best_table": 209,
+      "total_net": 392,
+      "avg_net": 32.7
+    },
+    {
+      "id": "p022",
+      "rank": 3,
+      "display": "Loy L.",
+      "tables_played": 8,
+      "total_gain": 258,
+      "avg_gain": 32.2,
+      "best_table": 241,
+      "total_net": -14,
+      "avg_net": -1.8
+    },
+    {
+      "id": "p030",
+      "rank": 4,
+      "display": "Yongnian H.",
+      "tables_played": 5,
+      "total_gain": 210,
+      "avg_gain": 42.0,
+      "best_table": 102,
+      "total_net": 170,
+      "avg_net": 34.0
+    },
+    {
+      "id": "p023",
+      "rank": 5,
+      "display": "Michael Z.",
+      "tables_played": 9,
+      "total_gain": 127,
+      "avg_gain": 14.1,
+      "best_table": 55,
+      "total_net": 16,
+      "avg_net": 1.8
+    },
+    {
+      "id": "p024",
+      "rank": 6,
+      "display": "Nathan F.",
+      "tables_played": 5,
+      "total_gain": 103,
+      "avg_gain": 20.6,
+      "best_table": 65,
+      "total_net": 1,
+      "avg_net": 0.2
+    },
+    {
+      "id": "p026",
+      "rank": 7,
+      "display": "Orien L.",
+      "tables_played": 2,
+      "total_gain": 93,
+      "avg_gain": 46.5,
+      "best_table": 93,
+      "total_net": 88,
+      "avg_net": 44.0
+    },
+    {
+      "id": "p020",
+      "rank": 8,
+      "display": "Lily P.",
+      "tables_played": 11,
+      "total_gain": 85,
+      "avg_gain": 7.7,
+      "best_table": 52,
+      "total_net": -504,
+      "avg_net": -45.8
+    },
+    {
+      "id": "p027",
+      "rank": 9,
+      "display": "Sean P.",
+      "tables_played": 6,
+      "total_gain": 70,
+      "avg_gain": 11.7,
+      "best_table": 55,
+      "total_net": -112,
+      "avg_net": -18.7
+    },
+    {
+      "id": "p007",
+      "rank": 10,
+      "display": "Benjamin L.",
+      "tables_played": 4,
+      "total_gain": 60,
+      "avg_gain": 15.0,
+      "best_table": 35,
+      "total_net": 29,
+      "avg_net": 7.2
+    },
+    {
+      "id": "p003",
+      "rank": 11,
+      "display": "Andrew W.",
+      "tables_played": 2,
+      "total_gain": 59,
+      "avg_gain": 29.5,
+      "best_table": 37,
+      "total_net": 59,
+      "avg_net": 29.5
+    },
+    {
+      "id": "p011",
+      "rank": 12,
+      "display": "Evan T.",
+      "tables_played": 2,
+      "total_gain": 24,
+      "avg_gain": 12.0,
+      "best_table": 24,
+      "total_net": -183,
+      "avg_net": -91.5
+    },
+    {
+      "id": "p001",
+      "rank": 13,
+      "display": "Abby P.",
+      "tables_played": 2,
+      "total_gain": 4,
+      "avg_gain": 2.0,
+      "best_table": 4,
+      "total_net": -15,
+      "avg_net": -7.5
+    },
+    {
+      "id": "p006",
+      "rank": 14,
+      "display": "Bailee N.",
+      "tables_played": 2,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -15,
+      "total_net": -55,
+      "avg_net": -27.5
+    },
+    {
+      "id": "p018",
+      "rank": 15,
+      "display": "Kylan L.",
+      "tables_played": 3,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -5,
+      "total_net": -41,
+      "avg_net": -13.7
+    },
+    {
+      "id": "p021",
+      "rank": 16,
+      "display": "Lorton C.",
+      "tables_played": 3,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -8,
+      "total_net": -138,
+      "avg_net": -46.0
+    },
+    {
+      "id": "p015",
+      "rank": 17,
+      "display": "Jun I.",
+      "tables_played": 3,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -19,
+      "total_net": -139,
+      "avg_net": -46.3
+    }
+  ],
+  "unranked": [
+    {
+      "id": "p002",
+      "display": "Aiden R.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p004",
+      "display": "Andy L.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p005",
+      "display": "Anthony W.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p008",
+      "display": "Brittney M.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p009",
+      "display": "Daniel L.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p012",
+      "display": "Howard F.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p013",
+      "display": "JT S.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p014",
+      "display": "Jack G.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p016",
+      "display": "Kai-Tang T.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p019",
+      "display": "Lawrence M.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p025",
+      "display": "Nevaeh Z.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p028",
+      "display": "Sophia Y.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p029",
+      "display": "Winston C.",
+      "tables_played": 1,
+      "tables_needed": 1
+    },
+    {
+      "id": "p031",
+      "display": "Zach S.",
+      "tables_played": 1,
+      "tables_needed": 1
+    }
+  ],
+  "awards": [
+    {
+      "id": "biggest-win",
+      "label": "Biggest single table",
+      "display": "Eddie Z.",
+      "value": 288,
+      "unit": "points",
+      "detail": "2025-09-28"
+    },
+    {
+      "id": "most-tables",
+      "label": "Most tables played",
+      "display": "Kevin J.",
+      "value": 12,
+      "unit": "tables",
+      "detail": null
+    }
+  ]
+}
