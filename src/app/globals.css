@@ -1,0 +1,32 @@
+/*
+ * Yours. Everything visual on this site is hand-written, so this file starts
+ * almost empty on purpose — there is no framework here quietly making design
+ * decisions for you.
+ *
+ * What is here is a minimal reset and nothing else: no palette, no type scale,
+ * no spacing system. Those are the interesting parts and they are still open.
+ *
+ * Worth keeping in mind from DESIGN-SPEC.md while you build:
+ *   - design at 360px first, enhance upward
+ *   - body text at least 4.5:1 against the background, metadata too
+ *   - never remove a focus outline without putting something visible back
+ *   - touch targets at least 44px
+ *   - honour prefers-reduced-motion for the header
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}

@@ -1,0 +1,49 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# The roster maps real names to the short names shown on the site. It is the
+# only file that holds both, so it must never be committed to a public repo.
+# Keep a backup somewhere private — player ids come from here, and losing it
+# means everyone gets renumbered.
+/pipeline/roster.local.json
+
+# python
+__pycache__/
+
+# markdown files
+*.md
+!README.md
