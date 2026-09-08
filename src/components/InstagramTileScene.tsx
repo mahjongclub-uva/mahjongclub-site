@@ -75,16 +75,18 @@ function Tile({
     // turn and lifts toward you — a single settled gesture rather than
     // following the pointer around, which never settles and reads as jitter.
     //
-    // Leans toward the pointer in whichever direction it happens to be —
-    // pointer.x drives the vertical axis, pointer.y the horizontal one, so the
-    // tile pivots on any corner or edge rather than one fixed hinge.
+    // The edge nearest the cursor comes toward you, on both axes, so the tile
+    // pivots on any corner or edge rather than one fixed hinge.
     //
-    // Signs: a positive rotation.y brings the LEFT edge forward, so the tile
-    // must turn the same sign as pointer.x to lean toward the cursor. A
-    // positive rotation.x brings the TOP forward, so y is negated.
+    // Signs, worked out rather than guessed. A positive rotation.y brings the
+    // LEFT edge forward, so a cursor on the right (x > 0) needs a NEGATIVE
+    // rotation.y to bring the right edge forward. A positive rotation.x brings
+    // the TOP forward, and pointer y is -1 at the top, so that one is negated
+    // too. Both axes therefore share a sign — earlier they did not, and the
+    // tile leaned away horizontally while leaning toward you vertically.
     const reach = 0.34;
     const { x, y } = active ? pointer.current : { x: 0, y: 0 };
-    const targetY = x * reach;
+    const targetY = -x * reach;
     const targetX = -y * reach * 0.7;
     const targetZ = active ? 0.5 : 0;
 
