@@ -51,10 +51,11 @@ svg {
   --jade: #2a6350;                 /* 5.8:1  */
   --rule: #c7cfbc;
 
-  /* Gold, for the player at the top of the standings. Dark enough to be read
-     as text as well as used as a wash. */
-  --gold: #7a5c14;
-  --gold-wash: #eae2c4;
+  /* Gold, for the player at the top. Dark enough to be read as text on the
+     wash beneath it as well as on the page — 5.3:1 on the wash, 6.3:1 on
+     cream. #7a5c14 sat at exactly 4.50 on the deeper wash, on the line. */
+  --gold: #6e5210;
+  --gold-wash: #e6dbb4;
 
   /* Tiles. Ivory face, jade reverse, vermilion letterform — the colours a
      real character tile actually uses. */
@@ -752,15 +753,26 @@ main {
   font-size: var(--text-lg);
 }
 
+/* Hover or hold turns the rank over. Outside the reduced-motion guard, so the
+   swap still happens for someone who has asked for less movement — it just
+   happens at once instead of turning. */
+.leaderboard tbody tr:hover .rank-tile,
+.leaderboard tbody tr:active .rank-tile {
+  transform: rotateY(180deg);
+}
+
 /* The player at the top, marked with a gold wash that fades out to the right.
    Decorative reinforcement only — the rank number already says who is first,
    so nothing here is carried by colour alone. */
 .leaderboard tbody tr:first-child {
   background: linear-gradient(
     to right,
-    var(--gold-wash),
-    rgba(234, 226, 196, 0) 86%
+    var(--gold-wash) 0%,
+    var(--gold-wash) 46%,
+    rgba(234, 226, 196, 0.35) 78%,
+    rgba(234, 226, 196, 0) 100%
   );
+  box-shadow: inset 0 1px 0 rgba(110, 82, 16, 0.26);
 }
 
 .leaderboard tbody tr:first-child td[data-label="Rank"],
@@ -770,6 +782,7 @@ main {
 
 .leaderboard tbody tr:first-child th {
   font-weight: 600;
+  font-size: var(--text-xl);
 }
 
 
@@ -780,17 +793,33 @@ main {
 }
 
 .leaderboard td:first-child {
-  width: 4rem;
+  width: 4.25rem;
+  /* The tile turns in here. */
+  perspective: 420px;
 }
 
 /* The rank, on a tile. Ivory face, jade edge, same materials as everything
    else on the site. */
+/* The rank as a character tile that turns over on hover to show the number it
+   stands for. Two faces, as the wordmark tiles are. */
 .rank-tile {
+  position: relative;
+  display: block;
+  width: 40px;
+  aspect-ratio: 44 / 62;
+  transform-style: preserve-3d;
+}
+
+.rank-face {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  width: 36px;
-  aspect-ratio: 44 / 62;
   border-radius: 4px;
+  backface-visibility: hidden;
+}
+
+.rank-front {
   background: linear-gradient(
     155deg,
     var(--tile-face-hi) 0%,
@@ -803,25 +832,39 @@ main {
     0 1px 2px rgba(46, 46, 44, 0.14);
 }
 
-/* Numeral above, 萬 below, the way a real character tile is laid out. */
-.rank-cjk {
-  display: grid;
-  gap: 1px;
-  place-items: center;
-  line-height: 1;
-  /* A stack rather than one family: these ten glyphs have to resolve on every
-     platform, and a missing CJK font would leave the rank as empty boxes. */
-  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
-    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+.rank-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(
+    155deg,
+    var(--tile-back-hi) 0%,
+    var(--tile-back) 55%,
+    var(--tile-back-lo) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 1px 2px rgba(46, 46, 44, 0.18);
+  font-family: var(--sans);
+  font-size: var(--text-base);
+  color: var(--tile-face-hi);
 }
 
+/* Numeral above, 萬 below, the way a real character tile is laid out. */
+
+/* Charcoal rather than jade, and large enough to actually be read. */
 .rank-numeral {
-  font-size: 14px;
-  color: var(--jade);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink);
 }
 
 .rank-suit {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
   font-size: 11px;
+  line-height: 1;
+  margin-block-start: 1px;
   color: var(--tile-letter);
 }
 
@@ -843,16 +886,13 @@ main {
 }
 
 /* The leader's tile is gilt rather than jade. */
-.leaderboard tbody tr:first-child .rank-tile {
+.leaderboard tbody tr:first-child .rank-front {
   box-shadow:
     inset 0 -2px 0 var(--gold),
-    inset 0 0 0 1px rgba(122, 92, 20, 0.35),
+    inset 0 0 0 1px rgba(110, 82, 16, 0.45),
     0 1px 3px rgba(46, 46, 44, 0.18);
 }
 
-.leaderboard tbody tr:first-child .rank-numeral {
-  color: var(--gold);
-}
 
 @media (max-width: 767px) {
   /* Hidden from sight, kept for screen readers. */
@@ -1184,6 +1224,11 @@ main {
    ======================================================================== */
 
 @media (prefers-reduced-motion: no-preference) {
+  /* The tile turns over on hover, and on touch while held. */
+  .rank-tile {
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
   .tile-scene {
     animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
       backwards;

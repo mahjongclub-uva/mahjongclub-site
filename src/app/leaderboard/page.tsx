@@ -17,8 +17,11 @@ const NUMERALS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "�
  * The rank as a character tile: the numeral above, 萬 below, as a real 萬子
  * tile is laid out.
  *
- * The Arabic numeral is kept for assistive technology, because a rank is
- * information and not everyone reads these characters.
+ * Hovering the row turns it over: the jade reverse carries the Arabic numeral,
+ * so anyone who does not read the characters can still find their place.
+ *
+ * That number is also present for assistive technology at all times, since a
+ * rank is information and hover is not available to everyone.
  */
 function RankTile({ rank }: { rank: number }) {
   const numeral = NUMERALS[rank];
@@ -26,9 +29,13 @@ function RankTile({ rank }: { rank: number }) {
 
   return (
     <span className="rank-tile">
-      <span className="rank-cjk" aria-hidden="true">
+      <span className="rank-face rank-front" aria-hidden="true">
         <span className="rank-numeral">{numeral}</span>
         <span className="rank-suit">萬</span>
+      </span>
+      {/* The reverse, showing the number the character stands for. */}
+      <span className="rank-face rank-back" aria-hidden="true">
+        {rank}
       </span>
       <span className="sr-only">{rank}</span>
     </span>
