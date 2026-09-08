@@ -70,7 +70,7 @@ export default function Leaderboard() {
       </section>
 
       {semester.awards.length > 0 && (
-        <Section id="awards" title="Awards" tone="cream">
+        <Section id="awards" title="Awards" tone="paper">
           <dl className="awards">
             {semester.awards.map((award) => (
               <div key={award.id}>

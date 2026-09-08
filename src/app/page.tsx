@@ -24,7 +24,7 @@ export default function Home() {
         <Calendar />
       </Section>
 
-      <Section id="follow" title="Keep up with us" tone="cream">
+      <Section id="follow" title="Keep up with us" tone="sage">
         <FollowUs />
       </Section>
     </main>

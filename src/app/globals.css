@@ -45,7 +45,7 @@ svg {
   /* Paper and ink. Celadon is a glaze colour, so the page is barely green —
      the saturation lives on the tiles, where the area is small. Contrast
      ratios against --paper are noted; keep them above 4.5. */
-  --paper: #ecebe0;
+  --paper: #f5eedc;
   --ink: #22271d;                  /* 12.7:1 */
   --ink-soft: #545c48;             /* 5.8:1  */
   --jade: #2a6350;                 /* 5.8:1  */
@@ -122,10 +122,12 @@ body {
     ),
     radial-gradient(
       130% 90% at 50% 100%,
-      rgba(35, 40, 31, 0.09),
+      rgba(35, 40, 31, 0.08),
       rgba(35, 40, 31, 0) 55%
     ),
-    var(--texture-grain);
+    /* The same laid paper the toned sections use, so the whole site sits on
+       one material rather than changing texture between bands. */
+    var(--texture-linen);
   background-repeat: no-repeat, no-repeat, repeat;
   color: var(--ink);
   font-family: var(--serif);
@@ -178,8 +180,9 @@ main {
   padding-block: var(--space-6);
 }
 
-/* Section grounds. Alternate them; two touching sections should never share
-   one. All three are checked at 4.5:1 or better for ink, metadata and links. */
+/* Two grounds: the cream base showing through, and sage. Alternate them; two
+   touching sections should never share one. Both are checked at 4.5:1 or
+   better for ink, metadata and links. */
 .tone-paper {
   background: transparent;
 }
@@ -192,14 +195,6 @@ main {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(34, 39, 29, 0.07);
-}
-
-.tone-cream {
-  background-color: #f5eedc;
-  background-image: var(--texture-linen);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(34, 39, 29, 0.06);
 }
 
 .quiet {
@@ -753,16 +748,15 @@ main {
   font-size: var(--text-lg);
 }
 
-/* The player at the top, marked with a gold wash and a gilt edge. Decorative
-   reinforcement only — the rank number already says who is first, so nothing
-   here is carried by colour alone. */
+/* The player at the top, marked with a gold wash that fades out to the right.
+   Decorative reinforcement only — the rank number already says who is first,
+   so nothing here is carried by colour alone. */
 .leaderboard tbody tr:first-child {
   background: linear-gradient(
     to right,
     var(--gold-wash),
-    rgba(234, 226, 196, 0) 82%
+    rgba(234, 226, 196, 0) 86%
   );
-  box-shadow: inset 3px 0 0 var(--gold);
 }
 
 .leaderboard tbody tr:first-child td[data-label="Rank"],
@@ -774,10 +768,6 @@ main {
   font-weight: 600;
 }
 
-.leaderboard tbody tr:first-child td:first-child,
-.leaderboard tbody tr:first-child th[scope="row"] {
-  padding-inline-start: var(--space-3);
-}
 
 .leaderboard td {
   font-family: var(--sans);

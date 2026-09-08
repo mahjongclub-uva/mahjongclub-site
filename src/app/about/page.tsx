@@ -46,7 +46,7 @@ export default function About() {
         </div>
       </Section>
 
-      <Section id="scoring" title="How the leaderboard works" tone="cream">
+      <Section id="scoring" title="How the leaderboard works" tone="sage">
         <div className="prose">
           <p>
             Everyone sits down with 205 points. What you leave the table with,
