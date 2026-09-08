@@ -264,7 +264,7 @@ main {
      solid without turning the wordmark into a row of bricks. */
   --tile-w: clamp(38px, 10.5vw, 66px);
   --tile-depth: calc(var(--tile-w) * 0.15);
-  --tile-radius: 5px;
+  --tile-radius: calc(var(--tile-w) * 0.11);
 
   width: var(--tile-w);
   aspect-ratio: 44 / 62;
@@ -297,11 +297,16 @@ main {
    the maths depends on the tile's width — which is fluid. */
 .tile-side {
   position: absolute;
-  border-radius: 1px;
+  /* Rounded on the outer corners so the silhouette does not turn square where
+     a wall meets the rounded face. It cannot follow the curve — a flat plane
+     never can — but it stops the joint reading as a hard corner. */
+  border-radius: 2px;
+  /* Starts at the exact colour the face's edge ends on, so the seam reads as
+     one piece of material rather than two. */
   background: linear-gradient(
     to bottom,
-    var(--tile-face) 0%,
-    var(--tile-face-lo) 70%,
+    var(--tile-face-lo) 0%,
+    #ddd3ba 62%,
     var(--tile-edge) 100%
   );
 }
@@ -364,10 +369,12 @@ main {
      now has a real jade bottom wall behind it, and a border would put a
      second edge on the silhouette. */
   box-shadow:
+    /* chamfer: lit shoulder top-left, shaded shoulder bottom-right */
+    inset 2px 2px 3px rgba(255, 255, 255, 0.95),
+    inset -2px -3px 4px rgba(120, 105, 70, 0.28),
     inset 0 -3px 0 var(--tile-edge),
-    inset 0 2px 2px rgba(255, 255, 255, 0.85),
     inset 0 0 0 1px var(--tile-rim),
-    0 4px 10px rgba(35, 40, 31, 0.13);
+    0 5px 12px rgba(35, 40, 31, 0.16);
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(1rem, 4.2vw, 1.6rem);
