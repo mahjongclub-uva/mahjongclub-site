@@ -702,17 +702,21 @@ main {
   position: absolute;
   inset-inline: 0;
   inset-block-end: 0;
-  height: 7px;
+  height: 8px;
   border-radius: 2px;
+  /* The ivory half has to be lighter than the paper it sits on, or it vanishes
+     into it — which is what happened when the ground went from sage to cream.
+     Hard stop at 58% so the two materials meet at an edge rather than blend. */
   background: linear-gradient(
     to bottom,
     var(--tile-back-hi) 0%,
-    var(--tile-back) 42%,
-    var(--tile-back-lo) 62%,
-    var(--tile-face-lo) 62%,
-    var(--tile-face) 100%
+    var(--tile-back) 38%,
+    var(--tile-back-lo) 58%,
+    #fffefa 58%,
+    #f8f2e2 100%
   );
-  opacity: 0.55;
+  box-shadow: 0 1px 1.5px rgba(34, 39, 29, 0.12);
+  opacity: 0.9;
 }
 
 .leaderboard tbody tr:last-child::after {
