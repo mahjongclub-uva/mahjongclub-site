@@ -1,6 +1,5 @@
 import { MIN_TABLES_TO_RANK } from "@/lib/schema";
 import Section from "@/components/Section";
-import TileMark from "@/components/TileMark";
 
 export const metadata = {
   title: "About — Mahjong Club @ UVA",
@@ -58,7 +57,6 @@ export default function About() {
             to whoever needed fewer tables, then to whoever lost less.
           </p>
         </div>
-        <TileMark className="section-mark" height={64} />
       </Section>
     </main>
   );

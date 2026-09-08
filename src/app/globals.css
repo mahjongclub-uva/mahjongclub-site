@@ -641,11 +641,6 @@ main {
   margin-block-start: var(--space-3);
 }
 
-.section-mark {
-  margin-block-start: var(--space-5);
-  opacity: 0.55;
-}
-
 .section-more {
   margin-block-start: var(--space-4);
   font-family: var(--sans);
@@ -785,7 +780,7 @@ main {
 }
 
 .leaderboard td:first-child {
-  width: 3.5rem;
+  width: 4rem;
 }
 
 /* The rank, on a tile. Ivory face, jade edge, same materials as everything
@@ -793,9 +788,9 @@ main {
 .rank-tile {
   display: grid;
   place-items: center;
-  width: 26px;
+  width: 36px;
   aspect-ratio: 44 / 62;
-  border-radius: 3px;
+  border-radius: 4px;
   background: linear-gradient(
     155deg,
     var(--tile-face-hi) 0%,
@@ -806,9 +801,45 @@ main {
     inset 0 -2px 0 var(--tile-edge),
     inset 0 0 0 1px var(--tile-rim),
     0 1px 2px rgba(46, 46, 44, 0.14);
+}
+
+/* Numeral above, 萬 below, the way a real character tile is laid out. */
+.rank-cjk {
+  display: grid;
+  gap: 1px;
+  place-items: center;
+  line-height: 1;
+  /* A stack rather than one family: these ten glyphs have to resolve on every
+     platform, and a missing CJK font would leave the rank as empty boxes. */
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+}
+
+.rank-numeral {
+  font-size: 14px;
+  color: var(--jade);
+}
+
+.rank-suit {
+  font-size: 11px;
+  color: var(--tile-letter);
+}
+
+/* Beyond nine there is no character tile, so the number stands alone. */
+.rank-plain {
   font-family: var(--sans);
-  font-size: var(--text-xs);
-  color: var(--ink);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+/* Available to assistive technology, invisible on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* The leader's tile is gilt rather than jade. */
@@ -817,25 +848,10 @@ main {
     inset 0 -2px 0 var(--gold),
     inset 0 0 0 1px rgba(122, 92, 20, 0.35),
     0 1px 3px rgba(46, 46, 44, 0.18);
+}
+
+.leaderboard tbody tr:first-child .rank-numeral {
   color: var(--gold);
-}
-
-/* How much of the leader's score this player has. The number beside it is the
-   real value; this only makes the gaps between players visible at a glance. */
-.score-bar {
-  display: block;
-  width: var(--fill);
-  max-width: 100%;
-  height: 3px;
-  margin-block-start: 5px;
-  border-radius: 2px;
-  background: var(--tile-back);
-  opacity: 0.45;
-}
-
-.leaderboard tbody tr:first-child .score-bar {
-  background: var(--gold);
-  opacity: 0.6;
 }
 
 @media (max-width: 767px) {
