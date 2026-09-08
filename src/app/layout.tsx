@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Fraunces, EB_Garamond } from "next/font/google";
+import { Instrument_Serif, Spectral } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = Fraunces({
+const display = Instrument_Serif({
   subsets: ["latin"],
+  weight: "400",
   variable: "--font-display",
   display: "swap",
 });
 
-const body = EB_Garamond({
+const body = Spectral({
   subsets: ["latin"],
+  weight: ["400", "600"],
   variable: "--font-body",
   display: "swap",
 });

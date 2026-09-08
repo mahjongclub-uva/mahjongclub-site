@@ -404,47 +404,28 @@ main {
   background: var(--tile-edge);
 }
 
+/* The artwork fills the box; the letter sits on top of it. */
+.tile-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .tile-face {
-  background: linear-gradient(
-    155deg,
-    var(--tile-face-hi) 0%,
-    var(--tile-face) 45%,
-    var(--tile-face-lo) 100%
-  );
   color: var(--tile-letter);
-  /* The jade line is drawn inside the face rather than as a border: the tile
-     now has a real jade bottom wall behind it, and a border would put a
-     second edge on the silhouette. */
-  box-shadow:
-    /* chamfer: lit shoulder top-left, shaded shoulder bottom-right */
-    inset 2px 2px 3px rgba(255, 255, 255, 0.95),
-    inset -2px -3px 4px rgba(120, 105, 70, 0.28),
-    inset 0 -3px 0 var(--tile-edge),
-    inset 0 0 0 1px var(--tile-rim),
-    0 5px 12px rgba(35, 40, 31, 0.16);
-  font-family: var(--display);
+  filter: drop-shadow(0 5px 10px rgba(35, 40, 31, 0.18));
+}
+
+.tile-letter {
+  position: relative;
+  font-family: var(--serif);
   font-weight: 600;
   font-size: clamp(1rem, 4.2vw, 1.6rem);
   line-height: 1;
 }
 
 .tile-back {
-  background:
-    linear-gradient(
-      155deg,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0) 38%
-    ),
-    linear-gradient(
-      155deg,
-      var(--tile-back-hi) 0%,
-      var(--tile-back) 55%,
-      var(--tile-back-lo) 100%
-    );
-  box-shadow:
-    inset 0 -3px 0 var(--tile-back-lo),
-    inset 0 2px 2px rgba(255, 255, 255, 0.3),
-    0 4px 10px rgba(35, 40, 31, 0.16);
   /* rotateY first, so the translate runs along the flipped local axis and
      lands the reverse at z = -depth. */
   transform: rotateY(180deg) translateZ(var(--tile-depth));
