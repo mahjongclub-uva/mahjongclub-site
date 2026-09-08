@@ -110,12 +110,17 @@ body {
      must not repeat, or it draws a seam across the page. */
   background-image:
     radial-gradient(
-      140% 80% at 50% 0%,
-      rgba(255, 255, 255, 0.55),
-      rgba(255, 255, 255, 0) 60%
+      120% 70% at 50% 0%,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0) 58%
+    ),
+    radial-gradient(
+      130% 90% at 50% 100%,
+      rgba(35, 40, 31, 0.09),
+      rgba(35, 40, 31, 0) 55%
     ),
     var(--texture-grain);
-  background-repeat: no-repeat, repeat;
+  background-repeat: no-repeat, no-repeat, repeat;
   color: var(--ink);
   font-family: var(--serif);
   font-size: var(--text-base);
@@ -182,16 +187,20 @@ main {
 
 /* Navigation ------------------------------------------------------------- */
 
+/* Tabs, rather than a row of links: the active one rises out of the rule and
+   merges with the page below it, which gives the header a front and a back. */
 .nav {
   border-block-end: 1px solid var(--rule);
+  padding-block-start: var(--space-3);
 }
 
 .nav ul {
   max-width: var(--content);
-  margin-inline: auto;
-  padding: 0 var(--space-4);
+  margin: 0 auto -1px;
+  padding-inline: var(--space-3);
   display: flex;
-  gap: var(--space-4);
+  align-items: flex-end;
+  gap: 3px;
   list-style: none;
 }
 
@@ -200,25 +209,39 @@ main {
   align-items: center;
   /* 44px tall, so it is a comfortable target without looking like a button. */
   min-height: 44px;
-  font-family: var(--sans);
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  /* Fluid, because three tabs at a fixed 28px of padding each overflow a
+     360px screen. Nothing may scroll horizontally, at any width. */
+  padding-inline: clamp(0.7rem, 3.4vw, 1.75rem);
+  font-family: var(--display);
+  font-size: clamp(0.95rem, 3.4vw, 1.0625rem);
   color: var(--ink-soft);
   text-decoration: none;
-  border-block-end: 2px solid transparent;
+  border: 1px solid var(--rule);
+  border-block-end: 0;
+  border-radius: 7px 7px 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.32),
+    rgba(255, 255, 255, 0.08)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .nav a:hover {
   color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
 }
 
-/* The current tab is marked by weight and colour as well as the rule, so it
-   is not carried by one thin line alone. */
+/* The current tab is the page's own colour, so the rule breaks under it and
+   the tab reads as attached to the content. Marked by colour and elevation as
+   well as position, never by one thin line alone. */
 .nav a[aria-current="page"] {
   color: var(--ink);
-  font-weight: 600;
-  border-block-end-color: var(--tile-letter);
+  background: var(--paper);
+  padding-block: 2px 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 -3px 8px rgba(35, 40, 31, 0.07);
 }
 
 .hero {
@@ -245,6 +268,11 @@ main {
    smoothing, so the row trails the cursor rather than snapping to it. Both
    default to 0deg, so with no JavaScript the row simply sits square. */
 .wordmark-tiles {
+  position: relative;
+  /* Shrink to the tiles. As a block-level flex container it would fill the
+     column, and the rack behind it would stretch with it. */
+  width: fit-content;
+  margin-inline: auto;
   transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition: transform 260ms ease-out;
   display: flex;
@@ -256,6 +284,25 @@ main {
      One `flat` anywhere in the chain collapses the whole box into a plane —
      which is exactly what made the tiles look two-dimensional. */
   transform-style: preserve-3d;
+}
+
+/* The rack. Sits behind the tiles in the same 3D space, so it stays put when
+   the row leans — which is most of what gives the header depth. */
+.wordmark-tiles::before {
+  content: "";
+  position: absolute;
+  inset: -9px -13px -11px;
+  border-radius: 10px;
+  background: linear-gradient(
+    160deg,
+    rgba(35, 40, 31, 0.11),
+    rgba(35, 40, 31, 0.03)
+  );
+  box-shadow:
+    inset 0 3px 7px rgba(35, 40, 31, 0.26),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateZ(-20px);
 }
 
 .tile-scene {
