@@ -228,6 +228,9 @@ main {
 
 .wordmark {
   margin: 0;
+  /* Perspective belongs here, not on the row: the row itself tilts, and an
+     element cannot be viewed through its own perspective. */
+  perspective: 1100px;
   --rise-duration: 550ms;
   --rise-stagger: 70ms;
   --flip-start: 520ms;
@@ -236,18 +239,35 @@ main {
   --sub-duration: 700ms;
 }
 
+/* Perspective belongs on the wordmark, not on the row: the row itself tilts,
+   and an element cannot be viewed through its own perspective. */
+/* The lean itself. Tilt sets --tilt-x and --tilt-y; the transition doubles as
+   smoothing, so the row trails the cursor rather than snapping to it. Both
+   default to 0deg, so with no JavaScript the row simply sits square. */
 .wordmark-tiles {
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 260ms ease-out;
   display: flex;
   justify-content: center;
   /* At 360px the page leaves ~305px. Seven tiles plus six gaps must fit
      inside that, which is why both are fluid. A fixed 44px tile overflows. */
   gap: clamp(2px, 0.7vw, 9px);
-  perspective: 900px;
+  /* Every level between the rotated element and the faces has to preserve 3D.
+     One `flat` anywhere in the chain collapses the whole box into a plane —
+     which is exactly what made the tiles look two-dimensional. */
+  transform-style: preserve-3d;
 }
 
 .tile-scene {
-  width: clamp(38px, 10.5vw, 66px);
+  /* Named, because the depth is derived from it. Real tiles are about
+     20 x 30 x 15mm — genuinely chunky — but a fifth of the width reads as
+     solid without turning the wordmark into a row of bricks. */
+  --tile-w: clamp(38px, 10.5vw, 66px);
+  --tile-depth: calc(var(--tile-w) * 0.2);
+
+  width: var(--tile-w);
   aspect-ratio: 44 / 62;
+  transform-style: preserve-3d;
 }
 
 .tile {
@@ -269,6 +289,59 @@ main {
   place-items: center;
   border-radius: 5px;
   backface-visibility: hidden;
+}
+
+/* The box occupies z from 0 (face) back to -depth (reverse). Each wall is
+   hinged on the edge it shares with the face and folded backwards, so none of
+   the maths depends on the tile's width — which is fluid. */
+.tile-side {
+  position: absolute;
+  background: linear-gradient(
+    to bottom,
+    var(--tile-face) 0%,
+    var(--tile-face-lo) 70%,
+    var(--tile-edge) 100%
+  );
+}
+
+.tile-side-l,
+.tile-side-r {
+  top: 0;
+  height: 100%;
+  width: var(--tile-depth);
+}
+
+.tile-side-r {
+  left: 100%;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+}
+
+.tile-side-l {
+  right: 100%;
+  transform-origin: right center;
+  transform: rotateY(-90deg);
+}
+
+.tile-side-t,
+.tile-side-b {
+  left: 0;
+  width: 100%;
+  height: var(--tile-depth);
+}
+
+.tile-side-t {
+  bottom: 100%;
+  transform-origin: center bottom;
+  transform: rotateX(-90deg);
+  background: linear-gradient(to bottom, var(--tile-face-lo), var(--tile-face));
+}
+
+.tile-side-b {
+  top: 100%;
+  transform-origin: center top;
+  transform: rotateX(90deg);
+  background: var(--tile-edge);
 }
 
 .tile-face {
@@ -311,7 +384,9 @@ main {
     inset 0 2px 2px rgba(255, 255, 255, 0.3),
     inset 0 -2px 3px rgba(0, 0, 0, 0.26),
     0 4px 10px rgba(35, 40, 31, 0.16);
-  transform: rotateY(180deg);
+  /* rotateY first, so the translate runs along the flipped local axis and
+     lands the reverse at z = -depth. */
+  transform: rotateY(180deg) translateZ(var(--tile-depth));
 }
 
 .wordmark-sub {

@@ -29,6 +29,13 @@ export default function Wordmark() {
         {WORDMARK.split("").map((letter, i) => (
           <span className="tile-scene" key={i} style={{ "--i": i } as CSSProperties}>
             <span className="tile">
+              {/* Four side walls give the tile a body. Without them it is two
+                  planes with nothing between, which collapses to a line
+                  mid-flip and catches no light at rest. */}
+              <span className="tile-side tile-side-l" aria-hidden="true" />
+              <span className="tile-side tile-side-r" aria-hidden="true" />
+              <span className="tile-side tile-side-t" aria-hidden="true" />
+              <span className="tile-side tile-side-b" aria-hidden="true" />
               <span className="tile-back" aria-hidden="true" />
               <span className="tile-face">{letter}</span>
             </span>
