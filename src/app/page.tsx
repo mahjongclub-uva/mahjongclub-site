@@ -8,7 +8,7 @@ import Section from "@/components/Section";
 export default function Home() {
   return (
     <main>
-      <header className="hero tone-paper">
+      <header className="hero">
         <div className="section-wrap">
           <Hero />
           <p className="tagline">{TAGLINE}</p>
@@ -16,15 +16,15 @@ export default function Home() {
       </header>
 
       {/* Alternating grounds do the work the little dividers used to. */}
-      <Section id="table" title="At the table" tone="sage">
+      <Section id="table" title="At the table">
         <Photos />
       </Section>
 
-      <Section id="when" title="When we play" tone="paper">
+      <Section id="when" title="When we play">
         <Calendar />
       </Section>
 
-      <Section id="follow" title="Keep up with us" tone="sage">
+      <Section id="follow" title="Keep up with us">
         <FollowUs />
       </Section>
     </main>

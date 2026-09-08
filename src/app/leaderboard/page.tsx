@@ -12,7 +12,7 @@ export default function Leaderboard() {
 
   return (
     <main>
-      <header className="page-head tone-paper">
+      <header className="page-head">
         <div className="section-wrap">
         <p className="eyebrow">{semester.label}</p>
         <h1 className="page-title">Leaderboard</h1>
@@ -27,7 +27,7 @@ export default function Leaderboard() {
         </div>
       </header>
 
-      <section className="section tone-sage">
+      <section className="section">
         <div className="section-wrap">
       {shown.length === 0 ? (
         <p className="quiet">No tables played yet this semester.</p>
@@ -70,7 +70,7 @@ export default function Leaderboard() {
       </section>
 
       {semester.awards.length > 0 && (
-        <Section id="awards" title="Awards" tone="paper">
+        <Section id="awards" title="Awards">
           <dl className="awards">
             {semester.awards.map((award) => (
               <div key={award.id}>

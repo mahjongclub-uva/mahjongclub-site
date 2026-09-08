@@ -11,14 +11,14 @@ export const metadata = {
 export default function About() {
   return (
     <main>
-      <header className="page-head tone-paper">
+      <header className="page-head">
         <div className="section-wrap">
           <p className="eyebrow">About</p>
           <h1 className="page-title">What we play</h1>
         </div>
       </header>
 
-      <section className="section tone-sage">
+      <section className="section">
         <div className="section-wrap prose">
         <p>
           We play Fuzhou-style mahjong: sixteen tiles in hand rather than the
@@ -33,7 +33,7 @@ export default function About() {
         </div>
       </section>
 
-      <Section id="beginners" title="If you have never played" tone="paper">
+      <Section id="beginners" title="If you have never played">
         <div className="prose">
           <p>
             Then you are the person we most want at the table. Most of the club
@@ -46,7 +46,7 @@ export default function About() {
         </div>
       </Section>
 
-      <Section id="scoring" title="How the leaderboard works" tone="sage">
+      <Section id="scoring" title="How the leaderboard works">
         <div className="prose">
           <p>
             Everyone sits down with 205 points. What you leave the table with,
