@@ -600,7 +600,27 @@ main {
 }
 
 .page-head {
-  padding-block: var(--space-5) var(--space-4);
+  padding-block: var(--space-5) 0;
+}
+
+/* A section straight after the page heading does not need the full break —
+   the heading it follows is already the separation. */
+.page-head + .section {
+  padding-block-start: var(--space-4);
+}
+
+/* Two facts on one line where there is room, stacked when there is not. */
+.table-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin-block-start: var(--space-4);
+}
+
+.table-note span + span::before {
+  content: "·";
+  margin-inline-end: var(--space-3);
+  color: var(--rule);
 }
 
 .page-title {

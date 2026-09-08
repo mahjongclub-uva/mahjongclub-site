@@ -16,14 +16,6 @@ export default function Leaderboard() {
         <div className="section-wrap">
         <p className="eyebrow">{semester.label}</p>
         <h1 className="page-title">Leaderboard</h1>
-        {semester.last_session && (
-          <p className="quiet">
-            Through{" "}
-            <time dateTime={semester.last_session}>
-              {formatDate(semester.last_session)}
-            </time>
-          </p>
-        )}
         </div>
       </header>
 
@@ -57,12 +49,24 @@ export default function Leaderboard() {
             </tbody>
           </table>
 
-          {hidden > 0 && (
-            <p className="quiet">
-              Showing the top {SHOWN} of {semester.standings.length} ranked
-              players.
-            </p>
-          )}
+          {/* Both facts a reader needs after the table: how current it is,
+              and that they are not seeing all of it. */}
+          <p className="quiet table-note">
+            {semester.last_session && (
+              <span>
+                Last updated{" "}
+                <time dateTime={semester.last_session}>
+                  {formatDate(semester.last_session)}
+                </time>
+              </span>
+            )}
+            {hidden > 0 && (
+              <span>
+                Showing the top {SHOWN} of {semester.standings.length} ranked
+                players
+              </span>
+            )}
+          </p>
         </>
       )}
 
