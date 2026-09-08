@@ -264,6 +264,7 @@ main {
      solid without turning the wordmark into a row of bricks. */
   --tile-w: clamp(38px, 10.5vw, 66px);
   --tile-depth: calc(var(--tile-w) * 0.2);
+  --tile-radius: 5px;
 
   width: var(--tile-w);
   aspect-ratio: 44 / 62;
@@ -287,7 +288,7 @@ main {
   inset: 0;
   display: grid;
   place-items: center;
-  border-radius: 5px;
+  border-radius: var(--tile-radius);
   backface-visibility: hidden;
 }
 
@@ -304,10 +305,13 @@ main {
   );
 }
 
+/* Each wall stops short of the corners by exactly the corner radius. A flat
+   rectangle cannot follow the face's curve, so a full-length wall pokes out
+   past the rounded corner as a sharp tab. */
 .tile-side-l,
 .tile-side-r {
-  top: 0;
-  height: 100%;
+  top: var(--tile-radius);
+  height: calc(100% - 2 * var(--tile-radius));
   width: var(--tile-depth);
 }
 
@@ -325,8 +329,8 @@ main {
 
 .tile-side-t,
 .tile-side-b {
-  left: 0;
-  width: 100%;
+  left: var(--tile-radius);
+  width: calc(100% - 2 * var(--tile-radius));
   height: var(--tile-depth);
 }
 
@@ -352,12 +356,12 @@ main {
     var(--tile-face-lo) 100%
   );
   color: var(--tile-letter);
-  /* The jade edge. Weight at the bottom and light along the top is what makes
-     it read as a carved object rather than a printed card. */
-  border-block-end: 3px solid var(--tile-edge);
+  /* The jade line is drawn inside the face rather than as a border: the tile
+     now has a real jade bottom wall behind it, and a border would put a
+     second edge on the silhouette. */
   box-shadow:
+    inset 0 -3px 0 var(--tile-edge),
     inset 0 2px 2px rgba(255, 255, 255, 0.85),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px var(--tile-rim),
     0 4px 10px rgba(35, 40, 31, 0.13);
   font-family: var(--display);
@@ -379,10 +383,9 @@ main {
       var(--tile-back) 55%,
       var(--tile-back-lo) 100%
     );
-  border-block-end: 3px solid var(--tile-back-lo);
   box-shadow:
+    inset 0 -3px 0 var(--tile-back-lo),
     inset 0 2px 2px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.26),
     0 4px 10px rgba(35, 40, 31, 0.16);
   /* rotateY first, so the translate runs along the flipped local axis and
      lands the reverse at z = -depth. */
@@ -462,6 +465,17 @@ main {
 .leaders-name {
   font-family: var(--display);
   font-size: var(--text-lg);
+}
+
+/* Running prose. Paragraphs already cap at --measure; this just gives them
+   air between one another. */
+.prose p + p {
+  margin-block-start: var(--space-3);
+}
+
+.section-mark {
+  margin-block-start: var(--space-5);
+  opacity: 0.55;
 }
 
 .section-more {
@@ -671,20 +685,27 @@ main {
   perspective: 600px;
 }
 
+/* Reuses the wordmark's wall classes, which only need these three custom
+   properties to size themselves. */
 .ig-tile {
+  --tile-w: 62px;
+  --tile-depth: 13px;
+  --tile-radius: 5px;
+
+  position: relative;
   flex: none;
   display: block;
-  width: 60px;
+  width: var(--tile-w);
   aspect-ratio: 44 / 62;
   transform-style: preserve-3d;
 }
 
 .ig-tile-face {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
+  border-radius: var(--tile-radius);
   background: linear-gradient(
     155deg,
     var(--tile-face-hi) 0%,
@@ -692,10 +713,9 @@ main {
     var(--tile-face-lo) 100%
   );
   color: var(--tile-letter);
-  border-block-end: 3px solid var(--tile-edge);
   box-shadow:
+    inset 0 -3px 0 var(--tile-edge),
     inset 0 2px 2px rgba(255, 255, 255, 0.85),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px var(--tile-rim),
     0 4px 10px rgba(35, 40, 31, 0.13);
 }

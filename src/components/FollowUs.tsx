@@ -30,6 +30,12 @@ export default function FollowUs() {
       target="_blank"
     >
       <span className="ig-tile" aria-hidden="true">
+        {/* Same four walls as the wordmark tiles, so this reads as one of the
+            set rather than a flat card wearing the same colours. */}
+        <span className="tile-side tile-side-l" />
+        <span className="tile-side tile-side-r" />
+        <span className="tile-side tile-side-t" />
+        <span className="tile-side tile-side-b" />
         <span className="ig-tile-face">
           <InstagramMark />
         </span>
