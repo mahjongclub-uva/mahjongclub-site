@@ -853,18 +853,19 @@ main {
 /* Roughly 55:45 in favour of the red 萬 below — sized by area rather than by
    height, so the ratio is sqrt(55/45) ≈ 1.1 between the two. */
 .rank-numeral {
-  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+  font-family: var(--font-han), "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
     "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
   font-size: 15px;
+  font-weight: 700;
   line-height: 1;
   color: var(--ink);
 }
 
 .rank-suit {
-  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+  font-family: var(--font-han), "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
     "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
   margin-block-start: 1px;
   color: var(--tile-letter);
@@ -915,14 +916,16 @@ main {
     display: block;
   }
 
-  /* A block row rather than a grid one. The stats have to sit inline on a
-     single line, and `display: inline` on a grid item is blockified — which
-     is what put Score and Tables on separate lines with the separator
-     dangling at the start of the second. */
+  /* Name and score share the top line, tables sits under the name. A grid
+     rather than flow, because the score has to sit hard right against a name
+     of any length. */
   .leaderboard tbody tr {
     position: relative;
+    display: grid;
+    grid-template-columns: 3.6rem 1fr auto;
+    column-gap: var(--space-2);
+    align-items: baseline;
     padding-block: var(--space-3);
-    padding-inline-start: 3.6rem;
   }
 
   .leaderboard th,
@@ -931,32 +934,36 @@ main {
     border: 0;
   }
 
-  /* The tile is lifted out of the flow so the name and stats can use the
-     full width beside it. */
   .leaderboard td[data-label="Rank"] {
-    position: absolute;
-    inset-inline-start: 0;
-    inset-block-start: var(--space-3);
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
     width: auto;
   }
 
   .leaderboard tbody th {
-    margin-block-end: 2px;
+    grid-column: 2;
+    grid-row: 1;
   }
 
-  .leaderboard td[data-label="Score"],
+  .leaderboard td[data-label="Score"] {
+    grid-column: 3;
+    grid-row: 1;
+    text-align: right;
+    font-size: var(--text-base);
+    color: var(--ink);
+  }
+
   .leaderboard td[data-label="Tables"] {
-    display: inline;
+    grid-column: 2 / 4;
+    grid-row: 2;
+    font-size: var(--text-xs);
+    margin-block-start: 2px;
   }
 
-  .leaderboard td[data-label="Score"]::before,
-  .leaderboard td[data-label="Tables"]::before {
-    content: attr(data-label) " ";
-    color: var(--ink-soft);
-  }
-
-  .leaderboard td[data-label="Tables"]::before {
-    content: " · " attr(data-label) " ";
+  /* Ranked players have played at least two tables, so the plural is safe. */
+  .leaderboard td[data-label="Tables"]::after {
+    content: " tables";
   }
 
   /* The divider spans the whole row, tile included. */

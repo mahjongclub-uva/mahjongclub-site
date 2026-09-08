@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Lora } from "next/font/google";
+import { Cormorant_Garamond, Lora, Noto_Serif_SC } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
@@ -11,6 +11,24 @@ const display = Cormorant_Garamond({
   weight: ["400", "600"],
   variable: "--font-display",
   display: "swap",
+});
+
+/**
+ * Carries the ten characters on the rank tiles, 一 through 九 and 萬.
+ *
+ * A real bold weight rather than leaning on the system CJK font: those vary by
+ * platform and synthesise bold badly, which on a 42px tile is the difference
+ * between a crisp glyph and a smudge.
+ */
+const han = Noto_Serif_SC({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-han",
+  display: "swap",
+  // Not preloaded on purpose. Preloading would fetch this face's latin subset,
+  // which nothing on the site renders — the ten characters we do use live in
+  // CJK unicode ranges that the browser fetches only when it meets them.
+  preload: false,
 });
 
 const body = Lora({
@@ -29,7 +47,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable} ${han.variable}`}>
       <body>
         {/*
           The flat wordmark ships hidden so nothing flashes before the canvas
