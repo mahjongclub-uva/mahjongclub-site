@@ -863,6 +863,10 @@ main {
   position: absolute;
   /* Room for the tile to turn without clipping against its own box. */
   inset: -30%;
+  /* The whole card is a link and the canvas sits inside it. Clicks bubble
+     either way, but this keeps the cursor and hit-testing behaving like one
+     surface rather than a canvas embedded in a link. */
+  pointer-events: none;
   opacity: 0;
   transition: opacity 300ms ease;
 }

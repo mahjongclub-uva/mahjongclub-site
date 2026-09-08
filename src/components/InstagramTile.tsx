@@ -17,7 +17,7 @@ const Scene = dynamic(() => import("@/components/InstagramTileScene"), {
   loading: () => null,
 });
 
-export default function InstagramTile() {
+export default function InstagramTile({ active = false }: { active?: boolean }) {
   const [ready, setReady] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
 
@@ -30,7 +30,7 @@ export default function InstagramTile() {
       <TileFaceArt />
       <MarkGlyph />
       <span className="ig-tile-scene">
-        <Scene onReady={onReady} />
+        <Scene active={active} onReady={onReady} />
       </span>
     </span>
   );
