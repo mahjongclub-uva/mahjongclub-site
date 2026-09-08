@@ -45,11 +45,16 @@ svg {
   /* Paper and ink. Celadon is a glaze colour, so the page is barely green —
      the saturation lives on the tiles, where the area is small. Contrast
      ratios against --paper are noted; keep them above 4.5. */
-  --paper: #eaece3;
-  --ink: #23281f;                  /* 12.6:1 */
-  --ink-soft: #59614f;             /* 5.4:1  */
-  --jade: #2c6553;                 /* 5.7:1  */
-  --rule: #cdd3c6;
+  --paper: #ecebe0;
+  --ink: #22271d;                  /* 12.7:1 */
+  --ink-soft: #545c48;             /* 5.8:1  */
+  --jade: #2a6350;                 /* 5.8:1  */
+  --rule: #c7cfbc;
+
+  /* Gold, for the player at the top of the standings. Dark enough to be read
+     as text as well as used as a wash. */
+  --gold: #7a5c14;
+  --gold-wash: #eae2c4;
 
   /* Tiles. Ivory face, jade reverse, vermilion letterform — the colours a
      real character tile actually uses. */
@@ -96,6 +101,7 @@ svg {
   --measure: 34rem;                /* body text stays readable */
   --content: 46rem;                /* the page column */
 
+  --texture-linen: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27220%27%20height%3D%27220%27%3E%3Cfilter%20id%3D%27l%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.07%200.34%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.18%20%200%200%200%200%200.22%20%200%200%200%200%200.16%20%200%200%200%200.36%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20filter%3D%27url%28%23l%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
   --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.8%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.20%20%200%200%200%200%200.26%20%200%200%200%200%200.19%20%200%200%200%200.55%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27160%27%20height%3D%27160%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
 }
 
@@ -179,13 +185,21 @@ main {
 }
 
 .tone-sage {
-  background: #e2e7db;
-  box-shadow: inset 0 1px 0 rgba(35, 40, 31, 0.06);
+  background-color: #d6dfcd;
+  /* Laid-paper texture: coarse and fibrous on purpose, so the ground reads as
+     a different material from the porcelain sitting on it. */
+  background-image: var(--texture-linen);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(34, 39, 29, 0.07);
 }
 
 .tone-cream {
-  background: #f2eee2;
-  box-shadow: inset 0 1px 0 rgba(35, 40, 31, 0.05);
+  background-color: #f5eedc;
+  background-image: var(--texture-linen);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(34, 39, 29, 0.06);
 }
 
 .quiet {
@@ -692,9 +706,37 @@ main {
 .leaderboard th,
 .leaderboard td {
   padding: var(--space-3) var(--space-2);
-  border-block-end: 1px solid var(--rule);
   text-align: left;
   font-weight: 400;
+  border: 0;
+}
+
+/* Rows are separated by a face-down tile rather than a rule: the jade back
+   sits on the ivory body, which shows as a pale edge beneath and beside it. */
+.leaderboard tbody tr {
+  position: relative;
+}
+
+.leaderboard tbody tr::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 7px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--tile-back-hi) 0%,
+    var(--tile-back) 42%,
+    var(--tile-back-lo) 62%,
+    var(--tile-face-lo) 62%,
+    var(--tile-face) 100%
+  );
+  opacity: 0.55;
+}
+
+.leaderboard tbody tr:last-child::after {
+  display: none;
 }
 
 .leaderboard thead th {
@@ -703,12 +745,38 @@ main {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  border-block-end-color: var(--ink-soft);
+  border-block-end: 1px solid var(--ink-soft);
 }
 
 .leaderboard tbody th {
   font-family: var(--display);
   font-size: var(--text-lg);
+}
+
+/* The player at the top, marked with a gold wash and a gilt edge. Decorative
+   reinforcement only — the rank number already says who is first, so nothing
+   here is carried by colour alone. */
+.leaderboard tbody tr:first-child {
+  background: linear-gradient(
+    to right,
+    var(--gold-wash),
+    rgba(234, 226, 196, 0) 82%
+  );
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.leaderboard tbody tr:first-child td[data-label="Rank"],
+.leaderboard tbody tr:first-child th {
+  color: var(--gold);
+}
+
+.leaderboard tbody tr:first-child th {
+  font-weight: 600;
+}
+
+.leaderboard tbody tr:first-child td:first-child,
+.leaderboard tbody tr:first-child th[scope="row"] {
+  padding-inline-start: var(--space-3);
 }
 
 .leaderboard td {
