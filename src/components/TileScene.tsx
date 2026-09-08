@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { RoundedBox, ContactShadows } from "@react-three/drei";
+import { RoundedBox, Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 
 /**
@@ -80,10 +80,16 @@ function Tile({ index, texture }: BeatProps) {
         radius={0.075}
         smoothness={6}
         position={[0, 0, TILE_D * 0.14]}
-        castShadow
-        receiveShadow
       >
-        <meshStandardMaterial color="#fbf6e9" roughness={0.5} metalness={0} />
+        <meshPhysicalMaterial
+          color="#f7f4ec"
+          roughness={0.24}
+          metalness={0}
+          clearcoat={0.9}
+          clearcoatRoughness={0.18}
+          sheen={0.4}
+          sheenColor="#fff8ea"
+        />
       </RoundedBox>
 
       <RoundedBox
@@ -91,10 +97,14 @@ function Tile({ index, texture }: BeatProps) {
         radius={0.075}
         smoothness={6}
         position={[0, 0, -TILE_D * 0.33]}
-        castShadow
-        receiveShadow
       >
-        <meshStandardMaterial color="#2f6656" roughness={0.62} metalness={0} />
+        <meshPhysicalMaterial
+          color="#33705d"
+          roughness={0.35}
+          metalness={0}
+          clearcoat={0.6}
+          clearcoatRoughness={0.3}
+        />
       </RoundedBox>
 
       {/* The letter, floating a hair proud of the face so it never z-fights. */}
@@ -157,7 +167,6 @@ export default function TileScene({ onReady }: { onReady?: () => void }) {
   return (
     <Canvas
       className="tile-canvas"
-      shadows
       dpr={[1, 2]}
       camera={{ position: [0, 0.15, 6.4], fov: 32 }}
       gl={{ antialias: true, alpha: true }}
@@ -166,22 +175,19 @@ export default function TileScene({ onReady }: { onReady?: () => void }) {
     >
       <ambientLight intensity={1.15} />
       <hemisphereLight args={["#fffaf0", "#c8cbbe", 1.1]} />
-      <directionalLight
-        position={[-3.5, 5, 5]}
-        intensity={2.4}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
+      <directionalLight position={[-3.5, 5, 5]} intensity={2.2} />
       <directionalLight position={[4, 1.5, 3]} intensity={0.7} />
+
+      {/* Built locally out of light shapes, so the clearcoat has highlights to
+          catch without fetching an HDR from anywhere. frames={1} bakes it once
+          rather than re-rendering the probe every frame. */}
+      <Environment resolution={256} frames={1}>
+        <Lightformer position={[0, 3, 3]} scale={[8, 3, 1]} intensity={2.4} color="#fffaf0" />
+        <Lightformer position={[-4, 1, 2]} scale={[3, 4, 1]} intensity={1.3} color="#eef3ff" />
+        <Lightformer position={[4, -1, 2]} scale={[3, 3, 1]} intensity={0.9} color="#fff2dd" />
+      </Environment>
       <Row letters={letters} />
       <FirstFrame onReady={onReady} />
-      <ContactShadows
-        position={[0, -1.05, 0]}
-        opacity={0.32}
-        scale={9}
-        blur={2.6}
-        far={2}
-      />
     </Canvas>
   );
 }

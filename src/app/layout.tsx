@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Spectral } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
@@ -30,6 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        {/* Tile gradients, declared once for every tile on every page. */}
+        <TileArtDefs />
         <Nav />
         {children}
         <Footer />

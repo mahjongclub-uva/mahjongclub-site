@@ -189,59 +189,70 @@ main {
 
 /* Tabs, rather than a row of links: the active one rises out of the rule and
    merges with the page below it, which gives the header a front and a back. */
+/* A floating rounded-rectangle bar rather than a strip across the top: it
+   reads as a control that belongs to the page instead of a browser chrome. */
 .nav {
-  border-block-end: 1px solid var(--rule);
-  padding-block-start: var(--space-3);
+  padding-block: var(--space-3) 0;
 }
 
 .nav ul {
-  max-width: var(--content);
-  margin: 0 auto -1px;
-  padding-inline: var(--space-3);
+  width: fit-content;
+  margin: 0 auto;
+  padding: 4px;
   display: flex;
-  align-items: flex-end;
-  gap: 3px;
+  gap: 2px;
   list-style: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 0 0 1px var(--rule),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 3px rgba(35, 40, 31, 0.07);
 }
 
 .nav a {
   display: flex;
   align-items: center;
+  justify-content: center;
   /* 44px tall, so it is a comfortable target without looking like a button. */
   min-height: 44px;
-  /* Fluid, because three tabs at a fixed 28px of padding each overflow a
-     360px screen. Nothing may scroll horizontally, at any width. */
-  padding-inline: clamp(0.7rem, 3.4vw, 1.75rem);
+  padding-inline: clamp(0.9rem, 4vw, 1.6rem);
   font-family: var(--display);
   font-size: clamp(0.95rem, 3.4vw, 1.0625rem);
   color: var(--ink-soft);
   text-decoration: none;
-  border: 1px solid var(--rule);
-  border-block-end: 0;
-  border-radius: 7px 7px 0 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.32),
-    rgba(255, 255, 255, 0.08)
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
 }
 
 .nav a:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 /* The current tab is the page's own colour, so the rule breaks under it and
    the tab reads as attached to the content. Marked by colour and elevation as
    well as position, never by one thin line alone. */
+/* The current tab is lifted out of the bar — marked by fill and elevation as
+   well as position, never by one thin line. */
 .nav a[aria-current="page"] {
   color: var(--ink);
-  background: var(--paper);
-  padding-block: 2px 0;
+  background: var(--tile-face);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 -3px 8px rgba(35, 40, 31, 0.07);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(35, 40, 31, 0.14);
+}
+
+/* On a phone the bar spans the screen and the tabs split it evenly, so every
+   target is wide and nothing depends on precise tapping. */
+@media (max-width: 560px) {
+  .nav ul {
+    width: auto;
+    margin-inline: var(--space-3);
+  }
+
+  .nav li {
+    flex: 1;
+  }
 }
 
 .hero {
@@ -272,6 +283,36 @@ main {
   display: block;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* With JavaScript running the canvas will take over, so the flat tiles stop
+   animating and simply sit face-up. Without JavaScript this never applies and
+   the CSS reveal plays as before. */
+.hero-stage[data-js="on"] .tile-scene,
+.hero-stage[data-js="on"] .tile,
+.hero-stage[data-js="on"] .wordmark-sub,
+.hero-stage[data-js="on"] .tagline {
+  animation: none;
+}
+
+/* Waiting for the canvas: hold the flat tiles face-down, so when the scene
+   arrives it picks the sequence up rather than starting it over. */
+.hero-stage[data-js="on"][data-scene="waiting"] .tile {
+  transform: rotateY(-180deg);
+}
+
+/* The scene never drew. Play the flat reveal so the name resolves regardless. */
+.hero-stage[data-scene="fallback"] .tile-scene {
+  animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
+    backwards;
+  animation-delay: calc(var(--i) * var(--rise-stagger));
+}
+
+.hero-stage[data-scene="fallback"] .tile {
+  animation: tile-flip var(--flip-duration) cubic-bezier(0.65, 0, 0.35, 1)
+    backwards;
+  animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
+  transform: none;
 }
 
 /* Once the scene is up, the flat tiles step aside. The <h1> stays in the DOM
@@ -495,30 +536,32 @@ main {
 
 /* 5. Sections ============================================================= */
 
-/* A short run of face-down tiles, standing in for a rule. Deliberately small:
-   it should read as a mark in the whitespace, not as a band across the page. */
+/* Three colour blocks in the palette's own colours. A mark in the whitespace,
+   the way a dinkus works in a printed book — not a band across the page. */
 .rule {
   display: flex;
   justify-content: center;
-  /* Enough gap that they read as separate tiles rather than one green bar. */
-  gap: 5px;
+  gap: 6px;
   margin-block: var(--space-6);
 }
 
 .rule-tile {
-  width: 14px;
-  aspect-ratio: 44 / 62;
+  width: 22px;
+  height: 8px;
   border-radius: 2px;
-  background: linear-gradient(
-    155deg,
-    var(--tile-back-hi) 0%,
-    var(--tile-back) 55%,
-    var(--tile-back-lo) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-    0 1px 2px rgba(35, 40, 31, 0.16);
+}
+
+.rule-tile:nth-child(1) {
+  background: var(--tile-back);
+}
+
+.rule-tile:nth-child(2) {
+  background: var(--tile-letter);
+}
+
+.rule-tile:nth-child(3) {
+  background: var(--ink-soft);
+  opacity: 0.5;
 }
 
 .section-title {
@@ -780,22 +823,13 @@ main {
   inset: 0;
   display: grid;
   place-items: center;
-  border-radius: var(--tile-radius);
-  background: linear-gradient(
-    155deg,
-    var(--tile-face-hi) 0%,
-    var(--tile-face) 45%,
-    var(--tile-face-lo) 100%
-  );
+  /* The artwork paints the tile; this only positions the mark on top of it. */
   color: var(--tile-letter);
-  box-shadow:
-    inset 0 -3px 0 var(--tile-edge),
-    inset 0 2px 2px rgba(255, 255, 255, 0.85),
-    inset 0 0 0 1px var(--tile-rim),
-    0 4px 10px rgba(35, 40, 31, 0.13);
+  filter: drop-shadow(0 4px 9px rgba(35, 40, 31, 0.16));
 }
 
-.ig-tile-face svg {
+.ig-tile-face > svg:last-child {
+  position: relative;
   width: 26px;
   height: 26px;
 }

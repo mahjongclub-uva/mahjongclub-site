@@ -1,4 +1,5 @@
 import { INSTAGRAM } from "@/lib/site";
+import { TileFaceArt } from "@/components/TileArt";
 
 /**
  * Instagram is where meeting times and changes actually get posted, so this is
@@ -37,6 +38,7 @@ export default function FollowUs() {
         <span className="tile-side tile-side-t" />
         <span className="tile-side tile-side-b" />
         <span className="ig-tile-face">
+          <TileFaceArt />
           <InstagramMark />
         </span>
       </span>

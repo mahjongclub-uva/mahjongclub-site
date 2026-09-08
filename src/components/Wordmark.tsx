@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { WORDMARK, CLUB_NAME, FULL_NAME } from "@/lib/site";
-import { TileArtDefs, TileFaceArt, TileBackArt } from "@/components/TileArt";
+import { TileFaceArt, TileBackArt } from "@/components/TileArt";
 
 /**
  * The club name as mahjong tiles, revealed in three beats: the tiles rise and
@@ -26,8 +26,6 @@ import { TileArtDefs, TileFaceArt, TileBackArt } from "@/components/TileArt";
 export default function Wordmark() {
   return (
     <h1 className="wordmark" aria-label={FULL_NAME}>
-      {/* Gradients declared once and referenced by every tile. */}
-      <TileArtDefs />
       <span className="wordmark-tiles">
         {WORDMARK.split("").map((letter, i) => (
           <span className="tile-scene" key={i} style={{ "--i": i } as CSSProperties}>
