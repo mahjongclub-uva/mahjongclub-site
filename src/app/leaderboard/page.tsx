@@ -1,6 +1,6 @@
 import { getCurrentSemester } from "@/lib/data";
 import { formatDate } from "@/lib/format";
-import Rule from "@/components/Rule";
+import Section from "@/components/Section";
 
 /** A display truncation only. The data always carries every ranked player. */
 const SHOWN = 10;
@@ -12,7 +12,8 @@ export default function Leaderboard() {
 
   return (
     <main>
-      <header className="page-head">
+      <header className="page-head tone-paper">
+        <div className="section-wrap">
         <p className="eyebrow">{semester.label}</p>
         <h1 className="page-title">Leaderboard</h1>
         {semester.last_session && (
@@ -23,8 +24,11 @@ export default function Leaderboard() {
             </time>
           </p>
         )}
+        </div>
       </header>
 
+      <section className="section tone-sage">
+        <div className="section-wrap">
       {shown.length === 0 ? (
         <p className="quiet">No tables played yet this semester.</p>
       ) : (
@@ -62,28 +66,25 @@ export default function Leaderboard() {
         </>
       )}
 
+        </div>
+      </section>
+
       {semester.awards.length > 0 && (
-        <>
-          <Rule />
-          <section className="section" aria-labelledby="awards">
-            <h2 className="section-title" id="awards">
-              Awards
-            </h2>
-            <dl className="awards">
-              {semester.awards.map((award) => (
-                <div key={award.id}>
-                  <dt>{award.label}</dt>
-                  <dd>
-                    <span className="awards-name">{award.display}</span>
-                    <span className="awards-value">
-                      {award.value} {award.unit}
-                    </span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        </>
+        <Section id="awards" title="Awards" tone="cream">
+          <dl className="awards">
+            {semester.awards.map((award) => (
+              <div key={award.id}>
+                <dt>{award.label}</dt>
+                <dd>
+                  <span className="awards-name">{award.display}</span>
+                  <span className="awards-value">
+                    {award.value} {award.unit}
+                  </span>
+                </dd>
+              </div>
+          ))}
+          </dl>
+        </Section>
       )}
 
     </main>

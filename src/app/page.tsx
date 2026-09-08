@@ -1,48 +1,34 @@
 import { TAGLINE } from "@/lib/site";
 import Hero from "@/components/Hero";
+import Logo from "@/components/Logo";
 import Calendar from "@/components/Calendar";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
-import TileMark from "@/components/TileMark";
-import Rule from "@/components/Rule";
+import Section from "@/components/Section";
 
 export default function Home() {
   return (
     <main>
-      <header className="hero">
-        <Hero />
-        <p className="tagline">{TAGLINE}</p>
-        <TileMark className="hero-mark" height={78} />
+      <header className="hero tone-paper">
+        <div className="section-wrap">
+          <Logo />
+          <Hero />
+          <p className="tagline">{TAGLINE}</p>
+        </div>
       </header>
 
-      <Rule />
-
-      {/* Photographs come first after the hero: they say what the club is
-          faster than any sentence, and each frame arrives on scroll. */}
-      <section className="section" aria-labelledby="table">
-        <h2 className="section-title reveal" id="table">
-          At the table
-        </h2>
+      {/* Alternating grounds do the work the little dividers used to. */}
+      <Section id="table" title="At the table" tone="sage">
         <Photos />
-      </section>
+      </Section>
 
-      <Rule />
-
-      <section className="section reveal" aria-labelledby="when">
-        <h2 className="section-title" id="when">
-          When we play
-        </h2>
+      <Section id="when" title="When we play" tone="paper">
         <Calendar />
-      </section>
+      </Section>
 
-      <Rule />
-
-      <section className="section reveal" aria-labelledby="follow">
-        <h2 className="section-title" id="follow">
-          Keep up with us
-        </h2>
+      <Section id="follow" title="Keep up with us" tone="cream">
         <FollowUs />
-      </section>
+      </Section>
     </main>
   );
 }

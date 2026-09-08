@@ -1,5 +1,5 @@
 import { MIN_TABLES_TO_RANK } from "@/lib/schema";
-import Rule from "@/components/Rule";
+import Section from "@/components/Section";
 import TileMark from "@/components/TileMark";
 
 export const metadata = {
@@ -11,12 +11,15 @@ export const metadata = {
 export default function About() {
   return (
     <main>
-      <header className="page-head">
-        <p className="eyebrow">About</p>
-        <h1 className="page-title">What we play</h1>
+      <header className="page-head tone-paper">
+        <div className="section-wrap">
+          <p className="eyebrow">About</p>
+          <h1 className="page-title">What we play</h1>
+        </div>
       </header>
 
-      <section className="prose">
+      <section className="section tone-sage">
+        <div className="section-wrap prose">
         <p>
           We play Fuzhou-style mahjong: sixteen tiles in hand rather than the
           thirteen most people have seen, four players to a table, and a gold
@@ -27,14 +30,10 @@ export default function About() {
           hands that would be dead into hands that are one tile away, so the
           table stays live much later than it otherwise would.
         </p>
+        </div>
       </section>
 
-      <Rule />
-
-      <section className="section" aria-labelledby="beginners">
-        <h2 className="section-title" id="beginners">
-          If you have never played
-        </h2>
+      <Section id="beginners" title="If you have never played" tone="paper">
         <div className="prose">
           <p>
             Then you are the person we most want at the table. Most of the club
@@ -45,14 +44,9 @@ export default function About() {
             There is nothing to bring and nothing to pay to try it.
           </p>
         </div>
-      </section>
+      </Section>
 
-      <Rule />
-
-      <section className="section" aria-labelledby="scoring">
-        <h2 className="section-title" id="scoring">
-          How the leaderboard works
-        </h2>
+      <Section id="scoring" title="How the leaderboard works" tone="cream">
         <div className="prose">
           <p>
             Everyone sits down with 205 points. What you leave the table with,
@@ -74,7 +68,7 @@ export default function About() {
           </p>
         </div>
         <TileMark className="section-mark" height={64} />
-      </section>
+      </Section>
     </main>
   );
 }

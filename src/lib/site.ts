@@ -28,6 +28,15 @@ export const TAGLINE = "Anyone is welcome to play. Come learn with us.";
  */
 export const CALENDAR_ID: string | null = null;
 
+/**
+ * Club logo, shown as a circle above the wordmark.
+ *
+ * Put the file in public/ and set the path, e.g. "/logo.png". It is displayed
+ * inside a circular frame, so a square image with the mark centred works best.
+ * Leave null and an empty circle holds the space.
+ */
+export const LOGO: string | null = null;
+
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
 export const INSTAGRAM: string | null = "mahjongclub_uva";
 

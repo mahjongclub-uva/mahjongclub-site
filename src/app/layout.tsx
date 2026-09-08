@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Spectral } from "next/font/google";
+import { Cormorant_Garamond, Lora } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = Instrument_Serif({
+const display = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "600"],
   variable: "--font-display",
   display: "swap",
 });
 
-const body = Spectral({
+const body = Lora({
   subsets: ["latin"],
   weight: ["400", "600"],
   variable: "--font-body",

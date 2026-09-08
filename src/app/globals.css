@@ -156,10 +156,36 @@ a:hover {
   border-radius: 2px;
 }
 
+/* Full bleed, so a section's ground can span the viewport. The reading column
+   is .section-wrap inside it. */
 main {
+  padding: 0;
+}
+
+.section-wrap {
   max-width: var(--content);
   margin-inline: auto;
-  padding: var(--space-5) var(--space-4) var(--space-6);
+  padding-inline: var(--space-4);
+}
+
+.section {
+  padding-block: var(--space-6);
+}
+
+/* Section grounds. Alternate them; two touching sections should never share
+   one. All three are checked at 4.5:1 or better for ink, metadata and links. */
+.tone-paper {
+  background: transparent;
+}
+
+.tone-sage {
+  background: #e2e7db;
+  box-shadow: inset 0 1px 0 rgba(35, 40, 31, 0.06);
+}
+
+.tone-cream {
+  background: #f2eee2;
+  box-shadow: inset 0 1px 0 rgba(35, 40, 31, 0.05);
 }
 
 .quiet {
@@ -169,11 +195,24 @@ main {
 
 .eyebrow {
   margin: 0 0 var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--sans);
   font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+/* A small jade block, the colour of a tile's reverse. Decorative only — the
+   label beside it carries the meaning. */
+.eyebrow::before {
+  content: "";
+  width: 14px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--tile-back);
 }
 
 
@@ -256,8 +295,35 @@ main {
 }
 
 .hero {
-  padding-block: var(--space-6) var(--space-5);
+  padding-block: var(--space-5) var(--space-6);
   text-align: center;
+}
+
+/* Holds its space whether or not there is a logo yet, so dropping one in
+   later cannot shift the page. */
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-block-end: var(--space-5);
+}
+
+.logo img,
+.logo-empty {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+}
+
+.logo-empty {
+  background: radial-gradient(
+    120% 120% at 32% 24%,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.15)
+  );
+  box-shadow:
+    inset 0 0 0 1px var(--rule),
+    inset 0 2px 6px rgba(35, 40, 31, 0.08);
 }
 
 /* The two layers of the header. The CSS wordmark holds the space and the
@@ -295,10 +361,11 @@ main {
   animation: none;
 }
 
-/* Waiting for the canvas: hold the flat tiles face-down, so when the scene
-   arrives it picks the sequence up rather than starting it over. */
-.hero-stage[data-js="on"][data-scene="waiting"] .tile {
-  transform: rotateY(-180deg);
+/* While the canvas loads, show nothing at all rather than the flat tiles'
+   starting pose — that pose belongs to an animation which is no longer going
+   to play, and it reads as a glitch. The <h1> text stays in the DOM. */
+.hero-stage[data-js="on"][data-scene="waiting"] .wordmark-tiles {
+  opacity: 0;
 }
 
 /* The scene never drew. Play the flat reveal so the name resolves regardless. */
@@ -538,36 +605,27 @@ main {
 
 /* Three colour blocks in the palette's own colours. A mark in the whitespace,
    the way a dinkus works in a printed book — not a band across the page. */
-.rule {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-block: var(--space-6);
-}
 
-.rule-tile {
-  width: 22px;
-  height: 8px;
-  border-radius: 2px;
-}
 
-.rule-tile:nth-child(1) {
-  background: var(--tile-back);
-}
 
-.rule-tile:nth-child(2) {
-  background: var(--tile-letter);
-}
 
-.rule-tile:nth-child(3) {
-  background: var(--ink-soft);
-  opacity: 0.5;
-}
 
 .section-title {
   margin: 0 0 var(--space-4);
   font-size: var(--text-xl);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
+}
+
+/* A short vermilion rule under each section heading — the one warm mark on an
+   otherwise green and ivory page. */
+.section-title::after {
+  content: "";
+  display: block;
+  width: 26px;
+  height: 3px;
+  margin-block-start: var(--space-3);
+  border-radius: 2px;
+  background: var(--tile-letter);
 }
 
 .page-head {
@@ -576,6 +634,7 @@ main {
 
 .page-title {
   margin: 0;
+  font-weight: 600;
   font-size: var(--text-2xl);
   letter-spacing: -0.02em;
 }
@@ -805,34 +864,25 @@ main {
 
 /* Reuses the wordmark's wall classes, which only need these three custom
    properties to size themselves. */
+/* No CSS box: the artwork is the tile. Only sizing and the lean live here. */
 .ig-tile {
-  --tile-w: 62px;
-  --tile-depth: 13px;
-  --tile-radius: 5px;
-
   position: relative;
   flex: none;
-  display: block;
-  width: var(--tile-w);
-  aspect-ratio: 44 / 62;
-  transform-style: preserve-3d;
-}
-
-.ig-tile-face {
-  position: absolute;
-  inset: 0;
   display: grid;
   place-items: center;
-  /* The artwork paints the tile; this only positions the mark on top of it. */
-  color: var(--tile-letter);
-  filter: drop-shadow(0 4px 9px rgba(35, 40, 31, 0.16));
+  width: 64px;
+  aspect-ratio: 44 / 62;
+  filter: drop-shadow(0 5px 11px rgba(35, 40, 31, 0.18));
 }
 
-.ig-tile-face > svg:last-child {
+.ig-tile > svg:last-child {
   position: relative;
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
+  color: var(--tile-letter);
 }
+
+
 
 .ig-body {
   display: grid;
