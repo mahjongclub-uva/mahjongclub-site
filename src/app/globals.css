@@ -1,18 +1,32 @@
-/*
- * Yours. Everything visual on this site is hand-written, so this file starts
- * almost empty on purpose — there is no framework here quietly making design
- * decisions for you.
- *
- * What is here is a minimal reset and nothing else: no palette, no type scale,
- * no spacing system. Those are the interesting parts and they are still open.
- *
- * Worth keeping in mind from DESIGN-SPEC.md while you build:
- *   - design at 360px first, enhance upward
- *   - body text at least 4.5:1 against the background, metadata too
- *   - never remove a focus outline without putting something visible back
- *   - touch targets at least 44px
- *   - honour prefers-reduced-motion for the header
- */
+/* ==========================================================================
+   Mahjong Club at UVA — stylesheet
+
+   Structure is scaffolded; the design decisions are marked FILL IN.
+   Everything here is plain CSS on semantic elements. No framework, no build
+   step, nothing generating styles behind your back.
+
+   Order matters and is deliberate:
+     1. Reset
+     2. Design tokens      <- most of your work starts here
+     3. Base elements
+     4. Layout
+     5. Leaderboard
+     6. Tile header
+     7. Reduced motion
+
+   The only hard rules here are accessibility ones:
+     - any text at 4.5:1 against its background, metadata included
+     - never remove a focus outline without putting something visible back
+     - touch targets at least 44px in their smallest dimension
+     - no information carried by colour alone
+     - nothing overflows horizontally at any width
+
+   Everything else — sizes, ratios, timings, breakpoints — is yours to set.
+   Where a number appears below it is a starting point, not a requirement.
+   ========================================================================== */
+
+
+/* 1. Reset ================================================================ */
 
 *,
 *::before,
@@ -29,4 +43,366 @@ picture,
 svg {
   display: block;
   max-width: 100%;
+}
+
+
+/* 2. Design tokens ========================================================
+   FILL IN. These are greyscale placeholders so the page renders and you can
+   see your changes immediately. Replace the values; keep the names.
+
+   Naming them by ROLE rather than by colour ("--color-text", not "--grey-800")
+   is what makes swapping the whole palette a change to this block alone.
+
+   For the tile colours, photographing the club's own set is likely to get you
+   somewhere more specific than picking swatches in the abstract.
+   ======================================================================== */
+
+:root {
+  /* Page ------------------------------------------------------------------ */
+  /* Celadon: the pale grey-green of ceramic glaze. Kept desaturated on
+     purpose — a saturated green at full-field size reads as poker felt.
+     Contrast ratios against --color-bg are noted so you can see the headroom
+     before you darken or lighten anything. */
+  --color-bg: #e7ede4;
+  --color-text: #1b231d;            /* 13.5:1 */
+  --color-text-secondary: #4b5a4c;  /* 6.2:1  */
+  --color-accent: #1f6152;          /* 6.1:1, deep jade for links */
+  --color-rule: #c6d2c2;
+
+  /* Texture ---------------------------------------------------------------
+     Fine grain so the background reads as glazed ceramic rather than flat
+     paint. It is a 140px SVG tile repeated, not a filter over the whole
+     viewport — turbulence across a full-screen element is expensive to
+     rasterise, and it would be recomputed on a scrolling composited layer.
+     Rendered once at this size, it costs nothing.
+     Raise the rect's opacity in the data URI below to make it coarser. */
+  --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27140%27%20height%3D%27140%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%273%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.29%20%200%200%200%200%200.38%20%200%200%200%200%200.32%20%200%200%200%200.5%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27140%27%20height%3D%27140%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.13%27%2F%3E%3C%2Fsvg%3E");
+
+  /* Tiles ----------------------------------------------------------------- */
+  /* Back and face differ in LUMINANCE, not only hue, so the flip still reads
+     in greyscale and to a colourblind visitor. Ivory face, jade edge and
+     back — the green is an accent on the tile, not the field behind it. */
+  --tile-face: #f4f1e6;             /* ivory, as a real tile face */
+  --tile-letter: #1b231d;           /* 14.2:1 on the face */
+  --tile-edge: #3e8a76;             /* jade, the lit bottom edge */
+  --tile-back: #33685a;             /* deeper jade, 5.7:1 against the face */
+  --tile-rim: rgba(62, 138, 118, 0.35);
+
+  /* Type ------------------------------------------------------------------ */
+  /* System stack costs zero requests and renders natively everywhere. Spending
+     your entire font budget on the wordmark alone is a defensible choice. */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-body);  /* FILL IN once the display face is chosen */
+
+  /* FILL IN: a deliberate scale beats sizes picked one at a time.
+     A common approach is a fixed ratio between steps (1.25 here). */
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+
+  /* Spacing --------------------------------------------------------------- */
+  /* FILL IN: consistent spacing does more for a page looking intentional than
+     almost anything else. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+
+  /* Layout ---------------------------------------------------------------- */
+  --content-max: 42rem;  /* FILL IN: keep body line length under 80 characters */
+}
+
+
+/* 3. Base elements ========================================================
+   Wired to the tokens above, so most changes happen there, not here.
+   ======================================================================== */
+
+body {
+  background-color: var(--color-bg);
+  /* A soft highlight falling from the top, over the grain. Together they read
+     as a glazed surface catching light rather than a flat colour field. */
+  background-image:
+    radial-gradient(
+      130% 90% at 50% 0%,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0) 62%
+    ),
+    var(--texture-grain);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+}
+
+h1,
+h2 {
+  line-height: var(--leading-tight);
+  text-wrap: balance;  /* stops a heading leaving one orphaned word */
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+
+h2 {
+  font-size: var(--text-lg);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+/* FILL IN: style this, do not delete it. Removing the outline with nothing
+   in its place makes the site unusable by keyboard. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+
+/* 4. Layout =============================================================== */
+
+main {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+/* Custom properties do not work inside media queries, so breakpoint values are
+   written out wherever they appear. The only one currently used is 768px, where
+   the leaderboard stops being cards. Add or move them as the design needs —
+   the best breakpoints are the widths where your layout actually breaks, which
+   you find by dragging the window, not by picking round numbers. */
+
+
+/* 5. Leaderboard ==========================================================
+   The plumbing for the card collapse is done. The visual design is not.
+
+   Below 768px the table stops being a table and each row becomes a card.
+   That works because every <td> carries a data-label attribute, so the
+   column heading can reappear inside the cell once the header row is hidden.
+   ======================================================================== */
+
+.leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard caption {
+  text-align: left;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  padding-block-end: var(--space-2);
+}
+
+/* FILL IN: the desktop table. Alignment is the one thing worth getting right
+   early — numbers read far better right-aligned or tabular-aligned than left. */
+.leaderboard th,
+.leaderboard td {
+  text-align: left;
+  padding: var(--space-2);
+  border-block-end: 1px solid var(--color-rule);
+}
+
+@media (max-width: 767px) {
+  /* Hide the header row from sight but keep it for screen readers. */
+  .leaderboard thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .leaderboard,
+  .leaderboard tbody,
+  .leaderboard tr,
+  .leaderboard th,
+  .leaderboard td {
+    display: block;
+  }
+
+  /* FILL IN: this is the card. One idea worth trying first: keep it dense,
+     like a list item — rank and name on one line, the stats inline beneath —
+     rather than a tall padded box, so more than three players fit on screen. */
+  .leaderboard tr {
+    border-block-end: 1px solid var(--color-rule);
+    padding-block: var(--space-3);
+  }
+
+  .leaderboard th,
+  .leaderboard td {
+    border: 0;
+    padding: 0;
+  }
+
+  /* The column heading, reappearing inside each cell. */
+  .leaderboard td::before {
+    content: attr(data-label) ": ";
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+  }
+}
+
+
+/* 6. Tile wordmark =======================================================
+   The flip mechanism is plumbing and is done. Everything about how a tile
+   LOOKS is yours.
+
+   How it works, so you can change it confidently:
+
+     - .tile is the thing that rotates. Its two children sit on top of each
+       other, each with backface-visibility: hidden, so only the one facing
+       you is drawn.
+     - .tile-back is pre-rotated 180deg, so at rest you see the FACE. That is
+       deliberate: face-up is the resting state, and the animation is what
+       starts it face-down.
+     - animation-fill-mode: backwards holds the from-state during the delay,
+       which is what makes the stagger work without JavaScript.
+     - Each tile carries --i from the JSX, so the delay is arithmetic rather
+       than seven near-identical rules.
+
+   Because face-up is the default, a failed stylesheet or a reduced-motion
+   preference leaves the club's name plainly legible. Do not invert this.
+   ======================================================================== */
+
+.wordmark {
+  /* FILL IN: the whole header block — spacing, alignment, size. */
+  margin: 0;
+}
+
+.wordmark-tiles {
+  display: flex;
+  justify-content: center;
+  /* FILL IN, but mind the arithmetic — this is the tightest constraint on
+     the page. At 360px, main's padding leaves 328px. Seven tiles at the 44px
+     floor are 308px, so the six gaps have 20px between them: 3px each, max.
+     A larger gap here overflows the viewport, which is not allowed.
+     Above 480px there is room to breathe, hence the clamp. */
+  gap: clamp(2px, 0.8vw, 10px);
+  perspective: 800px;           /* FILL IN: lower = more dramatic 3D */
+  margin-block-end: var(--space-2);
+}
+
+.wordmark-sub {
+  display: block;
+  text-align: center;
+  font-size: var(--text-base);  /* FILL IN */
+  color: var(--color-text-secondary);
+}
+
+.tile {
+  position: relative;
+  flex: 0 1 auto;
+
+  /* FILL IN. Real mahjong tiles are roughly 20x30mm, so 2:3 is a reasonable
+     first guess at what reads as a tile rather than a rounded rectangle — but
+     it is a guess, not a rule. Same for the 44px floor: it is there so the
+     letters stay legible on a phone, not because anything requires it.
+     If you change either, redo the row arithmetic in .wordmark-tiles above. */
+  aspect-ratio: 2 / 3;
+  width: clamp(44px, 12vw, 88px);
+
+  transform-style: preserve-3d;
+}
+
+.tile-back,
+.tile-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  backface-visibility: hidden;
+  border-radius: 4px;          /* FILL IN */
+}
+
+.tile-face {
+  /* FILL IN: the ivory face. A flat colour reads as a card, not a tile —
+     thickness comes from an asymmetric border or inset shadow, heavier on the
+     bottom edge, which suggests a lit object with depth. */
+  background: var(--tile-face);
+  color: var(--tile-letter);
+  /* The jade edge. Heavier on the bottom than the rim, which is what suggests
+     a solid object catching light from above rather than a printed card. */
+  border-block-end: 3px solid var(--tile-edge);
+  box-shadow:
+    inset 0 0 0 1px var(--tile-rim),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);   /* FILL IN: must hold up in a narrow frame */
+  line-height: 1;
+}
+
+.tile-back {
+  /* FILL IN: the reverse. Must differ from the face in LUMINANCE, not only
+     hue, or the flip is invisible in greyscale and to a colourblind visitor. */
+  background: var(--tile-back);
+  border-block-end: 3px solid var(--tile-edge);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transform: rotateY(180deg);
+}
+
+
+/* Timing -----------------------------------------------------------------
+   FILL IN. There is no required number here — but there is one fact worth
+   keeping in view, because the club's name is unreadable until the cascade
+   finishes:
+
+       last tile finishes at  start + (6 x stagger) + duration
+
+   The values below land at about 0.6s. The hero mockup's 210ms stagger and
+   1300ms flip land at 3.06s. Both are legitimate choices; they just say
+   different things about how long a stranger waits to learn what this club
+   is. Do the arithmetic whenever you change one.
+   ------------------------------------------------------------------------ */
+
+.tile {
+  --tile-flip-start: 120ms;
+  --tile-flip-stagger: 70ms;
+  --tile-flip-duration: 550ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tile {
+    animation: tile-flip-in var(--tile-flip-duration)
+      cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    animation-delay: calc(
+      var(--tile-flip-start) + var(--i) * var(--tile-flip-stagger)
+    );
+  }
+}
+
+@keyframes tile-flip-in {
+  from {
+    transform: rotateY(-180deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+
+
+/* 7. Reduced motion =======================================================
+   Not optional, and not a nicety. Flipping and rotating elements are a common
+   motion-sickness trigger.
+
+   Under this setting the header must render in its FINAL state immediately —
+   face up, no animation. Not a faster animation.
+   ======================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

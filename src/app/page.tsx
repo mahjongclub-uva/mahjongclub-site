@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
+import Wordmark from "@/components/Wordmark";
 
 // Scaffolding, not design. This page proves the data reaches a template and
 // gives you a semantic skeleton to build on. The markup is yours to change —
@@ -7,7 +8,8 @@ import { getCurrentSemester } from "@/lib/data";
 //
 // Two things worth keeping whatever else changes:
 //   - the club name stays real text inside the <h1>, never an image
-//   - nothing here is a client component, so this page ships no JavaScript
+//   - the first reveal is CSS, so the name does not wait on hydration.
+//     JavaScript is welcome on top of that, not underneath it.
 
 export default function Home() {
   const semester = getCurrentSemester();
@@ -15,8 +17,7 @@ export default function Home() {
 
   return (
     <main>
-      {/* Non-negotiable 1: the club's name is selectable, indexable text. */}
-      <h1>Mahjong Club at UVA</h1>
+      <Wordmark />
 
       <p>
         Fuzhou-style 16-tile mahjong, played with a gold wildcard tile.

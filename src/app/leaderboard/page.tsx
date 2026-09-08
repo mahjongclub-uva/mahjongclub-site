@@ -4,10 +4,10 @@ import { getCurrentSemester } from "@/lib/data";
 // Scaffolding, not design.
 //
 // The markup is a real <table> because this is genuinely tabular data and that
-// is what a screen reader needs. DESIGN-SPEC.md settles on collapsing it into
-// stacked cards below the tablet breakpoint, which is a CSS job — the usual
-// approach is display:block on the table parts plus a data-label attribute per
-// cell. Horizontal scrolling is explicitly not an option.
+// is what a screen reader needs. Six columns do not fit a phone, so below 768px
+// it collapses into stacked cards — display:block on the table parts plus the
+// data-label attributes below. Horizontal scrolling on the table is the one
+// approach ruled out, because it hides columns with no sign they exist.
 //
 // Names never link anywhere. There are no player pages and no player-specific
 // URLs anywhere on this site, by design.
@@ -28,7 +28,7 @@ export default function Leaderboard() {
       {semester.standings.length === 0 ? (
         <p>No tables played yet this semester.</p>
       ) : (
-        <table>
+        <table className="leaderboard">
           {/*
             Deliberately does not print the session count. Table 21 has no date
             in the sheet, so semester.sessions is a floor rather than a count —
@@ -49,12 +49,19 @@ export default function Leaderboard() {
           <tbody>
             {semester.standings.map((player) => (
               <tr key={player.id}>
-                <td>{player.rank}</td>
+                {/*
+                  Each data-label repeats its column heading. Below the tablet
+                  breakpoint the header row is hidden and the CSS pulls these
+                  back in via td::before, which is what lets one <table> serve
+                  both the desktop table and the mobile cards.
+                  Keep them in step with the <th scope="col"> text above.
+                */}
+                <td data-label="Rank">{player.rank}</td>
                 <th scope="row">{player.display}</th>
-                <td>{player.tables_played}</td>
-                <td>{player.total_gain}</td>
-                <td>{player.avg_gain}</td>
-                <td>{player.best_table}</td>
+                <td data-label="Tables">{player.tables_played}</td>
+                <td data-label="Points won">{player.total_gain}</td>
+                <td data-label="Average">{player.avg_gain}</td>
+                <td data-label="Best table">{player.best_table}</td>
               </tr>
             ))}
           </tbody>
