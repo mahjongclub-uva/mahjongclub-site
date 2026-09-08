@@ -263,7 +263,7 @@ main {
      20 x 30 x 15mm — genuinely chunky — but a fifth of the width reads as
      solid without turning the wordmark into a row of bricks. */
   --tile-w: clamp(38px, 10.5vw, 66px);
-  --tile-depth: calc(var(--tile-w) * 0.2);
+  --tile-depth: calc(var(--tile-w) * 0.15);
   --tile-radius: 5px;
 
   width: var(--tile-w);
@@ -297,6 +297,7 @@ main {
    the maths depends on the tile's width — which is fluid. */
 .tile-side {
   position: absolute;
+  border-radius: 1px;
   background: linear-gradient(
     to bottom,
     var(--tile-face) 0%,
@@ -334,17 +335,20 @@ main {
   height: var(--tile-depth);
 }
 
+/* Sign matters: rotateX gives z' = y * sin(theta), so a wall above the face
+   (local y negative) folds backwards at +90deg, and one below it at -90deg.
+   Inverted, they fold forwards and float in front of the tile as loose tabs. */
 .tile-side-t {
   bottom: 100%;
   transform-origin: center bottom;
-  transform: rotateX(-90deg);
+  transform: rotateX(90deg);
   background: linear-gradient(to bottom, var(--tile-face-lo), var(--tile-face));
 }
 
 .tile-side-b {
   top: 100%;
   transform-origin: center top;
-  transform: rotateX(90deg);
+  transform: rotateX(-90deg);
   background: var(--tile-edge);
 }
 
@@ -420,30 +424,30 @@ main {
 
 /* 5. Sections ============================================================= */
 
+/* A short run of face-down tiles, standing in for a rule. Deliberately small:
+   it should read as a mark in the whitespace, not as a band across the page. */
 .rule {
-  height: 1px;
+  display: flex;
+  justify-content: center;
+  /* Enough gap that they read as separate tiles rather than one green bar. */
+  gap: 5px;
   margin-block: var(--space-6);
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--rule) 12%,
-    var(--rule) 88%,
-    transparent
-  );
-  position: relative;
 }
 
-/* The marked segment at the centre, the way a scoring stick carries pips. */
-.rule::after {
-  content: "";
-  position: absolute;
-  inset-block-start: -1px;
-  inset-inline-start: 50%;
-  width: 34px;
-  height: 3px;
-  translate: -50% 0;
+.rule-tile {
+  width: 14px;
+  aspect-ratio: 44 / 62;
   border-radius: 2px;
-  background: var(--rule);
+  background: linear-gradient(
+    155deg,
+    var(--tile-back-hi) 0%,
+    var(--tile-back) 55%,
+    var(--tile-back-lo) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(35, 40, 31, 0.16);
 }
 
 .section-title {
