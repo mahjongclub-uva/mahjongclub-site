@@ -16,7 +16,7 @@ export default function Logo() {
         // asset() prefixes the base path. Without it a bare "/logo.png"
         // resolves to the domain root: fine in dev, 404 in production.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={asset(LOGO)} alt="" width={96} height={96} />
+        <img src={asset(LOGO)} alt="" width={176} height={176} />
       ) : (
         <span className="logo-empty" aria-hidden="true" title={FULL_NAME} />
       )}

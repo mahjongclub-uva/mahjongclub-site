@@ -26,7 +26,7 @@ export const TAGLINE = "Anyone is welcome to play. Come learn with us.";
  *
  * Leave null and the page shows a quiet placeholder instead of a broken frame.
  */
-export const CALENDAR_ID: string | null = null;
+export const CALENDAR_ID: string | null = "c2b93807305215ee07bdbd6d1c045e8f58588b299afa24dd14fa981830eb3c2a@group.calendar.google.com";
 
 /**
  * Club logo, shown as a circle above the wordmark.
@@ -35,7 +35,7 @@ export const CALENDAR_ID: string | null = null;
  * inside a circular frame, so a square image with the mark centred works best.
  * Leave null and an empty circle holds the space.
  */
-export const LOGO: string | null = null;
+export const LOGO: string | null = "/logo.webp";
 
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
 export const INSTAGRAM: string | null = "mahjongclub_uva";
