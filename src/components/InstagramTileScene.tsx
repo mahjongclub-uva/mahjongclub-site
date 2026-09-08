@@ -67,12 +67,12 @@ function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
     // turn and lifts toward you — a single settled gesture rather than
     // following the pointer around, which never settles and reads as jitter.
     //
-    // Signs set which corner comes forward. In three.js a positive rotation.y
-    // brings the LEFT edge toward the viewer, and a negative rotation.x brings
-    // the BOTTOM forward — so this lifts the bottom-left corner, and the tile
-    // turns away toward the top right.
-    const targetY = active ? 0.26 : 0;
-    const targetX = active ? -0.14 : 0;
+    // The turn is about the vertical axis only: a positive rotation.y brings
+    // the whole LEFT edge — top-left through bottom-left — toward the viewer,
+    // like a door opening, while the right edge falls away. No rotation.x, so
+    // the tile stays level rather than tipping to a corner.
+    const targetY = active ? 0.3 : 0;
+    const targetX = 0;
     const targetZ = active ? 0.5 : 0;
 
     g.rotation.y += (targetY - g.rotation.y) * 0.12;
