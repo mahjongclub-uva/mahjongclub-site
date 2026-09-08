@@ -3,7 +3,14 @@
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { TileBody, TileLights, TILE_W, TILE_H, TILE_D, cssVar } from "@/components/Tile3D";
+import { TileBody, TileLights, TILE_W, cssVar } from "@/components/Tile3D";
+
+/**
+ * Thicker than the wordmark's tiles. A real tile is roughly 20 x 30 x 15mm —
+ * genuinely chunky — which looks heavy repeated seven times but correct on a
+ * single tile shown by itself.
+ */
+const DEPTH = 0.62;
 
 /**
  * The Instagram mark on a real tile, matching the wordmark.
@@ -83,8 +90,8 @@ function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
 
   return (
     <group ref={group}>
-      <TileBody />
-      <mesh position={[0, 0, TILE_D * 0.5 + 0.004]}>
+      <TileBody depth={DEPTH} />
+      <mesh position={[0, 0, DEPTH * 0.5 + 0.004]}>
         <planeGeometry args={[TILE_W * 0.78, TILE_W * 0.78]} />
         <meshBasicMaterial map={texture} transparent depthWrite={false} />
       </mesh>
@@ -103,10 +110,15 @@ export default function InstagramTileScene({
     <Canvas
       frameloop="demand"
       dpr={[1, 2]}
-      camera={{ position: [0, 0, 8.5], fov: 13 }}
+      /* A moderate lens, raised a little and aimed back at the tile. Long
+         enough that turning it does not stretch the near edge, short enough
+         that you can still see it has a body — and the slight height reveals
+         the top face without rotating the tile off square. */
+      camera={{ position: [0, 0.85, 6.1], fov: 21 }}
       gl={{ antialias: true, alpha: true }}
-      onCreated={({ gl }) => {
+      onCreated={({ gl, camera }) => {
         gl.setClearAlpha(0);
+        camera.lookAt(0, 0, 0);
         setTimeout(() => onReady?.(), 0);
       }}
     >
