@@ -82,10 +82,14 @@ svg {
   /* Back and face differ in LUMINANCE, not only hue, so the flip still reads
      in greyscale and to a colourblind visitor. Ivory face, jade edge and
      back — the green is an accent on the tile, not the field behind it. */
+  --tile-face-hi: #fffdf7;          /* the lit top corner of the face */
   --tile-face: #f4f1e6;             /* ivory, as a real tile face */
-  --tile-letter: #1b231d;           /* 14.2:1 on the face */
+  --tile-face-lo: #e6ddc6;          /* the shaded bottom corner */
+  --tile-letter: #a3312c;           /* 6.1:1 on the face; real tiles are red */
   --tile-edge: #3e8a76;             /* jade, the lit bottom edge */
-  --tile-back: #33685a;             /* deeper jade, 5.7:1 against the face */
+  --tile-back-hi: #5aa992;
+  --tile-back: #33685a;             /* jade, 5.7:1 against the face */
+  --tile-back-lo: #1d453a;
   --tile-rim: rgba(62, 138, 118, 0.35);
 
   /* Type ------------------------------------------------------------------ */
@@ -253,63 +257,58 @@ main {
 
 
 /* 6. Tile wordmark =======================================================
-   The flip mechanism is plumbing and is done. Everything about how a tile
-   LOOKS is yours.
+   Three beats, no JavaScript:
 
-   How it works, so you can change it confidently:
+     1. rise    each tile fades up and tilts toward you, settling into place
+     2. flip    the cascade, turning the backs over to reveal the letters
+     3. sub     the club name fades in underneath
 
-     - .tile is the thing that rotates. Its two children sit on top of each
-       other, each with backface-visibility: hidden, so only the one facing
-       you is drawn.
-     - .tile-back is pre-rotated 180deg, so at rest you see the FACE. That is
-       deliberate: face-up is the resting state, and the animation is what
-       starts it face-down.
-     - animation-fill-mode: backwards holds the from-state during the delay,
-       which is what makes the stagger work without JavaScript.
-     - Each tile carries --i from the JSX, so the delay is arithmetic rather
-       than seven near-identical rules.
+   The nesting matters. .tile-scene handles beat 1 (opacity and position),
+   .tile handles beat 2 (rotation). They are separate elements because a
+   single element cannot run two animations that both write `transform`.
 
-   Because face-up is the default, a failed stylesheet or a reduced-motion
-   preference leaves the club's name plainly legible. Do not invert this.
+   Every delay comes from --i, set inline on .tile-scene and inherited by its
+   children, so the timing is data on the element rather than seven copies of
+   the same rule.
+
+   The resting state is the resolved one: tiles up, faces out, subtitle
+   visible. The animations use `backwards` fill to hold their start state
+   during the delay, which is what makes reduced-motion and a failed
+   stylesheet both degrade to "the name is simply there".
    ======================================================================== */
 
 .wordmark {
-  /* FILL IN: the whole header block — spacing, alignment, size. */
   margin: 0;
+  /* FILL IN. Timing lives here so the whole sequence is tuned in one place.
+     The subtitle delay is calculated from these rather than hardcoded, so
+     retuning the cascade cannot leave it out of step. */
+  --rise-duration: 550ms;
+  --rise-stagger: 70ms;
+  --flip-start: 520ms;
+  --flip-stagger: 210ms;
+  --flip-duration: 1300ms;
+  --sub-duration: 650ms;
 }
 
 .wordmark-tiles {
   display: flex;
   justify-content: center;
-  /* FILL IN, but mind the arithmetic — this is the tightest constraint on
-     the page. At 360px, main's padding leaves 328px. Seven tiles at the 44px
-     floor are 308px, so the six gaps have 20px between them: 3px each, max.
-     A larger gap here overflows the viewport, which is not allowed.
-     Above 480px there is room to breathe, hence the clamp. */
+  /* Mind the arithmetic: at 360px the page leaves ~328px. Seven tiles plus
+     six gaps must fit inside that, which is why both are fluid rather than
+     fixed. A fixed 44px tile with an 8px gap overflows by 44px. */
   gap: clamp(2px, 0.8vw, 10px);
-  perspective: 800px;           /* FILL IN: lower = more dramatic 3D */
-  margin-block-end: var(--space-2);
+  perspective: 900px;
 }
 
-.wordmark-sub {
-  display: block;
-  text-align: center;
-  font-size: var(--text-base);  /* FILL IN */
-  color: var(--color-text-secondary);
+.tile-scene {
+  width: clamp(40px, 11.5vw, 72px);
+  aspect-ratio: 44 / 62;
 }
 
 .tile {
   position: relative;
-  flex: 0 1 auto;
-
-  /* FILL IN. Real mahjong tiles are roughly 20x30mm, so 2:3 is a reasonable
-     first guess at what reads as a tile rather than a rounded rectangle — but
-     it is a guess, not a rule. Same for the 44px floor: it is there so the
-     letters stay legible on a phone, not because anything requires it.
-     If you change either, redo the row arithmetic in .wordmark-tiles above. */
-  aspect-ratio: 2 / 3;
-  width: clamp(44px, 12vw, 88px);
-
+  width: 100%;
+  height: 100%;
   transform-style: preserve-3d;
 }
 
@@ -319,72 +318,119 @@ main {
   inset: 0;
   display: grid;
   place-items: center;
+  border-radius: 4px;
   backface-visibility: hidden;
-  border-radius: 4px;          /* FILL IN */
 }
 
 .tile-face {
-  /* FILL IN: the ivory face. A flat colour reads as a card, not a tile —
-     thickness comes from an asymmetric border or inset shadow, heavier on the
-     bottom edge, which suggests a lit object with depth. */
-  background: var(--tile-face);
+  /* FILL IN. The gradient plus the layered inset shadows are what read as a
+     carved object rather than a flat rectangle: light along the top edge,
+     shade along the bottom, a thin rim all round. */
+  background: linear-gradient(
+    155deg,
+    var(--tile-face-hi) 0%,
+    var(--tile-face) 45%,
+    var(--tile-face-lo) 100%
+  );
   color: var(--tile-letter);
-  /* The jade edge. Heavier on the bottom than the rim, which is what suggests
-     a solid object catching light from above rather than a printed card. */
   border-block-end: 3px solid var(--tile-edge);
   box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.14),
     inset 0 0 0 1px var(--tile-rim),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);   /* FILL IN: must hold up in a narrow frame */
+    0 3px 8px rgba(0, 0, 0, 0.18);
+  font-family: Georgia, "Times New Roman", serif;  /* FILL IN */
+  font-size: clamp(1rem, 4.5vw, 1.5rem);
+  font-weight: 700;
   line-height: 1;
 }
 
 .tile-back {
-  /* FILL IN: the reverse. Must differ from the face in LUMINANCE, not only
-     hue, or the flip is invisible in greyscale and to a colourblind visitor. */
-  background: var(--tile-back);
-  border-block-end: 3px solid var(--tile-edge);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  /* The jade reverse, with a sheen across the top-left as if catching light. */
+  background:
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0) 35%
+    ),
+    linear-gradient(
+      155deg,
+      var(--tile-back-hi) 0%,
+      var(--tile-back) 55%,
+      var(--tile-back-lo) 100%
+    );
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.28),
+    0 3px 8px rgba(0, 0, 0, 0.2);
   transform: rotateY(180deg);
 }
 
-
-/* Timing -----------------------------------------------------------------
-   FILL IN. There is no required number here — but there is one fact worth
-   keeping in view, because the club's name is unreadable until the cascade
-   finishes:
-
-       last tile finishes at  start + (6 x stagger) + duration
-
-   The values below land at about 0.6s. The hero mockup's 210ms stagger and
-   1300ms flip land at 3.06s. Both are legitimate choices; they just say
-   different things about how long a stranger waits to learn what this club
-   is. Do the arithmetic whenever you change one.
-   ------------------------------------------------------------------------ */
-
-.tile {
-  --tile-flip-start: 120ms;
-  --tile-flip-stagger: 70ms;
-  --tile-flip-duration: 550ms;
+.wordmark-sub {
+  display: block;
+  margin-block-start: var(--space-4);
+  text-align: center;
 }
 
+.wordmark-club {
+  display: block;
+  font-size: var(--text-lg);       /* FILL IN */
+  letter-spacing: 0.01em;
+}
+
+.wordmark-uni {
+  display: block;
+  margin-block-start: var(--space-1);
+  font-size: var(--text-sm);       /* FILL IN */
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+
+/* The three beats. Each keyframe block declares only `from`, so the `to` is
+   whatever the rules above say — the resolved state is defined once.
+   ------------------------------------------------------------------------ */
+
 @media (prefers-reduced-motion: no-preference) {
+  .tile-scene {
+    animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
+      backwards;
+    animation-delay: calc(var(--i) * var(--rise-stagger));
+  }
+
   .tile {
-    animation: tile-flip-in var(--tile-flip-duration)
-      cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    animation: tile-flip var(--flip-duration) cubic-bezier(0.65, 0, 0.35, 1)
+      backwards;
+    animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
+  }
+
+  /* Starts as the last tile (index 6) finishes turning over. Derived, not
+     hardcoded, so retuning the cascade above keeps this in step. */
+  .wordmark-sub {
+    animation: wordmark-sub-in var(--sub-duration) ease-out backwards;
     animation-delay: calc(
-      var(--tile-flip-start) + var(--i) * var(--tile-flip-stagger)
+      var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration)
     );
   }
 }
 
-@keyframes tile-flip-in {
+@keyframes tile-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.88) rotateX(-22deg);
+  }
+}
+
+@keyframes tile-flip {
   from {
     transform: rotateY(-180deg);
   }
-  to {
-    transform: rotateY(0);
+}
+
+@keyframes wordmark-sub-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
 

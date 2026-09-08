@@ -20,8 +20,7 @@ export default function Home() {
       <Wordmark />
 
       <p>
-        Fuzhou-style 16-tile mahjong, played with a gold wildcard tile.
-        Beginners welcome.
+        Anyone is welcome to play! Come learn with us.
       </p>
 
       <h2>{semester.label} leaders</h2>

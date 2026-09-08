@@ -41,9 +41,7 @@ export default function Leaderboard() {
               <th scope="col">Rank</th>
               <th scope="col">Player</th>
               <th scope="col">Tables</th>
-              <th scope="col">Points won</th>
-              <th scope="col">Average</th>
-              <th scope="col">Best table</th>
+              <th scope="col">Score</th>
             </tr>
           </thead>
           <tbody>
@@ -59,9 +57,7 @@ export default function Leaderboard() {
                 <td data-label="Rank">{player.rank}</td>
                 <th scope="row">{player.display}</th>
                 <td data-label="Tables">{player.tables_played}</td>
-                <td data-label="Points won">{player.total_gain}</td>
-                <td data-label="Average">{player.avg_gain}</td>
-                <td data-label="Best table">{player.best_table}</td>
+                <td data-label="Score">{player.total_gain}</td>
               </tr>
             ))}
           </tbody>
