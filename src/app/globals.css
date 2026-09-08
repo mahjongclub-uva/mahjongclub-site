@@ -46,8 +46,8 @@ svg {
      the saturation lives on the tiles, where the area is small. Contrast
      ratios against --paper are noted; keep them above 4.5. */
   --paper: #f5eedc;
-  --ink: #22271d;                  /* 12.7:1 */
-  --ink-soft: #545c48;             /* 5.8:1  */
+  --ink: #2e2e2c;                  /* charcoal, 11.8:1 on cream */
+  --ink-soft: #585850;             /* 6.2:1  */
   --jade: #2a6350;                 /* 5.8:1  */
   --rule: #c7cfbc;
 
@@ -786,6 +786,56 @@ main {
 
 .leaderboard td:first-child {
   width: 3.5rem;
+}
+
+/* The rank, on a tile. Ivory face, jade edge, same materials as everything
+   else on the site. */
+.rank-tile {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  aspect-ratio: 44 / 62;
+  border-radius: 3px;
+  background: linear-gradient(
+    155deg,
+    var(--tile-face-hi) 0%,
+    var(--tile-face) 50%,
+    var(--tile-face-lo) 100%
+  );
+  box-shadow:
+    inset 0 -2px 0 var(--tile-edge),
+    inset 0 0 0 1px var(--tile-rim),
+    0 1px 2px rgba(46, 46, 44, 0.14);
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  color: var(--ink);
+}
+
+/* The leader's tile is gilt rather than jade. */
+.leaderboard tbody tr:first-child .rank-tile {
+  box-shadow:
+    inset 0 -2px 0 var(--gold),
+    inset 0 0 0 1px rgba(122, 92, 20, 0.35),
+    0 1px 3px rgba(46, 46, 44, 0.18);
+  color: var(--gold);
+}
+
+/* How much of the leader's score this player has. The number beside it is the
+   real value; this only makes the gaps between players visible at a glance. */
+.score-bar {
+  display: block;
+  width: var(--fill);
+  max-width: 100%;
+  height: 3px;
+  margin-block-start: 5px;
+  border-radius: 2px;
+  background: var(--tile-back);
+  opacity: 0.45;
+}
+
+.leaderboard tbody tr:first-child .score-bar {
+  background: var(--gold);
+  opacity: 0.6;
 }
 
 @media (max-width: 767px) {

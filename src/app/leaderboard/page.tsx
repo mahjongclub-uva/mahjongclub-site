@@ -9,6 +9,9 @@ export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
   const hidden = semester.standings.length - shown.length;
+  // Bars are drawn against the leader, so the top row is always full width and
+  // the rest read as a share of it.
+  const best = shown[0]?.total_gain || 1;
 
   return (
     <main>
@@ -40,9 +43,27 @@ export default function Leaderboard() {
             <tbody>
               {shown.map((player) => (
                 <tr key={player.id}>
-                  <td data-label="Rank">{player.rank}</td>
+                  <td data-label="Rank">
+                    {/* The rank sits on a tile, so the table is made of the
+                        same things the game is. */}
+                    <span className="rank-tile">{player.rank}</span>
+                  </td>
                   <th scope="row">{player.display}</th>
-                  <td data-label="Score">{player.total_gain}</td>
+                  <td data-label="Score">
+                    {player.total_gain}
+                    {/* A share of the leader's score. Decorative — the number
+                        beside it is the actual value — so it is hidden from
+                        screen readers. */}
+                    <span
+                      className="score-bar"
+                      style={
+                        {
+                          "--fill": `${(player.total_gain / best) * 100}%`,
+                        } as React.CSSProperties
+                      }
+                      aria-hidden="true"
+                    />
+                  </td>
                   <td data-label="Tables">{player.tables_played}</td>
                 </tr>
               ))}

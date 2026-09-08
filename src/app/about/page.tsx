@@ -14,57 +14,48 @@ export default function About() {
       <header className="page-head">
         <div className="section-wrap">
           <p className="eyebrow">About</p>
-          <h1 className="page-title">What we play</h1>
+          <h1 className="page-title">The club</h1>
         </div>
       </header>
 
-      <section className="section">
-        <div className="section-wrap prose">
-        <p>
-          We play Fuzhou-style mahjong: sixteen tiles in hand rather than the
-          thirteen most people have seen, four players to a table, and a gold
-          wildcard that can stand in for anything.
-        </p>
-        <p>
-          The wildcard is what makes the Fuzhou game its own thing. It turns
-          hands that would be dead into hands that are one tile away, so the
-          table stays live much later than it otherwise would.
-        </p>
+      <Section id="game" title="What we play">
+        <div className="prose">
+          <p>
+            Fuzhou-style mahjong. Sixteen tiles in hand instead of the usual
+            thirteen, four players to a table, and a gold wildcard that stands
+            in for any tile.
+          </p>
+          <p>
+            The wildcard changes how the game feels. Hands that would be dead
+            turn out to be one tile away, so tables stay alive much longer.
+          </p>
         </div>
-      </section>
+      </Section>
 
       <Section id="beginners" title="If you have never played">
         <div className="prose">
           <p>
-            Then you are the person we most want at the table. Most of the club
-            learned here. Someone will sit with you and talk you through a hand,
-            and nobody keeps score while you are learning.
+            Good. Most of us learned here. Someone will sit with you and walk
+            you through a hand, and nothing is scored while you are learning.
           </p>
-          <p>
-            There is nothing to bring and nothing to pay to try it.
-          </p>
+          <p>Bring nothing. It costs nothing to try.</p>
         </div>
       </Section>
 
       <Section id="scoring" title="How the leaderboard works">
         <div className="prose">
           <p>
-            Everyone sits down with 205 points. What you leave the table with,
-            minus that 205, is your result — and it can be negative, because
-            the points have to come from somewhere.
+            Everyone starts with 205 points. Your result is what you walk away
+            with, minus that 205, so it can be negative.
           </p>
           <p>
-            The leaderboard adds up only the tables you <em>won</em> points on.
-            A losing table counts as zero rather than as a loss. That is
-            deliberate: it means sitting down at another table can never cost
-            you position, so there is no reason to stop playing once you are
-            ahead, and no reason not to play at all if you are behind.
+            The leaderboard only counts tables you finished up on. A losing
+            table scores zero instead of counting against you, so playing more
+            can never drop you down the list.
           </p>
           <p>
-            You need {MIN_TABLES_TO_RANK} tables to be ranked. If two players
-            finish level, the one who did it in fewer tables places higher, and
-            if they are level on that too, the one who lost less across the
-            season.
+            You need {MIN_TABLES_TO_RANK} tables to be ranked. Level scores go
+            to whoever needed fewer tables, then to whoever lost less.
           </p>
         </div>
         <TileMark className="section-mark" height={64} />
