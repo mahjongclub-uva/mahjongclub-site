@@ -249,6 +249,42 @@ main {
   text-align: center;
 }
 
+/* The two layers of the header. The CSS wordmark holds the space and the
+   heading text; the canvas sits over it and takes the same box, so the swap
+   costs no layout shift. */
+.hero-stage {
+  position: relative;
+}
+
+.hero-scene {
+  position: absolute;
+  /* Centred on the flat wordmark it replaces, so the swap does not shift the
+     tiles up or down the page. */
+  inset-block-start: 50%;
+  inset-inline: 0;
+  translate: 0 -50%;
+  /* Taller than the tiles so the contact shadow and the lean have room. */
+  height: 165%;
+  pointer-events: none;
+}
+
+.hero-scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Once the scene is up, the flat tiles step aside. The <h1> stays in the DOM
+   and stays the accessible name — it just stops being what you look at. */
+.hero-stage[data-scene="ready"] .wordmark-tiles {
+  opacity: 0;
+  transition: opacity 400ms ease 120ms;
+}
+
+.hero-stage[data-scene="ready"] .wordmark-tiles::before {
+  opacity: 0;
+}
+
 .wordmark {
   margin: 0;
   /* Perspective belongs here, not on the row: the row itself tilts, and an

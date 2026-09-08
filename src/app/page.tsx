@@ -1,6 +1,5 @@
 import { TAGLINE } from "@/lib/site";
-import Wordmark from "@/components/Wordmark";
-import Tilt from "@/components/Tilt";
+import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
@@ -11,9 +10,7 @@ export default function Home() {
   return (
     <main>
       <header className="hero">
-        <Tilt>
-          <Wordmark />
-        </Tilt>
+        <Hero />
         <p className="tagline">{TAGLINE}</p>
         <TileMark className="hero-mark" height={78} />
       </header>
