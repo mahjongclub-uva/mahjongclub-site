@@ -1,4 +1,5 @@
 import { LOGO, FULL_NAME } from "@/lib/site";
+import { asset } from "@/lib/asset";
 
 /**
  * The club logo, in a circular frame above the wordmark.
@@ -12,8 +13,10 @@ export default function Logo() {
   return (
     <div className="logo" role="presentation">
       {LOGO ? (
+        // asset() prefixes the base path. Without it a bare "/logo.png"
+        // resolves to the domain root: fine in dev, 404 in production.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={LOGO} alt="" width={96} height={96} />
+        <img src={asset(LOGO)} alt="" width={96} height={96} />
       ) : (
         <span className="logo-empty" aria-hidden="true" title={FULL_NAME} />
       )}

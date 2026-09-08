@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { PHOTOS } from "@/lib/site";
+import { asset } from "@/lib/asset";
 
 /**
  * Club photographs.
@@ -39,14 +40,13 @@ export default function Photos() {
           key={photo.src}
           style={{ "--i": i } as CSSProperties}
         >
-          {/* Plain <img> on purpose. The lint rule assumes next/image will
-              optimize, but this is a static export with images.unoptimized —
-              there is no image server, so next/image would add a concept and
-              change nothing. Width, height and lazy loading are set by hand
-              below, which is what the rule is actually protecting. */}
+          {/* asset() prefixes the base path; a bare src would 404 in
+              production. next/image would add nothing here — optimisation is
+              off, since a static export has no image server — and it does not
+              prefix the path either once unoptimized. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={photo.src}
+            src={asset(photo.src)}
             alt={photo.alt}
             width={photo.width}
             height={photo.height}

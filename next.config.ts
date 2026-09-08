@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
   // Emit leaderboard/index.html instead of leaderboard.html, so the URL
   // /leaderboard/ resolves on a plain static file server with no rewrite rules.
   trailingSlash: true,
+
+  // Exposed so components can prefix their own asset paths. Next prefixes
+  // basePath for routes and for next/link, but NOT for an <img src> or a CSS
+  // url() — and not for next/image either once images are unoptimized. Any
+  // file referenced from public/ has to be prefixed by hand, via asset().
+  env: { NEXT_PUBLIC_BASE_PATH: BASE_PATH },
 };
 
 export default nextConfig;
