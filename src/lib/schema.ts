@@ -29,7 +29,7 @@ export const MIN_TABLES_TO_RANK = 2;
  *
  * To add an award: add its id here, emit it from the pipeline, render it.
  */
-export const AWARD_IDS = ["biggest-win", "most-tables"] as const;
+export const AWARD_IDS = ["biggest-win"] as const;
 
 /** e.g. "fall-2025". Never derived from anything private. */
 const semesterId = z

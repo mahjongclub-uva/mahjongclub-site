@@ -412,7 +412,7 @@ def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict],
     return standings, unranked
 
 
-def build_awards(tables: list[Table], roster: dict[str, dict], standings: list[dict]) -> list[dict]:
+def build_awards(tables: list[Table], roster: dict[str, dict]) -> list[dict]:
     """
     Awards use raw net, not gain: a win is a win however the season is ranked.
     They ignore the minimum-tables threshold.
@@ -438,19 +438,6 @@ def build_awards(tables: list[Table], roster: dict[str, dict], standings: list[d
                 "value": best[1],
                 "unit": "points",
                 "detail": best[2],
-            }
-        )
-
-    if standings:
-        most = max(standings, key=lambda p: (p["tables_played"], -p["rank"]))
-        awards.append(
-            {
-                "id": "most-tables",
-                "label": "Most tables played",
-                "display": most["display"],
-                "value": most["tables_played"],
-                "unit": "tables",
-                "detail": None,
             }
         )
 
@@ -503,7 +490,7 @@ def main() -> None:
                 "min_tables_to_rank": MIN_TABLES_TO_RANK,
                 "standings": standings,
                 "unranked": unranked,
-                "awards": build_awards(tables, roster, standings),
+                "awards": build_awards(tables, roster),
             },
         )
 

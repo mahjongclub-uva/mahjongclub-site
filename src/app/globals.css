@@ -1,28 +1,21 @@
 /* ==========================================================================
-   Mahjong Club at UVA — stylesheet
+   Mahjong Club @ UVA
 
-   Structure is scaffolded; the design decisions are marked FILL IN.
-   Everything here is plain CSS on semantic elements. No framework, no build
-   step, nothing generating styles behind your back.
+     1. Reset            5. Sections        9. Calendar
+     2. Tokens           6. Standings      10. Photographs
+     3. Base             7. Leaderboard    11. Footer
+     4. Hero + tiles     8. Awards         12. Motion
 
-   Order matters and is deliberate:
-     1. Reset
-     2. Design tokens      <- most of your work starts here
-     3. Base elements
-     4. Layout
-     5. Leaderboard
-     6. Tile header
-     7. Reduced motion
+   The page is built on negative space. Most of the work is in the vertical
+   rhythm and the type scale, not in decoration — if something here starts
+   looking busy, the fix is almost always to remove a thing rather than to
+   balance it with another thing.
 
-   The only hard rules here are accessibility ones:
+   Accessibility floor, which is not negotiable:
      - any text at 4.5:1 against its background, metadata included
-     - never remove a focus outline without putting something visible back
-     - touch targets at least 44px in their smallest dimension
-     - no information carried by colour alone
-     - nothing overflows horizontally at any width
-
-   Everything else — sizes, ratios, timings, breakpoints — is yours to set.
-   Where a number appears below it is a starting point, not a requirement.
+     - visible keyboard focus, always
+     - touch targets at least 44px
+     - nothing overflows horizontally, at any width
    ========================================================================== */
 
 
@@ -46,183 +39,399 @@ svg {
 }
 
 
-/* 2. Design tokens ========================================================
-   FILL IN. These are greyscale placeholders so the page renders and you can
-   see your changes immediately. Replace the values; keep the names.
-
-   Naming them by ROLE rather than by colour ("--color-text", not "--grey-800")
-   is what makes swapping the whole palette a change to this block alone.
-
-   For the tile colours, photographing the club's own set is likely to get you
-   somewhere more specific than picking swatches in the abstract.
-   ======================================================================== */
+/* 2. Tokens =============================================================== */
 
 :root {
-  /* Page ------------------------------------------------------------------ */
-  /* Celadon: the pale grey-green of ceramic glaze. Kept desaturated on
-     purpose — a saturated green at full-field size reads as poker felt.
-     Contrast ratios against --color-bg are noted so you can see the headroom
-     before you darken or lighten anything. */
-  --color-bg: #e7ede4;
-  --color-text: #1b231d;            /* 13.5:1 */
-  --color-text-secondary: #4b5a4c;  /* 6.2:1  */
-  --color-accent: #1f6152;          /* 6.1:1, deep jade for links */
-  --color-rule: #c6d2c2;
+  /* Paper and ink. Celadon is a glaze colour, so the page is barely green —
+     the saturation lives on the tiles, where the area is small. Contrast
+     ratios against --paper are noted; keep them above 4.5. */
+  --paper: #eaece3;
+  --ink: #23281f;                  /* 12.6:1 */
+  --ink-soft: #59614f;             /* 5.4:1  */
+  --jade: #2c6553;                 /* 5.7:1  */
+  --rule: #cdd3c6;
 
-  /* Texture ---------------------------------------------------------------
-     Fine grain so the background reads as glazed ceramic rather than flat
-     paint. It is a 140px SVG tile repeated, not a filter over the whole
-     viewport — turbulence across a full-screen element is expensive to
-     rasterise, and it would be recomputed on a scrolling composited layer.
-     Rendered once at this size, it costs nothing.
-     Raise the rect's opacity in the data URI below to make it coarser. */
-  --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27140%27%20height%3D%27140%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%273%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.29%20%200%200%200%200%200.38%20%200%200%200%200%200.32%20%200%200%200%200.5%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27140%27%20height%3D%27140%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.13%27%2F%3E%3C%2Fsvg%3E");
+  /* Tiles. Ivory face, jade reverse, vermilion letterform — the colours a
+     real character tile actually uses. */
+  --tile-face-hi: #fffdf6;
+  --tile-face: #f6f3ea;
+  --tile-face-lo: #e7e0cc;
+  --tile-letter: #9d302b;          /* 6.6:1 on the face */
+  --tile-edge: #3f8871;
+  --tile-back-hi: #58a992;
+  --tile-back: #2f6656;            /* 6.0:1 against the face */
+  --tile-back-lo: #1b4437;
+  --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* Tiles ----------------------------------------------------------------- */
-  /* Back and face differ in LUMINANCE, not only hue, so the flip still reads
-     in greyscale and to a colourblind visitor. Ivory face, jade edge and
-     back — the green is an accent on the tile, not the field behind it. */
-  --tile-face-hi: #fffdf7;          /* the lit top corner of the face */
-  --tile-face: #f4f1e6;             /* ivory, as a real tile face */
-  --tile-face-lo: #e6ddc6;          /* the shaded bottom corner */
-  --tile-letter: #a3312c;           /* 6.1:1 on the face; real tiles are red */
-  --tile-edge: #3e8a76;             /* jade, the lit bottom edge */
-  --tile-back-hi: #5aa992;
-  --tile-back: #33685a;             /* jade, 5.7:1 against the face */
-  --tile-back-lo: #1d453a;
-  --tile-rim: rgba(62, 138, 118, 0.35);
+  /* The circles motif. */
+  --dots-outer: #2f6656;
+  --dots-inner: #eaece3;
+  --dots-core: #9d302b;
 
-  /* Type ------------------------------------------------------------------ */
-  /* System stack costs zero requests and renders natively everywhere. Spending
-     your entire font budget on the wordmark alone is a defensible choice. */
-  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-body);  /* FILL IN once the display face is chosen */
+  /* Type. A book serif for anything that speaks, a UI sans for anything that
+     is really a number. No web font is loaded: these stacks resolve to
+     something well-made on every platform and cost nothing. */
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
+    Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
 
-  /* FILL IN: a deliberate scale beats sizes picked one at a time.
-     A common approach is a fixed ratio between steps (1.25 here). */
-  --text-sm: 0.8rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.563rem;
-  --text-2xl: 1.953rem;
+  --text-xs: 0.78rem;
+  --text-sm: 0.88rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.875rem;
+  --text-2xl: clamp(2rem, 6vw, 3.25rem);
 
-  --leading-tight: 1.2;
-  --leading-body: 1.6;
+  --leading-tight: 1.15;
+  --leading-body: 1.7;
 
-  /* Spacing --------------------------------------------------------------- */
-  /* FILL IN: consistent spacing does more for a page looking intentional than
-     almost anything else. */
+  /* Space. Generous by default — the quiet comes from the gaps. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
-  --space-4: 1.5rem;
-  --space-5: 2.5rem;
+  --space-4: 1.75rem;
+  --space-5: 3rem;
+  --space-6: clamp(3.5rem, 10vw, 7rem);
 
-  /* Layout ---------------------------------------------------------------- */
-  --content-max: 42rem;  /* FILL IN: keep body line length under 80 characters */
+  --measure: 34rem;                /* body text stays readable */
+  --content: 46rem;                /* the page column */
+
+  --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.8%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.20%20%200%200%200%200%200.26%20%200%200%200%200%200.19%20%200%200%200%200.55%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27160%27%20height%3D%27160%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
 }
 
 
-/* 3. Base elements ========================================================
-   Wired to the tokens above, so most changes happen there, not here.
-   ======================================================================== */
+/* 3. Base ================================================================= */
 
 body {
-  /* Fill the viewport even when the page is short, or the background stops
-     partway down and the rest of the screen is bare. */
   min-height: 100dvh;
-
-  background-color: var(--color-bg);
-  /* A soft highlight falling from the top, over the grain. Together they read
-     as a glazed surface catching light rather than a flat colour field. */
+  background-color: var(--paper);
+  /* A soft light from above, over a fine grain. Together they read as a
+     glazed, slightly imperfect surface rather than flat colour. The highlight
+     must not repeat, or it draws a seam across the page. */
   background-image:
     radial-gradient(
-      130% 90% at 50% 0%,
-      rgba(255, 255, 255, 0.6),
-      rgba(255, 255, 255, 0) 62%
+      140% 80% at 50% 0%,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0) 60%
     ),
     var(--texture-grain);
-  /* The highlight must not repeat — it is one light source, and tiling it
-     puts a hard seam across the page. The grain is a tile and does repeat. */
   background-repeat: no-repeat, repeat;
-  color: var(--color-text);
-  font-family: var(--font-body);
+  color: var(--ink);
+  font-family: var(--serif);
   font-size: var(--text-base);
   line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2 {
+  font-weight: 400;
   line-height: var(--leading-tight);
-  text-wrap: balance;  /* stops a heading leaving one orphaned word */
+  text-wrap: balance;
 }
 
-h1 {
-  font-size: var(--text-2xl);
-}
-
-h2 {
-  font-size: var(--text-lg);
+p {
+  max-width: var(--measure);
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--jade);
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: from-font;
 }
 
-/* FILL IN: style this, do not delete it. Removing the outline with nothing
-   in its place makes the site unusable by keyboard. */
+a:hover {
+  color: var(--ink);
+}
+
 :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--jade);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
-
-
-/* 4. Layout =============================================================== */
 
 main {
-  max-width: var(--content-max);
+  max-width: var(--content);
   margin-inline: auto;
-  padding: var(--space-4) var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-6);
 }
 
-/* Custom properties do not work inside media queries, so breakpoint values are
-   written out wherever they appear. The only one currently used is 768px, where
-   the leaderboard stops being cards. Add or move them as the design needs —
-   the best breakpoints are the widths where your layout actually breaks, which
-   you find by dragging the window, not by picking round numbers. */
+.quiet {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
 
 
-/* 5. Leaderboard ==========================================================
-   The plumbing for the card collapse is done. The visual design is not.
+/* 4. Hero and tiles =======================================================
+   The club name is real text inside the <h1>. .tile-scene moves, .tile
+   rotates — two elements because one cannot run two animations that both
+   write `transform`. The resolved state is the default; the animation starts
+   the tiles face-down using `backwards` fill, so reduced motion and a failed
+   stylesheet both leave the name plainly legible.
+   ======================================================================== */
 
-   Below 768px the table stops being a table and each row becomes a card.
-   That works because every <td> carries a data-label attribute, so the
-   column heading can reappear inside the cell once the header row is hidden.
+.hero {
+  padding-block: var(--space-6) var(--space-5);
+  text-align: center;
+}
+
+.wordmark {
+  margin: 0;
+  --rise-duration: 550ms;
+  --rise-stagger: 70ms;
+  --flip-start: 520ms;
+  --flip-stagger: 150ms;
+  --flip-duration: 900ms;
+  --sub-duration: 700ms;
+}
+
+.wordmark-tiles {
+  display: flex;
+  justify-content: center;
+  /* At 360px the page leaves ~305px. Seven tiles plus six gaps must fit
+     inside that, which is why both are fluid. A fixed 44px tile overflows. */
+  gap: clamp(2px, 0.7vw, 9px);
+  perspective: 900px;
+}
+
+.tile-scene {
+  width: clamp(38px, 10.5vw, 66px);
+  aspect-ratio: 44 / 62;
+}
+
+.tile {
+  /* Must be block. These are spans, because an <h1> should hold inline
+     content — and an inline box ignores width, height and aspect-ratio,
+     leaving the absolutely-positioned faces with no box to fill. */
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.tile-back,
+.tile-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  backface-visibility: hidden;
+}
+
+.tile-face {
+  background: linear-gradient(
+    155deg,
+    var(--tile-face-hi) 0%,
+    var(--tile-face) 45%,
+    var(--tile-face-lo) 100%
+  );
+  color: var(--tile-letter);
+  /* The jade edge. Weight at the bottom and light along the top is what makes
+     it read as a carved object rather than a printed card. */
+  border-block-end: 3px solid var(--tile-edge);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px var(--tile-rim),
+    0 4px 10px rgba(35, 40, 31, 0.13);
+  font-family: var(--serif);
+  font-size: clamp(0.95rem, 4vw, 1.45rem);
+  line-height: 1;
+}
+
+.tile-back {
+  background:
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0) 38%
+    ),
+    linear-gradient(
+      155deg,
+      var(--tile-back-hi) 0%,
+      var(--tile-back) 55%,
+      var(--tile-back-lo) 100%
+    );
+  border-block-end: 3px solid var(--tile-back-lo);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.26),
+    0 4px 10px rgba(35, 40, 31, 0.16);
+  transform: rotateY(180deg);
+}
+
+.wordmark-sub {
+  display: block;
+  margin-block-start: var(--space-4);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  /* The tracking adds a trailing gap on the last letter; nudge it back so the
+     line reads optically centred under the tiles. */
+  text-indent: 0.24em;
+}
+
+.tagline {
+  max-width: 26rem;
+  margin: var(--space-4) auto 0;
+  color: var(--ink-soft);
+}
+
+.hero-mark {
+  margin: var(--space-5) auto 0;
+  opacity: 0.5;
+}
+
+
+/* 5. Sections ============================================================= */
+
+.rule {
+  height: 1px;
+  margin-block: var(--space-6);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--rule) 12%,
+    var(--rule) 88%,
+    transparent
+  );
+  position: relative;
+}
+
+/* The marked segment at the centre, the way a scoring stick carries pips. */
+.rule::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline-start: 50%;
+  width: 34px;
+  height: 3px;
+  translate: -50% 0;
+  border-radius: 2px;
+  background: var(--rule);
+}
+
+.section-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
+}
+
+.page-head {
+  padding-block: var(--space-5) var(--space-4);
+}
+
+.page-title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.02em;
+}
+
+.section-more {
+  margin-block-start: var(--space-4);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+}
+
+
+/* 6. Standings, homepage ================================================== */
+
+.leaders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: var(--measure);
+}
+
+.leaders li {
+  display: grid;
+  grid-template-columns: 2ch 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+}
+
+.leaders li:last-child {
+  border-block-end: 0;
+}
+
+.leaders-rank {
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.leaders-score {
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+
+/* 7. Leaderboard ==========================================================
+   One <table> serves both layouts. Below 768px the header row is hidden and
+   each row becomes a card, with the column heading pulled back in from the
+   data-label attribute. Horizontal scrolling is the one option ruled out:
+   it hides columns with no sign that they exist.
    ======================================================================== */
 
 .leaderboard {
   width: 100%;
   border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
 }
 
-.leaderboard caption {
-  text-align: left;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  padding-block-end: var(--space-2);
-}
-
-/* FILL IN: the desktop table. Alignment is the one thing worth getting right
-   early — numbers read far better right-aligned or tabular-aligned than left. */
 .leaderboard th,
 .leaderboard td {
+  padding: var(--space-3) var(--space-2);
+  border-block-end: 1px solid var(--rule);
   text-align: left;
-  padding: var(--space-2);
-  border-block-end: 1px solid var(--color-rule);
+  font-weight: 400;
+}
+
+.leaderboard thead th {
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-block-end-color: var(--ink-soft);
+}
+
+.leaderboard tbody th {
+  font-size: var(--text-lg);
+}
+
+.leaderboard td {
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.leaderboard td:first-child {
+  width: 3.5rem;
 }
 
 @media (max-width: 767px) {
-  /* Hide the header row from sight but keep it for screen readers. */
+  /* Hidden from sight, kept for screen readers. */
   .leaderboard thead {
     position: absolute;
     width: 1px;
@@ -240,168 +449,205 @@ main {
     display: block;
   }
 
-  /* FILL IN: this is the card. One idea worth trying first: keep it dense,
-     like a list item — rank and name on one line, the stats inline beneath —
-     rather than a tall padded box, so more than three players fit on screen. */
+  /* A dense list item rather than a tall padded box, so more than three
+     players fit on a phone screen at once. */
   .leaderboard tr {
-    border-block-end: 1px solid var(--color-rule);
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    column-gap: var(--space-3);
     padding-block: var(--space-3);
+    border-block-end: 1px solid var(--rule);
   }
 
   .leaderboard th,
   .leaderboard td {
-    border: 0;
     padding: 0;
+    border: 0;
   }
 
-  /* The column heading, reappearing inside each cell. */
-  .leaderboard td::before {
-    content: attr(data-label) ": ";
-    color: var(--color-text-secondary);
-    font-size: var(--text-sm);
+  .leaderboard td[data-label="Rank"] {
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: var(--text-lg);
+    color: var(--ink);
+  }
+
+  .leaderboard tbody th {
+    grid-column: 2;
+  }
+
+  .leaderboard td[data-label="Score"],
+  .leaderboard td[data-label="Tables"] {
+    grid-column: 2;
+    display: inline;
+  }
+
+  .leaderboard td[data-label="Score"]::before,
+  .leaderboard td[data-label="Tables"]::before {
+    content: attr(data-label) " ";
+    color: var(--ink-soft);
+  }
+
+  .leaderboard td[data-label="Tables"]::before {
+    content: " · " attr(data-label) " ";
   }
 }
 
 
-/* 6. Tile wordmark =======================================================
-   Three beats, no JavaScript:
+/* 8. Awards =============================================================== */
 
-     1. rise    each tile fades up and tilts toward you, settling into place
-     2. flip    the cascade, turning the backs over to reveal the letters
-     3. sub     the club name fades in underneath
-
-   The nesting matters. .tile-scene handles beat 1 (opacity and position),
-   .tile handles beat 2 (rotation). They are separate elements because a
-   single element cannot run two animations that both write `transform`.
-
-   Every delay comes from --i, set inline on .tile-scene and inherited by its
-   children, so the timing is data on the element rather than seven copies of
-   the same rule.
-
-   The resting state is the resolved one: tiles up, faces out, subtitle
-   visible. The animations use `backwards` fill to hold their start state
-   during the delay, which is what makes reduced-motion and a failed
-   stylesheet both degrade to "the name is simply there".
-   ======================================================================== */
-
-.wordmark {
+.awards {
   margin: 0;
-  /* FILL IN. Timing lives here so the whole sequence is tuned in one place.
-     The subtitle delay is calculated from these rather than hardcoded, so
-     retuning the cascade cannot leave it out of step. */
-  --rise-duration: 550ms;
-  --rise-stagger: 70ms;
-  --flip-start: 520ms;
-  --flip-stagger: 210ms;
-  --flip-duration: 1300ms;
-  --sub-duration: 650ms;
+  display: grid;
+  gap: var(--space-4);
 }
 
-.wordmark-tiles {
+.awards dt {
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.awards dd {
+  margin: var(--space-1) 0 0;
   display: flex;
-  justify-content: center;
-  /* Mind the arithmetic: at 360px the page leaves ~328px. Seven tiles plus
-     six gaps must fit inside that, which is why both are fluid rather than
-     fixed. A fixed 44px tile with an 8px gap overflows by 44px. */
-  gap: clamp(2px, 0.8vw, 10px);
-  perspective: 900px;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: baseline;
 }
 
-.tile-scene {
-  width: clamp(40px, 11.5vw, 72px);
-  aspect-ratio: 44 / 62;
+.awards-name {
+  font-size: var(--text-lg);
 }
 
-.tile {
-  /* Must be block. These are spans, because an <h1> should contain inline
-     content — and an inline box ignores width, height and aspect-ratio, which
-     leaves the absolutely-positioned faces with no box to fill. .tile-scene
-     gets away without this only because a flex item is blockified for free. */
-  display: block;
-  position: relative;
+.awards-value {
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* 9. Calendar ============================================================= */
+
+.calendar-frame {
+  /* Height is reserved before the frame loads, so nothing reflows. */
+  aspect-ratio: 4 / 3;
+  min-height: 24rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.calendar-frame iframe {
   width: 100%;
   height: 100%;
-  transform-style: preserve-3d;
 }
 
-.tile-back,
-.tile-face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 4px;
-  backface-visibility: hidden;
-}
-
-.tile-face {
-  /* FILL IN. The gradient plus the layered inset shadows are what read as a
-     carved object rather than a flat rectangle: light along the top edge,
-     shade along the bottom, a thin rim all round. */
-  background: linear-gradient(
-    155deg,
-    var(--tile-face-hi) 0%,
-    var(--tile-face) 45%,
-    var(--tile-face-lo) 100%
-  );
-  color: var(--tile-letter);
-  border-block-end: 3px solid var(--tile-edge);
-  box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.85),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.14),
-    inset 0 0 0 1px var(--tile-rim),
-    0 3px 8px rgba(0, 0, 0, 0.18);
-  font-family: Georgia, "Times New Roman", serif;  /* FILL IN */
-  font-size: clamp(1rem, 4.5vw, 1.5rem);
-  font-weight: 700;
-  line-height: 1;
-}
-
-.tile-back {
-  /* The jade reverse, with a sheen across the top-left as if catching light. */
-  background:
-    linear-gradient(
-      155deg,
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0) 35%
-    ),
-    linear-gradient(
-      155deg,
-      var(--tile-back-hi) 0%,
-      var(--tile-back) 55%,
-      var(--tile-back-lo) 100%
-    );
-  box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.35),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.28),
-    0 3px 8px rgba(0, 0, 0, 0.2);
-  transform: rotateY(180deg);
-}
-
-.wordmark-sub {
-  display: block;
-  margin-block-start: var(--space-4);
+.calendar-placeholder {
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--rule);
+  border-radius: 3px;
   text-align: center;
 }
 
-.wordmark-club {
-  display: block;
-  font-size: var(--text-lg);       /* FILL IN */
-  letter-spacing: 0.01em;
-}
-
-.wordmark-uni {
-  display: block;
-  margin-block-start: var(--space-1);
-  font-size: var(--text-sm);       /* FILL IN */
-  font-weight: 400;
-  color: var(--color-text-secondary);
+.calendar-placeholder p {
+  max-width: none;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
 }
 
 
-/* The three beats. Each keyframe block declares only `from`, so the `to` is
-   whatever the rules above say — the resolved state is defined once.
-   ------------------------------------------------------------------------ */
+/* 10. Photographs ========================================================= */
+
+.photo-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.photo-slot {
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-slot.is-empty {
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--rule);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+
+/* 11. Footer ============================================================== */
+
+.footer {
+  border-block-start: 1px solid var(--rule);
+  margin-block-start: var(--space-6);
+}
+
+.footer-inner {
+  max-width: var(--content);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.footer p {
+  margin: 0;
+  max-width: var(--measure);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.footer-disclaimer {
+  font-size: var(--text-xs);
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* 44px tall so it is a comfortable touch target without looking like one. */
+  min-height: 44px;
+  font-family: var(--sans);
+  text-decoration: none;
+}
+
+.social-link:hover span {
+  text-decoration: underline;
+}
+
+
+/* 12. Motion ==============================================================
+   Every animation is opt-in. The resting state of every element is its
+   resolved state, and animations use `backwards`/`both` fill to hold their
+   start state — so no motion ever means "content missing".
+   ======================================================================== */
 
 @media (prefers-reduced-motion: no-preference) {
   .tile-scene {
@@ -416,20 +662,52 @@ main {
     animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
   }
 
-  /* Starts as the last tile (index 6) finishes turning over. Derived, not
-     hardcoded, so retuning the cascade above keeps this in step. */
-  .wordmark-sub {
-    animation: wordmark-sub-in var(--sub-duration) ease-out backwards;
+  /* Derived from the cascade rather than hardcoded, so retuning the tiles
+     above cannot leave the name out of step. */
+  .wordmark-sub,
+  .tagline,
+  .hero-mark {
+    animation: settle-in var(--sub-duration) ease-out backwards;
     animation-delay: calc(
       var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration)
     );
+  }
+
+  .tagline {
+    animation-delay: calc(
+      var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration) + 120ms
+    );
+  }
+
+  .hero-mark {
+    animation-delay: calc(
+      var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration) + 240ms
+    );
+  }
+
+  /* Sections fade up as they arrive. Scroll-driven in CSS, so it costs no
+     JavaScript and cannot jank the main thread. Where the browser does not
+     support it, the @supports guard means sections are simply always
+     visible — which is the correct fallback. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      /* Longhand, and deliberately no animation-duration: on a scroll-driven
+         timeline the duration defaults to `auto`, which maps the keyframes
+         across animation-range. Giving it a time instead makes the fade a
+         hard cut at the start of the range. */
+      animation-name: settle-in;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 70%;
+    }
   }
 }
 
 @keyframes tile-rise {
   from {
     opacity: 0;
-    transform: translateY(26px) scale(0.88) rotateX(-22deg);
+    transform: translateY(24px) scale(0.9) rotateX(-20deg);
   }
 }
 
@@ -439,28 +717,9 @@ main {
   }
 }
 
-@keyframes wordmark-sub-in {
+@keyframes settle-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-
-/* 7. Reduced motion =======================================================
-   Not optional, and not a nicety. Flipping and rotating elements are a common
-   motion-sickness trigger.
-
-   Under this setting the header must render in its FINAL state immediately —
-   face up, no animation. Not a faster animation.
-   ======================================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transform: translateY(10px);
   }
 }

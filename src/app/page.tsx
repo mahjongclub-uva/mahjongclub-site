@@ -1,66 +1,78 @@
 import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
+import { formatDate } from "@/lib/format";
+import { TAGLINE } from "@/lib/site";
 import Wordmark from "@/components/Wordmark";
-
-// Scaffolding, not design. This page proves the data reaches a template and
-// gives you a semantic skeleton to build on. The markup is yours to change —
-// the tile wordmark, the layout and all of the styling are still to be written.
-//
-// Two things worth keeping whatever else changes:
-//   - the club name stays real text inside the <h1>, never an image
-//   - the first reveal is CSS, so the name does not wait on hydration.
-//     JavaScript is welcome on top of that, not underneath it.
+import Calendar from "@/components/Calendar";
+import Photos from "@/components/Photos";
+import Dots from "@/components/Dots";
+import Rule from "@/components/Rule";
 
 export default function Home() {
   const semester = getCurrentSemester();
-  const top5 = semester.standings.slice(0, 5);
+  const leaders = semester.standings.slice(0, 5);
 
   return (
     <main>
-      <Wordmark />
+      <header className="hero">
+        <Wordmark />
+        <p className="tagline">{TAGLINE}</p>
+        <Dots className="hero-mark" size={72} />
+      </header>
 
-      <p>
-        Anyone is welcome to play! Come learn with us.
-      </p>
+      <Rule />
 
-      <h2>{semester.label} leaders</h2>
+      <section className="section reveal" aria-labelledby="when">
+        <h2 className="section-title" id="when">
+          When we play
+        </h2>
+        <Calendar />
+      </section>
 
-      {top5.length === 0 ? (
-        <p>No tables played yet this semester.</p>
-      ) : (
-        <ol>
-          {top5.map((player) => (
-            <li key={player.id}>
-              {player.display} — {player.total_gain} points from{" "}
-              {player.tables_played} tables
-            </li>
-          ))}
-        </ol>
-      )}
+      <Rule />
 
-      <p>
-        <Link href="/leaderboard/">Full leaderboard</Link>
-      </p>
+      <section className="section reveal" aria-labelledby="standings">
+        <h2 className="section-title" id="standings">
+          {semester.label}
+        </h2>
 
-      {semester.last_session && (
-        <p>
-          Data through{" "}
-          <time dateTime={semester.last_session}>
-            {formatDate(semester.last_session)}
-          </time>
-          .
-        </p>
-      )}
+        {leaders.length === 0 ? (
+          <p className="quiet">No tables played yet this semester.</p>
+        ) : (
+          <>
+            <ol className="leaders">
+              {leaders.map((player) => (
+                <li key={player.id}>
+                  <span className="leaders-rank">{player.rank}</span>
+                  <span className="leaders-name">{player.display}</span>
+                  <span className="leaders-score">{player.total_gain}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="section-more">
+              <Link href="/leaderboard/">Full standings</Link>
+            </p>
+          </>
+        )}
+
+        {semester.last_session && (
+          <p className="quiet">
+            Through{" "}
+            <time dateTime={semester.last_session}>
+              {formatDate(semester.last_session)}
+            </time>
+          </p>
+        )}
+      </section>
+
+      <Rule />
+
+      <section className="section reveal" aria-labelledby="table">
+        <h2 className="section-title" id="table">
+          At the table
+        </h2>
+        <Photos />
+      </section>
     </main>
   );
-}
-
-/** "2025-11-22" -> "22 Nov 2025". Parsed as UTC so it cannot slip a day. */
-function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }
