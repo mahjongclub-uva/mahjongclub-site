@@ -4,43 +4,55 @@ import { INSTAGRAM } from "@/lib/site";
  * Instagram is where meeting times and changes actually get posted, so this is
  * the most useful thing on the homepage after the calendar.
  *
- * Renders without a link until INSTAGRAM is set in src/lib/site.ts — a dead
- * link is worse than a plain sentence.
+ * The mark sits on a tile, in the same vermilion the wordmark letters use, so
+ * it reads as part of the set rather than as a pasted-in brand asset. On hover
+ * or keyboard focus the tile tilts toward you and lifts, the way you would
+ * pick one up off the table to look at it.
+ *
+ * Renders as plain text with no link until INSTAGRAM is set in site.ts — a
+ * dead link is worse than a sentence.
  */
 export default function FollowUs() {
-  return (
-    <div className="follow">
-      <p className="follow-line">
-        Meeting times, table photos and last-minute changes all go up on
-        Instagram. Follow along to keep up.
+  if (!INSTAGRAM) {
+    return (
+      <p className="quiet">
+        Meeting times and updates go up on Instagram. The account handle is
+        being set up.
       </p>
+    );
+  }
 
-      {INSTAGRAM ? (
-        <a
-          className="follow-link"
-          href={`https://instagram.com/${INSTAGRAM}`}
-          rel="me noopener noreferrer"
-          target="_blank"
-        >
+  return (
+    <a
+      className="ig"
+      href={`https://instagram.com/${INSTAGRAM}`}
+      rel="me noopener noreferrer"
+      target="_blank"
+    >
+      <span className="ig-tile" aria-hidden="true">
+        <span className="ig-tile-face">
           <InstagramMark />
-          <span>@{INSTAGRAM}</span>
-        </a>
-      ) : (
-        <p className="quiet">The account handle is being set up.</p>
-      )}
-    </div>
+        </span>
+      </span>
+
+      <span className="ig-body">
+        <span className="ig-handle">@{INSTAGRAM}</span>
+        <span className="ig-sub">
+          Meeting times, table photos and last-minute changes
+        </span>
+      </span>
+    </a>
   );
 }
 
+/** Inline, so the page makes no third-party request for it. */
 function InstagramMark() {
   return (
     <svg
-      width="20"
-      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.7"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -48,7 +60,7 @@ function InstagramMark() {
     >
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
-      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none" />
     </svg>
   );
 }

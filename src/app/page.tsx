@@ -17,6 +17,17 @@ export default function Home() {
 
       <Rule />
 
+      {/* Photographs come first after the hero: they say what the club is
+          faster than any sentence, and each frame arrives on scroll. */}
+      <section className="section" aria-labelledby="table">
+        <h2 className="section-title reveal" id="table">
+          At the table
+        </h2>
+        <Photos />
+      </section>
+
+      <Rule />
+
       <section className="section reveal" aria-labelledby="when">
         <h2 className="section-title" id="when">
           When we play
@@ -31,15 +42,6 @@ export default function Home() {
           Keep up with us
         </h2>
         <FollowUs />
-      </section>
-
-      <Rule />
-
-      <section className="section reveal" aria-labelledby="table">
-        <h2 className="section-title" id="table">
-          At the table
-        </h2>
-        <Photos />
       </section>
     </main>
   );

@@ -16,16 +16,8 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-inner">
-        <p className="footer-consent">
-          Playing a scored game puts your result on the leaderboard, shown as a
-          first name and last initial. Nothing else is published. To be left
-          off entirely, tell a club officer.
-        </p>
-
         <p className="footer-disclaimer">
-          {FULL_NAME} is a Contracted Independent Organization of the
-          University of Virginia. It is not part of, controlled by, or an agent
-          of the University.
+          {FULL_NAME}. All rights reserved.
         </p>
 
         {INSTAGRAM && (
