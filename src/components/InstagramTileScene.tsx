@@ -53,7 +53,15 @@ function useMarkTexture() {
   }, []);
 }
 
-function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
+function Tile({
+  active,
+  pointer,
+  onReady,
+}: {
+  active: boolean;
+  pointer: React.RefObject<{ x: number; y: number }>;
+  onReady?: () => void;
+}) {
   const group = useRef<THREE.Group>(null);
   const texture = useMarkTexture();
   const { invalidate } = useThree();
@@ -67,12 +75,17 @@ function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
     // turn and lifts toward you — a single settled gesture rather than
     // following the pointer around, which never settles and reads as jitter.
     //
-    // The turn is about the vertical axis only: a positive rotation.y brings
-    // the whole LEFT edge — top-left through bottom-left — toward the viewer,
-    // like a door opening, while the right edge falls away. No rotation.x, so
-    // the tile stays level rather than tipping to a corner.
-    const targetY = active ? 0.3 : 0;
-    const targetX = 0;
+    // Leans toward the pointer in whichever direction it happens to be —
+    // pointer.x drives the vertical axis, pointer.y the horizontal one, so the
+    // tile pivots on any corner or edge rather than one fixed hinge.
+    //
+    // Signs: a positive rotation.y brings the LEFT edge forward, so the tile
+    // must turn the same sign as pointer.x to lean toward the cursor. A
+    // positive rotation.x brings the TOP forward, so y is negated.
+    const reach = 0.34;
+    const { x, y } = active ? pointer.current : { x: 0, y: 0 };
+    const targetY = x * reach;
+    const targetX = -y * reach * 0.7;
     const targetZ = active ? 0.5 : 0;
 
     g.rotation.y += (targetY - g.rotation.y) * 0.12;
@@ -82,6 +95,7 @@ function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
     // frameloop is "demand", so keep asking for frames until it has settled.
     if (
       Math.abs(targetY - g.rotation.y) > 0.0005 ||
+      Math.abs(targetX - g.rotation.x) > 0.0005 ||
       Math.abs(targetZ - g.position.z) > 0.0005
     ) {
       invalidate();
@@ -106,14 +120,19 @@ function Tile({ active, onReady }: { active: boolean; onReady?: () => void }) {
 
 export default function InstagramTileScene({
   active = false,
+  pointer,
   onReady,
 }: {
   active?: boolean;
+  pointer: React.RefObject<{ x: number; y: number }>;
   onReady?: () => void;
 }) {
   return (
     <Canvas
-      frameloop="demand"
+      /* Continuous only while it is being pointed at. The rest of the time
+         there is nothing moving, and a permanent render loop for a 64px mark
+         would cost battery for nothing. */
+      frameloop={active ? "always" : "demand"}
       dpr={[1, 2]}
       /* A moderate lens, raised a little and aimed back at the tile. Long
          enough that turning it does not stretch the near edge, short enough
@@ -128,7 +147,7 @@ export default function InstagramTileScene({
       }}
     >
       <TileLights />
-      <Tile active={active} onReady={onReady} />
+      <Tile active={active} pointer={pointer} onReady={onReady} />
     </Canvas>
   );
 }

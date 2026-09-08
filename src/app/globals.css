@@ -877,11 +877,16 @@ main {
   height: 100% !important;
 }
 
-/* Once the scene has drawn, the flat tile steps aside. */
-.ig-tile[data-scene="ready"] .tile-art,
-.ig-tile[data-scene="ready"] .ig-mark {
+/* The drawn tile ships hidden so a snapshot of it never flashes before the
+   canvas arrives. It appears only if the scene never turns up. */
+.ig-tile .tile-art,
+.ig-tile .ig-mark {
   opacity: 0;
-  transition: opacity 300ms ease;
+}
+
+.ig-tile[data-scene="fallback"] .tile-art,
+.ig-tile[data-scene="fallback"] .ig-mark {
+  opacity: 1;
 }
 
 .ig-tile[data-scene="ready"] .ig-tile-scene {
