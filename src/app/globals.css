@@ -180,6 +180,47 @@ main {
    stylesheet both leave the name plainly legible.
    ======================================================================== */
 
+/* Navigation ------------------------------------------------------------- */
+
+.nav {
+  border-block-end: 1px solid var(--rule);
+}
+
+.nav ul {
+  max-width: var(--content);
+  margin-inline: auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  gap: var(--space-4);
+  list-style: none;
+}
+
+.nav a {
+  display: flex;
+  align-items: center;
+  /* 44px tall, so it is a comfortable target without looking like a button. */
+  min-height: 44px;
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+}
+
+.nav a:hover {
+  color: var(--ink);
+}
+
+/* The current tab is marked by weight and colour as well as the rule, so it
+   is not carried by one thin line alone. */
+.nav a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+  border-block-end-color: var(--tile-letter);
+}
+
 .hero {
   padding-block: var(--space-6) var(--space-5);
   text-align: center;
@@ -535,6 +576,32 @@ main {
   font-size: var(--text-sm);
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+
+/* Follow us -------------------------------------------------------------- */
+
+.follow-line {
+  margin-block: 0 var(--space-4);
+}
+
+.follow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.follow-link:hover {
+  border-color: var(--jade);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 

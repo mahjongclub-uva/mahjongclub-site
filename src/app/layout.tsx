@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, EB_Garamond } from "next/font/google";
+import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        <Nav />
         {children}
         <Footer />
       </body>

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
+import { formatDate } from "@/lib/format";
 import Rule from "@/components/Rule";
 
 /** A display truncation only. The data always carries every ranked player. */
@@ -14,7 +14,15 @@ export default function Leaderboard() {
     <main>
       <header className="page-head">
         <p className="eyebrow">{semester.label}</p>
-        <h1 className="page-title">Standings</h1>
+        <h1 className="page-title">Leaderboard</h1>
+        {semester.last_session && (
+          <p className="quiet">
+            Through{" "}
+            <time dateTime={semester.last_session}>
+              {formatDate(semester.last_session)}
+            </time>
+          </p>
+        )}
       </header>
 
       {shown.length === 0 ? (
@@ -78,9 +86,6 @@ export default function Leaderboard() {
         </>
       )}
 
-      <p className="section-more">
-        <Link href="/">Home</Link>
-      </p>
     </main>
   );
 }

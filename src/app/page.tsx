@@ -1,17 +1,12 @@
-import Link from "next/link";
-import { getCurrentSemester } from "@/lib/data";
-import { formatDate } from "@/lib/format";
 import { TAGLINE } from "@/lib/site";
 import Wordmark from "@/components/Wordmark";
 import Calendar from "@/components/Calendar";
 import Photos from "@/components/Photos";
+import FollowUs from "@/components/FollowUs";
 import TileMark from "@/components/TileMark";
 import Rule from "@/components/Rule";
 
 export default function Home() {
-  const semester = getCurrentSemester();
-  const leaders = semester.standings.slice(0, 5);
-
   return (
     <main>
       <header className="hero">
@@ -31,38 +26,11 @@ export default function Home() {
 
       <Rule />
 
-      <section className="section reveal" aria-labelledby="standings">
-        <h2 className="section-title" id="standings">
-          {semester.label}
+      <section className="section reveal" aria-labelledby="follow">
+        <h2 className="section-title" id="follow">
+          Keep up with us
         </h2>
-
-        {leaders.length === 0 ? (
-          <p className="quiet">No tables played yet this semester.</p>
-        ) : (
-          <>
-            <ol className="leaders">
-              {leaders.map((player) => (
-                <li key={player.id}>
-                  <span className="leaders-rank">{player.rank}</span>
-                  <span className="leaders-name">{player.display}</span>
-                  <span className="leaders-score">{player.total_gain}</span>
-                </li>
-              ))}
-            </ol>
-            <p className="section-more">
-              <Link href="/leaderboard/">Full standings</Link>
-            </p>
-          </>
-        )}
-
-        {semester.last_session && (
-          <p className="quiet">
-            Through{" "}
-            <time dateTime={semester.last_session}>
-              {formatDate(semester.last_session)}
-            </time>
-          </p>
-        )}
+        <FollowUs />
       </section>
 
       <Rule />
