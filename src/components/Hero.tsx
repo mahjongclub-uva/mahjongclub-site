@@ -25,29 +25,40 @@ const TileScene = dynamic(() => import("@/components/TileScene"), {
 
 export default function Hero() {
   const [sceneReady, setSceneReady] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
   const onReady = useCallback(() => setSceneReady(true), []);
 
-  // Once this runs, JavaScript is available and the 3D scene is on its way,
-  // so the flat tiles wait face-down rather than playing their own reveal.
-  // Otherwise the header resolves twice: once in CSS, then again in canvas.
-  useEffect(() => setHydrated(true), []);
-
-  // ...but they must not wait forever. If the scene has not drawn a frame in
+  // The flat tiles ship hidden, so nothing has to be gated on hydration. But
+  // they must not stay hidden forever: if the scene has not drawn a frame in
   // a few seconds — slow connection, blocked WebGL, a chunk that never
-  // arrives — the flat tiles play their reveal and the name resolves anyway.
-  const [gaveUp, setGaveUp] = useState(false);
+  // arrives — reveal them so the name resolves anyway.
   useEffect(() => {
     if (sceneReady) return;
-    const timer = setTimeout(() => setGaveUp(true), 3500);
-    return () => clearTimeout(timer);
+
+    // Only count down while the page is actually being looked at. A
+    // backgrounded tab does not draw frames or run timers on schedule, so a
+    // plain timeout would decide the scene had failed when it simply has not
+    // been given a chance yet — and the flat tiles would appear, then swap
+    // out the moment you switched to the tab.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const start = () => {
+      if (document.visibilityState !== "visible" || timer) return;
+      timer = setTimeout(() => setGaveUp(true), 3500);
+    };
+
+    start();
+    document.addEventListener("visibilitychange", start);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", start);
+    };
   }, [sceneReady]);
 
   return (
     <div
       className="hero-stage"
       data-scene={sceneReady ? "ready" : gaveUp ? "fallback" : "waiting"}
-      data-js={hydrated ? "on" : undefined}
     >
       <Wordmark />
       <div className="hero-scene" aria-hidden="true">

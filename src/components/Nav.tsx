@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "@/components/Logo";
 
 /**
  * The only client component on the site.
@@ -25,7 +26,9 @@ export default function Nav() {
 
   return (
     <nav className="nav" aria-label="Main">
-      <ul>
+      <div className="nav-inner">
+        <Logo />
+        <ul>
         {TABS.map((tab) => {
           // basePath is stripped from usePathname, so these compare cleanly.
           const current =
@@ -45,7 +48,8 @@ export default function Nav() {
             </li>
           );
         })}
-      </ul>
+        </ul>
+      </div>
     </nav>
   );
 }

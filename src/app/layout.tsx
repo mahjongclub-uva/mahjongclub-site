@@ -31,6 +31,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
+        {/*
+          The flat wordmark ships hidden so nothing flashes before the canvas
+          takes over. With JavaScript off there is no canvas coming, so reveal
+          it — this is the only thing standing between a no-JS visitor and a
+          nameless page.
+        */}
+        <noscript>
+          <style>{`.wordmark-tiles { opacity: 1 !important; }`}</style>
+        </noscript>
+
         {/* Tile gradients, declared once for every tile on every page. */}
         <TileArtDefs />
         <Nav />

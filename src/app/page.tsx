@@ -1,6 +1,5 @@
 import { TAGLINE } from "@/lib/site";
 import Hero from "@/components/Hero";
-import Logo from "@/components/Logo";
 import Calendar from "@/components/Calendar";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
@@ -11,7 +10,6 @@ export default function Home() {
     <main>
       <header className="hero tone-paper">
         <div className="section-wrap">
-          <Logo />
           <Hero />
           <p className="tagline">{TAGLINE}</p>
         </div>

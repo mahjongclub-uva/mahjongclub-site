@@ -235,8 +235,7 @@ main {
 }
 
 .nav ul {
-  width: fit-content;
-  margin: 0 auto;
+  margin: 0;
   padding: 4px;
   display: flex;
   gap: 2px;
@@ -284,13 +283,22 @@ main {
 /* On a phone the bar spans the screen and the tabs split it evenly, so every
    target is wide and nothing depends on precise tapping. */
 @media (max-width: 560px) {
+  .nav-inner {
+    gap: var(--space-2);
+  }
+
   .nav ul {
-    width: auto;
-    margin-inline: var(--space-3);
+    flex: 1;
   }
 
   .nav li {
     flex: 1;
+  }
+
+  .logo img,
+  .logo-empty {
+    width: 38px;
+    height: 38px;
   }
 }
 
@@ -301,17 +309,26 @@ main {
 
 /* Holds its space whether or not there is a logo yet, so dropping one in
    later cannot shift the page. */
-.logo {
+/* Sits beside the tabs. Holds its space whether or not there is a file yet,
+   so dropping one in later cannot shift the bar. */
+.nav-inner {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-block-end: var(--space-5);
+  gap: var(--space-3);
+  padding-inline: var(--space-3);
+}
+
+.logo {
+  flex: none;
+  display: flex;
 }
 
 .logo img,
 .logo-empty {
   display: block;
-  width: 96px;
-  height: 96px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
 }
 
@@ -354,44 +371,27 @@ main {
 /* With JavaScript running the canvas will take over, so the flat tiles stop
    animating and simply sit face-up. Without JavaScript this never applies and
    the CSS reveal plays as before. */
-.hero-stage[data-js="on"] .tile-scene,
-.hero-stage[data-js="on"] .tile,
-.hero-stage[data-js="on"] .wordmark-sub,
-.hero-stage[data-js="on"] .tagline {
-  animation: none;
-}
-
 /* While the canvas loads, show nothing at all rather than the flat tiles'
    starting pose — that pose belongs to an animation which is no longer going
    to play, and it reads as a glitch. The <h1> text stays in the DOM. */
-.hero-stage[data-js="on"][data-scene="waiting"] .wordmark-tiles {
+/* Hidden in the markup as shipped: with JavaScript the canvas takes over, and
+   without it the <noscript> block in layout.tsx reveals these instead. Either
+   way nothing is painted and then taken away, which is what the flash was. */
+.wordmark-tiles {
   opacity: 0;
 }
 
-/* The scene never drew. Play the flat reveal so the name resolves regardless. */
-.hero-stage[data-scene="fallback"] .tile-scene {
-  animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
-    backwards;
-  animation-delay: calc(var(--i) * var(--rise-stagger));
+.hero-stage[data-scene="fallback"] .wordmark-tiles {
+  opacity: 1;
 }
 
-.hero-stage[data-scene="fallback"] .tile {
-  animation: tile-flip var(--flip-duration) cubic-bezier(0.65, 0, 0.35, 1)
-    backwards;
-  animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
-  transform: none;
-}
 
 /* Once the scene is up, the flat tiles step aside. The <h1> stays in the DOM
    and stays the accessible name — it just stops being what you look at. */
 .hero-stage[data-scene="ready"] .wordmark-tiles {
   opacity: 0;
-  transition: opacity 400ms ease 120ms;
 }
 
-.hero-stage[data-scene="ready"] .wordmark-tiles::before {
-  opacity: 0;
-}
 
 .wordmark {
   margin: 0;
@@ -408,17 +408,10 @@ main {
 
 /* Perspective belongs on the wordmark, not on the row: the row itself tilts,
    and an element cannot be viewed through its own perspective. */
-/* The lean itself. Tilt sets --tilt-x and --tilt-y; the transition doubles as
-   smoothing, so the row trails the cursor rather than snapping to it. Both
-   default to 0deg, so with no JavaScript the row simply sits square. */
 .wordmark-tiles {
   position: relative;
-  /* Shrink to the tiles. As a block-level flex container it would fill the
-     column, and the rack behind it would stretch with it. */
   width: fit-content;
   margin-inline: auto;
-  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-  transition: transform 260ms ease-out;
   display: flex;
   justify-content: center;
   /* At 360px the page leaves ~305px. Seven tiles plus six gaps must fit
@@ -432,22 +425,6 @@ main {
 
 /* The rack. Sits behind the tiles in the same 3D space, so it stays put when
    the row leans — which is most of what gives the header depth. */
-.wordmark-tiles::before {
-  content: "";
-  position: absolute;
-  inset: -9px -13px -11px;
-  border-radius: 10px;
-  background: linear-gradient(
-    160deg,
-    rgba(35, 40, 31, 0.11),
-    rgba(35, 40, 31, 0.03)
-  );
-  box-shadow:
-    inset 0 3px 7px rgba(35, 40, 31, 0.26),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.45),
-    0 1px 0 rgba(255, 255, 255, 0.6);
-  transform: translateZ(-20px);
-}
 
 .tile-scene {
   /* Named, because the depth is derived from it. Real tiles are about
@@ -865,6 +842,7 @@ main {
 /* Reuses the wordmark's wall classes, which only need these three custom
    properties to size themselves. */
 /* No CSS box: the artwork is the tile. Only sizing and the lean live here. */
+/* Two layers, as the hero is: the drawn tile underneath, the 3D one over it. */
 .ig-tile {
   position: relative;
   flex: none;
@@ -872,15 +850,40 @@ main {
   place-items: center;
   width: 64px;
   aspect-ratio: 44 / 62;
-  filter: drop-shadow(0 5px 11px rgba(35, 40, 31, 0.18));
 }
 
-.ig-tile > svg:last-child {
+.ig-mark {
   position: relative;
   width: 27px;
   height: 27px;
   color: var(--tile-letter);
 }
+
+.ig-tile-scene {
+  position: absolute;
+  /* Room for the tile to turn without clipping against its own box. */
+  inset: -30%;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.ig-tile-scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Once the scene has drawn, the flat tile steps aside. */
+.ig-tile[data-scene="ready"] .tile-art,
+.ig-tile[data-scene="ready"] .ig-mark {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.ig-tile[data-scene="ready"] .ig-tile-scene {
+  opacity: 1;
+}
+
 
 
 
