@@ -5,7 +5,7 @@ import { TAGLINE } from "@/lib/site";
 import Wordmark from "@/components/Wordmark";
 import Calendar from "@/components/Calendar";
 import Photos from "@/components/Photos";
-import Dots from "@/components/Dots";
+import TileMark from "@/components/TileMark";
 import Rule from "@/components/Rule";
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
       <header className="hero">
         <Wordmark />
         <p className="tagline">{TAGLINE}</p>
-        <Dots className="hero-mark" size={72} />
+        <TileMark className="hero-mark" height={78} />
       </header>
 
       <Rule />

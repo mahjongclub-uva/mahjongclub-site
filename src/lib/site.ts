@@ -29,7 +29,7 @@ export const TAGLINE = "Anyone is welcome to play. Come learn with us.";
 export const CALENDAR_ID: string | null = null;
 
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
-export const INSTAGRAM: string | null = null;
+export const INSTAGRAM: string | null = "mahjongclub_uva";
 
 /**
  * Photographs for the homepage.

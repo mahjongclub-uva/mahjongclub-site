@@ -63,16 +63,15 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* The circles motif. */
-  --dots-outer: #2f6656;
-  --dots-inner: #eaece3;
-  --dots-core: #9d302b;
-
-  /* Type. A book serif for anything that speaks, a UI sans for anything that
-     is really a number. No web font is loaded: these stacks resolve to
-     something well-made on every platform and cost nothing. */
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
-    Georgia, serif;
+  /* Type.
+     Fraunces sets the wordmark and headings; EB Garamond sets the prose.
+     Both are open-licensed and self-hosted by next/font — see layout.tsx,
+     which is also the only place to change them. The stacks below are the
+     fallbacks used while the faces load.
+     The sans is only ever for numbers and small labels, where a serif's
+     varying widths make columns of figures hard to compare. */
+  --display: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --serif: var(--font-body), "Iowan Old Style", Georgia, serif;
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", sans-serif;
 
@@ -126,6 +125,7 @@ body {
 
 h1,
 h2 {
+  font-family: var(--display);
   font-weight: 400;
   line-height: var(--leading-tight);
   text-wrap: balance;
@@ -246,8 +246,9 @@ main {
     inset 0 -2px 3px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px var(--tile-rim),
     0 4px 10px rgba(35, 40, 31, 0.13);
-  font-family: var(--serif);
-  font-size: clamp(0.95rem, 4vw, 1.45rem);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1rem, 4.2vw, 1.6rem);
   line-height: 1;
 }
 
@@ -342,6 +343,11 @@ main {
   letter-spacing: -0.02em;
 }
 
+.leaders-name {
+  font-family: var(--display);
+  font-size: var(--text-lg);
+}
+
 .section-more {
   margin-block-start: var(--space-4);
   font-family: var(--sans);
@@ -417,6 +423,7 @@ main {
 }
 
 .leaderboard tbody th {
+  font-family: var(--display);
   font-size: var(--text-lg);
 }
 
@@ -519,6 +526,7 @@ main {
 }
 
 .awards-name {
+  font-family: var(--display);
   font-size: var(--text-lg);
 }
 
