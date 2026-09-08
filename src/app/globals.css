@@ -624,6 +624,26 @@ main {
   color: var(--rule);
 }
 
+/* Stacked on a phone. The separator only makes sense between two things on
+   one line — wrapped, it dangles at the start of the second. */
+@media (max-width: 767px) {
+  .table-note {
+    display: block;
+  }
+
+  .table-note span {
+    display: block;
+  }
+
+  .table-note span + span {
+    margin-block-start: var(--space-1);
+  }
+
+  .table-note span + span::before {
+    content: none;
+  }
+}
+
 .page-title {
   margin: 0;
   font-weight: 600;
@@ -792,6 +812,11 @@ main {
   color: var(--ink-soft);
 }
 
+.leaderboard td[data-label="Score"] {
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .leaderboard td:first-child {
   width: 4.25rem;
   /* The tile turns in here. */
@@ -855,8 +880,8 @@ main {
 .rank-numeral {
   font-family: var(--font-han), "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
     "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 900;
   line-height: 1;
   color: var(--ink);
 }
@@ -866,6 +891,7 @@ main {
     "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
   font-size: 18px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1;
   margin-block-start: 1px;
   color: var(--tile-letter);

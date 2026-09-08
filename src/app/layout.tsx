@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Lora, Noto_Serif_SC } from "next/font/google";
+import { Cormorant_Garamond, Lora, Noto_Sans_SC } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
@@ -16,13 +16,14 @@ const display = Cormorant_Garamond({
 /**
  * Carries the ten characters on the rank tiles, 一 through 九 and 萬.
  *
- * A real bold weight rather than leaning on the system CJK font: those vary by
- * platform and synthesise bold badly, which on a 42px tile is the difference
- * between a crisp glyph and a smudge.
+ * A sans rather than a serif on purpose. 一, 二 and 三 are nothing but
+ * horizontal strokes, and a serif tapers them to hairlines that all but vanish
+ * at tile size. A gothic keeps the stroke even, so the low numerals carry the
+ * same weight as 四 through 九.
  */
-const han = Noto_Serif_SC({
+const han = Noto_Sans_SC({
   subsets: ["latin"],
-  weight: ["700"],
+  weight: ["700", "900"],
   variable: "--font-han",
   display: "swap",
   // Not preloaded on purpose. Preloading would fetch this face's latin subset,
