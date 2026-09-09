@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Wordmark from "@/components/Wordmark";
 
 /**
@@ -23,7 +23,17 @@ const TileScene = dynamic(() => import("@/components/TileScene"), {
   loading: () => null,
 });
 
+function subscribeMotion(callback: () => void) {
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+const prefersReducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export default function Hero() {
+  const reduceMotion = useSyncExternalStore(subscribeMotion, prefersReducedMotion, () => true);
   const [sceneReady, setSceneReady] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const onReady = useCallback(() => setSceneReady(true), []);
@@ -58,11 +68,11 @@ export default function Hero() {
   return (
     <div
       className="hero-stage"
-      data-scene={sceneReady ? "ready" : gaveUp ? "fallback" : "waiting"}
+      data-scene={reduceMotion ? "fallback" : sceneReady ? "ready" : gaveUp ? "fallback" : "waiting"}
     >
       <Wordmark />
       <div className="hero-scene" aria-hidden="true">
-        <TileScene onReady={onReady} />
+        {!reduceMotion && <TileScene onReady={onReady} />}
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ function useLetterTextures(letters: string[]) {
       // Reads the face colours straight off the page, so the scene and the
       // CSS version cannot drift apart.
       ctx.fillStyle = cssVar("--tile-letter", "#9d302b");
-      ctx.font = `600 150px ${cssVar("--serif", "serif")}`;
+      ctx.font = `600 150px ${cssVar("--display", "serif")}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(letter, canvas.width / 2, canvas.height / 2 + 6);
@@ -129,7 +129,7 @@ export default function TileScene({ onReady }: { onReady?: () => void }) {
   return (
     <Canvas
       className="tile-canvas"
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       camera={{ position: [0, 0.15, 6.4], fov: 32 }}
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => {

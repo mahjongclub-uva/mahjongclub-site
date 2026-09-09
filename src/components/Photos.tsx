@@ -5,9 +5,8 @@ import { asset } from "@/lib/asset";
 /**
  * Club photographs.
  *
- * Add them in src/lib/site.ts. Until there are any, this renders empty frames
- * at the right proportions, so the layout is real before anyone has taken a
- * picture.
+ * Add them in src/lib/site.ts. Until there are any, this renders nothing so
+ * visitors never see a row of unfinished placeholder frames.
  *
  * Each frame carries --i, which offsets its scroll-reveal so they arrive one
  * after another rather than all at once.
@@ -17,20 +16,7 @@ import { asset } from "@/lib/asset";
  * anybody — no full names, no precise location, and strip EXIF first.
  */
 export default function Photos() {
-  if (PHOTOS.length === 0) {
-    return (
-      <div className="photo-grid">
-        {[0, 1, 2].map((i) => (
-          <div
-            className="photo-slot is-empty"
-            key={i}
-            style={{ "--i": i } as CSSProperties}
-            role="presentation"
-          />
-        ))}
-      </div>
-    );
-  }
+  if (PHOTOS.length === 0) return null;
 
   return (
     <div className="photo-grid">

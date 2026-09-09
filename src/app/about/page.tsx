@@ -1,10 +1,11 @@
-import { MIN_TABLES_TO_RANK } from "@/lib/schema";
+import Link from "next/link";
+import { GROUPME_URL, INSTAGRAM } from "@/lib/site";
 import Section from "@/components/Section";
 
 export const metadata = {
-  title: "About — Mahjong Club @ UVA",
+  title: "About - Mahjong Club @ UVA",
   description:
-    "What we play, who it is for, and how the leaderboard is worked out.",
+    "What the Mahjong Club at UVA plays, how to join, and how public club data is handled.",
 };
 
 export default function About() {
@@ -14,6 +15,10 @@ export default function About() {
         <div className="section-wrap">
           <p className="eyebrow">About</p>
           <h1 className="page-title">The club</h1>
+          <p className="page-intro">
+            A low-pressure place to learn Fuzhou-style mahjong, meet new
+            players and keep coming back to the table.
+          </p>
         </div>
       </header>
 
@@ -31,33 +36,82 @@ export default function About() {
         </div>
       </Section>
 
-      <Section id="beginners" title="If you have never played">
-        <div className="prose">
-          <p>
-            Good. Most of us learned here. Someone will sit with you and walk
-            you through a hand, and nothing is scored while you are learning.
-          </p>
-          <p>Bring nothing. It costs nothing to try.</p>
+      <Section id="connect" title="Join the next table">
+        <div className="social-list">
+          {GROUPME_URL ? (
+            <a href={GROUPME_URL} rel="noopener noreferrer" target="_blank">
+              <span>
+                <strong>GroupMe</strong>
+                <small>Reminders, questions and last-minute changes</small>
+              </span>
+              <b>Open invite</b>
+            </a>
+          ) : (
+            <div className="social-list-pending">
+              <span>
+                <strong>GroupMe</strong>
+                <small>Ask a club officer for the current invitation</small>
+              </span>
+              <b>Invite pending</b>
+            </div>
+          )}
+
+          {INSTAGRAM && (
+            <a
+              href={`https://instagram.com/${INSTAGRAM}`}
+              rel="me noopener noreferrer"
+              target="_blank"
+            >
+              <span>
+                <strong>@{INSTAGRAM}</strong>
+                <small>Photos, announcements and meeting updates</small>
+              </span>
+              <b>Open Instagram</b>
+            </a>
+          )}
         </div>
       </Section>
 
-      <Section id="scoring" title="How the leaderboard works">
+      <Section id="learn" title="New to mahjong?">
         <div className="prose">
           <p>
-            Everyone starts with 205 points. Your result is what you walk away
-            with, minus that 205, so it can be negative.
+            Most members learned here. We provide the sets and guide new
+            players through a practice hand before anything is scored.
           </p>
           <p>
-            The leaderboard only counts tables you finished up on. A losing
-            table scores zero instead of counting against you, so playing more
-            can never drop you down the list.
-          </p>
-          <p>
-            You need {MIN_TABLES_TO_RANK} tables to be ranked. Level scores go
-            to whoever needed fewer tables, then to whoever lost less.
+            <Link className="text-link" href="/guide/">
+              Read the beginner guide
+            </Link>
           </p>
         </div>
       </Section>
+
+      <section className="club-notes" aria-labelledby="notes">
+        <div className="section-wrap">
+          <h2 id="notes">Club notes</h2>
+          <ol>
+            <li>
+              Mahjong Club @ UVA operates independently as a Contracted
+              Independent Organization. The University does not direct or
+              control the club and is not responsible for its activities. Read
+              the University&apos;s{" "}
+              <a
+                href="https://studentaffairs.virginia.edu/subsite/student-engagement/cio-support/about-student-orgs"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                explanation of student organizations
+              </a>
+              .
+            </li>
+            <li>
+              Playing a scored table allows the club to publish your display
+              name and result. Ask a club officer to opt out; public ranks are
+              recalculated without your entry.
+            </li>
+          </ol>
+        </div>
+      </section>
     </main>
   );
 }

@@ -26,7 +26,7 @@ export const TAGLINE = "Anyone is welcome to play. Come learn with us.";
  *
  * Leave null and the page shows a quiet placeholder instead of a broken frame.
  */
-export const CALENDAR_ID: string | null = "c2b93807305215ee07bdbd6d1c045e8f58588b299afa24dd14fa981830eb3c2a@group.calendar.google.com";
+export const CALENDAR_ID: string | null = null;
 
 /**
  * Club logo, shown as a circle above the wordmark.
@@ -39,6 +39,15 @@ export const LOGO: string | null = "/logo.webp";
 
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
 export const INSTAGRAM: string | null = "mahjongclub_uva";
+
+/**
+ * GroupMe invitation URL.
+ *
+ * Keep this null until there is a current invitation link. The Contact page
+ * will explain that the link is coming instead of sending people to an
+ * expired or guessed group.
+ */
+export const GROUPME_URL: string | null = null;
 
 /**
  * Photographs for the homepage.

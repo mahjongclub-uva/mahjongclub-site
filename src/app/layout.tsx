@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Lora, Noto_Sans_SC } from "next/font/google";
+import { Newsreader, Noto_Sans_SC, Source_Sans_3 } from "next/font/google";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = Cormorant_Garamond({
+const display = Newsreader({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "600", "700"],
   variable: "--font-display",
   display: "swap",
 });
@@ -32,9 +32,9 @@ const han = Noto_Sans_SC({
   preload: false,
 });
 
-const body = Lora({
+const body = Source_Sans_3({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "600", "700"],
   variable: "--font-body",
   display: "swap",
 });
@@ -48,7 +48,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${han.variable}`}>
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${han.variable}`}
+    >
       <body>
         {/*
           The flat wordmark ships hidden so nothing flashes before the canvas

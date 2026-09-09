@@ -1,4 +1,5 @@
 import { CALENDAR_ID } from "@/lib/site";
+import Link from "next/link";
 
 /**
  * The club calendar, embedded from Google Calendar.
@@ -18,7 +19,14 @@ export default function Calendar() {
   if (!CALENDAR_ID) {
     return (
       <div className="calendar-placeholder">
-        <p>Meeting times are posted on Instagram while the calendar is set up.</p>
+        <p className="calendar-label">Next session</p>
+        <p className="calendar-message">
+          Meeting times are shared through Instagram and GroupMe while the
+          calendar is being set up.
+        </p>
+        <Link className="action-link" href="/about/#connect">
+          Find the group
+        </Link>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import { getCurrentSemester } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import Section from "@/components/Section";
+import Link from "next/link";
 
 /**
  * A display truncation only — the data always carries every ranked player.
@@ -66,6 +67,7 @@ export default function Leaderboard() {
               reader needs. Below 768px the header row is hidden and each row
               becomes a card, using the data-label attributes. */}
           <table className="leaderboard">
+            <caption className="sr-only">{semester.label} leaderboard</caption>
             <thead>
               <tr>
                 <th scope="col">Rank</th>
@@ -105,6 +107,11 @@ export default function Leaderboard() {
                 players
               </span>
             )}
+          </p>
+          <p className="section-more">
+            <Link className="text-link" href="/guide/#scoring">
+              How scoring works
+            </Link>
           </p>
         </>
       )}

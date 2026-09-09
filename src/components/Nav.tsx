@@ -18,6 +18,7 @@ import Logo from "@/components/Logo";
 const TABS = [
   { href: "/", label: "Home" },
   { href: "/about/", label: "About" },
+  { href: "/guide/", label: "Guide" },
   { href: "/leaderboard/", label: "Leaderboard" },
 ];
 
@@ -29,25 +30,25 @@ export default function Nav() {
       <div className="nav-inner">
         <Logo />
         <ul>
-        {TABS.map((tab) => {
-          // basePath is stripped from usePathname, so these compare cleanly.
-          const current =
-            tab.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(tab.href.replace(/\/$/, ""));
-          return (
-            <li key={tab.href}>
-              <Link
-                href={tab.href}
-                // Tells a screen reader which tab you are on. Not conveyed by
-                // the underline alone.
-                aria-current={current ? "page" : undefined}
-              >
-                {tab.label}
-              </Link>
-            </li>
-          );
-        })}
+          {TABS.map((tab) => {
+            // basePath is stripped from usePathname, so these compare cleanly.
+            const current =
+              tab.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(tab.href.replace(/\/$/, ""));
+            return (
+              <li key={tab.href}>
+                <Link
+                  href={tab.href}
+                  // Tells a screen reader which tab you are on. Not conveyed
+                  // by colour alone.
+                  aria-current={current ? "page" : undefined}
+                >
+                  {tab.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </nav>

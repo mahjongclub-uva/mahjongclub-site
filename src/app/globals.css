@@ -69,17 +69,13 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* Type.
-     Fraunces sets the wordmark and headings; EB Garamond sets the prose.
-     Both are open-licensed and self-hosted by next/font — see layout.tsx,
-     which is also the only place to change them. The stacks below are the
-     fallbacks used while the faces load.
-     The sans is only ever for numbers and small labels, where a serif's
-     varying widths make columns of figures hard to compare. */
+  /* Type. Newsreader gives headings a sturdy editorial voice; Source Sans 3
+     keeps instructions and club information easy to scan on a phone. Both
+     are self-hosted by next/font. */
   --display: var(--font-display), "Iowan Old Style", Georgia, serif;
-  --serif: var(--font-body), "Iowan Old Style", Georgia, serif;
-  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", sans-serif;
+  --body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --sans: var(--body);
 
   --text-xs: 0.78rem;
   --text-sm: 0.88rem;
@@ -131,7 +127,7 @@ body {
     var(--texture-linen);
   background-repeat: no-repeat, no-repeat, repeat;
   color: var(--ink);
-  font-family: var(--serif);
+  font-family: var(--body);
   font-size: var(--text-base);
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
@@ -178,7 +174,7 @@ main {
 }
 
 .section {
-  padding-block: var(--space-6);
+  padding-block: clamp(2rem, 5vw, 3.5rem);
 }
 
 /* One ground for the whole site: the cream body showing through. Sections are
@@ -279,21 +275,28 @@ main {
    target is wide and nothing depends on precise tapping. */
 @media (max-width: 560px) {
   .nav-inner {
-    gap: var(--space-2);
+    display: block;
+    padding-inline: var(--space-2);
   }
 
   .nav ul {
-    flex: 1;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 0.8fr 0.8fr 0.8fr 1.35fr;
   }
 
   .nav li {
-    flex: 1;
+    min-width: 0;
   }
 
-  .logo img,
-  .logo-empty {
-    width: 38px;
-    height: 38px;
+  .nav a {
+    min-height: 44px;
+    padding-inline: var(--space-1);
+    font-size: 0.82rem;
+  }
+
+  .nav .logo {
+    display: none;
   }
 }
 
@@ -425,7 +428,7 @@ main {
   /* Named, because the depth is derived from it. Real tiles are about
      20 x 30 x 15mm — genuinely chunky — but a fifth of the width reads as
      solid without turning the wordmark into a row of bricks. */
-  --tile-w: clamp(38px, 10.5vw, 66px);
+  --tile-w: clamp(29px, 9.8vw, 66px);
   --tile-depth: calc(var(--tile-w) * 0.15);
   --tile-radius: calc(var(--tile-w) * 0.11);
 
@@ -535,7 +538,7 @@ main {
 
 .tile-letter {
   position: relative;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-weight: 600;
   font-size: clamp(1rem, 4.2vw, 1.6rem);
   line-height: 1;
@@ -567,6 +570,45 @@ main {
   color: var(--ink-soft);
 }
 
+.hero-actions {
+  margin-block-start: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.action-link {
+  min-height: 44px;
+  padding: 0.65rem var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--jade);
+  border-radius: 4px;
+  color: var(--jade);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.action-link:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.action-link-primary {
+  color: var(--tile-face-hi);
+  background: var(--jade);
+}
+
+.action-link-primary:hover {
+  color: var(--tile-face-hi);
+  background: var(--tile-back-lo);
+}
+
 .hero-mark {
   margin: var(--space-5) auto 0;
   opacity: 0.5;
@@ -588,20 +630,49 @@ main {
   letter-spacing: -0.005em;
 }
 
-/* A short vermilion rule under each section heading — the one warm mark on an
-   otherwise green and ivory page. */
+/* The short rule reads like the edge of a face-down tile: jade back over an
+   ivory face. It repeats the object language without adding another icon. */
 .section-title::after {
   content: "";
   display: block;
-  width: 26px;
-  height: 3px;
+  width: 30px;
+  height: 7px;
   margin-block-start: var(--space-3);
   border-radius: 2px;
-  background: var(--tile-letter);
+  background: linear-gradient(
+    to bottom,
+    var(--tile-back-hi) 0%,
+    var(--tile-back) 54%,
+    var(--tile-face) 54%,
+    var(--tile-face-lo) 100%
+  );
+  box-shadow: 0 1px 1px rgba(35, 40, 31, 0.14);
 }
 
 .page-head {
   padding-block: var(--space-5) 0;
+}
+
+.page-intro,
+.welcome p {
+  color: var(--ink-soft);
+}
+
+.page-intro {
+  margin-block: var(--space-3) 0;
+}
+
+.welcome p {
+  margin-block: 0 var(--space-3);
+}
+
+.text-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-weight: 650;
 }
 
 /* A section straight after the page heading does not need the full break —
@@ -1154,11 +1225,10 @@ main {
   height: 100%;
 }
 
-/* Matches the empty photo frames: a quiet panel, not a dashed outline. */
+/* A useful fallback when no public calendar is available. */
 .calendar-placeholder {
   padding: var(--space-5) var(--space-4);
   border-radius: 3px;
-  text-align: center;
   background: linear-gradient(
     160deg,
     rgba(255, 255, 255, 0.55),
@@ -1168,10 +1238,21 @@ main {
 }
 
 .calendar-placeholder p {
-  max-width: none;
   margin: 0;
+}
+
+.calendar-placeholder .calendar-label {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.calendar-placeholder .calendar-message {
+  margin-block: var(--space-2) var(--space-3);
   color: var(--ink-soft);
-  font-size: var(--text-sm);
 }
 
 
@@ -1203,16 +1284,169 @@ main {
   object-fit: cover;
 }
 
-/* A quiet panel rather than a dashed outline — a dashed box reads as
-   unfinished admin UI, which is the opposite of what the page is going for.
-   These disappear the moment PHOTOS has anything in it. */
-.photo-slot.is-empty {
+
+/* Guide and club information ------------------------------------------- */
+
+.tile-key {
+  margin: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.tile-key div {
+  padding-inline-start: var(--space-3);
+  border-inline-start: 5px solid var(--tile-back);
+}
+
+.tile-key dt,
+.turn-flow strong,
+.social-list strong {
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.tile-key dd {
+  margin: var(--space-1) 0 0;
+  max-width: var(--measure);
+  color: var(--ink-soft);
+}
+
+.guide-prose p:first-child::first-letter {
+  color: var(--tile-letter);
+  font-family: var(--display);
+  font-size: 2.5em;
+  font-weight: 700;
+  line-height: 0.8;
+}
+
+.turn-flow {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  counter-reset: turn;
+  list-style: none;
+}
+
+.turn-flow li {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  align-content: center;
+  counter-increment: turn;
+}
+
+.turn-flow li::before {
+  content: counter(turn);
+  grid-row: 1 / 3;
+  width: 42px;
+  aspect-ratio: 44 / 62;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  border-radius: 4px;
+  color: var(--tile-letter);
   background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0.15)
+    155deg,
+    var(--tile-face-hi),
+    var(--tile-face) 55%,
+    var(--tile-face-lo)
   );
-  box-shadow: inset 0 0 0 1px var(--rule);
+  box-shadow:
+    inset 0 -2px 0 var(--tile-edge),
+    inset 0 0 0 1px var(--tile-rim),
+    0 1px 2px rgba(46, 46, 44, 0.14);
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.turn-flow span {
+  color: var(--ink-soft);
+}
+
+.social-list {
+  border-block-start: 1px solid var(--rule);
+}
+
+.social-list > a,
+.social-list > div {
+  min-height: 86px;
+  padding-block: var(--space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.social-list > a:hover strong {
+  color: var(--jade);
+}
+
+.social-list span {
+  display: grid;
+  gap: 2px;
+}
+
+.social-list small,
+.social-list b {
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+}
+
+.social-list small {
+  color: var(--ink-soft);
+}
+
+.social-list b {
+  color: var(--jade);
+}
+
+.social-list-pending b {
+  color: var(--ink-soft);
+}
+
+.club-notes {
+  padding-block: var(--space-5);
+  border-block-start: 1px solid var(--rule);
+}
+
+.club-notes h2 {
+  margin: 0 0 var(--space-3);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.club-notes ol {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding-block: var(--space-4) var(--space-5);
+  }
+
+  .hero-actions .action-link {
+    flex: 1 1 9rem;
+  }
+
+  .social-list > a,
+  .social-list > div {
+    grid-template-columns: 1fr;
+  }
 }
 
 
@@ -1242,18 +1476,18 @@ main {
   font-size: var(--text-xs);
 }
 
-.social-link {
+.footer-links {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  /* 44px tall so it is a comfortable touch target without looking like one. */
-  min-height: 44px;
+  gap: var(--space-2) var(--space-3);
   font-family: var(--sans);
-  text-decoration: none;
 }
 
-.social-link:hover span {
-  text-decoration: underline;
+.footer-links a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 
@@ -1262,6 +1496,90 @@ main {
    resolved state, and animations use `backwards`/`both` fill to hold their
    start state — so no motion ever means "content missing".
    ======================================================================== */
+
+/* A pale woven table surface, with porcelain and jade kept on the tiles. */
+body {
+  background-color: #e7eee5;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, #fafbf4 0%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(42, 99, 80, 0.025) 3px 4px),
+    repeating-linear-gradient(90deg, transparent 0 3px, rgba(42, 99, 80, 0.025) 3px 4px);
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+.hero {
+  padding-block: clamp(2.5rem, 6vw, 4rem) clamp(2rem, 5vw, 3rem);
+}
+
+.hero + .section {
+  border-block-start: 1px solid var(--rule);
+}
+
+.welcome {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.wordmark-tiles { opacity: 1; }
+.hero-stage[data-scene="waiting"] .tile-scene,
+.hero-stage[data-scene="waiting"] .tile { animation: none; }
+.hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
+.wordmark-sub, .tagline { animation: none !important; }
+
+.suit-study {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  padding: 1.5rem 0 1rem;
+  perspective: 800px;
+}
+
+.suit-study figure { margin: 0; text-align: center; }
+.suit-study figcaption { margin-top: 0.9rem; font-size: var(--text-sm); color: var(--ink-soft); }
+.sample-tile {
+  width: clamp(58px, 16vw, 76px);
+  height: clamp(84px, 23vw, 108px);
+  margin-inline: auto;
+  padding: 13px;
+  border: 1px solid #bfc9b8;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #fffef9, #f3efdf 80%, #e7e0c9);
+  box-shadow: 0 5px 0 #387660, 0 7px 0 #224f40, 2px 12px 12px rgba(25, 60, 45, 0.18), inset 2px 2px 1px #fff;
+  transform: rotateX(9deg) rotateZ(-5deg);
+}
+.suit-study figure:nth-child(2) .sample-tile { transform: translateY(-7px) rotateX(9deg); }
+.suit-study figure:nth-child(3) .sample-tile { transform: rotateX(9deg) rotateZ(5deg); }
+.sample-characters { display: grid; place-items: center; font-family: var(--font-han), sans-serif; font-size: 26px; font-weight: 900; line-height: 1.1; }
+.sample-characters span:last-child { color: var(--tile-letter); }
+.sample-dots, .sample-bamboo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; align-content: center; }
+.sample-dots i { aspect-ratio: 1; border: 3px solid var(--jade); border-radius: 50%; background: radial-gradient(circle, var(--jade) 0 24%, transparent 28%); }
+.sample-dots i:nth-child(-n+2) { border-color: var(--tile-letter); background: radial-gradient(circle, var(--tile-letter) 0 24%, transparent 28%); }
+.sample-bamboo i { height: 21px; width: 7px; justify-self: center; border-radius: 3px; background: linear-gradient(to bottom, #21513c 0 18%, #7c9f56 18% 26%, #21513c 26% 73%, #7c9f56 73% 81%, #21513c 81%); box-shadow: 1px 0 0 #b2bc83; }
+.guide-head { padding-top: 2.5rem; }
+.guide-index { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; }
+.guide-index a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; font-size: var(--text-sm); }
+.guide-prose p:first-child::first-letter { font: inherit; color: inherit; }
+.tile-key { margin-top: 1.5rem; }
+.tile-key div { border-inline-start-width: 3px; }
+.club-notes { margin-top: 2rem; }
+.footer { margin-top: 2rem; }
+.footer-inner { padding-block: 2rem; }
+h2[id] { scroll-margin-top: 1.5rem; }
+
+@media (max-width: 767px) {
+  .welcome { grid-template-columns: 1fr; gap: 0.5rem; }
+  .sample-tile { padding: 10px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sample-tile { transition: transform 240ms ease, box-shadow 240ms ease; }
+  .suit-study figure:hover .sample-tile { transform: translateY(-8px) rotateX(0); }
+  .action-link { transition: transform 160ms ease, background-color 160ms ease; }
+  .action-link:active { transform: translateY(2px); }
+  .nav a { transition: background-color 160ms ease; }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   /* The tile turns over on hover, and on touch while held. */
