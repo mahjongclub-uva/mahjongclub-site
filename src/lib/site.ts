@@ -18,15 +18,19 @@ export const FULL_NAME = "Mahjong Club @ UVA";
 export const TAGLINE = "Anyone is welcome to play. Come learn with us.";
 
 /**
- * Google Calendar embed id — usually an address like
+ * Google Calendar embed id — an address like
  * "abc123@group.calendar.google.com". Find it in Calendar under
- * Settings → your calendar → Integrate calendar.
+ * Settings → your calendar → Integrate calendar, listed as "Calendar ID".
+ *
+ * The id, not one of the URLs on that same screen. Pasting the iCal or
+ * embed URL here produces a frame that loads and then says the calendar
+ * cannot be found, which is easy to miss.
  *
  * The calendar must be public for the embed to load for visitors.
  *
  * Leave null and the page shows a quiet placeholder instead of a broken frame.
  */
-export const CALENDAR_ID: string | null = null;
+export const CALENDAR_ID: string | null = "c2b93807305215ee07bdbd6d1c045e8f58588b299afa24dd14fa981830eb3c2a@group.calendar.google.com";
 
 /**
  * Club logo, shown as a circle above the wordmark.

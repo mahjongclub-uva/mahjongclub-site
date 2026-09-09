@@ -1211,7 +1211,11 @@ main {
 /* 9. Calendar ============================================================= */
 
 .calendar-frame {
-  /* Height is reserved before the frame loads, so nothing reflows. */
+  /* Height is reserved before the frame loads, so nothing reflows.
+     The explicit width matters: without it, aspect-ratio resolves against
+     min-height instead, and a 24rem-tall 4:3 box is 512px wide — wider than
+     a phone, which scrolls the whole page sideways. */
+  width: 100%;
   aspect-ratio: 4 / 3;
   min-height: 24rem;
   border: 1px solid var(--rule);
@@ -1689,6 +1693,3 @@ h2[id] { scroll-margin-top: 1.5rem; }
 @keyframes settle-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
-  }
-}
