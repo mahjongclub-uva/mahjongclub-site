@@ -71,3 +71,29 @@ export type Photo = {
 };
 
 export const PHOTOS: Photo[] = [];
+
+/**
+ * The club's officers, in the order they appear on the About page.
+ *
+ * A name of null renders as "To be announced", which is the right thing to
+ * show for a role nobody has filled yet — and the reason this ships as a
+ * placeholder rather than five invented names.
+ *
+ * Officers are the one place the site shows more than a first name and last
+ * initial, because these are the people a visitor is meant to be able to ask
+ * for. Use whatever each officer is comfortable being called publicly; a first
+ * name alone is a perfectly good answer, and nobody should be listed here who
+ * has not agreed to it.
+ */
+export type Officer = {
+  role: string;
+  name: string | null;
+};
+
+export const OFFICERS: Officer[] = [
+  { role: "President", name: null },
+  { role: "Vice President", name: null },
+  { role: "Secretary", name: null },
+  { role: "Treasurer", name: null },
+  { role: "Publicity", name: null },
+];

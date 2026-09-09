@@ -1730,6 +1730,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
   letter-spacing: 0.02em;
   color: var(--ink-soft);
 }
+
 /* The scoring explanation under the leaderboard. Deliberately quiet: it is
    reference material, and the table above it is the reason people came. */
 .scoring-note {
@@ -1754,3 +1755,39 @@ h2[id] { scroll-margin-top: 1.5rem; }
   line-height: 1.65;
 }
 
+/* The officers, as a description list. Two columns where there is room, one
+   on a phone. Roles are the quiet half; the names are what people read. */
+.officers {
+  margin: 0;
+  display: grid;
+  gap: var(--space-4) var(--space-5);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .officers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.officers dt {
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.officers dd {
+  margin: var(--space-1) 0 0;
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  color: var(--ink);
+}
+
+/* An unfilled role reads as waiting, not as a name. Italic as well as paler,
+   so the difference survives greyscale and does not rest on colour alone. */
+.officers-vacant {
+  font-style: italic;
+  color: var(--ink-soft);
+}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GROUPME_URL, INSTAGRAM } from "@/lib/site";
+import { GROUPME_URL, INSTAGRAM, OFFICERS } from "@/lib/site";
 import Section from "@/components/Section";
 
 export const metadata = {
@@ -34,6 +34,21 @@ export default function About() {
             turn out to be one tile away, so tables stay alive much longer.
           </p>
         </div>
+      </Section>
+
+      <Section id="officers" title="Who runs it">
+        {/* A description list, because that is what this is: each role is a
+            term and the person holding it is its definition. */}
+        <dl className="officers">
+          {OFFICERS.map((officer) => (
+            <div key={officer.role}>
+              <dt>{officer.role}</dt>
+              <dd className={officer.name ? undefined : "officers-vacant"}>
+                {officer.name ?? "To be announced"}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </Section>
 
       <Section id="connect" title="Join the next table">
