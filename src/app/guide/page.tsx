@@ -1,5 +1,5 @@
 import Section from "@/components/Section";
-import SuitTiles from "@/components/SuitTiles";
+import TileSet from "@/components/TileSet";
 
 export const metadata = {
   title: "Mahjong Guide - Mahjong Club @ UVA",
@@ -28,7 +28,7 @@ export default function Guide() {
       </header>
 
       <Section id="tiles" title="Meet the tiles">
-        <SuitTiles />
+        <TileSet />
         <dl className="tile-key">
           <div>
             <dt>Three suits</dt>

@@ -6,7 +6,6 @@ import NextMeeting from "@/components/NextMeeting";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
 import Section from "@/components/Section";
-import SuitTiles from "@/components/SuitTiles";
 
 export default function Home() {
   return (
@@ -36,7 +35,6 @@ export default function Home() {
             What should I expect?
           </Link>
           </div>
-          <SuitTiles />
         </div>
       </Section>
 
