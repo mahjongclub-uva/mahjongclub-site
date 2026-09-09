@@ -1,0 +1,60 @@
+# Refreshes the "next meeting" line from the club's public calendar.
+#
+# The site is a static export, so it cannot look up the calendar when somebody
+# visits — the answer has to be baked in when the site is built. This runs
+# weekly, commits data/meetings.json, and asks the deploy workflow to rebuild.
+#
+# Saturday, because the club meets Friday evening: by the time this runs, the
+# week's meeting has happened and the next one is genuinely next.
+#
+# Unlike the scores pipeline, this one is safe to run in CI. It reads a public
+# calendar and touches no roster, so no real name can reach the build log.
+
+name: Refresh meetings
+
+on:
+  schedule:
+    # 08:00 UTC Saturday — early Saturday morning in Charlottesville. GitHub
+    # runs cron in UTC and does not follow daylight saving, so this drifts by
+    # an hour twice a year. At this hour of the morning, nobody notices.
+    - cron: "0 8 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  # Needed only to start the deploy workflow at the end.
+  actions: write
+
+concurrency:
+  group: meetings
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: python3 pipeline/build_meetings.py
+
+      - id: commit
+        run: |
+          if git diff --quiet -- data/meetings.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Calendar unchanged; nothing to deploy."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/meetings.json
+          git commit -m "chore(data): refresh next meeting from the calendar"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # A push made with GITHUB_TOKEN deliberately does not trigger other
+      # workflows, or a workflow could push itself into a loop. So the deploy
+      # has to be asked for by name.
+      - if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run deploy.yml --ref main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

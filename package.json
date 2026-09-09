@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test 'src/**/*.test.ts'",
-    "data": "python3 pipeline/build_data.py"
+    "data": "python3 pipeline/build_data.py",
+    "data:meetings": "python3 pipeline/build_meetings.py"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

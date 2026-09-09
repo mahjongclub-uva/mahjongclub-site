@@ -352,8 +352,54 @@ export const metaSchema = z
     }
   });
 
+/**
+ * data/meetings.json — the next few meetings, read from the club's public
+ * calendar by pipeline/build_meetings.py.
+ *
+ * Separate from the semester files on purpose: those are a record of what
+ * happened and change when the secretary scores a table, this is a forecast
+ * and goes stale on its own. An empty list is normal and means the site hides
+ * the next-meeting line, which is the right thing to do between semesters.
+ */
+export const meetingsSchema = z
+  .object({
+    generated_at: z.iso.datetime(),
+    meetings: z
+      .array(
+        z
+          .object({
+            // Offset-carrying, not a bare date: the club meets at a time of
+            // day, and 17:30 in November is a different UTC instant than
+            // 17:30 in September.
+            start: z.iso.datetime({ offset: true }),
+            end: z.iso.datetime({ offset: true }).nullable(),
+            summary: z.string().min(1),
+            // Whatever the calendar event's Location field says, or null when
+            // it is blank. Published as written, so what goes in that field on
+            // the calendar is a privacy decision every time.
+            location: z.string().min(1).nullable(),
+          })
+          .strict(),
+      )
+      .superRefine((list, ctx) => {
+        // Soonest first. The site shows list[0] and never sorts.
+        for (let i = 1; i < list.length; i++) {
+          if (list[i - 1].start >= list[i].start) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, "start"],
+              message: "meetings run soonest first",
+            });
+          }
+        }
+      }),
+  })
+  .strict();
+
 export type Meta = z.infer<typeof metaSchema>;
 export type Semester = z.infer<typeof semesterSchema>;
 export type Standing = Semester["standings"][number];
 export type Unranked = Semester["unranked"][number];
 export type Award = Semester["awards"][number];
+export type Meetings = z.infer<typeof meetingsSchema>;
+export type Meeting = Meetings["meetings"][number];

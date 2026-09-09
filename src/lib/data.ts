@@ -9,7 +9,14 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { metaSchema, semesterSchema, type Meta, type Semester } from "./schema";
+import {
+  metaSchema,
+  semesterSchema,
+  meetingsSchema,
+  type Meta,
+  type Semester,
+  type Meeting,
+} from "./schema";
 
 const DATA_DIR = join(process.cwd(), "data");
 const SEMESTER_DIR = join(DATA_DIR, "semesters");
@@ -119,4 +126,33 @@ export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
 export function getCurrentSemester(): Semester {
   const { meta, semesters } = getAllData();
   return semesters.get(meta.current_semester)!;
+}
+
+/**
+ * The next meeting, or null if there is not one to name.
+ *
+ * Null covers three cases that all deserve silence rather than a placeholder:
+ * the file has never been generated, the calendar has run out of events (the
+ * usual reason is a recurring event that expired at the end of a semester),
+ * and every meeting in the file has already happened because the weekly
+ * refresh has not run.
+ *
+ * That last case is why the file holds several meetings and this picks the
+ * first one still ahead. "Now" is the moment of the build, since a static
+ * export has no other moment available.
+ */
+export function getNextMeeting(): Meeting | null {
+  const path = join(DATA_DIR, "meetings.json");
+  if (!existsSync(path)) return null;
+
+  const data = parseOrDie(
+    meetingsSchema,
+    readJson(path, "data/meetings.json"),
+    "data/meetings.json",
+  );
+
+  const now = Date.now();
+  return (
+    data.meetings.find((m) => new Date(m.end ?? m.start).getTime() > now) ?? null
+  );
 }

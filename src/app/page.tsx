@@ -25,22 +25,21 @@ export default function Home() {
         </div>
       </header>
 
-      <Section id="first-night" title="Your first night">
+      <Section id="first-night" title="Come to our meetings!">
         <div className="welcome">
           <div>
           <p>
-            You do not need to know the rules or bring a set. We will teach
-            you through a practice hand before anything is scored.
+            You do not need to know the rules or bring a set! Come to learn, play, and just hang out, whether you’re studying, socializing, or just vibing, there’s a seat for you at the table. Grab your friends and join us for a relaxing (and maybe a little competitive 👀) mahjong session!
           </p>
           <Link className="text-link" href="/guide/#first-table">
-            What beginners can expect
+            What should I expect?
           </Link>
           </div>
           <SuitTiles />
         </div>
       </Section>
 
-      <Section id="when" title="When we play">
+      <Section id="when" title="When do we play?">
         <Calendar />
       </Section>
 
@@ -50,7 +49,7 @@ export default function Home() {
         </Section>
       )}
 
-      <Section id="follow" title="Keep up with us">
+      <Section id="follow" title="Follow us on social media!">
         <FollowUs />
       </Section>
     </main>
