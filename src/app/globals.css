@@ -372,15 +372,18 @@ main {
 /* While the canvas loads, show nothing at all rather than the flat tiles'
    starting pose — that pose belongs to an animation which is no longer going
    to play, and it reads as a glitch. The <h1> text stays in the DOM. */
-/* Hidden in the markup as shipped: with JavaScript the canvas takes over, and
-   without it the <noscript> block in layout.tsx reveals these instead. Either
-   way nothing is painted and then taken away, which is what the flash was. */
-.wordmark-tiles {
-  opacity: 0;
-}
+/* Visible as shipped, and that is not negotiable: this is the <h1>, it is the
+   largest contentful paint, and a student on weak signal must be able to read
+   the club's name without waiting for JavaScript or WebGL.
 
-.hero-stage[data-scene="fallback"] .wordmark-tiles {
+   The flash this used to cause was never the tiles being visible. It was the
+   CSS reveal starting during the server render and then snapping when
+   hydration decided a canvas was coming. Hero.tsx fixes that by treating the
+   motion preference as unknown until it is known, which lands in the
+   "waiting" state below, where the tiles simply sit face-up and still. */
+.wordmark-tiles {
   opacity: 1;
+  transition: opacity 420ms ease;
 }
 
 

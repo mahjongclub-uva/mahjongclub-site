@@ -7,14 +7,9 @@ import Wordmark from "@/components/Wordmark";
 /**
  * The header, in two layers.
  *
- * The CSS wordmark renders first and always. It holds the <h1> with the club's
- * name as real text, so the name is present before any JavaScript runs and
- * stays present for screen readers afterwards.
- *
- * The 3D scene loads after and mounts on top. When it is ready the CSS tiles
- * fade out — the heading element stays in the DOM, it simply stops being the
- * thing you look at. If WebGL is missing, blocked, or the chunk fails, none of
- * that happens and you keep the CSS version.
+ * The CSS wordmark keeps the club's name in the DOM for screen readers, but
+ * stays visually hidden while the 3D scene loads. It is shown only for reduced
+ * motion, disabled JavaScript, or a scene that fails to become ready.
  *
  * Never make the 3D layer the only copy of the name.
  */
@@ -33,7 +28,9 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export default function Hero() {
-  const reduceMotion = useSyncExternalStore(subscribeMotion, prefersReducedMotion, () => true);
+  // Unknown during server rendering: do not paint a fallback before learning
+  // the visitor's actual motion preference during hydration.
+  const reduceMotion = useSyncExternalStore(subscribeMotion, prefersReducedMotion, () => null);
   const [sceneReady, setSceneReady] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const onReady = useCallback(() => setSceneReady(true), []);
@@ -72,7 +69,7 @@ export default function Hero() {
     >
       <Wordmark />
       <div className="hero-scene" aria-hidden="true">
-        {!reduceMotion && <TileScene onReady={onReady} />}
+        {reduceMotion === false && <TileScene onReady={onReady} />}
       </div>
     </div>
   );
