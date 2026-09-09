@@ -77,6 +77,16 @@ svg {
     sans-serif;
   --sans: var(--body);
 
+  /* The header's three beats. Read by the wordmark, by the tagline and logo
+     that follow it, and by the canvas cross-fade — which is why they live at
+     the root rather than on the hero: not everything they time is inside it. */
+  --rise-duration: 550ms;
+  --rise-stagger: 70ms;
+  --flip-start: 520ms;
+  --flip-stagger: 150ms;
+  --flip-duration: 900ms;
+  --sub-duration: 700ms;
+
   --text-xs: 0.78rem;
   --text-sm: 0.88rem;
   --text-base: 1.0625rem;
@@ -346,9 +356,21 @@ main {
    costs no layout shift. */
 .hero-stage {
   position: relative;
+
+
+  /* When the seventh tile lands. Six staggers, because the cascade is indexed
+     from zero. */
+  --cascade-end: calc(
+    var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration)
+  );
 }
 
 .hero-scene {
+  /* Hidden until the CSS reveal has finished playing. The scene runs its own
+     rise-and-flip from the moment it mounts, so by the time it fades in it has
+     already resolved — the swap is one still wordmark for another. */
+  opacity: 0;
+  transition: opacity 420ms ease;
   position: absolute;
   /* Centred on the flat wordmark it replaces, so the swap does not shift the
      tiles up or down the page. */
@@ -387,10 +409,17 @@ main {
 }
 
 
-/* Once the scene is up, the flat tiles step aside. The <h1> stays in the DOM
-   and stays the accessible name — it just stops being what you look at. */
+/* Once the scene is up the flat tiles step aside, but not before the cascade
+   has finished — cutting in mid-flip is the one thing that reads as a glitch.
+   The <h1> stays in the DOM and stays the accessible name either way. */
 .hero-stage[data-scene="ready"] .wordmark-tiles {
   opacity: 0;
+  transition-delay: var(--cascade-end);
+}
+
+.hero-stage[data-scene="ready"] .hero-scene {
+  opacity: 1;
+  transition-delay: var(--cascade-end);
 }
 
 
@@ -399,12 +428,6 @@ main {
   /* Perspective belongs here, not on the row: the row itself tilts, and an
      element cannot be viewed through its own perspective. */
   perspective: 1100px;
-  --rise-duration: 550ms;
-  --rise-stagger: 70ms;
-  --flip-start: 520ms;
-  --flip-stagger: 150ms;
-  --flip-duration: 900ms;
-  --sub-duration: 700ms;
 }
 
 /* Perspective belongs on the wordmark, not on the row: the row itself tilts,
@@ -1529,10 +1552,12 @@ body {
   gap: var(--space-4);
 }
 
-.hero-stage[data-scene="waiting"] .tile-scene,
-.hero-stage[data-scene="waiting"] .tile { animation: none; }
-.hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
-.wordmark-sub, .tagline { animation: none !important; }
+/* Under reduced motion nothing animates, so there is no cascade to wait for
+   and the swap should just happen. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-stage[data-scene="ready"] .wordmark-tiles,
+  .hero-stage[data-scene="ready"] .hero-scene { transition-delay: 0s; }
+}
 
 .suit-study {
   display: flex;
