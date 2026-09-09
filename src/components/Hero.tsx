@@ -47,11 +47,16 @@ export default function Hero() {
     // plain timeout would decide the scene had failed when it simply has not
     // been given a chance yet — and the flat tiles would appear, then swap
     // out the moment you switched to the tab.
+    //
+    // Short, because the header is blank until either the scene arrives or
+    // this fires. It is the ceiling on how long the club's name can be
+    // missing, so it is measured in "before anyone notices", not "before we
+    // are sure".
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const start = () => {
       if (document.visibilityState !== "visible" || timer) return;
-      timer = setTimeout(() => setGaveUp(true), 3500);
+      timer = setTimeout(() => setGaveUp(true), 900);
     };
 
     start();

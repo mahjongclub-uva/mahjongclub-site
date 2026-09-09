@@ -372,18 +372,28 @@ main {
 /* While the canvas loads, show nothing at all rather than the flat tiles'
    starting pose — that pose belongs to an animation which is no longer going
    to play, and it reads as a glitch. The <h1> text stays in the DOM. */
-/* Visible as shipped, and that is not negotiable: this is the <h1>, it is the
-   largest contentful paint, and a student on weak signal must be able to read
-   the club's name without waiting for JavaScript or WebGL.
+/* Not shown while a canvas is on its way. The flat tiles were only ever a
+   stand-in for the 3D wordmark, and showing them first means the header
+   resolves twice — face-up tiles, then the same tiles again in 3D. One
+   reveal, not two.
 
-   The flash this used to cause was never the tiles being visible. It was the
-   CSS reveal starting during the server render and then snapping when
-   hydration decided a canvas was coming. Hero.tsx fixes that by treating the
-   motion preference as unknown until it is known, which lands in the
-   "waiting" state below, where the tiles simply sit face-up and still. */
+   They stay in the DOM regardless: this is the <h1>, it carries the club's
+   name as real text, and it is what a screen reader reads. Hidden here means
+   hidden to the eye only.
+
+   The cost is real and worth naming: with JavaScript blocked or WebGL
+   unavailable, nothing is legible until the fallback fires. That is why the
+   give-up timer in Hero.tsx is short, and why the <noscript> block in
+   layout.tsx exists. */
 .wordmark-tiles {
-  opacity: 1;
+  opacity: 0;
   transition: opacity 420ms ease;
+}
+
+/* No canvas coming — because motion is reduced, WebGL is unavailable, or the
+   scene never drew a frame. The flat wordmark is the wordmark. */
+.hero-stage[data-scene="fallback"] .wordmark-tiles {
+  opacity: 1;
 }
 
 

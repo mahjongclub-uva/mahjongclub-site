@@ -53,6 +53,15 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${han.variable}`}
     >
       <body>
+        {/*
+          No JavaScript means no canvas is coming and no fallback timer will
+          ever fire, so reveal the flat wordmark. Without this the header is
+          permanently blank, which is the one outcome that is not acceptable.
+        */}
+        <noscript>
+          <style>{`.wordmark-tiles { opacity: 1 !important; }`}</style>
+        </noscript>
+
         {/* Tile gradients, declared once for every tile on every page. */}
         <TileArtDefs />
         <Nav />
