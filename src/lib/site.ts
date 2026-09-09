@@ -91,9 +91,9 @@ export type Officer = {
 };
 
 export const OFFICERS: Officer[] = [
-  { role: "President", name: null },
-  { role: "Vice President", name: null },
-  { role: "Secretary", name: null },
-  { role: "Treasurer", name: null },
-  { role: "Publicity", name: null },
+  { role: "President", name: "Loy Luo" },
+  { role: "Vice President", name: "Benjamin Liu" },
+  { role: "Secretary", name: "Sean Pan" },
+  { role: "Treasurer", name: "Kevin Jiang" },
+  { role: "Publicity", name: "Brittney Men" },
 ];

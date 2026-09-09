@@ -36,7 +36,7 @@ export default function About() {
         </div>
       </Section>
 
-      <Section id="officers" title="Who runs it">
+      <Section id="officers" title="Officials">
         {/* A description list, because that is what this is: each role is a
             term and the person holding it is its definition. */}
         <dl className="officers">
