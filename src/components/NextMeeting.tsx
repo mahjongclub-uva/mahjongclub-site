@@ -22,17 +22,25 @@ export default function NextMeeting() {
   if (!meeting) return null;
 
   return (
-    <p className="next-meeting">
-      <span className="next-meeting-label">Next meeting:</span>
-      <time dateTime={meeting.start}>
-        {formatMeetingDay(meeting.start)}
+    <div className="next-meeting">
+      <p className="next-meeting-label">Next meeting</p>
+
+      {/* The day is the headline; the time and the room are the two details
+          you need once you have decided to come. The room carries the weight
+          of the two, because "where" is the question the calendar frame
+          underneath answers worst. */}
+      <p className="next-meeting-when">
+        <time dateTime={meeting.start}>{formatMeetingDay(meeting.start)}</time>
+      </p>
+
+      <p className="next-meeting-detail">
         <span className="next-meeting-time">
           {formatMeetingTime(meeting.start, meeting.end)}
         </span>
-      </time>
-      {meeting.location && (
-        <span className="next-meeting-where">at {meeting.location}</span>
-      )}
-    </p>
+        {meeting.location && (
+          <span className="next-meeting-where">{meeting.location}</span>
+        )}
+      </p>
+    </div>
   );
 }
