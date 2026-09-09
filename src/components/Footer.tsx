@@ -13,7 +13,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <p className="footer-disclaimer">
-          {FULL_NAME}. All rights reserved.
+          2026 {FULL_NAME}. All rights reserved. 
         </p>
 
         <p className="footer-links">

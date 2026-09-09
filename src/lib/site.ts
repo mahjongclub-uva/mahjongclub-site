@@ -47,7 +47,7 @@ export const INSTAGRAM: string | null = "mahjongclub_uva";
  * will explain that the link is coming instead of sending people to an
  * expired or guessed group.
  */
-export const GROUPME_URL: string | null = null;
+export const GROUPME_URL: string | null = "https://groupme.com/join_group/103973752/UZkrxfg4";
 
 /**
  * Photographs for the homepage.
