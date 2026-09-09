@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { MIN_TABLES_TO_RANK } from "@/lib/schema";
 import Section from "@/components/Section";
 import SuitTiles from "@/components/SuitTiles";
 
@@ -100,24 +98,6 @@ export default function Guide() {
         </div>
       </Section>
 
-      <Section id="scoring" title="Club scoring">
-        <div className="prose guide-prose">
-          <p>
-            Everyone starts a table with 205 points. Your net result is what
-            you finish with minus 205.
-          </p>
-          <p>
-            The leaderboard adds only positive table results. You need at
-            least {MIN_TABLES_TO_RANK} completed tables to be ranked, and the
-            public board displays the top nine as one complete mahjong suit.
-          </p>
-          <p>
-            <Link className="text-link" href="/leaderboard/">
-              View the leaderboard
-            </Link>
-          </p>
-        </div>
-      </Section>
     </main>
   );
 }

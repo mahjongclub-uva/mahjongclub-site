@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
+import { MIN_TABLES_TO_RANK } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import Section from "@/components/Section";
-import Link from "next/link";
 
 /**
  * A display truncation only — the data always carries every ranked player.
@@ -89,6 +90,24 @@ export default function Leaderboard() {
               ))}
             </tbody>
           </table>
+
+          {/* How the numbers are arrived at. Small, and after the table
+              rather than before it, because most visitors are looking for a
+              name and a number and do not need the rules to read it. */}
+          <div className="scoring-note">
+            <h2>How the score works</h2>
+            <p>
+              Everyone starts a table with 205 points, and your result is what
+              you finish with minus 205. The board adds up only your winning
+              tables, so a bad night never costs you a place. Play{" "}
+              {MIN_TABLES_TO_RANK} tables to be ranked.
+            </p>
+            <p>
+              <Link className="text-link" href="/guide/">
+                New to the game?
+              </Link>
+            </p>
+          </div>
 
           {/* Both facts a reader needs after the table: how current it is,
               and that they are not seeing all of it. */}
