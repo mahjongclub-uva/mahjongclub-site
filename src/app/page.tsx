@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PHOTOS, TAGLINE } from "@/lib/site";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
+import NextMeeting from "@/components/NextMeeting";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
 import Section from "@/components/Section";
@@ -40,6 +41,7 @@ export default function Home() {
       </Section>
 
       <Section id="when" title="When do we play?">
+        <NextMeeting />
         <Calendar />
       </Section>
 
