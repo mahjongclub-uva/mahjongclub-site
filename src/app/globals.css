@@ -1934,6 +1934,14 @@ h2[id] { scroll-margin-top: 1.5rem; }
    distance rather than seconds. */
 .inspect {
   --inspect-w: clamp(120px, 26vw, 210px);
+  /* Depth as a fraction of width. The flat CSS tiles use 0.15 and read as
+     card; the header's three.js tiles use 0.42 and the Instagram tile 0.62,
+     which is the one that looks right. A real tile is about 20mm by 16mm,
+     so 0.62 is if anything still shy. */
+  --inspect-depth: calc(var(--inspect-w) * 0.62);
+  /* The face SVG rounds its corners at 11 of 88 units. Every slice has to
+     match, or the silhouette breaks again. */
+  --inspect-radius: calc(var(--inspect-w) * 0.125);
 
   position: relative;
   /* The pass is this height plus one viewport, so 160vh is about two and a
@@ -1980,20 +1988,24 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }
 
 .inspect-face,
-.inspect-side {
+.inspect-slice {
   position: absolute;
   inset: 0;
+  border-radius: var(--inspect-radius);
+}
+
+.inspect-face {
   backface-visibility: hidden;
 }
 
 .inspect-front {
   display: grid;
   place-items: center;
-  transform: translateZ(calc(var(--inspect-w) * 0.075));
+  transform: translateZ(calc(var(--inspect-depth) / 2));
 }
 
 .inspect-back {
-  transform: rotateY(180deg) translateZ(calc(var(--inspect-w) * 0.075));
+  transform: rotateY(180deg) translateZ(calc(var(--inspect-depth) / 2));
 }
 
 .inspect-glyph {
@@ -2005,47 +2017,28 @@ h2[id] { scroll-margin-top: 1.5rem; }
   color: var(--tile-letter);
 }
 
-/* The four walls. Each is rotated into place and pushed out by half the
-   tile's depth. */
-.inspect-side {
+/* One slice of the body. --t runs 0 at the face to 1 at the back, so the
+   stack spans the full depth centred on the tile. */
+.inspect-slice {
   background: linear-gradient(
-    to bottom,
+    100deg,
     var(--tile-face-hi),
+    var(--tile-face) 45%,
     var(--tile-face-lo)
+  );
+  transform: translateZ(
+    calc(var(--inspect-depth) * (0.5 - var(--t)))
   );
 }
 
-.inspect-side-l,
-.inspect-side-r {
-  width: calc(var(--inspect-w) * 0.15);
-  left: calc(50% - var(--inspect-w) * 0.075);
-}
-
-.inspect-side-l {
-  transform: rotateY(-90deg) translateZ(calc(var(--inspect-w) * 0.5));
-}
-
-.inspect-side-r {
-  transform: rotateY(90deg) translateZ(calc(var(--inspect-w) * 0.5));
-}
-
-.inspect-side-t,
-.inspect-side-b {
-  height: calc(var(--inspect-w) * 0.15);
-  top: calc(50% - var(--inspect-w) * 0.075);
-}
-
-/* A wall above the face folds back at +90deg and one below at -90deg, because
-   z' = y·sin(theta). Getting these two the wrong way round detaches them into
-   floating squares, which is exactly what it looks like. */
-.inspect-side-t {
-  transform: rotateX(90deg)
-    translateZ(calc(var(--inspect-w) * 124 / 88 * 0.5));
-}
-
-.inspect-side-b {
-  transform: rotateX(-90deg)
-    translateZ(calc(var(--inspect-w) * 124 / 88 * 0.5));
+/* The back third is the green backing plate a real tile is built on. */
+.inspect-slice.is-backing {
+  background: linear-gradient(
+    100deg,
+    var(--tile-back-hi),
+    var(--tile-back) 45%,
+    var(--tile-back-lo)
+  );
 }
 
 .inspect-words h2 {
@@ -2069,15 +2062,18 @@ h2[id] { scroll-margin-top: 1.5rem; }
     .inspect-tile {
       animation: inspect-turn linear both;
       animation-timeline: --inspect-pass;
-      /* The whole pass, from the section's first pixel entering to its last
-         one leaving. */
-      animation-range: cover 0% cover 100%;
+      /* `contain`, not `cover`. For a section taller than the viewport,
+         contain is exactly the stretch where the section fills the screen —
+         which is exactly when the sticky tile is pinned. Under `cover` the
+         last of the turn happened after the tile had unpinned and was
+         sliding away, so it never appeared to settle. */
+      animation-range: contain 0% contain 100%;
     }
 
     .inspect-words {
       animation: inspect-words linear both;
       animation-timeline: --inspect-pass;
-      animation-range: cover 30% cover 62%;
+      animation-range: contain 22% contain 58%;
     }
   }
 }
