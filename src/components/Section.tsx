@@ -10,22 +10,32 @@ import type { ReactNode } from "react";
 export default function Section({
   id,
   title,
-  halftone = false,
+  lead,
+  reveal = false,
   children,
 }: {
   id: string;
   title: string;
-  /** Lays a faint field of dots behind the section. Decorative, opt-in. */
-  halftone?: boolean;
+  /** Rendered above the heading. Decorative — the rolling dot lives here. */
+  lead?: ReactNode;
+  /**
+   * Uncovers the heading as the section arrives, on a timeline the lead can
+   * read too, so the two move together rather than merely near each other.
+   */
+  reveal?: boolean;
   children: ReactNode;
 }) {
   return (
     <section
-      className={halftone ? "section section-halftone" : "section"}
+      className={reveal ? "section section-reveal" : "section"}
       aria-labelledby={id}
     >
       <div className="section-wrap">
-        <h2 className="section-title" id={id}>
+        {lead}
+        <h2
+          className={reveal ? "section-title section-title-reveal" : "section-title"}
+          id={id}
+        >
           {title}
         </h2>
         {children}

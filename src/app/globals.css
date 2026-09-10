@@ -1985,8 +1985,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   height: clamp(120px, 22vh, 200px);
   /* The dot leaves at both ends rather than stopping at an invisible wall. */
   overflow: hidden;
-  view-timeline-name: --roll-pass;
-  view-timeline-axis: block;
 }
 
 .roll-dot {
@@ -2010,8 +2008,8 @@ h2[id] { scroll-margin-top: 1.5rem; }
   @media (prefers-reduced-motion: no-preference) {
     .roll-dot {
       animation: roll-across linear both;
-      animation-timeline: --roll-pass;
-      animation-range: cover 0% cover 100%;
+      animation-timeline: --reveal-pass;
+      animation-range: var(--reveal-range);
     }
   }
 }
@@ -2025,5 +2023,103 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
   to {
     transform: translate(calc(-50% + var(--roll-travel)), -50%) rotate(516deg);
+  }
+}
+
+/* The sliding tab marker.
+ 
+   Only rendered once JavaScript has measured the current tab, which is why
+   .nav a[aria-current="page"] keeps its own background above: without JS
+   there is no marker, and the plain background is the whole indicator. The
+   [data-marker="on"] rules below hand over from one to the other, so the two
+   are never both visible. */
+.nav-marker {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: 4px;
+  pointer-events: none;
+}
+
+.nav-marker span {
+  display: block;
+  height: 100%;
+  border-radius: 12px;
+  background: var(--tile-face);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(35, 40, 31, 0.14);
+  transition-property: transform, width;
+  transition-duration: 420ms;
+  transition-timing-function: cubic-bezier(0.34, 0.9, 0.32, 1);
+}
+
+.nav[data-marker="on"] ul {
+  position: relative;
+}
+
+/* The marker is doing this job now, so the tab stops painting its own. The
+   colour stays: that is what marks the current tab, and it is not carried by
+   the moving box. */
+.nav[data-marker="on"] a[aria-current="page"] {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* The link has to sit above the marker or the marker covers the word. */
+.nav[data-marker="on"] li:not(.nav-marker) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-marker span {
+    transition-property: none;
+  }
+}
+
+/* A section the dot uncovers.
+ 
+   One timeline, declared here and read by both the rolling dot above the
+   heading and the heading itself, over the same range. That is the whole
+   trick: two animations on one clock stay in step, where two clocks drift
+   and the dot stops looking like the cause of anything.
+ 
+   The range is where the section sits around reading height rather than the
+   whole pass — a tall section (this one holds the calendar) would otherwise
+   finish the reveal while its heading was still off the bottom of the screen. */
+.section-reveal {
+  --reveal-range: cover 8% cover 40%;
+
+  view-timeline-name: --reveal-pass;
+  view-timeline-axis: block;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section-title-reveal {
+      animation: title-uncover linear both;
+      animation-timeline: --reveal-pass;
+      animation-range: var(--reveal-range);
+    }
+  }
+}
+
+/* The heading has to shrink to its text before any of this means anything.
+   A section title is a block and fills the reading column, so clipping a
+   percentage off the right of a 900px box does not touch 170px of words —
+   the wipe did nothing until the last fifth of the range. */
+.section-title-reveal {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* Wiped open left to right, following the dot. clip-path rather than opacity
+   because the point is that something passed over it, not that it faded up. */
+@keyframes title-uncover {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 -0.2em 0 0);
   }
 }

@@ -39,9 +39,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <RollingDot />
-
-      <Section id="when" title="When do we play?">
+      <Section id="when" title="When do we play?" lead={<RollingDot />} reveal>
         <NextMeeting />
         <Calendar />
       </Section>
