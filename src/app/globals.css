@@ -366,27 +366,9 @@ main {
   height: 100% !important;
 }
 
-/* With JavaScript running the canvas will take over, so the flat tiles stop
-   animating and simply sit face-up. Without JavaScript this never applies and
-   the CSS reveal plays as before. */
-/* While the canvas loads, show nothing at all rather than the flat tiles'
-   starting pose — that pose belongs to an animation which is no longer going
-   to play, and it reads as a glitch. The <h1> text stays in the DOM. */
-/* Not shown while a canvas is on its way. The flat tiles were only ever a
-   stand-in for the 3D wordmark, and showing them first means the header
-   resolves twice — face-up tiles, then the same tiles again in 3D. One
-   reveal, not two.
-
-   They stay in the DOM regardless: this is the <h1>, it carries the club's
-   name as real text, and it is what a screen reader reads. Hidden here means
-   hidden to the eye only.
-
-   The cost is real and worth naming: with JavaScript blocked or WebGL
-   unavailable, nothing is legible until the fallback fires. That is why the
-   give-up timer in Hero.tsx is short, and why the <noscript> block in
-   layout.tsx exists. */
+/* The CSS name remains readable while the decorative canvas loads. */
 .wordmark-tiles {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 420ms ease;
 }
 
@@ -2095,3 +2077,104 @@ h2[id] { scroll-margin-top: 1.5rem; }
 
   clip-path: inset(0 calc((1 - var(--open-at)) * 100%) 0 0);
 }
+
+/* Tactile club-table redesign. Page composition stays separate from data pages. */
+.home-page {
+  --content: 74rem;
+}
+.home-page .hero {
+  padding-block: clamp(3rem, 7vw, 6rem) 3.5rem;
+  overflow: clip;
+  background: radial-gradient(ellipse at 50% 30%, #ffffffb3, transparent 65%);
+}
+.home-page .hero .section-wrap { max-width: 66rem; }
+.home-page .tile-scene { --tile-w: clamp(29px, 10.8vw, 108px); }
+.home-page .hero-stage { margin-bottom: 2rem; }
+.home-page .wordmark-sub { font-size: clamp(1rem, 2vw, 1.4rem); letter-spacing: 0.22em; margin-top: 1.8rem; }
+.home-page .tagline { font-size: clamp(1.15rem, 2vw, 1.4rem); margin-inline: auto; }
+.hero-scene { pointer-events: auto; }
+/* The name is visible in the initial HTML, including while WebGL loads. */
+.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 1; }
+.home-page .section { padding-block: clamp(3rem, 7vw, 6rem); }
+.home-page .section-title { font-size: clamp(2.6rem, 5.5vw, 4.7rem); letter-spacing: -0.045em; max-width: 14ch; }
+.home-page .section-title::after { display: none; }
+.home-page .welcome { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+.home-page .welcome > div:first-child { padding-top: 1rem; }
+.home-page .welcome p { max-width: 36ch; font-size: 1.15rem; }
+.home-page .welcome .welcome-lead { font-family: var(--display); font-size: clamp(1.6rem, 3vw, 2.3rem); line-height: 1.2; max-width: 20ch; }
+.home-page .welcome .text-link { display: inline-flex; align-items: center; min-height: 48px; margin-top: 1rem; font-weight: 600; }
+.home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
+.home-page .section:has(#first-night) > .section-wrap { position: relative; }
+.tile-showcase { margin-top: -8rem; border-radius: 18px; background: #dce7da; border: 1px solid #c5d5c5; overflow: hidden; }
+.showcase-viewport { position: relative; height: clamp(270px, 33vw, 390px); background: radial-gradient(ellipse at 45% 30%, #fbfff2a6, transparent 70%); }
+.showcase-fallback { position: absolute; width: 160px; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-6deg); filter: drop-shadow(10px 20px 14px #254a3529); }
+.showcase-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.showcase-viewport[data-ready="true"] .showcase-fallback { opacity: 0; }
+.showcase-canvas { position: absolute !important; inset: 0; }
+.showcase-controls { text-align: center; padding: 0 1rem 1.25rem; }
+.suit-selector { display: flex; gap: 4px; padding: 4px; width: fit-content; margin: auto; border: 1px solid #b9ccbb; border-radius: 12px; }
+.suit-selector button, .turn-tile, .photo-navigation button { font: 600 0.95rem var(--sans); min-height: 44px; padding: 0.5rem 1rem; border: 0; border-radius: 8px; cursor: pointer; background: transparent; color: var(--jade); }
+.suit-selector button[aria-pressed="true"] { background: var(--tile-face); box-shadow: 0 2px 3px #2a63501f; color: #254735; }
+.showcase-controls p { font-size: 0.95rem !important; margin: 1rem auto 0.2rem; min-height: 2.8em; }
+.turn-tile { text-decoration: underline; text-underline-offset: 4px; }
+.turn-tile span { display: inline-block; margin-left: 0.4rem; font-size: 1.3rem; }
+.home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
+.home-page .next-meeting { border-left: 3px solid var(--jade); padding: 1.25rem 0 1.25rem 1.5rem; }
+.home-page .next-meeting-when { font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.home-page .calendar-frame { width: 100%; margin: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px #254a3510; }
+.home-page .roll { height: 90px; }
+.home-page .section-reveal { border-block: 1px solid var(--rule); }
+.action-link { border-radius: 9px; min-height: 48px; box-shadow: 0 3px 0 #23483226; }
+.action-link-primary:hover { color: var(--tile-face-hi); background: #204b3d; }
+:focus-visible { outline: 3px solid var(--jade); outline-offset: 5px; }
+.photo-intro { margin-bottom: 2rem; font-size: 1.2rem; }
+.photo-grid { grid-template-columns: 1.35fr 1fr; align-items: start; gap: 2rem; }
+.photo-slot { aspect-ratio: auto; background: none; border-radius: 0; overflow: visible; animation: none; }
+.photo-slot:nth-child(2n) { padding-top: 5rem; }
+.photo-slot:only-child { grid-column: 1 / -1; max-width: 58rem; }
+.photo-slot button { display: block; position: relative; padding: 0; border: 0; width: 100%; overflow: hidden; border-radius: 14px; background: #dce7da; cursor: zoom-in; }
+.photo-slot img { aspect-ratio: 4 / 3; object-fit: cover; }
+.photo-slot:nth-child(2n) img { aspect-ratio: 4 / 5; }
+.photo-slot figcaption { padding-top: 0.75rem; color: var(--ink-soft); }
+.photo-open { position: absolute; right: 1rem; bottom: 1rem; background: var(--tile-face); color: #254735; padding: 0.5rem 0.75rem; border-radius: 7px; font: 600 0.9rem var(--sans); }
+.photo-dialog { width: min(1100px, 94vw); max-height: 94dvh; padding: 1rem; border: 1px solid var(--rule); border-radius: 16px; background: #edf2e9; color: var(--ink); }
+.photo-dialog::backdrop { background: #102a20db; }
+.photo-dialog-inner > img { width: 100%; height: min(68dvh, 800px); object-fit: contain; }
+.photo-dialog form { display: flex; justify-content: end; margin-bottom: 1rem; }
+.photo-dialog button { cursor: pointer; }
+.photo-navigation { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.photo-navigation p { text-align: center; font-size: 0.9rem; }
+.photo-navigation button:disabled { opacity: 0.4; cursor: default; }
+@media (prefers-reduced-motion: no-preference) {
+  .action-link, .social-list > a, .suit-selector button, .turn-tile { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+  .action-link:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #23483226; }
+  .action-link:active, .turn-tile:active { transform: translateY(2px); box-shadow: none; }
+  .suit-selector button:hover { background-color: #f6f3ea99; }
+  .set-tile-body { transition: transform 240ms ease, filter 240ms ease; }
+  .set-tile:hover .set-tile-body { transform: translateY(-7px) rotate(-3deg); filter: drop-shadow(3px 10px 5px #254a3530); }
+  .photo-slot img { transition: transform 450ms cubic-bezier(.2,.7,.3,1); }
+  .photo-slot button:hover img { transform: scale(1.035); }
+}
+@media (max-width: 767px) {
+  .home-page .hero { padding-block: 3.25rem 2.5rem; }
+  .home-page .welcome, .home-page .meeting-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .home-page .section-title { max-width: 100%; }
+  .tile-showcase { margin-top: 0; }
+  .showcase-viewport { height: 300px; }
+  .home-page .welcome > div:first-child { padding-top: 0; }
+  .home-page .next-meeting { margin: 0; }
+  .photo-grid { grid-template-columns: 1fr; }
+  .photo-slot:nth-child(2n) { padding-top: 0; }
+  .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }
+  .photo-navigation { gap: 0.25rem; }
+  .photo-navigation button { padding-inline: 0.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-tiles { transition: none; }
+  .section-title-reveal { clip-path: none; }
+  .roll-dot { transform: translate(-50%, -50%); }
+}
+
+.showcase-turn { min-height: 44px; }
+.home-page .tagline { max-width: 46ch; }
+.nav a:active { background: #d2decc; }

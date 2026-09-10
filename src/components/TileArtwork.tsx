@@ -266,6 +266,12 @@ export function Bird() {
         opacity="0.72"
       />
 
+      {/* Fine feather cuts keep the silhouette readable at small sizes. */}
+      <path d="M47 48 q4 10 4 18 M44 51 q1 9 5 16 M48 70 l3 3"
+        fill="none" stroke="#fffdf6" strokeWidth="1.1" strokeLinecap="round" opacity="0.85" />
+      <path d="M33 89 l4 -3 M43 91 l3 -5 M53 88 l1 -5"
+        fill="none" stroke={GREEN} strokeWidth="1.3" strokeLinecap="round" />
+
       {/* Head and beak. */}
       <circle cx="41" cy="31" r="6.4" fill={GREEN} />
       <path d="M35 29 l-7 3 l7 3z" fill={RED} />

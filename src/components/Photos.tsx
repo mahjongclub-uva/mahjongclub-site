@@ -1,46 +1,106 @@
-import type { CSSProperties } from "react";
-import { PHOTOS } from "@/lib/site";
+"use client";
+
+import { useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { PHOTOS, type Photo } from "@/lib/site";
 import { asset } from "@/lib/asset";
 
-/**
- * Club photographs.
- *
- * Add them in src/lib/site.ts. Until there are any, this renders nothing so
- * visitors never see a row of unfinished placeholder frames.
- *
- * Each frame carries --i, which offsets its scroll-reveal so they arrive one
- * after another rather than all at once.
- *
- * Every image declares width and height, so nothing on the page moves as they
- * load. Read the privacy rules in CLAUDE.md before adding a photograph of
- * anybody — no full names, no precise location, and strip EXIF first.
- */
-export default function Photos() {
-  if (PHOTOS.length === 0) return null;
-
+/** Add consented, EXIF-stripped photographs to PHOTOS in site.ts. */
+export default function Photos({ photos = PHOTOS }: { photos?: Photo[] }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [active, setActive] = useState(0);
+  const reduce = useReducedMotion();
+  if (!photos.length) return null;
+  const photo = photos[active];
   return (
-    <div className="photo-grid">
-      {PHOTOS.map((photo, i) => (
-        <figure
-          className="photo-slot"
-          key={photo.src}
-          style={{ "--i": i } as CSSProperties}
-        >
-          {/* asset() prefixes the base path; a bare src would 404 in
-              production. next/image would add nothing here — optimisation is
-              off, since a static export has no image server — and it does not
-              prefix the path either once unoptimized. */}
+    <>
+      <div className="photo-grid">
+        {photos.map((photo, i) => (
+          <motion.figure
+            className="photo-slot"
+            key={photo.src}
+            initial={false}
+            whileInView={reduce ? undefined : { y: [18, 0], opacity: [0.5, 1] }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.55, delay: (i % 3) * 0.08 }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setActive(i);
+                dialog.current?.showModal();
+              }}
+              aria-label={`Enlarge photo: ${photo.alt}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={asset(photo.src)}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                loading="lazy"
+                decoding="async"
+                style={{ objectPosition: photo.position }}
+              />
+              <span className="photo-open" aria-hidden="true">
+                View photo ↗
+              </span>
+            </button>
+            {photo.caption && <figcaption>{photo.caption}</figcaption>}
+          </motion.figure>
+        ))}
+      </div>
+      <dialog
+        ref={dialog}
+        className="photo-dialog"
+        aria-label="Club photo viewer"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) dialog.current?.close();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowRight")
+            setActive((n) => (n + 1) % photos.length);
+          if (event.key === "ArrowLeft")
+            setActive((n) => (n - 1 + photos.length) % photos.length);
+        }}
+      >
+        <div className="photo-dialog-inner">
+          <form method="dialog">
+            <button className="action-link" autoFocus>
+              Close ×
+            </button>
+          </form>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={asset(photo.src)}
             alt={photo.alt}
             width={photo.width}
             height={photo.height}
-            loading="lazy"
-            decoding="async"
           />
-        </figure>
-      ))}
-    </div>
+          <div className="photo-navigation">
+            <button
+              type="button"
+              onClick={() =>
+                setActive((n) => (n - 1 + photos.length) % photos.length)
+              }
+              disabled={photos.length < 2}
+            >
+              Previous
+            </button>
+            <p aria-live="polite">
+              {active + 1} / {photos.length}
+              {photo.caption ? ` · ${photo.caption}` : ""}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActive((n) => (n + 1) % photos.length)}
+              disabled={photos.length < 2}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </dialog>
+    </>
   );
 }

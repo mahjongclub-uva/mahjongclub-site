@@ -25,13 +25,13 @@ export function TileBody({ depth = TILE_D }: { depth?: number }) {
     <>
       <RoundedBox
         args={[TILE_W, TILE_H, depth * 0.72]}
-        radius={0.075}
+        radius={0.055}
         smoothness={6}
         position={[0, 0, depth * 0.14]}
       >
         <meshPhysicalMaterial
           color="#f7f4ec"
-          roughness={0.24}
+          roughness={0.3}
           metalness={0}
           clearcoat={0.9}
           clearcoatRoughness={0.18}
@@ -42,7 +42,7 @@ export function TileBody({ depth = TILE_D }: { depth?: number }) {
 
       <RoundedBox
         args={[TILE_W, TILE_H, depth * 0.34]}
-        radius={0.075}
+        radius={0.055}
         smoothness={6}
         position={[0, 0, -depth * 0.33]}
       >
@@ -69,9 +69,9 @@ export function TileBody({ depth = TILE_D }: { depth?: number }) {
 export function TileLights() {
   return (
     <>
-      <ambientLight intensity={1.15} />
-      <hemisphereLight args={["#fffaf0", "#c8cbbe", 1.1]} />
-      <directionalLight position={[-3.5, 5, 5]} intensity={2.2} />
+      <ambientLight intensity={0.7} />
+      <hemisphereLight args={["#fffaf0", "#c8cbbe", 0.7]} />
+      <directionalLight position={[-3.5, 5, 5]} intensity={1.7} />
       <directionalLight position={[4, 1.5, 3]} intensity={0.7} />
       <Environment resolution={256} frames={1}>
         <Lightformer position={[0, 3, 3]} scale={[8, 3, 1]} intensity={2.4} color="#fffaf0" />

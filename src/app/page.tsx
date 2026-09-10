@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PHOTOS, TAGLINE } from "@/lib/site";
+import { PHOTOS, TAGLINE, HOME } from "@/lib/site";
+import TileShowcase from "@/components/TileShowcase";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
 import RollingDot from "@/components/RollingDot";
@@ -11,7 +12,7 @@ import RevealSection from "@/components/RevealSection";
 
 export default function Home() {
   return (
-    <main>
+    <main className="home-page">
       <header className="hero">
         <div className="section-wrap">
           <Hero />
@@ -27,16 +28,16 @@ export default function Home() {
         </div>
       </header>
 
-      <Section id="first-night" title="Come to our meetings!">
+      <Section id="first-night" title={HOME.welcomeTitle}>
         <div className="welcome">
           <div>
-          <p>
-            You do not need to know the rules or bring a set! Come to learn, play, and just hang out, whether you’re studying, socializing, or just vibing, there’s a seat for you at the table. Grab your friends and join us for a relaxing (and maybe a little competitive 👀) mahjong session!
-          </p>
+          <p className="welcome-lead">{HOME.welcomeNote}</p>
+          <p>{HOME.welcome}</p>
           <Link className="text-link" href="/guide/#first-table">
             What should I expect?
           </Link>
           </div>
+          <TileShowcase />
         </div>
       </Section>
 
@@ -47,6 +48,7 @@ export default function Home() {
 
       {PHOTOS.length > 0 && (
         <Section id="table" title="At the table">
+          <p className="photo-intro">{HOME.photoIntro}</p>
           <Photos />
         </Section>
       )}

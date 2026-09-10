@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { TileBody, TileLights, TILE_W, TILE_H, TILE_D, cssVar } from "@/components/Tile3D";
 import * as THREE from "three";
@@ -19,12 +19,12 @@ import * as THREE from "three";
  * visible.
  */
 
-const WORD = "MAHJONG";
+import { WORDMARK } from "@/lib/site";
 const GAP = 0.09;
 
 /** Draws a letter to a canvas and hands it back as a texture. */
 function useLetterTextures(letters: string[]) {
-  return useMemo(() => {
+  const textures = useMemo(() => {
     return letters.map((letter) => {
       const canvas = document.createElement("canvas");
       canvas.width = 256;
@@ -43,6 +43,8 @@ function useLetterTextures(letters: string[]) {
       return texture;
     });
   }, [letters]);
+  useEffect(() => () => textures.forEach((texture) => texture.dispose()), [textures]);
+  return textures;
 }
 
 type BeatProps = { index: number; letter: string; texture: THREE.Texture };
@@ -121,7 +123,7 @@ function FirstFrame({ onReady }: { onReady?: () => void }) {
 }
 
 export default function TileScene({ onReady }: { onReady?: () => void }) {
-  const letters = useMemo(() => WORD.split(""), []);
+  const letters = useMemo(() => WORDMARK.split(""), []);
   const [failed, setFailed] = useState(false);
 
   if (failed) return null;
@@ -134,10 +136,7 @@ export default function TileScene({ onReady }: { onReady?: () => void }) {
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => {
         gl.setClearAlpha(0);
-        // Report on context creation rather than on the first drawn frame: a
-        // backgrounded or throttled tab may never draw one, and the flat
-        // tiles would sit there waiting forever. A timer fires either way.
-        setTimeout(() => onReady?.(), 0);
+
       }}
       onError={() => setFailed(true)}
     >
