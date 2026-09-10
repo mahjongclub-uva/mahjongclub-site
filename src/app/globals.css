@@ -1993,46 +1993,25 @@ h2[id] { scroll-margin-top: 1.5rem; }
   inset-inline-start: 50%;
   width: var(--roll-size);
   height: var(--roll-size);
-  /* Resting state: centred and upright. Everything below is what scrolling
-     does to it, and the divider is fine without any of it. */
-  transform: translate(-50%, -50%);
+  /* --progress is published by RevealSection and runs 0..1 across the
+     section's pass. The window below is the stretch of that pass where the
+     roll happens; clamped, so the dot is parked before it and after it.
+ 
+     Defaulting --progress to 1 is what makes this safe: with no JavaScript the
+     dot is centred and upright, which is exactly where the roll ends. */
+  --roll-at: clamp(0, calc((var(--progress, 1) - 0.05) / 0.23), 1);
+
+  transform: translate(
+      calc(-50% - var(--roll-travel) * 2 * (1 - var(--roll-at))),
+      -50%
+    )
+    rotate(calc((var(--roll-at) - 1) * 1032deg));
   opacity: 0.85;
 }
 
 .roll-dot svg {
   width: 100%;
   height: 100%;
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .roll-dot {
-      animation: roll-across linear both;
-      animation-timeline: --reveal-pass;
-      animation-range: var(--reveal-range);
-    }
-  }
-}
-
-/* Rolls in from off the left and stops in the middle — it does not roll past
-   and park on the right.
- 
-   Two reasons. The end state now matches the resting state, so a browser
-   without scroll timelines shows the dot exactly where an animated one comes
-   to rest, which is the rule everything else here follows. And a dot centred
-   under the heading is a divider; a dot shoved against the right edge just
-   looks misplaced.
- 
-   9 diameters of travel is 9 / pi = 2.865 turns, so 1032deg. Change
-   --roll-travel and this has to change with it or the dot slips. */
-@keyframes roll-across {
-  from {
-    transform: translate(calc(-50% - var(--roll-travel) * 2), -50%)
-      rotate(-1032deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
 }
 
 /* The sliding tab marker.
@@ -2100,23 +2079,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
    the band was still down at the bottom edge of the screen, so by the time
    you looked at it, it had already stopped. */
 .section-reveal {
-  /* The dot lands as the band reaches the middle of the screen. */
-  --reveal-range: cover 5% cover 28%;
-  /* The heading opens just behind it, so the dot reads as the cause. */
-  --reveal-title-range: cover 12% cover 33%;
-
-  view-timeline-name: --reveal-pass;
-  view-timeline-axis: block;
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .section-title-reveal {
-      animation: title-uncover linear both;
-      animation-timeline: --reveal-pass;
-      animation-range: var(--reveal-title-range);
-    }
-  }
+  position: relative;
 }
 
 /* The heading has to shrink to its text before any of this means anything.
@@ -2126,15 +2089,9 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .section-title-reveal {
   width: fit-content;
   max-width: 100%;
-}
 
-/* Wiped open left to right, following the dot. clip-path rather than opacity
-   because the point is that something passed over it, not that it faded up. */
-@keyframes title-uncover {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 -0.2em 0 0);
-  }
+  /* Opens just behind the dot, so the dot reads as the cause. */
+  --open-at: clamp(0, calc((var(--progress, 1) - 0.12) / 0.21), 1);
+
+  clip-path: inset(0 calc((1 - var(--open-at)) * 100%) 0 0);
 }

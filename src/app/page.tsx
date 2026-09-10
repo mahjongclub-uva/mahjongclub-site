@@ -7,6 +7,7 @@ import NextMeeting from "@/components/NextMeeting";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
 import Section from "@/components/Section";
+import RevealSection from "@/components/RevealSection";
 
 export default function Home() {
   return (
@@ -39,10 +40,10 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section id="when" title="When do we play?" lead={<RollingDot />} reveal>
+      <RevealSection id="when" title="When do we play?" lead={<RollingDot />}>
         <NextMeeting />
         <Calendar />
-      </Section>
+      </RevealSection>
 
       {PHOTOS.length > 0 && (
         <Section id="table" title="At the table">
