@@ -1,4 +1,5 @@
 import { TileFaceArt } from "@/components/TileArt";
+import { Dots, Bamboo } from "@/components/TileArtwork";
 
 /**
  * Every tile in a standard set, drawn rather than photographed.
@@ -16,91 +17,8 @@ import { TileFaceArt } from "@/components/TileArt";
  * makes the page searchable for "seven of bamboo".
  */
 
-/* The face's drawable area, in <TileFaceArt>'s own 88x124 coordinates. The
-   recessed panel runs x 7..81 and y 7..111, so everything below stays inside
-   roughly x 20..68 and y 24..94 to keep a margin. */
-
-const NUMERALS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
 const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-
-type Point = [number, number];
-
-/**
- * Where the circles go on a dots tile, by count.
- *
- * These are laid out to read at a glance rather than to copy any one
- * manufacturer: three runs on the diagonal, seven is a row above a block, and
- * one is a single large circle, which is how every set does it.
- */
-const DOT_LAYOUT: Record<number, Point[]> = {
-  1: [[44, 59]],
-  2: [[44, 38], [44, 80]],
-  3: [[26, 32], [44, 59], [62, 86]],
-  4: [[29, 38], [59, 38], [29, 80], [59, 80]],
-  5: [[29, 34], [59, 34], [44, 59], [29, 84], [59, 84]],
-  6: [[29, 30], [59, 30], [29, 59], [59, 59], [29, 88], [59, 88]],
-  7: [[26, 28], [44, 28], [62, 28], [31, 66], [57, 66], [31, 92], [57, 92]],
-  8: [[31, 26], [57, 26], [31, 48], [57, 48], [31, 70], [57, 70], [31, 92], [57, 92]],
-  9: [[26, 32], [44, 32], [62, 32], [26, 59], [44, 59], [62, 59], [26, 86], [44, 86], [62, 86]],
-};
-
-/** Same idea for bamboo, where each mark is a stick rather than a circle. */
-const BAMBOO_LAYOUT: Record<number, Point[]> = {
-  1: [[44, 59]],
-  2: [[44, 38], [44, 80]],
-  3: [[44, 30], [32, 78], [56, 78]],
-  4: [[31, 38], [57, 38], [31, 80], [57, 80]],
-  5: [[31, 32], [57, 32], [44, 59], [31, 86], [57, 86]],
-  6: [[27, 38], [44, 38], [61, 38], [27, 80], [44, 80], [61, 80]],
-  7: [[44, 26], [27, 62], [44, 62], [61, 62], [27, 94], [44, 94], [61, 94]],
-  8: [[24, 38], [37, 38], [51, 38], [64, 38], [24, 80], [37, 80], [51, 80], [64, 80]],
-  9: [[27, 28], [44, 28], [61, 28], [27, 59], [44, 59], [61, 59], [27, 90], [44, 90], [61, 90]],
-};
-
-function Dots({ count }: { count: number }) {
-  const points = DOT_LAYOUT[count];
-  // One dot is drawn large, the way a real 一筒 is — it is the only count that
-  // gets the whole face to itself.
-  const r = count === 1 ? 17 : 9.5;
-
-  return (
-    <>
-      {points.map(([x, y], i) => (
-        <g key={i}>
-          <circle cx={x} cy={y} r={r} fill="none" stroke="var(--jade)" strokeWidth={r * 0.34} />
-          <circle cx={x} cy={y} r={r * 0.3} fill="var(--tile-letter)" />
-        </g>
-      ))}
-    </>
-  );
-}
-
-function Bamboo({ count }: { count: number }) {
-  const points = BAMBOO_LAYOUT[count];
-  const tall = count === 1;
-  const w = tall ? 11 : count === 8 ? 7 : 8;
-  const h = tall ? 62 : count >= 7 ? 26 : 30;
-
-  return (
-    <>
-      {points.map(([x, y], i) => (
-        <g key={i}>
-          <rect
-            x={x - w / 2}
-            y={y - h / 2}
-            width={w}
-            height={h}
-            rx={w / 2}
-            fill="var(--tile-back-lo)"
-          />
-          {/* The two joints. A bamboo stick without them reads as a bar. */}
-          <rect x={x - w / 2} y={y - h * 0.2} width={w} height={h * 0.09} fill="var(--tile-back-hi)" />
-          <rect x={x - w / 2} y={y + h * 0.14} width={w} height={h * 0.09} fill="var(--tile-back-hi)" />
-        </g>
-      ))}
-    </>
-  );
-}
 
 /** One tile: the drawn face, whatever sits on it, and its name for a reader. */
 function Tile({ name, children }: { name: string; children: React.ReactNode }) {
@@ -180,7 +98,7 @@ export default function TileSet() {
       <Group
         id="suit-characters"
         title="Characters"
-        note="Read the number on top and 萬 underneath. Four of each, thirty-six in all."
+        note="The number on top, 萬 underneath. Five is written 伍, the formal numeral, the way a cheque spells it out."
       >
         {RANKS.map((n) => (
           <CharacterTile
@@ -195,7 +113,7 @@ export default function TileSet() {
       <Group
         id="suit-dots"
         title="Dots"
-        note="Count the circles. One dot is drawn large and alone, which is how you tell it from the rest at speed."
+        note="Count the rings. One is drawn large and alone; the colours change from tile to tile so you can read a count across the table without counting."
       >
         {RANKS.map((n) => (
           <Tile key={n} name={`${WORDS[n]} of dots`}>
@@ -207,7 +125,7 @@ export default function TileSet() {
       <Group
         id="suit-bamboo"
         title="Bamboo"
-        note="Count the sticks. In most sets one bamboo is a bird rather than a stick — same tile, older joke."
+        note="Count the stalks. One bamboo is a bird, which every set draws differently and none explains."
       >
         {RANKS.map((n) => (
           <Tile key={n} name={`${WORDS[n]} of bamboo`}>

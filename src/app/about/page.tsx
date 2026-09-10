@@ -23,7 +23,7 @@ export default function About() {
       </header>
 
       <Section id="game" title="What we play">
-        <div className="prose">
+        <div className="prose reading">
           <p>
             Fuzhou-style mahjong. Sixteen tiles in hand instead of the usual
             thirteen, four players to a table, and a gold wildcard that stands
@@ -88,7 +88,7 @@ export default function About() {
       </Section>
 
       <Section id="learn" title="New to mahjong?">
-        <div className="prose">
+        <div className="prose reading">
           <p>
             Most members learned here. We provide the sets and guide new
             players through a practice hand before anything is scored.

@@ -1927,185 +1927,103 @@ h2[id] { scroll-margin-top: 1.5rem; }
   mask-image: radial-gradient(circle at 16% 84%, #000, transparent 66%);
 }
 
-/* 16. The tile you scroll past ============================================ */
+/* 15. Reading highlight =================================================== */
 
-/* Tall on purpose: the height IS the animation's duration. Shorten this and
-   the turn happens faster, because the timeline is measured in scroll
-   distance rather than seconds. */
-.inspect {
-  --inspect-w: clamp(120px, 26vw, 210px);
-  /* Depth as a fraction of width. The flat CSS tiles use 0.15 and read as
-     card; the header's three.js tiles use 0.42 and the Instagram tile 0.62,
-     which is the one that looks right. A real tile is about 20mm by 16mm,
-     so 0.62 is if anything still shy. */
-  --inspect-depth: calc(var(--inspect-w) * 0.62);
-  /* The face SVG rounds its corners at 11 of 88 units. Every slice has to
-     match, or the silhouette breaks again. */
-  --inspect-radius: calc(var(--inspect-w) * 0.125);
+/* Body paragraphs sit soft until they reach reading height, then come up to
+   full ink and settle back as they pass. Scroll-driven in CSS, so it costs no
+   JavaScript and cannot jank the thread.
+ 
+   The range is deliberately generous: a paragraph is lit for most of the time
+   it is comfortably readable, rather than only at one exact scroll position.
+   A narrow band turns reading into a chase.
+ 
+   Both fallbacks are the same and both are correct: without scroll-timeline
+   support, or under reduced motion, every paragraph is simply at full ink.
+   Nothing is ever dimmer than the accessible floor — --ink-soft is 6.07:1 on
+   the page ground, so even the resting state passes on its own. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reading p {
+      animation: reading-lift linear both;
+      animation-timeline: view();
+      animation-range: entry 62% exit 38%;
+    }
+  }
+}
+
+@keyframes reading-lift {
+  /* Approaching. */
+  0% {
+    color: var(--ink-soft);
+  }
+  /* In the reading band, and held there for most of the pass. */
+  22%,
+  78% {
+    color: var(--ink);
+  }
+  /* Read, and stepping back. */
+  100% {
+    color: var(--ink-soft);
+  }
+}
+
+/* 16. The rolling dot ===================================================== */
+
+/* A section divider that happens to move. Short on purpose: this is something
+   you pass, not something that detains you. */
+.roll {
+  --roll-size: clamp(44px, 9vw, 78px);
+  /* How far it travels each way, expressed in dot diameters rather than
+     viewport units. That is what makes the roll exact: a circle rolling a
+     distance d turns d / (pi * diameter) times, so tying travel to diameter
+     fixes the ratio at every screen width. In vw it drifted — the clamp on
+     --roll-size saturates at both ends, and the dot then slipped like a wheel
+     on ice at some widths and spun in place at others. */
+  --roll-travel: calc(var(--roll-size) * 4.5);
 
   position: relative;
-  /* The pass is this height plus one viewport, so 160vh is about two and a
-     half screens of scrolling to turn one tile. Long enough to feel unhurried,
-     short enough that nobody scrolling for the meeting time resents it. */
-  min-height: 160vh;
-  /* The timeline the tile reads. Named rather than anonymous so the animation
-     can live on a descendant that is itself sticky — a sticky element's own
-     view() progress is meaningless, since it stops moving. */
-  view-timeline-name: --inspect-pass;
+  height: clamp(120px, 22vh, 200px);
+  /* The dot leaves at both ends rather than stopping at an invisible wall. */
+  overflow: hidden;
+  view-timeline-name: --roll-pass;
   view-timeline-axis: block;
 }
 
-.inspect-sticky {
-  position: sticky;
-  inset-block-start: 0;
-  /* dvh, not vh: on a phone the URL bar makes vh taller than the screen, and
-     the tile would sit low enough to be half hidden behind browser chrome. */
-  min-height: 100dvh;
-  display: grid;
-  place-content: center;
-  gap: var(--space-4);
-  padding-inline: var(--space-4);
-  text-align: center;
-}
-
-.inspect-stage {
-  /* Perspective belongs to the stage, not the tile: an element cannot be
-     viewed through its own perspective. */
-  perspective: 900px;
-  display: grid;
-  place-items: center;
-}
-
-.inspect-tile {
-  position: relative;
-  width: var(--inspect-w);
-  aspect-ratio: 88 / 124;
-  transform-style: preserve-3d;
-  /* Face-up and square on is the resting state. Everything below is what
-     scrolling does to it, and none of it is required for the tile to look
-     right. */
-  transform: rotateY(0deg);
-}
-
-.inspect-face,
-.inspect-slice {
+.roll-dot {
   position: absolute;
-  inset: 0;
-  border-radius: var(--inspect-radius);
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: var(--roll-size);
+  height: var(--roll-size);
+  /* Resting state: centred and upright. Everything below is what scrolling
+     does to it, and the divider is fine without any of it. */
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
 }
 
-.inspect-face {
-  backface-visibility: hidden;
+.roll-dot svg {
+  width: 100%;
+  height: 100%;
 }
 
-.inspect-front {
-  display: grid;
-  place-items: center;
-  transform: translateZ(calc(var(--inspect-depth) / 2));
-}
-
-.inspect-back {
-  transform: rotateY(180deg) translateZ(calc(var(--inspect-depth) / 2));
-}
-
-.inspect-glyph {
-  position: relative;
-  font-family: var(--font-han), sans-serif;
-  font-weight: 700;
-  font-size: calc(var(--inspect-w) * 0.46);
-  line-height: 1;
-  color: var(--tile-letter);
-}
-
-/* One slice of the body. --t runs 0 at the face to 1 at the back, so the
-   stack spans the full depth centred on the tile. */
-.inspect-slice {
-  background: linear-gradient(
-    100deg,
-    var(--tile-face-hi),
-    var(--tile-face) 45%,
-    var(--tile-face-lo)
-  );
-  transform: translateZ(
-    calc(var(--inspect-depth) * (0.5 - var(--t)))
-  );
-}
-
-/* The back third is the green backing plate a real tile is built on. */
-.inspect-slice.is-backing {
-  background: linear-gradient(
-    100deg,
-    var(--tile-back-hi),
-    var(--tile-back) 45%,
-    var(--tile-back-lo)
-  );
-}
-
-.inspect-words h2 {
-  margin: 0;
-  font-size: var(--text-xl);
-}
-
-.inspect-words p {
-  margin: var(--space-2) auto 0;
-  max-width: 32ch;
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-}
-
-/* Scroll drives the turn. Behind @supports because Firefox has not shipped
-   scroll-driven animations, and behind reduced-motion because a tile that
-   moves when you scroll is exactly what that setting is about. Neither
-   fallback is a lesser version: the tile is face-up either way. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .inspect-tile {
-      animation: inspect-turn linear both;
-      animation-timeline: --inspect-pass;
-      /* `contain`, not `cover`. For a section taller than the viewport,
-         contain is exactly the stretch where the section fills the screen —
-         which is exactly when the sticky tile is pinned. Under `cover` the
-         last of the turn happened after the tile had unpinned and was
-         sliding away, so it never appeared to settle. */
-      animation-range: contain 0% contain 100%;
-    }
-
-    .inspect-words {
-      animation: inspect-words linear both;
-      animation-timeline: --inspect-pass;
-      animation-range: contain 22% contain 58%;
+    .roll-dot {
+      animation: roll-across linear both;
+      animation-timeline: --roll-pass;
+      animation-range: cover 0% cover 100%;
     }
   }
 }
 
-/* Shorter on a phone. The same 160vh is three screens of thumb work there,
-   which turns a flourish into an obstacle. */
-@media (max-width: 767px) {
-  .inspect { min-height: 115vh; }
-}
-
-@keyframes inspect-turn {
-  /* Face down and tipped away, as it would sit on the table. */
-  0% {
-    transform: rotateY(178deg) rotateX(14deg) scale(0.92);
-  }
-  /* Picked up and turned — the long middle of the scroll is the turn itself. */
-  55% {
-    transform: rotateY(28deg) rotateX(-6deg) scale(1.04);
-  }
-  /* Held still, square on, read. */
-  100% {
-    transform: rotateY(0deg) rotateX(0deg) scale(1);
-  }
-}
-
-@keyframes inspect-words {
+/* 9 diameters of travel is 9 / pi = 2.865 turns, so 1031deg in total and
+   515.7 each side of centre. Change --roll-travel and this has to change with
+   it, or the dot goes back to slipping. */
+@keyframes roll-across {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translate(calc(-50% - var(--roll-travel)), -50%) rotate(-516deg);
   }
   to {
-    opacity: 1;
-    transform: none;
+    transform: translate(calc(-50% + var(--roll-travel)), -50%) rotate(516deg);
   }
 }

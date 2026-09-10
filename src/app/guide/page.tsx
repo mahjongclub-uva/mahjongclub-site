@@ -51,7 +51,7 @@ export default function Guide() {
       </Section>
 
       <Section id="hand" title="Build a winning hand">
-        <div className="prose guide-prose">
+        <div className="prose guide-prose reading">
           <p>
             Most of your hand is arranged into groups: three matching tiles,
             four matching tiles, or three consecutive tiles in one suit.
@@ -86,7 +86,7 @@ export default function Guide() {
       </Section>
 
       <Section id="first-table" title="Your first table">
-        <div className="prose guide-prose">
+        <div className="prose guide-prose reading">
           <p>
             Bring nothing. We provide the sets, explain the gold tile, and
             play a practice hand before recording a score.
