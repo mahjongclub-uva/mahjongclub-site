@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PHOTOS, TAGLINE } from "@/lib/site";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
+import InspectTile from "@/components/InspectTile";
 import NextMeeting from "@/components/NextMeeting";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
@@ -37,6 +38,8 @@ export default function Home() {
           </div>
         </div>
       </Section>
+
+      <InspectTile />
 
       <Section id="when" title="When do we play?">
         <NextMeeting />

@@ -10,14 +10,20 @@ import type { ReactNode } from "react";
 export default function Section({
   id,
   title,
+  halftone = false,
   children,
 }: {
   id: string;
   title: string;
+  /** Lays a faint field of dots behind the section. Decorative, opt-in. */
+  halftone?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="section" aria-labelledby={id}>
+    <section
+      className={halftone ? "section section-halftone" : "section"}
+      aria-labelledby={id}
+    >
       <div className="section-wrap">
         <h2 className="section-title" id={id}>
           {title}
