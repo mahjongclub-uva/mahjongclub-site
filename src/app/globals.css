@@ -2014,15 +2014,24 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
 }
 
-/* 9 diameters of travel is 9 / pi = 2.865 turns, so 1031deg in total and
-   515.7 each side of centre. Change --roll-travel and this has to change with
-   it, or the dot goes back to slipping. */
+/* Rolls in from off the left and stops in the middle — it does not roll past
+   and park on the right.
+ 
+   Two reasons. The end state now matches the resting state, so a browser
+   without scroll timelines shows the dot exactly where an animated one comes
+   to rest, which is the rule everything else here follows. And a dot centred
+   under the heading is a divider; a dot shoved against the right edge just
+   looks misplaced.
+ 
+   9 diameters of travel is 9 / pi = 2.865 turns, so 1032deg. Change
+   --roll-travel and this has to change with it or the dot slips. */
 @keyframes roll-across {
   from {
-    transform: translate(calc(-50% - var(--roll-travel)), -50%) rotate(-516deg);
+    transform: translate(calc(-50% - var(--roll-travel) * 2), -50%)
+      rotate(-1032deg);
   }
   to {
-    transform: translate(calc(-50% + var(--roll-travel)), -50%) rotate(516deg);
+    transform: translate(-50%, -50%) rotate(0deg);
   }
 }
 
@@ -2084,11 +2093,17 @@ h2[id] { scroll-margin-top: 1.5rem; }
    trick: two animations on one clock stay in step, where two clocks drift
    and the dot stops looking like the cause of anything.
  
-   The range is where the section sits around reading height rather than the
-   whole pass — a tall section (this one holds the calendar) would otherwise
-   finish the reveal while its heading was still off the bottom of the screen. */
+   The ranges are where the section sits around reading height, not the whole
+   pass. A tall section (this one holds the calendar) would otherwise finish
+   the whole reveal while its heading was still below the fold — and that is
+   exactly what went wrong the first time: the dot completed its roll while
+   the band was still down at the bottom edge of the screen, so by the time
+   you looked at it, it had already stopped. */
 .section-reveal {
-  --reveal-range: cover 8% cover 40%;
+  /* The dot lands as the band reaches the middle of the screen. */
+  --reveal-range: cover 5% cover 28%;
+  /* The heading opens just behind it, so the dot reads as the cause. */
+  --reveal-title-range: cover 12% cover 33%;
 
   view-timeline-name: --reveal-pass;
   view-timeline-axis: block;
@@ -2099,7 +2114,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
     .section-title-reveal {
       animation: title-uncover linear both;
       animation-timeline: --reveal-pass;
-      animation-range: var(--reveal-range);
+      animation-range: var(--reveal-title-range);
     }
   }
 }
