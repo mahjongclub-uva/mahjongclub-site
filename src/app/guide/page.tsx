@@ -1,4 +1,5 @@
 import Section from "@/components/Section";
+import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
 
 export const metadata = {
@@ -9,7 +10,7 @@ export const metadata = {
 
 export default function Guide() {
   return (
-    <main>
+    <main className="guide-page">
       <header className="page-head guide-head">
         <div className="section-wrap">
           <p className="eyebrow">Mahjong guide</p>
@@ -22,7 +23,7 @@ export default function Guide() {
             <a href="#tiles">Tiles</a>
             <a href="#hand">Winning hands</a>
             <a href="#turn">Your turn</a>
-            <a href="#scoring">Scoring</a>
+            <a href="#first-table">Your first table</a>
           </nav>
         </div>
       </header>
@@ -32,9 +33,7 @@ export default function Guide() {
         <dl className="tile-key">
           <div>
             <dt>Three suits</dt>
-            <dd>
-              Characters, bamboo and dots are numbered one through nine.
-            </dd>
+            <dd>Characters, bamboo and dots are numbered one through nine.</dd>
           </div>
           <div>
             <dt>Honor tiles</dt>
@@ -51,6 +50,7 @@ export default function Guide() {
       </Section>
 
       <Section id="hand" title="Build a winning hand">
+        <WinningHand />
         <div className="prose guide-prose reading">
           <p>
             Most of your hand is arranged into groups: three matching tiles,
@@ -88,8 +88,8 @@ export default function Guide() {
       <Section id="first-table" title="Your first table">
         <div className="prose guide-prose reading">
           <p>
-            Bring nothing. We provide the sets, explain the gold tile, and
-            play a practice hand before recording a score.
+            Bring nothing. We provide the sets, explain the gold tile, and play
+            a practice hand before recording a score.
           </p>
           <p>
             Say what you are thinking out loud. It helps the table teach you,
@@ -97,7 +97,6 @@ export default function Guide() {
           </p>
         </div>
       </Section>
-
     </main>
   );
 }

@@ -1,23 +1,7 @@
-/**
- * What is printed on a tile face: the dots, the bamboo, and the bird.
- *
- * Drawn from a photograph of a real set rather than invented, which is the
- * difference between these and the first attempt. Three things that attempt
- * got wrong and this one does not:
- *
- *   - a dot is concentric rings, not a ring with a filled centre;
- *   - a bamboo stalk is a chain of segments pinched at the joints, not a bar;
- *   - the colours change from tile to tile. Black, green and red are used to
- *     tell counts apart at a glance across the table, which is the whole
- *     reason the convention exists.
- *
- * Colours are the palette's own, so these recolour with the site rather than
- * being pinned to ink black and pillarbox red.
- */
-
-const BLACK = "var(--ink)";
-const RED = "var(--tile-letter)";
-const GREEN = "var(--jade)";
+/** Shared tile ink, styled after the supplied blue, green, and orange reference. */
+const BLACK = "#114ba3";
+const RED = "#c94219";
+const GREEN = "#236951";
 
 type Point = [number, number];
 
@@ -26,58 +10,182 @@ type Point = [number, number];
 
 const DOT_LAYOUT: Record<number, Point[]> = {
   1: [[44, 59]],
-  2: [[44, 38], [44, 80]],
-  3: [[27, 31], [44, 59], [61, 87]],
-  4: [[30, 39], [58, 39], [30, 79], [58, 79]],
-  5: [[29, 33], [59, 33], [44, 59], [29, 85], [59, 85]],
-  6: [[30, 30], [58, 30], [30, 59], [58, 59], [30, 88], [58, 88]],
-  7: [[27, 27], [44, 27], [61, 27], [31, 65], [57, 65], [31, 91], [57, 91]],
-  8: [[31, 26], [57, 26], [31, 48], [57, 48], [31, 70], [57, 70], [31, 92], [57, 92]],
-  9: [[27, 31], [44, 31], [61, 31], [27, 59], [44, 59], [61, 59], [27, 87], [44, 87], [61, 87]],
+  2: [
+    [44, 38],
+    [44, 80],
+  ],
+  3: [
+    [27, 31],
+    [44, 59],
+    [61, 87],
+  ],
+  4: [
+    [30, 39],
+    [58, 39],
+    [30, 79],
+    [58, 79],
+  ],
+  5: [
+    [29, 33],
+    [59, 33],
+    [44, 59],
+    [29, 85],
+    [59, 85],
+  ],
+  6: [
+    [30, 30],
+    [58, 30],
+    [30, 59],
+    [58, 59],
+    [30, 88],
+    [58, 88],
+  ],
+  7: [
+    [27, 27],
+    [44, 27],
+    [61, 27],
+    [31, 65],
+    [57, 65],
+    [31, 91],
+    [57, 91],
+  ],
+  8: [
+    [31, 26],
+    [57, 26],
+    [31, 48],
+    [57, 48],
+    [31, 70],
+    [57, 70],
+    [31, 92],
+    [57, 92],
+  ],
+  9: [
+    [27, 31],
+    [44, 31],
+    [61, 31],
+    [27, 59],
+    [44, 59],
+    [61, 59],
+    [27, 87],
+    [44, 87],
+    [61, 87],
+  ],
 };
 
 /** Which colour each mark takes, in the order the layout lists them. */
 const DOT_COLOURS: Record<number, string[]> = {
   1: [RED],
-  2: [GREEN, GREEN],
+  2: [BLACK, GREEN],
   3: [RED, GREEN, GREEN],
   4: [BLACK, BLACK, BLACK, BLACK],
   5: [BLACK, BLACK, RED, BLACK, BLACK],
-  6: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
+  6: [BLACK, BLACK, BLACK, GREEN, GREEN, GREEN],
   7: [RED, RED, RED, GREEN, GREEN, GREEN, GREEN],
   8: [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
   9: [GREEN, GREEN, GREEN, RED, RED, RED, BLACK, BLACK, BLACK],
 };
 
 const BAMBOO_LAYOUT: Record<number, Point[]> = {
-  2: [[44, 37], [44, 81]],
-  3: [[44, 30], [32, 79], [56, 79]],
-  4: [[31, 37], [57, 37], [31, 81], [57, 81]],
-  5: [[31, 31], [57, 31], [44, 59], [31, 87], [57, 87]],
-  6: [[27, 37], [44, 37], [61, 37], [27, 81], [44, 81], [61, 81]],
-  7: [[44, 25], [27, 62], [44, 62], [61, 62], [27, 93], [44, 93], [61, 93]],
-  8: [[26, 36], [38, 44], [50, 44], [62, 36], [26, 84], [38, 76], [50, 76], [62, 84]],
-  9: [[27, 28], [44, 28], [61, 28], [27, 59], [44, 59], [61, 59], [27, 90], [44, 90], [61, 90]],
+  2: [
+    [44, 37],
+    [44, 81],
+  ],
+  3: [
+    [44, 30],
+    [32, 79],
+    [56, 79],
+  ],
+  4: [
+    [31, 37],
+    [57, 37],
+    [31, 81],
+    [57, 81],
+  ],
+  5: [
+    [31, 31],
+    [57, 31],
+    [44, 59],
+    [31, 87],
+    [57, 87],
+  ],
+  6: [
+    [27, 37],
+    [44, 37],
+    [61, 37],
+    [27, 81],
+    [44, 81],
+    [61, 81],
+  ],
+  7: [
+    [44, 25],
+    [27, 62],
+    [44, 62],
+    [61, 62],
+    [27, 93],
+    [44, 93],
+    [61, 93],
+  ],
+  8: [
+    [26, 36],
+    [38, 44],
+    [50, 44],
+    [62, 36],
+    [26, 84],
+    [38, 76],
+    [50, 76],
+    [62, 84],
+  ],
+  9: [
+    [27, 28],
+    [44, 28],
+    [61, 28],
+    [27, 59],
+    [44, 59],
+    [61, 59],
+    [27, 90],
+    [44, 90],
+    [61, 90],
+  ],
 };
 
 const BAMBOO_COLOURS: Record<number, string[]> = {
-  2: [GREEN, GREEN],
+  2: [BLACK, GREEN],
   3: [GREEN, GREEN, GREEN],
   4: [GREEN, GREEN, GREEN, GREEN],
-  5: [GREEN, GREEN, RED, GREEN, GREEN],
-  6: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
+  5: [BLACK, GREEN, RED, GREEN, BLACK],
+  6: [BLACK, BLACK, BLACK, GREEN, GREEN, GREEN],
   7: [RED, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
   8: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
   9: [RED, RED, RED, GREEN, GREEN, GREEN, RED, RED, RED],
 };
 
 /** One dot: rings inside rings, which is what makes it read as a coin. */
-function Dot({ x, y, r, colour }: { x: number; y: number; r: number; colour: string }) {
+function Dot({
+  x,
+  y,
+  r,
+  colour,
+}: {
+  x: number;
+  y: number;
+  r: number;
+  colour: string;
+}) {
   return (
     <g>
-      <circle cx={x} cy={y} r={r} fill="none" stroke={colour} strokeWidth={r * 0.3} />
-      <circle cx={x} cy={y} r={r * 0.5} fill="none" stroke={colour} strokeWidth={r * 0.24} />
-      <circle cx={x} cy={y} r={r * 0.14} fill={colour} />
+      <circle cx={x} cy={y} r={r} fill={colour} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <path
+          key={i}
+          d={`M${x} ${y - r * 0.2} c${-r * 0.55} ${-r * 0.7}, ${r * 0.55} ${-r * 0.7}, 0 0`}
+          transform={`rotate(${i * 72} ${x} ${y})`}
+          fill="none"
+          stroke="#fffdf6"
+          strokeWidth={r * 0.12}
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cx={x} cy={y} r={r * 0.13} fill="#fffdf6" />
     </g>
   );
 }
@@ -115,13 +223,31 @@ export function Dots({ count }: { count: number }) {
 export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
   const petals = Array.from({ length: 8 }, (_, i) => {
     const a = (i * Math.PI * 2) / 8;
-    return { cx: x + Math.cos(a) * r * 0.63, cy: y + Math.sin(a) * r * 0.63, i };
+    return {
+      cx: x + Math.cos(a) * r * 0.63,
+      cy: y + Math.sin(a) * r * 0.63,
+      i,
+    };
   });
 
   return (
     <g>
-      <circle cx={x} cy={y} r={r} fill="none" stroke={BLACK} strokeWidth={r * 0.13} />
-      <circle cx={x} cy={y} r={r * 0.82} fill="none" stroke={GREEN} strokeWidth={r * 0.2} />
+      <circle
+        cx={x}
+        cy={y}
+        r={r}
+        fill="none"
+        stroke={BLACK}
+        strokeWidth={r * 0.13}
+      />
+      <circle
+        cx={x}
+        cy={y}
+        r={r * 0.82}
+        fill="none"
+        stroke={GREEN}
+        strokeWidth={r * 0.2}
+      />
       {petals.map(({ cx, cy, i }) => (
         <circle
           key={i}
@@ -131,7 +257,14 @@ export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
           fill={i % 2 ? RED : GREEN}
         />
       ))}
-      <circle cx={x} cy={y} r={r * 0.4} fill="none" stroke={RED} strokeWidth={r * 0.17} />
+      <circle
+        cx={x}
+        cy={y}
+        r={r * 0.4}
+        fill="none"
+        stroke={RED}
+        strokeWidth={r * 0.17}
+      />
       <circle cx={x} cy={y} r={r * 0.12} fill={BLACK} />
     </g>
   );
@@ -156,37 +289,25 @@ function Stalk({
   colour: string;
   tilt?: number;
 }) {
-  const seg = h / 3;
   const w = h * 0.26;
 
   return (
-    <g transform={tilt ? `rotate(${tilt} ${x} ${y})` : undefined}>
-      {[0, 1, 2].map((i) => {
-        const cy = y - h / 2 + seg * i + seg / 2;
-        return (
-          <g key={i}>
-            <rect
-              x={x - w / 2}
-              y={cy - seg * 0.36}
-              width={w}
-              height={seg * 0.72}
-              rx={w * 0.42}
-              fill={colour}
-            />
-            {/* The joint: a short bar across the waist between segments. */}
-            {i < 2 && (
-              <rect
-                x={x - w * 0.66}
-                y={cy + seg * 0.4}
-                width={w * 1.32}
-                height={seg * 0.14}
-                rx={seg * 0.07}
-                fill={colour}
-              />
-            )}
-          </g>
-        );
-      })}
+    <g
+      transform={`translate(${x} ${y}) rotate(${tilt})`}
+      fill="none"
+      stroke={colour}
+      strokeWidth={h * 0.075}
+      strokeLinejoin="round"
+    >
+      <path
+        d={`M${-w / 2} ${-h / 2} Q0 ${-h / 2 - 1} ${w / 2} ${-h / 2}
+        L${w / 2} ${-h * 0.36} Q${w * 0.18} 0 ${w / 2} ${h * 0.36}
+        L${w / 2} ${h / 2} Q0 ${h / 2 + 1} ${-w / 2} ${h / 2}
+        L${-w / 2} ${h * 0.36} Q${-w * 0.18} 0 ${-w / 2} ${-h * 0.36} Z`}
+      />
+      <path
+        d={`M${-w / 2} ${-h * 0.36} H${w / 2} M${-w / 2} ${h * 0.36} H${w / 2} M${-w * 0.3} 0 H${w * 0.3}`}
+      />
     </g>
   );
 }
@@ -229,71 +350,47 @@ export function Bamboo({ count }: { count: number }) {
  */
 export function Bird() {
   return (
-    <g>
-      {/* Tail, fanning down and left. */}
+    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* Perch, outlined body, and the folded blue wing. */}
+      <path d="M18 69 Q42 67 66 64" stroke={GREEN} strokeWidth="2.5" />
       <path
-        d="M40 74 q-9 12 -14 22 q7 -5 12 -12"
-        fill="none"
-        stroke={RED}
-        strokeWidth="3.4"
-        strokeLinecap="round"
+        d="M41 34 C35 43 36 51 35 62 C49 64 59 53 60 43 C61 34 53 34 52 43"
+        stroke={GREEN}
+        strokeWidth="2"
       />
       <path
-        d="M45 76 q-4 14 -5 24 q5 -8 8 -17"
-        fill="none"
-        stroke={RED}
-        strokeWidth="3.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M50 75 q3 13 7 21 q-1 -9 -3 -18"
-        fill="none"
-        stroke={RED}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-
-      {/* Body. */}
-      <path
-        d="M44 34 q11 6 12 19 q1 13 -6 22 q-7 -3 -10 -12 q-3 -13 4 -29z"
-        fill={GREEN}
-      />
-
-      {/* Wing, folded along the back. */}
-      <path
-        d="M47 44 q9 7 9 18 q0 8 -4 13 q-1 -14 -5 -31z"
-        fill={BLACK}
-        opacity="0.72"
-      />
-
-      {/* Fine feather cuts keep the silhouette readable at small sizes. */}
-      <path d="M47 48 q4 10 4 18 M44 51 q1 9 5 16 M48 70 l3 3"
-        fill="none" stroke="#fffdf6" strokeWidth="1.1" strokeLinecap="round" opacity="0.85" />
-      <path d="M33 89 l4 -3 M43 91 l3 -5 M53 88 l1 -5"
-        fill="none" stroke={GREEN} strokeWidth="1.3" strokeLinecap="round" />
-
-      {/* Head and beak. */}
-      <circle cx="41" cy="31" r="6.4" fill={GREEN} />
-      <path d="M35 29 l-7 3 l7 3z" fill={RED} />
-      <circle cx="42.6" cy="29.6" r="1.5" fill="#fffdf6" />
-
-      {/* Crest. */}
-      <path
-        d="M43 25 q2 -7 7 -9 q-3 5 -3 9"
-        fill="none"
-        stroke={RED}
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-
-      {/* Feet. */}
-      <path
-        d="M44 76 l0 8 M44 84 l-4 4 M44 84 l4 4"
-        fill="none"
+        d="M40 39 C25 29 23 43 26 52 C28 63 25 72 18 77 C31 74 36 63 37 52 Z"
         stroke={BLACK}
         strokeWidth="2"
-        strokeLinecap="round"
       />
+      <path
+        d="M38 46 Q47 48 47 39 M41 44 L40 54 M46 44 L45 53 M50 42 L49 51"
+        stroke={GREEN}
+        strokeWidth="1.5"
+      />
+      {/* Small crested head and a long, fine fan of tail feathers. */}
+      <path
+        d="M39 36 C34 32 34 23 39 21 C47 17 52 24 50 33 L47 40"
+        stroke={GREEN}
+        strokeWidth="2"
+      />
+      <circle cx="43" cy="27" r="2" stroke={GREEN} strokeWidth="1.5" />
+      <path
+        d="M35 26 L30 24 L35 31 M37 21 Q30 14 45 16 Q55 17 59 12 Q56 24 43 21"
+        stroke={RED}
+        strokeWidth="2"
+      />
+      <path
+        d="M33 65 Q32 88 50 106 M39 64 Q39 85 56 103"
+        stroke={BLACK}
+        strokeWidth="1.5"
+      />
+      <path
+        d="M36 65 Q35 88 53 106 M43 62 Q43 85 59 101"
+        stroke={RED}
+        strokeWidth="1.5"
+      />
+      <path d="M40 64 Q40 87 56 106" stroke={GREEN} strokeWidth="1.5" />
     </g>
   );
 }

@@ -106,5 +106,6 @@ export const HOME = {
   welcomeTitle: "A seat for everyone.",
   welcome: "You do not need to know the rules or bring a set. Come to learn, play, and hang out. Bring your friends or meet someone new across the table.",
   welcomeNote: "A little strategy. A little luck. A good excuse to get together.",
+  photosPending: "Club photos coming soon.",
   photoIntro: "The people, the hands, and the moments between games.",
 };

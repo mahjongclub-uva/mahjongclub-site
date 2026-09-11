@@ -1,74 +1,4 @@
-import { TileFaceArt } from "@/components/TileArt";
-import { Dots, Bamboo } from "@/components/TileArtwork";
-
-/**
- * Every tile in a standard set, drawn rather than photographed.
- *
- * Drawn for three reasons: a photograph of the club's own set would have to be
- * consented to and stripped of EXIF like any other, stock tile images come
- * with licences nobody wants to audit in five years, and an SVG stays sharp
- * and recolours itself with the palette. Nothing here is fetched.
- *
- * The faces sit on the same <TileFaceArt> the header tiles use, so the set on
- * this page and the wordmark upstairs cannot drift apart.
- *
- * Each tile carries its name as visually hidden text. The drawing is the thing
- * you look at; the name is the thing a screen reader reads and the thing that
- * makes the page searchable for "seven of bamboo".
- */
-
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
-const WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-
-/** One tile: the drawn face, whatever sits on it, and its name for a reader. */
-function Tile({ name, children }: { name: string; children: React.ReactNode }) {
-  return (
-    <li className="set-tile">
-      <span className="set-tile-body">
-        <TileFaceArt />
-        <svg
-          className="set-tile-ink"
-          viewBox="0 0 88 124"
-          aria-hidden="true"
-          focusable="false"
-        >
-          {children}
-        </svg>
-      </span>
-      <span className="sr-only">{name}</span>
-    </li>
-  );
-}
-
-/** A tile whose face is one or two Chinese characters rather than a drawing. */
-function CharacterTile({
-  name,
-  top,
-  bottom,
-}: {
-  name: string;
-  top?: string;
-  bottom: string;
-}) {
-  return (
-    <Tile name={name}>
-      {top && (
-        <text className="set-ink-numeral" x="44" y="44" textAnchor="middle">
-          {top}
-        </text>
-      )}
-      <text
-        className="set-ink-suit"
-        x="44"
-        y={top ? 92 : 74}
-        textAnchor="middle"
-        fontSize={top ? 34 : 52}
-      >
-        {bottom}
-      </text>
-    </Tile>
-  );
-}
+import PlayingTile, { Tile, CharacterTile } from "@/components/PlayingTile";
 
 function Group({
   id,
@@ -98,27 +28,20 @@ export default function TileSet() {
       <Group
         id="suit-characters"
         title="Characters"
-        note="The number on top, 萬 underneath. Five is written 伍, the formal numeral, the way a cheque spells it out."
+        note="The number on top, 萬 underneath. The small corner number helps you learn the characters."
       >
         {RANKS.map((n) => (
-          <CharacterTile
-            key={n}
-            name={`${WORDS[n]} of characters`}
-            top={NUMERALS[n]}
-            bottom="萬"
-          />
+          <PlayingTile key={n} suit="characters" rank={n} />
         ))}
       </Group>
 
       <Group
         id="suit-dots"
         title="Dots"
-        note="Count the rings. One is drawn large and alone; the colours change from tile to tile so you can read a count across the table without counting."
+        note="Count the circles. Floral centers and clear spacing make the patterns easy to recognize."
       >
         {RANKS.map((n) => (
-          <Tile key={n} name={`${WORDS[n]} of dots`}>
-            <Dots count={n} />
-          </Tile>
+          <PlayingTile key={n} suit="dots" rank={n} />
         ))}
       </Group>
 
@@ -128,21 +51,19 @@ export default function TileSet() {
         note="Count the stalks. One bamboo is a bird, which every set draws differently and none explains."
       >
         {RANKS.map((n) => (
-          <Tile key={n} name={`${WORDS[n]} of bamboo`}>
-            <Bamboo count={n} />
-          </Tile>
+          <PlayingTile key={n} suit="bamboo" rank={n} />
         ))}
       </Group>
 
       <Group
         id="honours-winds"
         title="Winds"
-        note="East, south, west and north. No sequences — winds only ever group with their own kind."
+        note="East, south, west and north. No sequences - winds only ever group with their own kind."
       >
-        <CharacterTile name="East wind" bottom="東" />
-        <CharacterTile name="South wind" bottom="南" />
-        <CharacterTile name="West wind" bottom="西" />
-        <CharacterTile name="North wind" bottom="北" />
+        <CharacterTile name="East wind" bottom="東" ink="#114ba3" />
+        <CharacterTile name="South wind" bottom="南" ink="#114ba3" />
+        <CharacterTile name="West wind" bottom="西" ink="#114ba3" />
+        <CharacterTile name="North wind" bottom="北" ink="#114ba3" />
       </Group>
 
       <Group
@@ -151,7 +72,7 @@ export default function TileSet() {
         note="Red, green and white. The white dragon is a blank face in some sets and an empty frame in others."
       >
         <CharacterTile name="Red dragon" bottom="中" />
-        <CharacterTile name="Green dragon" bottom="發" />
+        <CharacterTile name="Green dragon" bottom="發" ink="#236951" />
         <Tile name="White dragon">
           <rect
             x="24"

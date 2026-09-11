@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PHOTOS, TAGLINE, HOME } from "@/lib/site";
-import TileShowcase from "@/components/TileShowcase";
+import ClubPhotos from "@/components/ClubPhotos";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
 import RollingDot from "@/components/RollingDot";
@@ -31,13 +31,13 @@ export default function Home() {
       <Section id="first-night" title={HOME.welcomeTitle}>
         <div className="welcome">
           <div>
-          <p className="welcome-lead">{HOME.welcomeNote}</p>
-          <p>{HOME.welcome}</p>
-          <Link className="text-link" href="/guide/#first-table">
-            What should I expect?
-          </Link>
+            <p className="welcome-lead">{HOME.welcomeNote}</p>
+            <p>{HOME.welcome}</p>
+            <Link className="text-link" href="/guide/#first-table">
+              What should I expect?
+            </Link>
           </div>
-          <TileShowcase />
+          <ClubPhotos />
         </div>
       </Section>
 
@@ -46,10 +46,10 @@ export default function Home() {
         <Calendar />
       </RevealSection>
 
-      {PHOTOS.length > 0 && (
+      {PHOTOS.length > 2 && (
         <Section id="table" title="At the table">
           <p className="photo-intro">{HOME.photoIntro}</p>
-          <Photos />
+          <Photos photos={PHOTOS.slice(2)} />
         </Section>
       )}
 

@@ -20,27 +20,28 @@ export default function RevealSection({
   lead?: ReactNode;
   children: ReactNode;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    offset: ["start 0.9", "start 0.4"],
   });
   const progress = useTransform(scrollYProgress, (value) =>
     reduce ? 1 : value,
   );
   return (
     <motion.section
-      ref={ref}
       className="section section-reveal"
       aria-labelledby={id}
       style={{ "--progress": progress } as import("motion/react").MotionStyle}
     >
       <div className="section-wrap">
-        {lead}
-        <h2 className="section-title section-title-reveal" id={id}>
-          {title}
-        </h2>
+        <div ref={ref} className="rolling-heading">
+          {lead}
+          <h2 className="section-title section-title-reveal" id={id}>
+            {title}
+          </h2>
+        </div>
         <div className="meeting-layout">{children}</div>
       </div>
     </motion.section>

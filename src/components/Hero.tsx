@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import WebGLBoundary from "./WebGLBoundary";
 import Wordmark from "@/components/Wordmark";
 
@@ -16,7 +16,7 @@ function subscribeMotion(callback: () => void) {
 const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** The CSS name is visible immediately; 3D takes over only after drawing. */
+/** Flat artwork is a failure fallback, never an extra frame in the 3D entrance. */
 export default function Hero() {
   const reduceMotion = useSyncExternalStore(
     subscribeMotion,
@@ -24,16 +24,35 @@ export default function Hero() {
     () => null,
   );
   const [sceneReady, setSceneReady] = useState(false);
+  const [failed, setFailed] = useState(false);
   const onReady = useCallback(() => setSceneReady(true), []);
-  const onError = useCallback(() => setSceneReady(false), []);
+  useEffect(() => {
+    if (sceneReady || reduceMotion || failed) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const watch = () => {
+      clearTimeout(timer);
+      if (document.visibilityState === "visible") {
+        timer = setTimeout(() => setFailed(true), 4000);
+      }
+    };
+    watch();
+    document.addEventListener("visibilitychange", watch);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", watch);
+    };
+  }, [sceneReady, reduceMotion, failed]);
+  const onError = useCallback(() => setFailed(true), []);
   return (
     <div
       className="hero-stage"
-      data-scene={reduceMotion ? "fallback" : sceneReady ? "ready" : "waiting"}
+      data-scene={
+        reduceMotion || failed ? "fallback" : sceneReady ? "ready" : "waiting"
+      }
     >
       <Wordmark />
       <div className="hero-scene" aria-hidden="true">
-        {reduceMotion === false && (
+        {reduceMotion === false && !failed && (
           <WebGLBoundary onError={onError}>
             <TileScene onReady={onReady} />
           </WebGLBoundary>
