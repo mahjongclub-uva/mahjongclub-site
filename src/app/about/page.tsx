@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GROUPME_URL, INSTAGRAM, OFFICERS } from "@/lib/site";
+import { ABOUT, GROUPME_URL, INSTAGRAM, OFFICERS } from "@/lib/site";
 import Section from "@/components/Section";
 
 export const metadata = {
@@ -15,28 +15,18 @@ export default function About() {
         <div className="section-wrap">
           <p className="eyebrow">About</p>
           <h1 className="page-title">The club</h1>
-          <p className="page-intro">
-            A low-pressure place to learn Fuzhou-style mahjong, meet new
-            players and keep coming back to the table.
-          </p>
+          <p className="page-intro">{ABOUT.intro}</p>
         </div>
       </header>
 
       <Section id="game" title="What we play">
         <div className="prose reading">
-          <p>
-            Fuzhou-style mahjong. Sixteen tiles in hand instead of the usual
-            thirteen, four players to a table, and a gold wildcard that stands
-            in for any tile.
-          </p>
-          <p>
-            The wildcard changes how the game feels. Hands that would be dead
-            turn out to be one tile away, so tables stay alive much longer.
-          </p>
+          <p>{ABOUT.game}</p>
+          <p>{ABOUT.variety}</p>
         </div>
       </Section>
 
-      <Section id="officers" title="Officials">
+      <Section id="officers" title="Meet the officers">
         {/* A description list, because that is what this is: each role is a
             term and the person holding it is its definition. */}
         <dl className="officers">
@@ -89,10 +79,7 @@ export default function About() {
 
       <Section id="learn" title="New to mahjong?">
         <div className="prose reading">
-          <p>
-            Most members learned here. We provide the sets and guide new
-            players through a practice hand before anything is scored.
-          </p>
+          <p>{ABOUT.learn}</p>
           <p>
             <Link className="action-link" href="/guide/">
               Read the beginner guide

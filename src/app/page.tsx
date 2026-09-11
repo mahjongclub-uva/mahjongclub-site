@@ -53,7 +53,7 @@ export default function Home() {
         </Section>
       )}
 
-      <Section id="follow" title="Follow us on social media!">
+      <Section id="follow" title="Between games">
         <FollowUs />
       </Section>
     </main>

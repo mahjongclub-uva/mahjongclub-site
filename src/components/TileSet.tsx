@@ -38,7 +38,7 @@ export default function TileSet() {
       <Group
         id="suit-dots"
         title="Dots"
-        note="Count the circles. Floral centers and clear spacing make the patterns easy to recognize."
+        note="Count the circles. Once you spot the pattern, you’ll recognize these at a glance."
       >
         {RANKS.map((n) => (
           <PlayingTile key={n} suit="dots" rank={n} />
@@ -48,7 +48,7 @@ export default function TileSet() {
       <Group
         id="suit-bamboo"
         title="Bamboo"
-        note="Count the stalks. One bamboo is a bird, which every set draws differently and none explains."
+        note="Count the stalks, with one exception: the bird is one bamboo. It likes to do things its own way."
       >
         {RANKS.map((n) => (
           <PlayingTile key={n} suit="bamboo" rank={n} />

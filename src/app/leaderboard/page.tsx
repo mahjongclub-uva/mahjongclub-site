@@ -106,7 +106,7 @@ export default function Leaderboard() {
                 <p>
                   Everyone starts a table with 205 points, and your result is
                   what you finish with minus 205. The board adds up only your
-                  winning tables, so a bad night never costs you a place. Play{" "}
+                  winning tables; losses don’t subtract from your total. Play{" "}
                   {MIN_TABLES_TO_RANK} tables to be ranked.
                 </p>
                 <p>

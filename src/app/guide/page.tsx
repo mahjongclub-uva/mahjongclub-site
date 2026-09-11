@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IconArrowUp } from "@tabler/icons-react";
 import Section from "@/components/Section";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
@@ -11,14 +11,14 @@ export const metadata = {
 
 export default function Guide() {
   return (
-    <main className="guide-page">
+    <main className="guide-page" id="guide-top">
       <header className="page-head guide-head">
         <div className="section-wrap">
           <p className="eyebrow">Mahjong guide</p>
           <h1 className="page-title">Learn your first hand</h1>
           <p className="page-intro">
-            You only need a few ideas to sit down and start playing. We teach
-            the table rules as you go.
+            No need to memorize this before you join us. Get to know a few
+            tiles, try a hand, and ask questions as you go.
           </p>
           <nav className="guide-index" aria-label="In this guide">
             <ol>
@@ -71,32 +71,22 @@ export default function Guide() {
             </dd>
           </div>
         </dl>
-        <p className="guide-next">
-          <a className="action-link" href="#hand">
-            Next: build a hand →
-          </a>
-        </p>
       </Section>
 
       <Section id="hand" title="Build a winning hand">
         <WinningHand />
         <div className="prose guide-prose reading">
           <p>
-            The groups in a hand are called sets, often called melds. Three
-            identical tiles make a pung; three consecutive tiles in one suit
-            make a chow. A kong is four identical tiles and counts as one set.
+            A hand comes together in sets (also called melds). Three identical
+            tiles make a pung; three consecutive tiles in one suit make a chow.
+            A kong is four identical tiles and counts as one set.
           </p>
           <p>
-            In our 16-tile game, a complete hand is generally five groups and
-            one matching pair. The gold wildcard makes more combinations
-            possible.
+            In Fuzhou-style play, you hold sixteen tiles between turns. The
+            example above finishes with seventeen: five sets and a pair. The
+            gold wildcard gives you more ways to get there.
           </p>
         </div>
-        <p className="guide-next">
-          <a className="action-link" href="#calls">
-            Next: learn the calls →
-          </a>
-        </p>
       </Section>
 
       <Section id="calls" title="Pung, pong, chow, chi?">
@@ -139,11 +129,6 @@ export default function Guide() {
           ; <a href="https://riichi.wiki/Naki">chi and pon call names</a>. Rules
           vary by mahjong style.
         </p>
-        <p className="guide-next">
-          <a className="action-link" href="#turn">
-            Next: take a turn →
-          </a>
-        </p>
       </Section>
 
       <Section id="turn" title="Take a turn">
@@ -165,30 +150,25 @@ export default function Guide() {
           A discard can sometimes be claimed to finish a group. Calls vary by
           situation, so a club member will prompt you when one is available.
         </p>
-        <p className="guide-next">
-          <a className="action-link" href="#first-table">
-            Next: your first table →
-          </a>
-        </p>
       </Section>
 
       <Section id="first-table" title="Your first table">
         <div className="prose guide-prose reading">
           <p>
-            Bring nothing. We provide the sets, explain the gold tile, and play
-            a practice hand before recording a score.
+            Just bring yourself. We provide the sets, explain the gold tile, and
+            play a practice hand before recording a score.
           </p>
           <p>
             Say what you are thinking out loud. It helps the table teach you,
             and nobody expects a new player to recognize every tile at once.
           </p>
         </div>
-        <p className="guide-next">
-          <Link className="action-link action-link-primary" href="/#when">
-            Find the next meeting
-          </Link>
-        </p>
       </Section>
+      <div className="guide-top-link">
+        <a className="action-link" href="#guide-top">
+          <IconArrowUp size={18} aria-hidden="true" /> Back to top
+        </a>
+      </div>
     </main>
   );
 }
