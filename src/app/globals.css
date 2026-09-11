@@ -69,7 +69,7 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* Type. Newsreader gives headings a sturdy editorial voice; Source Sans 3
+  /* Type. Fraunces gives headings a playful editorial voice; Nunito Sans
      keeps instructions and club information easy to scan on a phone. Both
      are self-hosted by next/font. */
   --display: var(--font-display), "Iowan Old Style", Georgia, serif;
@@ -2421,3 +2421,43 @@ body {
 }
 
 .outlook-icon { filter: invert(1); flex-shrink: 0; }
+
+/* Quiet, scroll-driven tile outlines sit outside the reading column. */
+body { isolation: isolate; }
+.ambient-tiles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+.ambient-tiles span { position: absolute; width: 135px; height: 185px; border: 2px solid #243d5818; border-radius: 18px; box-shadow: 8px 9px 0 #b997550c, inset 0 0 0 8px #fffaf330; }
+.ambient-tiles span::after { content: ""; position: absolute; inset: 38px 22px; border: 2px solid #9d302b12; border-radius: 50%; box-shadow: inset 0 0 0 10px #9d302b06; }
+.ambient-tiles span:nth-child(1) { left: -75px; top: 20%; transform: rotate(-15deg); }
+.ambient-tiles span:nth-child(2) { right: -75px; top: 48%; transform: rotate(18deg); }
+.ambient-tiles span:nth-child(3) { right: 5%; top: -140px; transform: rotate(-25deg); }
+.page-title, .section-title { letter-spacing: -0.035em; }
+.tagline { font-weight: 600; }
+.club-photos .photo-grid:has(> :only-child) { grid-template-columns: 1fr; }
+.club-photos .photo-slot img { aspect-ratio: 3 / 2; }
+.club-photos figcaption { font-size: 0.85rem; font-style: italic; }
+.player-search { padding-top: 0; }
+.search-panel { position: relative; padding: clamp(1.3rem, 4vw, 2.6rem); background: #e9edf0; border: 1px solid #243d5838; border-radius: 16px; box-shadow: 0 6px 0 #243d5812; }
+.search-panel .section-title::after { display: none; }
+.search-panel .section-title { margin-bottom: 1.5rem; }
+.search-decoration { position: absolute; right: 1.5rem; top: 1.5rem; color: #243d5826; transform: rotate(12deg); pointer-events: none; }
+.search-panel .eyebrow, .search-panel .section-title { position: relative; }
+.search-field { position: relative; max-width: none; }
+.search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--nav-ink); pointer-events: none; }
+.search-field input { padding-left: 3rem; background: #fffdf8; border: 1px solid #243d5860; }
+.search-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.search-results li { display: flex; flex-wrap: wrap; gap: 0.7rem 1.2rem; padding: 1.2rem; border: 1px solid #243d5830; border-bottom: 4px solid #c2a875; border-radius: 8px; background: #fffcf5; }
+.search-results li > strong { flex-basis: 100%; font: 600 1.15rem var(--display); overflow-wrap: anywhere; }
+.search-results li > span { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.9rem; }
+.search-results li > span:last-child { margin-left: auto; }
+@media (max-width: 560px) {
+  .ambient-tiles span { opacity: 0.5; }
+  .search-results { grid-template-columns: 1fr; }
+  .search-decoration { width: 52px; right: 0.7rem; top: 0.7rem; }
+  .search-field { gap: 0.4rem; }
+  .search-field .action-link { padding-inline: 0.6rem; }
+}
+.photo-dialog { background: #faf6ee; }
+.photo-dialog::backdrop { background: #172c42db; }
+.photo-dialog-inner > img { height: auto; max-height: 68dvh; }
+.photo-navigation:has(button:disabled) { justify-content: center; }
+.photo-navigation button:disabled { display: none; }

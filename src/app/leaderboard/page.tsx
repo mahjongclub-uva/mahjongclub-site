@@ -98,24 +98,6 @@ export default function Leaderboard() {
                 </tbody>
               </table>
 
-              {/* How the numbers are arrived at. Small, and after the table
-              rather than before it, because most visitors are looking for a
-              name and a number and do not need the rules to read it. */}
-              <div className="scoring-note" id="score-explained">
-                <h2>How the score works</h2>
-                <p>
-                  Everyone starts a table with 205 points, and your result is
-                  what you finish with minus 205. The board adds up only your
-                  winning tables; losses don’t subtract from your total. Play{" "}
-                  {MIN_TABLES_TO_RANK} tables to be ranked.
-                </p>
-                <p>
-                  <Link className="action-link" href="/guide/">
-                    Learn how to play
-                  </Link>
-                </p>
-              </div>
-
               {/* Both facts a reader needs after the table: how current it is,
               and that they are not seeing all of it. */}
               <p className="quiet table-note">
@@ -134,11 +116,6 @@ export default function Leaderboard() {
                   </span>
                 )}
               </p>
-              <p className="section-more">
-                <Link className="action-link" href="#find-player">
-                  Find your place
-                </Link>
-              </p>
             </>
           )}
         </div>
@@ -148,6 +125,27 @@ export default function Leaderboard() {
         standings={semester.standings}
         unranked={semester.unranked}
       />
+      <section className="section">
+        <div className="section-wrap">
+          {/* How the numbers are arrived at. Small, and after the table
+              rather than before it, because most visitors are looking for a
+              name and a number and do not need the rules to read it. */}
+          <div className="scoring-note" id="score-explained">
+            <h2>How the score works</h2>
+            <p>
+              Everyone starts a table with 205 points, and your result is what
+              you finish with minus 205. The board adds up only your winning
+              tables; losses don’t subtract from your total. Play{" "}
+              {MIN_TABLES_TO_RANK} tables to be ranked.
+            </p>
+            <p>
+              <Link className="action-link" href="/guide/">
+                Learn how to play
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

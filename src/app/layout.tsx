@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Newsreader, Noto_Sans_SC, Source_Sans_3 } from "next/font/google";
+import { Fraunces, Noto_Sans_SC, Nunito_Sans } from "next/font/google";
+import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = Newsreader({
+const display = Fraunces({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-display",
@@ -32,7 +33,7 @@ const han = Noto_Sans_SC({
   preload: false,
 });
 
-const body = Source_Sans_3({
+const body = Nunito_Sans({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-body",
@@ -64,6 +65,7 @@ export default function RootLayout({
 
         {/* Tile gradients, declared once for every tile on every page. */}
         <TileArtDefs />
+        <AmbientTiles />
         <Nav />
         {children}
         <Footer />

@@ -1,0 +1,24 @@
+"use client";
+
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
+
+/** Decorative edge tiles drift with the reader, with no continuous animation. */
+export default function AmbientTiles() {
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const left = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const right = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const turn = useTransform(scrollYProgress, [0, 1], [-15, 12]);
+  return (
+    <div className="ambient-tiles" aria-hidden="true">
+      <motion.span style={reduce ? undefined : { y: left, rotate: turn }} />
+      <motion.span style={reduce ? undefined : { y: right }} />
+      <motion.span style={reduce ? undefined : { y: left }} />
+    </div>
+  );
+}

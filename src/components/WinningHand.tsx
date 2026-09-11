@@ -29,9 +29,10 @@ export default function WinningHand() {
   return (
     <figure className="winning-hand">
       <figcaption>
-        <strong>Five sets + one pair</strong>
+        <strong>One example: five sets + one pair</strong>
         <span>
-          A 17-tile winning shape: five three-tile sets and one matching pair.
+          This 17-tile example shows one way to win, not the only combination.
+          Look for five three-tile sets and a matching pair.
         </span>
       </figcaption>
       <div className="hand-groups">

@@ -75,7 +75,15 @@ export type Photo = {
   position?: string;
 };
 
-export const PHOTOS: Photo[] = [];
+export const PHOTOS: Photo[] = [
+  {
+    src: "/photos/club-table.webp",
+    alt: "Club members gathered around a table playing mahjong with blue-backed tiles.",
+    width: 1800,
+    height: 1201,
+    caption: "A full table. A fresh hand. Your move.",
+  },
+];
 
 /**
  * The club's officers, in the order they appear on the About page.

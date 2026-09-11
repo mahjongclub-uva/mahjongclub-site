@@ -88,8 +88,8 @@ export default function Photos({ photos = PHOTOS }: { photos?: Photo[] }) {
               Previous
             </button>
             <p aria-live="polite">
-              {active + 1} / {photos.length}
-              {photo.caption ? ` · ${photo.caption}` : ""}
+              {photos.length > 1 ? `${active + 1} / ${photos.length}` : ""}
+              {photo.caption ? `${photos.length > 1 ? " · " : ""}${photo.caption}` : ""}
             </p>
             <button
               type="button"
