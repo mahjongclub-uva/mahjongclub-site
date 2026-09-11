@@ -61,8 +61,7 @@ export default function FollowUs() {
       <span className="ig-body">
         <span className="ig-handle">@{INSTAGRAM}</span>
         <span className="ig-sub">
-          The next game, the last great hand, and everything in between. Find
-          our photos and meeting updates here.
+          Photos and meeting updates on Instagram.
         </span>
       </span>
     </a>

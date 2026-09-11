@@ -81,7 +81,6 @@ export const PHOTOS: Photo[] = [
     alt: "Club members gathered around a table playing mahjong with blue-backed tiles.",
     width: 1800,
     height: 1201,
-    caption: "A full table. A fresh hand. Your move.",
   },
 ];
 
@@ -115,9 +114,8 @@ export const OFFICERS: Officer[] = [
 export const HOME = {
   welcomeTitle: "A seat for everyone.",
   welcome:
-    "No set? No experience? You’re in the right place. Bring a friend or come on your own. We’ll get you settled at a table and help you learn as you play.",
-  welcomeNote:
-    "A little strategy. A little luck. A good excuse to get together.",
+    "Bring a friend or come on your own. We have the sets and will teach you as we play.",
+  welcomeNote: "Come for a hand. Stay for another.",
   photosPending: "Club photos coming soon.",
   photoIntro: "The people, the hands, and the moments between games.",
 };
@@ -132,7 +130,5 @@ export const ABOUT = {
     "A few good hands, a few new friends, and always room for another player.",
   game: "Fuzhounese (Fuzhou-style) mahjong is one of our main games: sixteen tiles in hand, four players around the table, and a gold wildcard to keep you guessing.",
   variety:
-    "But we don’t stop there. Play a different style at home? Tell us about it. We’re happy to learn from each other, and we’ll agree on the rules before the tiles come out.",
-  learn:
-    "Never played? Pull up a chair. We’ll bring the sets and walk through a practice hand together. Questions are part of the game.",
+    "Other styles are welcome too. Bring your house rules; we’ll learn together.",
 };

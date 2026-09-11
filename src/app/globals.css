@@ -2461,3 +2461,36 @@ body { isolation: isolate; }
 .photo-dialog-inner > img { height: auto; max-height: 68dvh; }
 .photo-navigation:has(button:disabled) { justify-content: center; }
 .photo-navigation button:disabled { display: none; }
+
+/* Give the welcome heading its own row, clear of the photograph. */
+.home-page .section-title#first-night { font-size: clamp(2rem, 4.7vw, 3.6rem); margin-bottom: 2rem; }
+.home-page .club-photos { margin-top: 0; }
+.home-page .welcome { gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+.home-page .welcome > div:first-child { padding-top: 0; }
+.home-page .welcome .welcome-lead { font-size: clamp(1.5rem, 2.8vw, 2rem); }
+.photo-slot > img { border-radius: 14px; }
+body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transparent 48%); }
+.ambient-motif { position: absolute; width: 90px; height: 125px; opacity: 0.09; }
+.ambient-dots { left: 2%; top: 67%; }
+.ambient-bamboo { right: 1%; top: 14%; transform: rotate(12deg); }
+.ambient-character { position: absolute; left: 4%; top: 7%; color: #9d302b; opacity: 0.07; font: 700 64px var(--font-han); }
+.leader-crown { color: #856019; fill: #ead086; filter: drop-shadow(0 2px 1px #85601930); flex-shrink: 0; }
+.leader-badge { display: flex; align-items: center; gap: 0.6rem; }
+.search-panel .section-title { font-size: clamp(1.5rem, 3vw, 2rem); padding-right: 2rem; }
+.search-panel .search-field { margin-bottom: 0; }
+.footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1.1rem 2rem; }
+.footer-brand { display: flex; gap: 0.65rem; align-items: center; text-decoration: none; font-weight: 700; font-size: 0.95rem; min-width: 0; }
+.footer-brand img { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; }
+.footer-pages { display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem; }
+.footer-pages a { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.9rem; text-decoration: none; }
+.footer-pages a:hover { text-decoration: underline; }
+.footer-contact { grid-column: 1 / -1; border-block: 1px solid #ffffff24; padding-block: 0.8rem; font-size: 0.9rem; }
+.outlook-color-icon { background: #fff; border-radius: 3px; padding: 1px; flex-shrink: 0; }
+.footer .footer-disclaimer { font-size: 0.75rem; color: #c4ced8; }
+.footer-links { margin: 0; justify-self: end; }
+@media (max-width: 560px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 0.7rem; }
+  .footer-pages { justify-content: space-between; gap: 0.3rem; }
+  .footer-links { justify-self: start; }
+  .ambient-motif, .ambient-character { opacity: 0.045; }
+}

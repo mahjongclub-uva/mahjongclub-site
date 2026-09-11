@@ -31,11 +31,12 @@ export default function PlayerSearch({
             stroke={1.2}
             aria-hidden="true"
           />
-          <p className="eyebrow">Every seat counts</p>
           <h2 className="section-title" id="find-player">
-            Find your place
+            Don’t see yourself?
           </h2>
-          <label htmlFor="player-query">Search by public display name</label>
+          <label className="sr-only" htmlFor="player-query">
+            Search for your name
+          </label>
           <div className="search-field">
             <IconSearch className="search-icon" size={22} aria-hidden="true" />
             <input
@@ -43,7 +44,7 @@ export default function PlayerSearch({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Who’s at the table?"
+              placeholder="Search for your name"
               autoComplete="off"
               aria-describedby="search-status"
             />
@@ -57,16 +58,17 @@ export default function PlayerSearch({
               </button>
             )}
           </div>
-          <p className="quiet" id="search-status" role="status">
+          <p
+            className={term ? "quiet" : "sr-only"}
+            id="search-status"
+            role="status"
+          >
             {term
               ? `${count} ${count === 1 ? "player" : "players"} found.`
-              : "Your name might be below the fold, but your points still count. Search the full semester roster."}
+              : ""}
           </p>
           {term && count === 0 && (
-            <p>
-              Try a first name or a shorter spelling. Only public display names
-              are searchable.
-            </p>
+            <p>Try a first name or a shorter spelling.</p>
           )}
           {count > 0 && (
             <ul className="search-results">

@@ -91,8 +91,7 @@ export default function Guide() {
 
       <Section id="calls" title="Pung, pong, chow, chi?">
         <p className="guide-call-intro">
-          Different names, the same two useful shapes. These are also the calls
-          you use when claiming a discard.
+          Two shapes, with a few names you might hear at the table.
         </p>
         <dl className="call-guide">
           <div>
@@ -159,8 +158,7 @@ export default function Guide() {
             play a practice hand before recording a score.
           </p>
           <p>
-            Say what you are thinking out loud. It helps the table teach you,
-            and nobody expects a new player to recognize every tile at once.
+            Ask questions as you play. Nobody expects you to know every tile.
           </p>
         </div>
       </Section>

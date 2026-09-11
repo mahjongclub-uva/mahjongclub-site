@@ -23,6 +23,9 @@ export default function About() {
         <div className="prose reading">
           <p>{ABOUT.game}</p>
           <p>{ABOUT.variety}</p>
+          <Link className="action-link" href="/guide/">
+            New to mahjong? Start here
+          </Link>
         </div>
       </Section>
 
@@ -74,17 +77,6 @@ export default function About() {
               <b>Open Instagram</b>
             </a>
           )}
-        </div>
-      </Section>
-
-      <Section id="learn" title="New to mahjong?">
-        <div className="prose reading">
-          <p>{ABOUT.learn}</p>
-          <p>
-            <Link className="action-link" href="/guide/">
-              Read the beginner guide
-            </Link>
-          </p>
         </div>
       </Section>
 
