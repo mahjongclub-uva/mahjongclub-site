@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Section from "@/components/Section";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
@@ -20,11 +21,33 @@ export default function Guide() {
             the table rules as you go.
           </p>
           <nav className="guide-index" aria-label="In this guide">
-            <a href="#tiles">Tiles</a>
-            <a href="#hand">Winning hands</a>
-            <a href="#calls">Pung &amp; chow</a>
-            <a href="#turn">Your turn</a>
-            <a href="#first-table">Your first table</a>
+            <ol>
+              <li>
+                <a href="#tiles">
+                  <span>01</span> Meet the tiles
+                </a>
+              </li>
+              <li>
+                <a href="#hand">
+                  <span>02</span> Build a hand
+                </a>
+              </li>
+              <li>
+                <a href="#calls">
+                  <span>03</span> Learn the calls
+                </a>
+              </li>
+              <li>
+                <a href="#turn">
+                  <span>04</span> Take a turn
+                </a>
+              </li>
+              <li>
+                <a href="#first-table">
+                  <span>05</span> Join a table
+                </a>
+              </li>
+            </ol>
           </nav>
         </div>
       </header>
@@ -48,6 +71,11 @@ export default function Guide() {
             </dd>
           </div>
         </dl>
+        <p className="guide-next">
+          <a className="action-link" href="#hand">
+            Next: build a hand →
+          </a>
+        </p>
       </Section>
 
       <Section id="hand" title="Build a winning hand">
@@ -64,6 +92,11 @@ export default function Guide() {
             possible.
           </p>
         </div>
+        <p className="guide-next">
+          <a className="action-link" href="#calls">
+            Next: learn the calls →
+          </a>
+        </p>
       </Section>
 
       <Section id="calls" title="Pung, pong, chow, chi?">
@@ -106,6 +139,11 @@ export default function Guide() {
           ; <a href="https://riichi.wiki/Naki">chi and pon call names</a>. Rules
           vary by mahjong style.
         </p>
+        <p className="guide-next">
+          <a className="action-link" href="#turn">
+            Next: take a turn →
+          </a>
+        </p>
       </Section>
 
       <Section id="turn" title="Take a turn">
@@ -127,6 +165,11 @@ export default function Guide() {
           A discard can sometimes be claimed to finish a group. Calls vary by
           situation, so a club member will prompt you when one is available.
         </p>
+        <p className="guide-next">
+          <a className="action-link" href="#first-table">
+            Next: your first table →
+          </a>
+        </p>
       </Section>
 
       <Section id="first-table" title="Your first table">
@@ -140,6 +183,11 @@ export default function Guide() {
             and nobody expects a new player to recognize every tile at once.
           </p>
         </div>
+        <p className="guide-next">
+          <Link className="action-link action-link-primary" href="/#when">
+            Find the next meeting
+          </Link>
+        </p>
       </Section>
     </main>
   );

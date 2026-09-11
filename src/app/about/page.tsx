@@ -94,7 +94,7 @@ export default function About() {
             players through a practice hand before anything is scored.
           </p>
           <p>
-            <Link className="text-link" href="/guide/">
+            <Link className="action-link" href="/guide/">
               Read the beginner guide
             </Link>
           </p>

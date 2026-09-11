@@ -33,7 +33,7 @@ export default function Home() {
           <div>
             <p className="welcome-lead">{HOME.welcomeNote}</p>
             <p>{HOME.welcome}</p>
-            <Link className="text-link" href="/guide/#first-table">
+            <Link className="action-link" href="/guide/#first-table">
               What should I expect?
             </Link>
           </div>

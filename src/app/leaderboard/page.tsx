@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
 import { MIN_TABLES_TO_RANK } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
-import Section from "@/components/Section";
+import PlayerSearch from "@/components/PlayerSearch";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
@@ -110,8 +110,8 @@ export default function Leaderboard() {
                   {MIN_TABLES_TO_RANK} tables to be ranked.
                 </p>
                 <p>
-                  <Link className="text-link" href="/guide/">
-                    New to the game?
+                  <Link className="action-link" href="/guide/">
+                    Learn how to play
                   </Link>
                 </p>
               </div>
@@ -135,8 +135,8 @@ export default function Leaderboard() {
                 )}
               </p>
               <p className="section-more">
-                <Link className="text-link" href="#score-explained">
-                  How scoring works
+                <Link className="action-link" href="#find-player">
+                  Find your place
                 </Link>
               </p>
             </>
@@ -144,23 +144,10 @@ export default function Leaderboard() {
         </div>
       </section>
 
-      {semester.awards.length > 0 && (
-        <Section id="awards" title="Awards">
-          <dl className="awards">
-            {semester.awards.map((award) => (
-              <div key={award.id}>
-                <dt>{award.label}</dt>
-                <dd>
-                  <span className="awards-name">{award.display}</span>
-                  <span className="awards-value">
-                    {award.value} {award.unit}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </Section>
-      )}
+      <PlayerSearch
+        standings={semester.standings}
+        unranked={semester.unranked}
+      />
     </main>
   );
 }
