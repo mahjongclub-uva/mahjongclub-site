@@ -7,6 +7,38 @@ import Section from "@/components/Section";
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
 
+/** 一 through 九. Index 0 is unused so the array reads by rank. */
+const NUMERALS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+
+/**
+ * The rank as a character tile: the numeral above, 萬 below, as a real 萬子
+ * tile is laid out.
+ *
+ * Hovering the row turns it over: the jade reverse carries the Arabic numeral,
+ * so anyone who does not read the characters can still find their place.
+ *
+ * That number is also present for assistive technology at all times, since a
+ * rank is information and hover is not available to everyone.
+ */
+function RankTile({ rank }: { rank: number }) {
+  const numeral = NUMERALS[rank];
+  if (!numeral) return <span className="rank-plain">{rank}</span>;
+
+  return (
+    <span className="rank-tile">
+      <span className="rank-face rank-front" aria-hidden="true">
+        <span className="rank-numeral">{numeral}</span>
+        <span className="rank-suit">萬</span>
+      </span>
+      {/* The reverse, showing the number the character stands for. */}
+      <span className="rank-face rank-back" aria-hidden="true">
+        {rank}
+      </span>
+      <span className="sr-only">{rank}</span>
+    </span>
+  );
+}
+
 export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
@@ -44,11 +76,21 @@ export default function Leaderboard() {
                 </thead>
                 <tbody>
                   {shown.map((player) => (
-                    <tr key={player.id}>
+                    <tr key={player.id} data-leader={player.rank === 1}>
                       <td data-label="Rank">
-                        <span className="bamboo-rank">{player.rank}</span>
+                        <RankTile rank={player.rank} />
                       </td>
-                      <th scope="row">{player.display}</th>
+                      <th scope="row">
+                        {player.display}
+                        {player.rank === 1 && (
+                          <span className="leader-badge">
+                            <span className="leader-seal" aria-hidden="true">
+                              1
+                            </span>
+                            First place
+                          </span>
+                        )}
+                      </th>
                       <td data-label="Score">{player.total_gain}</td>
                       <td data-label="Tables">{player.tables_played}</td>
                     </tr>

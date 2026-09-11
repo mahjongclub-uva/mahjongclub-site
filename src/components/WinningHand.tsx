@@ -2,19 +2,36 @@ import PlayingTile, { type Suit } from "@/components/PlayingTile";
 
 const GROUPS: { label: string; suit: Suit; ranks: number[] }[] = [
   { label: "Pair: two matching tiles", suit: "bamboo", ranks: [2, 2] },
-  { label: "Trio: three matching tiles", suit: "bamboo", ranks: [1, 1, 1] },
-  { label: "Trio: a run in one suit", suit: "bamboo", ranks: [5, 6, 7] },
-  { label: "Trio: three matching tiles", suit: "dots", ranks: [8, 8, 8] },
-  { label: "Trio: a run in one suit", suit: "characters", ranks: [2, 3, 4] },
+  {
+    label: "Pung / pong: three matching tiles",
+    suit: "bamboo",
+    ranks: [1, 1, 1],
+  },
+  { label: "Chow / chi: a run in one suit", suit: "bamboo", ranks: [5, 6, 7] },
+  {
+    label: "Pung / pong: three matching tiles",
+    suit: "dots",
+    ranks: [8, 8, 8],
+  },
+  {
+    label: "Chow / chi: a run in one suit",
+    suit: "characters",
+    ranks: [2, 3, 4],
+  },
+  {
+    label: "Pung / pong: three matching tiles",
+    suit: "dots",
+    ranks: [3, 3, 3],
+  },
 ];
 
 export default function WinningHand() {
   return (
     <figure className="winning-hand">
       <figcaption>
-        <strong>Four trios + one pair</strong>
+        <strong>Five sets + one pair</strong>
         <span>
-          A 14-tile example, grouped so you can see how the pieces fit.
+          A 17-tile winning shape: five three-tile sets and one matching pair.
         </span>
       </figcaption>
       <div className="hand-groups">

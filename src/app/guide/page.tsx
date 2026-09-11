@@ -22,6 +22,7 @@ export default function Guide() {
           <nav className="guide-index" aria-label="In this guide">
             <a href="#tiles">Tiles</a>
             <a href="#hand">Winning hands</a>
+            <a href="#calls">Pung &amp; chow</a>
             <a href="#turn">Your turn</a>
             <a href="#first-table">Your first table</a>
           </nav>
@@ -53,8 +54,9 @@ export default function Guide() {
         <WinningHand />
         <div className="prose guide-prose reading">
           <p>
-            Most of your hand is arranged into groups: three matching tiles,
-            four matching tiles, or three consecutive tiles in one suit.
+            The groups in a hand are called sets, often called melds. Three
+            identical tiles make a pung; three consecutive tiles in one suit
+            make a chow. A kong is four identical tiles and counts as one set.
           </p>
           <p>
             In our 16-tile game, a complete hand is generally five groups and
@@ -62,6 +64,48 @@ export default function Guide() {
             possible.
           </p>
         </div>
+      </Section>
+
+      <Section id="calls" title="Pung, pong, chow, chi?">
+        <p className="guide-call-intro">
+          Different names, the same two useful shapes. These are also the calls
+          you use when claiming a discard.
+        </p>
+        <dl className="call-guide">
+          <div>
+            <dt>
+              Pung / pong <span>Three of a kind</span>
+            </dt>
+            <dd>
+              Three identical tiles, such as three eight-dot tiles. If you hold
+              two, you can usually call pung to claim the latest matching
+              discard from any player.
+            </dd>
+          </div>
+          <div>
+            <dt>
+              Chow / chi <span>A sequence</span>
+            </dt>
+            <dd>
+              Three consecutive numbers in the same suit, such as five, six, and
+              seven bamboo. A chow is normally claimed only from the player to
+              your left, immediately before your turn.
+            </dd>
+          </div>
+        </dl>
+        <p className="quiet guide-note">
+          After a pung or chow call, show the completed set and discard a tile.
+          Winds and dragons can form pungs, but not chows. Ask the table about
+          local calling rules and the gold wildcard.
+        </p>
+        <p className="quiet">
+          Terminology:{" "}
+          <a href="https://www.mahjongtime.com/chinese-official-mahjong-rules-2.html">
+            pung and chow
+          </a>
+          ; <a href="https://riichi.wiki/Naki">chi and pon call names</a>. Rules
+          vary by mahjong style.
+        </p>
       </Section>
 
       <Section id="turn" title="Take a turn">
