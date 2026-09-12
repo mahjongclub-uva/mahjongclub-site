@@ -1,3 +1,9 @@
+import {
+  IconPhoto,
+  IconBrandInstagram,
+  IconMessageCircle,
+  IconArrowUpRight,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { ABOUT, GROUPME_URL, INSTAGRAM, OFFICERS } from "@/lib/site";
 import Section from "@/components/Section";
@@ -10,7 +16,7 @@ export const metadata = {
 
 export default function About() {
   return (
-    <main>
+    <main className="about-page">
       <header className="page-head">
         <div className="section-wrap">
           <p className="eyebrow">About</p>
@@ -20,39 +26,62 @@ export default function About() {
       </header>
 
       <Section id="game" title="What we play">
-        <div className="prose reading">
-          <p>{ABOUT.game}</p>
-          <p>{ABOUT.variety}</p>
-          <Link className="action-link" href="/guide/">
-            New to mahjong? Start here
-          </Link>
+        <div className="about-story">
+          <div className="prose reading">
+            <p>{ABOUT.game}</p>
+            <p>{ABOUT.variety}</p>
+            <p>{ABOUT.otherStyles}</p>
+            <Link className="action-link" href="/guide/">
+              New to mahjong? Start here
+            </Link>
+          </div>
+          <div className="about-photo-placeholder">
+            <IconPhoto size={42} stroke={1.2} aria-hidden="true" />
+            <span>{ABOUT.tablePhoto}</span>
+            <small>Coming soon</small>
+          </div>
         </div>
       </Section>
 
       <Section id="officers" title="Meet the officers">
         {/* A description list, because that is what this is: each role is a
             term and the person holding it is its definition. */}
-        <dl className="officers">
-          {OFFICERS.map((officer) => (
-            <div key={officer.role}>
-              <dt>{officer.role}</dt>
-              <dd className={officer.name ? undefined : "officers-vacant"}>
-                {officer.name ?? "To be announced"}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div className="about-officers-layout">
+          <div className="about-photo-placeholder about-photo-portrait">
+            <IconPhoto size={42} stroke={1.2} aria-hidden="true" />
+            <span>{ABOUT.officersPhoto}</span>
+            <small>Coming soon</small>
+          </div>
+          <dl className="officers">
+            {OFFICERS.map((officer) => (
+              <div key={officer.role}>
+                <dt>{officer.role}</dt>
+                <dd className={officer.name ? undefined : "officers-vacant"}>
+                  {officer.name ?? "To be announced"}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </Section>
 
       <Section id="connect" title="Join the next table">
         <div className="social-list">
           {GROUPME_URL ? (
             <a href={GROUPME_URL} rel="noopener noreferrer" target="_blank">
+              <IconMessageCircle
+                className="join-icon"
+                size={30}
+                stroke={1.5}
+                aria-hidden="true"
+              />
               <span>
                 <strong>GroupMe</strong>
                 <small>Reminders, questions and last-minute changes</small>
               </span>
-              <b>Open invite</b>
+              <b>
+                Join GroupMe <IconArrowUpRight size={17} aria-hidden="true" />
+              </b>
             </a>
           ) : (
             <div className="social-list-pending">
@@ -70,11 +99,19 @@ export default function About() {
               rel="me noopener noreferrer"
               target="_blank"
             >
+              <IconBrandInstagram
+                className="join-icon"
+                size={30}
+                stroke={1.5}
+                aria-hidden="true"
+              />
               <span>
-                <strong>@{INSTAGRAM}</strong>
+                <strong>Instagram</strong>
                 <small>Photos, announcements and meeting updates</small>
               </span>
-              <b>Open Instagram</b>
+              <b>
+                Follow us <IconArrowUpRight size={17} aria-hidden="true" />
+              </b>
             </a>
           )}
         </div>

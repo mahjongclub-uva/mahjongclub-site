@@ -69,7 +69,7 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* Type. Fraunces gives headings a playful editorial voice; Nunito Sans
+  /* Type. DM Sans gives headings clean, open shapes; Nunito Sans
      keeps instructions and club information easy to scan on a phone. Both
      are self-hosted by next/font. */
   --display: var(--font-display), "Iowan Old Style", Georgia, serif;
@@ -2494,3 +2494,50 @@ body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transpar
   .footer-links { justify-self: start; }
   .ambient-motif, .ambient-character { opacity: 0.045; }
 }
+
+/* Clean sans headings and a distinct ink navigation bar. */
+:root { --display: var(--font-display), ui-sans-serif, system-ui, sans-serif; }
+.nav ul { background: #243344; box-shadow: 0 5px 15px #172c4226, inset 0 0 0 1px #172c42; }
+.nav ul a { color: #f5efe4; font-family: var(--body); font-weight: 700; }
+.nav ul a:hover { background: #ffffff14; color: #fff; }
+.nav ul a[aria-current="page"] { color: #243344; background: #fffaf0; }
+.nav-marker span { background: #fffaf0; }
+.nav[data-marker="on"] ul a[aria-current="page"] { background: transparent; color: #243344; }
+.nav ul a:focus-visible { outline-color: #c6a76a; outline-offset: -3px; }
+.ambient-dots { left: 9%; }
+.ambient-bamboo { right: 9%; }
+.ambient-character { left: 13%; }
+.about-page .section { padding-block: clamp(2.5rem, 6vw, 5rem); }
+.about-page .section-title { margin-bottom: 2rem; }
+.about-story { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+.about-story .prose p { margin-bottom: 1.3rem; }
+.about-photo-placeholder { min-height: 280px; aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.65rem; padding: 1.5rem; background: #e9e1d3; color: #655c4c; border: 8px solid #fffaf1; outline: 1px solid #d5caba; border-radius: 3px; box-shadow: 5px 7px 0 #c9b99b30; transform: rotate(2deg); }
+.about-photo-placeholder > span { font-weight: 700; }
+.about-photo-placeholder small { font-size: 0.8rem; }
+.about-photo-portrait { aspect-ratio: 4 / 5; min-height: 300px; transform: rotate(-2deg); background: #e1e6e9; color: #455564; }
+.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.about-page .officers { gap: 2rem; }
+.about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
+.about-page .social-list { display: grid; gap: 1rem; border: 0; }
+.about-page .social-list > a { grid-template-columns: auto minmax(0, 1fr) auto; padding: 1.5rem; border: 1px solid #243d5840; background: #fffcf5; border-radius: 12px; box-shadow: 0 3px 0 #243d5812; gap: 1.2rem; }
+.about-page .social-list strong { font-size: 1.2rem; }
+.join-icon { color: var(--nav-ink); }
+.about-page .social-list b { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) {
+  .about-page .social-list > a:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #243d5812; }
+  .about-page .social-list > a:hover .join-icon { transform: rotate(-8deg); }
+  .join-icon { transition: transform 180ms ease; }
+}
+@media (max-width: 700px) {
+  .about-story, .about-officers-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .about-photo-placeholder { min-height: 220px; aspect-ratio: 4 / 3; margin: 0.5rem; }
+  .about-officers-layout .about-photo-placeholder { order: 2; }
+  .about-page .social-list > a { padding: 1.2rem; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; }
+  .about-page .social-list > a b { grid-column: 2; justify-self: start; }
+  .ambient-dots { left: 4%; }
+  .ambient-bamboo { right: 4%; }
+  .ambient-character { left: 8%; }
+}
+.about-page .section-wrap { max-width: 70rem; }
+.about-page .page-intro { max-width: 42rem; }
+.about-page .club-notes ol { max-width: 46rem; }

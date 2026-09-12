@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Noto_Sans_SC, Nunito_Sans } from "next/font/google";
+import { DM_Sans, Noto_Sans_SC, Nunito_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -7,7 +7,7 @@ import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = Fraunces({
+const display = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-display",

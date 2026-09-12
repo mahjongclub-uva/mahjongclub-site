@@ -131,4 +131,8 @@ export const ABOUT = {
   game: "Fuzhounese (Fuzhou-style) mahjong is one of our main games: sixteen tiles in hand, four players around the table, and a gold wildcard to keep you guessing.",
   variety:
     "Other styles are welcome too. Bring your house rules; we’ll learn together.",
+  otherStyles:
+    "You might know Japanese riichi or Hong Kong-style mahjong, each with its own scoring traditions. American mahjong uses jokers and a card of winning hands.",
+  tablePhoto: "Game-night photo",
+  officersPhoto: "Officers photo",
 };
