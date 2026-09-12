@@ -1,4 +1,4 @@
-import { IconCrown } from "@tabler/icons-react";
+import WukongHeadband from "@/components/WukongHeadband";
 import Link from "next/link";
 import { getCurrentSemester } from "@/lib/data";
 import { MIN_TABLES_TO_RANK } from "@/lib/schema";
@@ -85,12 +85,7 @@ export default function Leaderboard() {
                         {player.display}
                         {player.rank === 1 && (
                           <span className="leader-badge">
-                            <IconCrown
-                              className="leader-crown"
-                              size={30}
-                              stroke={1.6}
-                              aria-hidden="true"
-                            />
+                            <WukongHeadband />
                             First place
                           </span>
                         )}

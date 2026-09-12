@@ -38,8 +38,22 @@ export default function AmbientTiles() {
         className="ambient-character"
         style={reduce ? undefined : { y: right }}
       >
-        萬
+        福
       </motion.div>
+      <motion.svg
+        className="ambient-motif ambient-center-dots"
+        viewBox="0 0 88 124"
+        style={reduce ? undefined : { y: left }}
+      >
+        <Dots count={1} />
+      </motion.svg>
+      <motion.svg
+        className="ambient-motif ambient-center-bamboo"
+        viewBox="0 0 88 124"
+        style={reduce ? undefined : { y: right, rotate: turn }}
+      >
+        <Bamboo count={3} />
+      </motion.svg>
     </div>
   );
 }

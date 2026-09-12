@@ -2541,3 +2541,16 @@ body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transpar
 .about-page .section-wrap { max-width: 70rem; }
 .about-page .page-intro { max-width: 42rem; }
 .about-page .club-notes ol { max-width: 46rem; }
+
+/* Tab measurements already include the list's padding. */
+.nav-marker { inset-inline-start: 0; }
+.wukong-headband { width: 54px; height: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 1px #805b1628); }
+.ambient-center-dots { left: 39%; top: 18%; opacity: 0.035; width: 100px; }
+.ambient-center-bamboo { left: 58%; top: 70%; opacity: 0.035; }
+@media (max-width: 560px) {
+  .ambient-center-dots, .ambient-center-bamboo { opacity: 0.025; }
+}
+@media (max-width: 560px) {
+  .wukong-headband { width: 44px; height: 24px; }
+  .leader-badge { gap: 0.4rem; font-size: 0.62rem; white-space: nowrap; }
+}

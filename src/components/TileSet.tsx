@@ -1,3 +1,4 @@
+import FlowerTile from "@/components/FlowerTile";
 import PlayingTile, { Tile, CharacterTile } from "@/components/PlayingTile";
 
 function Group({
@@ -89,17 +90,43 @@ export default function TileSet() {
 
       <Group
         id="honours-flowers"
-        title="Flowers and seasons"
-        note="Eight singles that sit out of play. Not every set includes them, and not every table uses them when they do."
+        title="Flowers"
+        note="Plum, orchid, chrysanthemum and bamboo. These optional bonus tiles are set aside when drawn; designs and numbering can vary by set."
       >
-        <CharacterTile name="Plum flower" bottom="梅" />
-        <CharacterTile name="Orchid flower" bottom="蘭" />
-        <CharacterTile name="Chrysanthemum flower" bottom="菊" />
-        <CharacterTile name="Bamboo flower" bottom="竹" />
-        <CharacterTile name="Spring season" bottom="春" />
-        <CharacterTile name="Summer season" bottom="夏" />
-        <CharacterTile name="Autumn season" bottom="秋" />
-        <CharacterTile name="Winter season" bottom="冬" />
+        <FlowerTile rank={1} />
+        <FlowerTile rank={2} />
+        <FlowerTile rank={3} />
+        <FlowerTile rank={4} />
+      </Group>
+      <Group
+        id="bonus-seasons"
+        title="Seasons"
+        note="Spring, summer, autumn and winter form a second set of four bonus tiles. Their use depends on the rules at your table."
+      >
+        <CharacterTile
+          name="Spring season"
+          rank={1}
+          ink="#114ba3"
+          bottom="春"
+        />
+        <CharacterTile
+          name="Summer season"
+          rank={2}
+          ink="#114ba3"
+          bottom="夏"
+        />
+        <CharacterTile
+          name="Autumn season"
+          rank={3}
+          ink="#114ba3"
+          bottom="秋"
+        />
+        <CharacterTile
+          name="Winter season"
+          rank={4}
+          ink="#114ba3"
+          bottom="冬"
+        />
       </Group>
     </div>
   );
