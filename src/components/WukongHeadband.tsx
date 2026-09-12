@@ -1,29 +1,37 @@
-/** Original golden-fillet illustration with Wukong's familiar paired curls. */
+/** An open oval band with inward spirals, shaped after the supplied reference. */
 export default function WukongHeadband() {
-  const band =
-    "M5 21 C12 30 60 30 67 21 M5 21 C10 17 18 16 24 17 M67 21 C62 17 54 16 48 17 M24 17 C15 15 18 4 27 5 C35 5 38 17 31 20 C27 22 23 18 26 15 M48 17 C57 15 54 4 45 5 C37 5 34 17 41 20 C45 22 49 18 46 15";
+  const rim = "M24 44 C-4 39 0 17 29 10 C57 3 91 6 106 17 C122 29 109 43 88 45";
+  const curls =
+    "M7 30 C12 41 31 51 42 43 C57 31 37 18 29 29 C23 39 37 43 38 33 M113 30 C108 41 89 51 78 43 C63 31 83 18 91 29 C97 39 83 43 82 33";
   return (
     <svg
       className="wukong-headband"
-      viewBox="0 0 72 34"
+      viewBox="0 0 120 56"
       aria-hidden="true"
       focusable="false"
     >
+      <path d={rim} fill="none" stroke="#72511e" strokeWidth="4" />
+      <path d={rim} fill="none" stroke="#e4bd65" strokeWidth="2" />
       <path
-        d={band}
+        d={curls}
         fill="none"
-        stroke="#805b16"
-        strokeWidth="5"
+        stroke="#78521c"
+        strokeWidth="6"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
       <path
-        d={band}
+        d={curls}
         fill="none"
-        stroke="#e8bd55"
-        strokeWidth="2.5"
+        stroke="#c99b42"
+        strokeWidth="3"
         strokeLinecap="round"
-        strokeLinejoin="round"
+      />
+      <path
+        d="M12 23 C26 8 78 5 101 18"
+        fill="none"
+        stroke="#fff0b6"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   );

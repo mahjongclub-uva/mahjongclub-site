@@ -54,6 +54,20 @@ export default function AmbientTiles() {
       >
         <Bamboo count={3} />
       </motion.svg>
+      <motion.svg
+        className="ambient-motif ambient-extra-dots"
+        viewBox="0 0 88 124"
+        style={reduce ? undefined : { y: right }}
+      >
+        <Dots count={5} />
+      </motion.svg>
+      <motion.svg
+        className="ambient-motif ambient-extra-bamboo"
+        viewBox="0 0 88 124"
+        style={reduce ? undefined : { y: left, rotate: turn }}
+      >
+        <Bamboo count={4} />
+      </motion.svg>
     </div>
   );
 }

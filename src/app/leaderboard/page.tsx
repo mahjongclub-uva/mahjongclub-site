@@ -82,13 +82,10 @@ export default function Leaderboard() {
                         <RankTile rank={player.rank} />
                       </td>
                       <th scope="row">
-                        {player.display}
-                        {player.rank === 1 && (
-                          <span className="leader-badge">
-                            <WukongHeadband />
-                            First place
-                          </span>
-                        )}
+                        <span className="player-name">
+                          {player.rank === 1 && <WukongHeadband />}
+                          <span>{player.display}</span>
+                        </span>
                       </th>
                       <td data-label="Score">{player.total_gain}</td>
                       <td data-label="Tables">{player.tables_played}</td>

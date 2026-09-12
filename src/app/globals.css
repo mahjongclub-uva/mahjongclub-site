@@ -2554,3 +2554,23 @@ body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transpar
   .wukong-headband { width: 44px; height: 24px; }
   .leader-badge { gap: 0.4rem; font-size: 0.62rem; white-space: nowrap; }
 }
+
+/* Fine paper grain, without ruled lines or moving noise. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+.page-title, .section-title { font-weight: 600; letter-spacing: -0.025em; }
+.eyebrow { letter-spacing: 0.1em; }
+.player-name { display: inline-flex; align-items: center; gap: 0.8rem; }
+.player-name .wukong-headband { width: 64px; height: 32px; filter: none; }
+.leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #eee3c5b3, #faf6eb60); }
+.leaderboard tbody tr[data-leader="true"] th { font-size: 1.4rem; }
+.ambient-extra-dots { left: 25%; top: 77%; opacity: 0.035; transform: rotate(-15deg); }
+.ambient-extra-bamboo { right: 27%; top: 30%; opacity: 0.03; }
+@media (max-width: 560px) {
+  .player-name { gap: 0.4rem; flex-wrap: wrap; }
+  .player-name .wukong-headband { width: 46px; height: 24px; }
+  .leaderboard tbody tr[data-leader="true"] th { font-size: 1.2rem; }
+  .ambient-extra-dots, .ambient-extra-bamboo { width: 65px; opacity: 0.025; }
+}

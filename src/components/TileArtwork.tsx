@@ -126,14 +126,14 @@ const BAMBOO_LAYOUT: Record<number, Point[]> = {
     [61, 93],
   ],
   8: [
-    [26, 36],
-    [38, 44],
-    [50, 44],
-    [62, 36],
-    [26, 84],
-    [38, 76],
-    [50, 76],
-    [62, 84],
+    [24, 40],
+    [37, 40],
+    [50, 40],
+    [63, 40],
+    [24, 80],
+    [37, 80],
+    [50, 80],
+    [63, 80],
   ],
   9: [
     [27, 28],
@@ -319,10 +319,9 @@ export function Bamboo({ count }: { count: number }) {
   const colours = BAMBOO_COLOURS[count];
   const h = count >= 7 ? 26 : count >= 4 ? 32 : 36;
 
-  // Eight is the odd one: the stalks lean into each other in a shallow W
-  // rather than sitting in rows.
+  // Eight uses four stalks in a W above four in a mirrored M.
   const tilts: Record<number, number[]> = {
-    8: [-13, -13, 13, 13, 13, 13, -13, -13],
+    8: [-30, 30, -30, 30, 30, -30, 30, -30],
   };
 
   return (
