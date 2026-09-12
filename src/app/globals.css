@@ -2574,3 +2574,4 @@ body::before {
   .leaderboard tbody tr[data-leader="true"] th { font-size: 1.2rem; }
   .ambient-extra-dots, .ambient-extra-bamboo { width: 65px; opacity: 0.025; }
 }
+.call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }

@@ -2,7 +2,7 @@
 export default function WukongHeadband() {
   const rim = "M24 44 C-4 39 0 17 29 10 C57 3 91 6 106 17 C122 29 109 43 88 45";
   const curls =
-    "M7 30 C12 41 31 51 42 43 C57 31 37 18 29 29 C23 39 37 43 38 33 M113 30 C108 41 89 51 78 43 C63 31 83 18 91 29 C97 39 83 43 82 33";
+    "M7 30 C12 41 41 51 52 43 C67 31 47 18 39 29 C33 39 47 43 48 33 M113 30 C108 41 79 51 68 43 C53 31 73 18 81 29 C87 39 73 43 72 33";
   return (
     <svg
       className="wukong-headband"

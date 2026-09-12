@@ -96,7 +96,9 @@ export default function Guide() {
         <dl className="call-guide">
           <div>
             <dt>
-              Pung / pong / peng <span>Three of a kind</span>
+              Pung / pong / peng
+              <span className="call-character" lang="zh-Hans">碰</span>
+              <span>Three of a kind</span>
             </dt>
             <dd>
               Three identical tiles, such as three eight-dot tiles. If you hold
@@ -106,7 +108,9 @@ export default function Guide() {
           </div>
           <div>
             <dt>
-              Chow / chi <span>A sequence</span>
+              Chow / chi
+              <span className="call-character" lang="zh-Hans">吃</span>
+              <span>A sequence</span>
             </dt>
             <dd>
               Three consecutive numbers in the same suit, such as five, six, and
