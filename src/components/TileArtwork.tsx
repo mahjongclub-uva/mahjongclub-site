@@ -125,16 +125,6 @@ const BAMBOO_LAYOUT: Record<number, Point[]> = {
     [44, 93],
     [61, 93],
   ],
-  8: [
-    [24, 40],
-    [37, 40],
-    [50, 40],
-    [63, 40],
-    [24, 80],
-    [37, 80],
-    [50, 80],
-    [63, 80],
-  ],
   9: [
     [27, 28],
     [44, 28],
@@ -155,7 +145,6 @@ const BAMBOO_COLOURS: Record<number, string[]> = {
   5: [BLACK, GREEN, RED, GREEN, BLACK],
   6: [BLACK, BLACK, BLACK, GREEN, GREEN, GREEN],
   7: [RED, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
-  8: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
   9: [RED, RED, RED, GREEN, GREEN, GREEN, RED, RED, RED],
 };
 
@@ -315,26 +304,29 @@ function Stalk({
 export function Bamboo({ count }: { count: number }) {
   if (count === 1) return <Bird />;
 
+  // Eight stalks: upright sides and overlapping diagonals, as in the reference.
+  if (count === 8)
+    return (
+      <>
+        <Stalk x={23} y={34} h={42} colour={GREEN} />
+        <Stalk x={65} y={34} h={42} colour={GREEN} />
+        <Stalk x={36} y={40} h={42} colour={GREEN} tilt={45} />
+        <Stalk x={52} y={40} h={42} colour={GREEN} tilt={-45} />
+        <Stalk x={23} y={84} h={42} colour={GREEN} />
+        <Stalk x={65} y={84} h={42} colour={GREEN} />
+        <Stalk x={36} y={78} h={42} colour={GREEN} tilt={-45} />
+        <Stalk x={52} y={78} h={42} colour={GREEN} tilt={45} />
+      </>
+    );
+
   const points = BAMBOO_LAYOUT[count];
   const colours = BAMBOO_COLOURS[count];
   const h = count >= 7 ? 26 : count >= 4 ? 32 : 36;
 
-  // Eight uses four stalks in a W above four in a mirrored M.
-  const tilts: Record<number, number[]> = {
-    8: [-30, 30, -30, 30, 30, -30, 30, -30],
-  };
-
   return (
     <>
       {points.map(([x, y], i) => (
-        <Stalk
-          key={i}
-          x={x}
-          y={y}
-          h={h}
-          colour={colours[i]}
-          tilt={tilts[count]?.[i] ?? 0}
-        />
+        <Stalk key={i} x={x} y={y} h={h} colour={colours[i]} />
       ))}
     </>
   );

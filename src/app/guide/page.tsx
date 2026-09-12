@@ -89,14 +89,14 @@ export default function Guide() {
         </div>
       </Section>
 
-      <Section id="calls" title="Pung, pong, chow, chi?">
+      <Section id="calls" title="Pung, pong, peng? Chow, chi?">
         <p className="guide-call-intro">
           Two shapes, with a few names you might hear at the table.
         </p>
         <dl className="call-guide">
           <div>
             <dt>
-              Pung / pong <span>Three of a kind</span>
+              Pung / pong / peng <span>Three of a kind</span>
             </dt>
             <dd>
               Three identical tiles, such as three eight-dot tiles. If you hold

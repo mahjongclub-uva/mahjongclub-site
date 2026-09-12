@@ -10,29 +10,31 @@ export default function WukongHeadband() {
       aria-hidden="true"
       focusable="false"
     >
-      <path d={rim} fill="none" stroke="#72511e" strokeWidth="4" />
-      <path d={rim} fill="none" stroke="#e4bd65" strokeWidth="2" />
-      <path
-        d={curls}
-        fill="none"
-        stroke="#78521c"
-        strokeWidth="6"
-        strokeLinecap="round"
-      />
-      <path
-        d={curls}
-        fill="none"
-        stroke="#c99b42"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 23 C26 8 78 5 101 18"
-        fill="none"
-        stroke="#fff0b6"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
+      <g transform="translate(9 3) scale(.85 .9)">
+        <path d={rim} fill="none" stroke="#72511e" strokeWidth="4" />
+        <path d={rim} fill="none" stroke="#e4bd65" strokeWidth="2" />
+        <path
+          d={curls}
+          fill="none"
+          stroke="#78521c"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+        <path
+          d={curls}
+          fill="none"
+          stroke="#c99b42"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M12 23 C26 8 78 5 101 18"
+          fill="none"
+          stroke="#fff0b6"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </g>
     </svg>
   );
 }
