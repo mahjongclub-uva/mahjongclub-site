@@ -47,11 +47,6 @@ export default function About() {
         {/* A description list, because that is what this is: each role is a
             term and the person holding it is its definition. */}
         <div className="about-officers-layout">
-          <div className="about-photo-placeholder about-photo-portrait">
-            <IconPhoto size={42} stroke={1.2} aria-hidden="true" />
-            <span>{ABOUT.officersPhoto}</span>
-            <small>Coming soon</small>
-          </div>
           <dl className="officers">
             {OFFICERS.map((officer) => (
               <div key={officer.role}>

@@ -2621,3 +2621,19 @@ body::before {
   .leaderboard tbody td { font-size: 1.1rem; }
   .meeting-photo-placeholder { min-height: 8rem; }
 }
+
+/* Club theme: ivory paper, charcoal ink, vermilion interface accents. */
+:root { --accent: #a33428; }
+.section-title::after, .eyebrow::before, .next-meeting-where::before { background: var(--accent); }
+.eyebrow, .next-meeting-label, .guide-index a span, .guide-index li:not(:last-child)::after,
+.call-guide dt span, .hand-group p, .join-icon { color: var(--accent); }
+.call-guide > div, .home-page .next-meeting { border-color: var(--accent); }
+:focus-visible { outline-color: var(--accent); }
+.search-panel { background: #eee6d7; border-color: var(--rule); box-shadow: 0 4px 0 #b6aa9633; }
+.about-photo-placeholder, .meeting-photo-placeholder { color: var(--ink-soft); border-color: #998d7a; background: #eee6d766; }
+.about-photo-placeholder svg { color: var(--accent); }
+.about-officers-layout { display: block; }
+.about-officers-layout .officers { width: 100%; }
+.meeting-summary { min-width: 0; display: grid; gap: 1.5rem; }
+.meeting-summary .meeting-photo-placeholder { width: 100%; margin: 0; }
+.home-page .meeting-layout { gap: clamp(1.5rem, 4vw, 3rem); }

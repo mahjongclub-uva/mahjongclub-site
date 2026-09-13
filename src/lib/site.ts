@@ -135,5 +135,4 @@ export const ABOUT = {
   otherStyles:
     "You might know Japanese riichi or Hong Kong-style mahjong, each with its own scoring traditions. American mahjong uses jokers and a card of winning hands.",
   tablePhoto: "Game-night photo",
-  officersPhoto: "Officers photo",
 };
