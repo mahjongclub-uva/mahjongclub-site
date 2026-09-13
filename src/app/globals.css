@@ -2590,11 +2590,21 @@ body::before {
 .action-link-primary:hover { background: #8f2e24; color: #fffaf0; box-shadow: 0 6px 0 #70271e; }
 .action-link:active { transform: translateY(3px); box-shadow: 0 1px 0 #b6aa96; }
 .guide-index a { color: var(--ink); }
-.call-demo { margin-top: 1.4rem; padding: 1rem; border: 1px solid var(--rule); border-radius: 8px; background: #eee6d780; }
-.call-demo .tile-row { justify-content: center; margin: 0 0 1rem; gap: 8px; }
-.call-demo .set-tile { width: 58px; }
-.call-demo button { display: block; margin-inline: auto; cursor: pointer; font: 600 .85rem var(--body); padding: .65rem 1rem; }
-.call-demo-status { display: block; text-align: center; min-height: 1.5em; margin-top: .7rem; color: var(--ink-soft); font-size: .85rem; }
 @media (prefers-reduced-motion: reduce) {
   .action-link:hover, .action-link:active { transform: none; }
+}
+
+/* Even navigation rim and quieter leaderboard alignment. */
+.nav ul { box-shadow: 0 6px 16px #29272220; }
+.player-name { gap: .55rem; flex-wrap: nowrap; }
+.player-name .wukong-headband { width: 48px; height: 25px; }
+.leaderboard tbody tr[data-leader="true"] th { font-family: var(--body); font-size: 1.1rem; }
+.tile-letter { font-family: var(--body); font-weight: 700; }
+.page-head { padding-bottom: clamp(2rem, 5vw, 3.5rem); }
+.call-guide { column-gap: 2.5rem; row-gap: 2rem; }
+@media (max-width: 560px) {
+  .player-name .wukong-headband { width: 36px; height: 20px; }
+  .leaderboard tbody tr[data-leader="true"] th { font-size: 1rem; }
+  .page-title { line-height: 1.08; }
+  .guide-index ol { row-gap: .75rem; }
 }

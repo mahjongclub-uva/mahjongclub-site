@@ -34,7 +34,7 @@ function useLetterTextures(letters: string[]) {
       // Reads the face colours straight off the page, so the scene and the
       // CSS version cannot drift apart.
       ctx.fillStyle = cssVar("--tile-letter", "#9d302b");
-      ctx.font = `600 150px ${cssVar("--display", "serif")}`;
+      ctx.font = `700 150px ${cssVar("--body", "sans-serif")}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(letter, canvas.width / 2, canvas.height / 2 + 6);
@@ -89,7 +89,7 @@ const easeInOut = (t: number) =>
 function Row({ letters }: { letters: string[] }) {
   const group = useRef<THREE.Group>(null);
   const textures = useLetterTextures(letters);
-  const { pointer } = useThree();
+  const { pointer, viewport } = useThree();
 
   useFrame(() => {
     const g = group.current;
@@ -101,7 +101,7 @@ function Row({ letters }: { letters: string[] }) {
   const span = letters.length * (TILE_W + GAP) - GAP;
 
   return (
-    <group ref={group}>
+    <group ref={group} scale={Math.min(1, viewport.width / (span + 0.5))}>
       {letters.map((letter, i) => (
         <group key={i} position={[i * (TILE_W + GAP) - span / 2 + TILE_W / 2, 0, 0]}>
           <Tile index={i} letter={letter} texture={textures[i]} />

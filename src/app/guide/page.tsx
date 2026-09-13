@@ -1,6 +1,5 @@
 import { IconArrowUp } from "@tabler/icons-react";
 import Section from "@/components/Section";
-import CallDemo from "@/components/CallDemo";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
 
@@ -105,7 +104,6 @@ export default function Guide() {
               Three identical tiles, such as three eight-dot tiles. If you hold
               two, you can usually call pung to claim the latest matching
               discard from any player.
-              <CallDemo kind="pung" />
             </dd>
           </div>
           <div>
@@ -118,7 +116,6 @@ export default function Guide() {
               Three consecutive numbers in the same suit, such as five, six, and
               seven bamboo. A chow is normally claimed only from the player to
               your left, immediately before your turn.
-              <CallDemo kind="chow" />
             </dd>
           </div>
         </dl>

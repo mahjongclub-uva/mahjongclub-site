@@ -83,8 +83,8 @@ export default function Leaderboard() {
                       </td>
                       <th scope="row">
                         <span className="player-name">
-                          {player.rank === 1 && <WukongHeadband />}
                           <span>{player.display}</span>
+                          {player.rank === 1 && <WukongHeadband />}
                         </span>
                       </th>
                       <td data-label="Score">{player.total_gain}</td>
