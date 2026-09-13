@@ -2469,8 +2469,8 @@ body { isolation: isolate; }
 .home-page .welcome > div:first-child { padding-top: 0; }
 .home-page .welcome .welcome-lead { font-size: clamp(1.5rem, 2.8vw, 2rem); }
 .photo-slot > img { border-radius: 14px; }
-body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transparent 48%); }
-.ambient-motif { position: absolute; width: 90px; height: 125px; opacity: 0.09; }
+body { background-image: none; }
+.ambient-motif { position: absolute; width: 90px; height: 125px; opacity: 0.11; }
 .ambient-dots { left: 2%; top: 67%; }
 .ambient-bamboo { right: 1%; top: 14%; transform: rotate(12deg); }
 .ambient-character { position: absolute; left: 4%; top: 7%; color: #9d302b; opacity: 0.07; font: 700 64px var(--font-han); }
@@ -2555,10 +2555,13 @@ body { background-image: radial-gradient(ellipse at 95% 12%, #e0b78d30, transpar
   .leader-badge { gap: 0.4rem; font-size: 0.62rem; white-space: nowrap; }
 }
 
-/* Fine paper grain, without ruled lines or moving noise. */
+/* Static paper grain and short, irregular fibers, behind the page content. */
 body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.11;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27320%27%20height%3D%27320%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2382725b%27%20stroke-opacity%3D%27.24%27%20stroke-width%3D%27.6%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M18%2031q3%202%205%207m59-17%204-5m68%2049q-2%204%200%208m78-54%205%203M34%20132l-3%206m80-32q5%201%208%204m145-8%203-6M72%20211q-3%203-2%207m112-37%206%202m105%2031-4%205M19%20288l6-3m116%2014q2-5%205-7m84-30%204%206%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  background-size: 180px 180px, 320px 320px;
+  background-repeat: repeat;
 }
 .page-title, .section-title { font-weight: 600; letter-spacing: -0.025em; }
 .eyebrow { letter-spacing: 0.1em; }
