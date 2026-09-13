@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Noto_Sans_SC, Nunito_Sans } from "next/font/google";
+import { Barlow_Condensed, Noto_Sans_SC, Public_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -7,7 +7,7 @@ import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import "./globals.css";
 
-const display = DM_Sans({
+const display = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-display",
@@ -33,7 +33,7 @@ const han = Noto_Sans_SC({
   preload: false,
 });
 
-const body = Nunito_Sans({
+const body = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-body",

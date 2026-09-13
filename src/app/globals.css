@@ -69,7 +69,7 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-rim: rgba(63, 136, 113, 0.3);
 
-  /* Type. DM Sans gives headings clean, open shapes; Nunito Sans
+  /* Type. Barlow Condensed gives headings a printed poster character; Public Sans
      keeps instructions and club information easy to scan on a phone. Both
      are self-hosted by next/font. */
   --display: var(--font-display), "Iowan Old Style", Georgia, serif;
@@ -2578,3 +2578,23 @@ body::before {
   .ambient-extra-dots, .ambient-extra-bamboo { width: 65px; opacity: 0.025; }
 }
 .call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
+
+/* Printed game-room palette and solid, tile-like controls. */
+:root { --ink: #292722; --ink-soft: #605b52; --nav-ink: #292722; --rule: #d0c6b6; }
+.page-title, .section-title { font-weight: 700; letter-spacing: -0.015em; }
+.nav ul { background: #292722; box-shadow: 0 4px 0 #171612, 0 8px 18px #29272218; }
+.nav ul a[aria-current="page"], .nav[data-marker="on"] ul a[aria-current="page"] { color: #292722; }
+.action-link { border-color: #29272280; box-shadow: 0 4px 0 #b6aa96; }
+.action-link-primary { background: #a33428; border-color: #873025; color: #fffaf0; box-shadow: 0 4px 0 #70271e; }
+.action-link:hover { background: #fffaf0; color: #292722; box-shadow: 0 6px 0 #b6aa96; }
+.action-link-primary:hover { background: #8f2e24; color: #fffaf0; box-shadow: 0 6px 0 #70271e; }
+.action-link:active { transform: translateY(3px); box-shadow: 0 1px 0 #b6aa96; }
+.guide-index a { color: var(--ink); }
+.call-demo { margin-top: 1.4rem; padding: 1rem; border: 1px solid var(--rule); border-radius: 8px; background: #eee6d780; }
+.call-demo .tile-row { justify-content: center; margin: 0 0 1rem; gap: 8px; }
+.call-demo .set-tile { width: 58px; }
+.call-demo button { display: block; margin-inline: auto; cursor: pointer; font: 600 .85rem var(--body); padding: .65rem 1rem; }
+.call-demo-status { display: block; text-align: center; min-height: 1.5em; margin-top: .7rem; color: var(--ink-soft); font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) {
+  .action-link:hover, .action-link:active { transform: none; }
+}
