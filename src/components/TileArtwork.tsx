@@ -307,7 +307,7 @@ export function Bamboo({ count }: { count: number }) {
   // Eight stalks: upright sides and overlapping diagonals, as in the reference.
   if (count === 8)
     return (
-      <>
+      <g transform="translate(4.4 5.9) scale(.9)">
         <Stalk x={23} y={34} h={42} colour={GREEN} />
         <Stalk x={65} y={34} h={42} colour={GREEN} />
         <Stalk x={36} y={40} h={42} colour={GREEN} tilt={45} />
@@ -316,7 +316,7 @@ export function Bamboo({ count }: { count: number }) {
         <Stalk x={65} y={84} h={42} colour={GREEN} />
         <Stalk x={36} y={78} h={42} colour={GREEN} tilt={-45} />
         <Stalk x={52} y={78} h={42} colour={GREEN} tilt={45} />
-      </>
+      </g>
     );
 
   const points = BAMBOO_LAYOUT[count];
@@ -341,7 +341,7 @@ export function Bamboo({ count }: { count: number }) {
  */
 export function Bird() {
   return (
-    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <g transform="translate(3.5 4.7) scale(.92)" fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* Perch, outlined body, and the folded blue wing. */}
       <path d="M18 69 Q42 67 66 64" stroke={GREEN} strokeWidth="2.5" />
       <path
@@ -365,7 +365,7 @@ export function Bird() {
         stroke={GREEN}
         strokeWidth="2"
       />
-      <circle cx="43" cy="27" r="2" stroke={GREEN} strokeWidth="1.5" />
+      <circle cx="43" cy="27" r="1.7" fill={GREEN} stroke="none" />
       <path
         d="M35 26 L30 24 L35 31 M37 21 Q30 14 45 16 Q55 17 59 12 Q56 24 43 21"
         stroke={RED}
@@ -381,7 +381,7 @@ export function Bird() {
         stroke={RED}
         strokeWidth="1.5"
       />
-      <path d="M40 64 Q40 87 56 106" stroke={GREEN} strokeWidth="1.5" />
+      <path d="M40 64 Q40 86 54 102" stroke={GREEN} strokeWidth="1.5" />
     </g>
   );
 }

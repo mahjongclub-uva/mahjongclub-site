@@ -23,6 +23,7 @@ export default function FlowerTile({ rank }: { rank: 1 | 2 | 3 | 4 }) {
         {flower.character}
       </text>
       <g
+        transform="translate(3 4) scale(.93)"
         fill="none"
         stroke="#236951"
         strokeWidth="2"
@@ -47,8 +48,8 @@ export default function FlowerTile({ rank }: { rank: 1 | 2 | 3 | 4 }) {
                     key={angle}
                     cx="0"
                     cy="-5"
-                    rx="3.6"
-                    ry="4.8"
+                    rx="3.2"
+                    ry="4.3"
                     transform={`rotate(${angle})`}
                     fill="#f4f2e9"
                     stroke="#b6412c"
@@ -80,14 +81,14 @@ export default function FlowerTile({ rank }: { rank: 1 | 2 | 3 | 4 }) {
           <>
             <path d="M39 103 Q45 81 42 57 M42 87 Q24 76 26 71 Q43 71 42 87 M43 79 Q60 63 63 70 Q60 82 43 79" />
             <g transform="translate(41 51)" stroke="#b6412c" strokeWidth="1.1">
-              {Array.from({ length: 12 }, (_, i) => (
+              {Array.from({ length: 10 }, (_, i) => (
                 <ellipse
                   key={i}
                   cx="0"
                   cy="-9"
-                  rx="2.7"
+                  rx="2.3"
                   ry="9"
-                  transform={`rotate(${i * 30})`}
+                  transform={`rotate(${i * 36})`}
                   fill="#f4f2e9"
                 />
               ))}

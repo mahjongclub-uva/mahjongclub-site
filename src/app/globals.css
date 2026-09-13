@@ -2608,3 +2608,16 @@ body::before {
   .page-title { line-height: 1.08; }
   .guide-index ol { row-gap: .75rem; }
 }
+
+/* Slightly larger standings, with the stacked phone layout retained. */
+.leaderboard-page { --content: 52rem; }
+.leaderboard tbody th { font-size: 1.5rem; }
+.leaderboard tbody td { font-size: 1.05rem; }
+.meeting-photo-placeholder { width: min(100%, 28rem); min-height: 9rem; margin: 2rem auto 0; padding: 1.5rem; display: grid; place-content: center; text-align: center; border: 1px dashed #998d7a; border-radius: 10px; background: #eee6d766; color: var(--ink-soft); }
+.meeting-photo-placeholder > span { font-size: 2rem; line-height: 1; color: var(--tile-letter); }
+.meeting-photo-placeholder p { margin: .75rem 0 0; font-size: .9rem; }
+@media (max-width: 560px) {
+  .leaderboard tbody th { font-size: 1.4rem; }
+  .leaderboard tbody td { font-size: 1.1rem; }
+  .meeting-photo-placeholder { min-height: 8rem; }
+}

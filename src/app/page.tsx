@@ -44,6 +44,10 @@ export default function Home() {
       <RevealSection id="when" title="When do we play?" lead={<RollingDot />}>
         <NextMeeting />
         <Calendar />
+        <div className="meeting-photo-placeholder">
+          <span aria-hidden="true">▧</span>
+          <p>{HOME.meetingPhotoPending}</p>
+        </div>
       </RevealSection>
 
       {PHOTOS.length > 2 && (

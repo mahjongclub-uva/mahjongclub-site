@@ -15,7 +15,7 @@ export const CLUB_NAME = "Club @ UVA";
 /** Read by screen readers in place of the seven separate tiles. */
 export const FULL_NAME = "Mahjong Club @ UVA";
 
-export const TAGLINE = "Your next good hand starts here. Everyone’s welcome.";
+export const TAGLINE = "Good tiles. Good company. Come pull up a chair.";
 
 /**
  * Google Calendar embed id — an address like
@@ -114,8 +114,9 @@ export const OFFICERS: Officer[] = [
 export const HOME = {
   welcomeTitle: "A seat for everyone.",
   welcome:
-    "Bring a friend or come on your own. We have the sets and will teach you as we play.",
+    "Bring a friend, or meet one here. We’ll bring the tiles and help you find your feet. No experience needed.",
   welcomeNote: "Come for a hand. Stay for another.",
+  meetingPhotoPending: "A little peek at game night, coming soon.",
   photosPending: "Club photos coming soon.",
   photoIntro: "The people, the hands, and the moments between games.",
 };
