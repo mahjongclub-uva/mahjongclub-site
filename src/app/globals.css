@@ -2085,7 +2085,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .hero {
   padding-block: clamp(3rem, 7vw, 6rem) 3.5rem;
   overflow: clip;
-  background: radial-gradient(ellipse at 50% 30%, #ffffffb3, transparent 65%);
+  background: transparent;
 }
 .home-page .hero .section-wrap { max-width: 66rem; }
 .home-page .tile-scene { --tile-w: clamp(29px, 10.8vw, 108px); }
