@@ -1,3 +1,5 @@
+import siteContent from "../../data/site.json";
+
 /**
  * Everything about the club that is not scores.
  *
@@ -15,7 +17,7 @@ export const CLUB_NAME = "Club @ UVA";
 /** Read by screen readers in place of the seven separate tiles. */
 export const FULL_NAME = "Mahjong Club @ UVA";
 
-export const TAGLINE = "Good tiles. Good company. Come pull up a chair.";
+export const TAGLINE = siteContent.tagline;
 
 /**
  * Google Calendar embed id — an address like
@@ -43,7 +45,7 @@ export const CALENDAR_ID: string | null =
 export const LOGO: string | null = "/logo.webp";
 
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
-export const INSTAGRAM: string | null = "mahjongclub_uva";
+export const INSTAGRAM: string | null = siteContent.instagram || null;
 
 /**
  * GroupMe invitation URL.
@@ -52,8 +54,7 @@ export const INSTAGRAM: string | null = "mahjongclub_uva";
  * will explain that the link is coming instead of sending people to an
  * expired or guessed group.
  */
-export const GROUPME_URL: string | null =
-  "https://groupme.com/join_group/103973752/UZkrxfg4";
+export const GROUPME_URL: string | null = siteContent.groupme_url || null;
 
 /**
  * Photographs for the homepage.
@@ -102,37 +103,26 @@ export type Officer = {
   name: string | null;
 };
 
-export const OFFICERS: Officer[] = [
-  { role: "President", name: "Loy Luo" },
-  { role: "Vice President", name: "Benjamin Liu" },
-  { role: "Secretary", name: "Sean Pan" },
-  { role: "Treasurer", name: "Kevin Jiang" },
-  { role: "Publicity", name: "Brittney Men" },
-];
+export const OFFICERS: Officer[] = siteContent.officers;
 
 /** Homepage editorial copy, separate from the visual components. */
 export const HOME = {
-  welcomeTitle: "A seat for everyone.",
-  welcome:
-    "Bring a friend, or meet one here. We’ll bring the tiles and help you find your feet. No experience needed.",
-  welcomeNote: "Come for a hand. Stay for another.",
-  meetingPhotoPending: "A little peek at game night, coming soon.",
-  photosPending: "Club photos coming soon.",
-  photoIntro: "The people, the hands, and the moments between games.",
+  welcomeTitle: siteContent.home.welcome_title,
+  welcome: siteContent.home.welcome,
+  welcomeNote: siteContent.home.welcome_note,
+  meetingPhotoPending: siteContent.home.meeting_photo_pending,
+  photosPending: siteContent.home.photos_pending,
+  photoIntro: siteContent.home.photo_intro,
 };
 
 /** Public footer contact details. */
-export const CONTACT_EMAIL = "zrk2xw@virginia.edu";
-export const LOCATION = "Charlottesville, VA";
-export const LOCATION_URL =
-  "https://www.google.com/maps/search/?api=1&query=Charlottesville%2C%20VA";
+export const CONTACT_EMAIL = siteContent.contact_email;
+export const LOCATION = siteContent.location;
+export const LOCATION_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(LOCATION)}`;
 export const ABOUT = {
-  intro:
-    "A few good hands, a few new friends, and always room for another player.",
-  game: "Fuzhounese (Fuzhou-style) mahjong is one of our main games: sixteen tiles in hand, four players around the table, and a gold wildcard to keep you guessing.",
-  variety:
-    "Other styles are welcome too. Bring your house rules; we’ll learn together.",
-  otherStyles:
-    "You might know Japanese riichi or Hong Kong-style mahjong, each with its own scoring traditions. American mahjong uses jokers and a card of winning hands.",
-  tablePhoto: "Game-night photo",
+  intro: siteContent.about.intro,
+  game: siteContent.about.game,
+  variety: siteContent.about.variety,
+  otherStyles: siteContent.about.other_styles,
+  tablePhoto: siteContent.about.table_photo,
 };

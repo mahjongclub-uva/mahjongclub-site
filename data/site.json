@@ -1,0 +1,44 @@
+{
+  "tagline": "Good tiles. Good company. Come pull up a chair.",
+  "instagram": "mahjongclub_uva",
+  "groupme_url": "https://groupme.com/join_group/103973752/UZkrxfg4",
+  "contact_email": "zrk2xw@virginia.edu",
+  "location": "Charlottesville, VA",
+  "home": {
+    "welcome_title": "A seat for everyone.",
+    "welcome": "Bring a friend, or meet one here. We’ll bring the tiles and help you find your feet. No experience needed.",
+    "welcome_note": "Come for a hand. Stay for another.",
+    "meeting_photo_pending": "A little peek at game night, coming soon.",
+    "photos_pending": "Club photos coming soon.",
+    "photo_intro": "The people, the hands, and the moments between games."
+  },
+  "about": {
+    "intro": "A few good hands, a few new friends, and always room for another player.",
+    "game": "Fuzhounese (Fuzhou-style) mahjong is one of our main games: sixteen tiles in hand, four players around the table, and a gold wildcard to keep you guessing.",
+    "variety": "Other styles are welcome too. Bring your house rules; we’ll learn together.",
+    "other_styles": "You might know Japanese riichi or Hong Kong-style mahjong, each with its own scoring traditions. American mahjong uses jokers and a card of winning hands.",
+    "table_photo": "Game-night photo"
+  },
+  "officers": [
+    {
+      "role": "President",
+      "name": "Loy Luo"
+    },
+    {
+      "role": "Vice President",
+      "name": "Benjamin Liu"
+    },
+    {
+      "role": "Secretary",
+      "name": "Sean Pan"
+    },
+    {
+      "role": "Treasurer",
+      "name": "Kevin Jiang"
+    },
+    {
+      "role": "Publicity",
+      "name": "Brittney Men"
+    }
+  ]
+}
