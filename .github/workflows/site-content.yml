@@ -82,6 +82,9 @@ jobs:
         run: npm run test:site-content
 
       - if: steps.change.outputs.changed == 'true'
+        run: npm run photos:check
+
+      - if: steps.change.outputs.changed == 'true'
         run: npm run build
 
       - name: Open a review pull request

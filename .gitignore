@@ -31,6 +31,9 @@ yarn-error.log*
 # env files
 .env*
 
+# Originals stay local. `npm run photos:prepare` writes clean public copies.
+/photo-inbox/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

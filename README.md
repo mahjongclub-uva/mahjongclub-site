@@ -32,3 +32,20 @@ After an update is merged, later checks do nothing until the sheet content chang
 
 The workflow manages homepage and About copy, officer display names, public contact details, and social links.
 Scores remain in the private roster pipeline, meetings remain in Google Calendar, and photos remain a manual consent and metadata-review process.
+
+## Add photos
+
+Put original photos in `photo-inbox/`, then run:
+
+```bash
+npm run photos:prepare
+```
+
+The command fixes orientation, limits each image to 2400 pixels, removes hidden
+metadata, and writes a WebP file to `public/photos/`.
+It also prints the width and height to copy into `src/lib/site.ts`.
+
+Run `npm run hooks:install` once per computer to prepare photos automatically
+before commits.
+CI runs `npm run photos:check` and rejects public images that still contain
+EXIF, XMP, IPTC, comments, device identifiers, or editor data.

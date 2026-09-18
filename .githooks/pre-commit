@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+npm run photos:prepare
+npm run photos:check
+
+if ! git diff --quiet -- public/photos ||
+  [ -n "$(git ls-files --others --exclude-standard -- public/photos)" ]; then
+  echo "Prepared photos changed. Review them, run 'git add public/photos', and commit again."
+  exit 1
+fi
