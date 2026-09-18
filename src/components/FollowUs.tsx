@@ -5,17 +5,14 @@ import { INSTAGRAM } from "@/lib/site";
 import InstagramTile from "@/components/InstagramTile";
 
 /**
- * Instagram is where meeting times and changes actually get posted, so this is
- * the most useful thing on the homepage after the calendar.
+ * Instagram is where meeting changes actually get posted, so this is the
+ * most useful thing on the homepage after the calendar.
  *
- * Pointer position is tracked here, on the link, rather than on the canvas —
- * the canvas ignores pointer events so the card behaves as one clickable
- * surface. It is written into a ref rather than state on purpose: a pointer
- * moves far more often than the screen repaints, and putting that in state
- * would re-render the tree on every mouse move.
- *
- * Renders as plain text with no link until INSTAGRAM is set in site.ts — a
- * dead link is worse than a sentence.
+ * Pointer position is tracked on the link, not the canvas (the canvas
+ * ignores pointer events so the whole card is one clickable surface), and
+ * written into a ref rather than state since a pointer moves far more often
+ * than the screen repaints. Renders as plain text with no link until
+ * INSTAGRAM is set in site.ts, a dead link is worse than a sentence.
  */
 export default function FollowUs() {
   const [active, setActive] = useState(false);

@@ -1,4 +1,4 @@
-/** Shared tile ink, styled after the supplied blue, green, and orange reference. */
+/** Shared tile ink */
 const BLACK = "#114ba3";
 const RED = "#c94219";
 const GREEN = "#236951";
@@ -201,13 +201,9 @@ export function Dots({ count }: { count: number }) {
 }
 
 /**
- * The one dot, drawn on its own.
- *
- * Pulled out as its own export because it rolls across the homepage, and that
- * is what forces the petals. Concentric rings are rotationally symmetric — a
- * ring turning looks exactly like a ring standing still, so a dot made only of
- * rings cannot be seen to roll. The eight petals are what make the rotation
- * legible, and they are also closer to the ornate 一筒 a real set carries.
+ * The one dot, exported on its own because it rolls across the homepage.
+ * Concentric rings alone are rotationally symmetric so rolling wouldn't
+ * read; the eight petals make the rotation legible (and match a real 一筒).
  */
 export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
   const petals = Array.from({ length: 8 }, (_, i) => {
@@ -332,13 +328,8 @@ export function Bamboo({ count }: { count: number }) {
   );
 }
 
-/**
- * One bamboo, which is a bird rather than a stalk.
- *
- * Every set draws it differently — peacock, sparrow, something in between —
- * so this is a reading of the shape rather than a copy: body, cocked head,
- * one wing, and a tail that fans red the way the reference set's does.
- */
+/** One bamboo is a bird, not a stalk; every set draws it differently, so this
+ * is a reading of the shape (body, cocked head, wing, red-fanned tail). */
 export function Bird() {
   return (
     <g transform="translate(3.5 4.7) scale(.92)" fill="none" strokeLinecap="round" strokeLinejoin="round">

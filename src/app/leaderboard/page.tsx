@@ -12,14 +12,10 @@ const SHOWN = 9;
 const NUMERALS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
 /**
- * The rank as a character tile: the numeral above, 萬 below, as a real 萬子
- * tile is laid out.
- *
- * Hovering the row turns it over: the jade reverse carries the Arabic numeral,
- * so anyone who does not read the characters can still find their place.
- *
- * That number is also present for assistive technology at all times, since a
- * rank is information and hover is not available to everyone.
+ * Rank as a character tile: numeral above, 萬 below, laid out as a real 萬子
+ * tile. Hovering flips it to show the Arabic numeral for anyone who doesn't
+ * read the characters; also present for assistive tech at all times, since
+ * hover isn't available to everyone.
  */
 function RankTile({ rank }: { rank: number }) {
   const numeral = NUMERALS[rank];
@@ -60,9 +56,6 @@ export default function Leaderboard() {
             <p className="quiet">No tables played yet this semester.</p>
           ) : (
             <>
-              {/* A real table: this is tabular data, and it is what a screen
-              reader needs. Below 768px the header row is hidden and each row
-              becomes a card, using the data-label attributes. */}
               <table className="leaderboard">
                 <caption className="sr-only">
                   {semester.label} leaderboard
@@ -94,8 +87,6 @@ export default function Leaderboard() {
                 </tbody>
               </table>
 
-              {/* Both facts a reader needs after the table: how current it is,
-              and that they are not seeing all of it. */}
               <p className="quiet table-note">
                 {semester.last_session && (
                   <span>
@@ -123,15 +114,11 @@ export default function Leaderboard() {
       />
       <section className="section">
         <div className="section-wrap">
-          {/* How the numbers are arrived at. Small, and after the table
-              rather than before it, because most visitors are looking for a
-              name and a number and do not need the rules to read it. */}
+          {/* After the table, not before: most visitors just want a name and a number. */}
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
             <p>
-              Everyone starts a table with 205 points, and your result is what
-              you finish with minus 205. The board adds up only your winning
-              tables; losses don’t subtract from your total. Play{" "}
+              The board adds up only your winning tables; losses don’t subtract from your total. Play{" "}
               {MIN_TABLES_TO_RANK} tables to be ranked.
             </p>
             <p>

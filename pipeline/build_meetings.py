@@ -4,20 +4,15 @@ Turns the club's public Google Calendar into the JSON the website reads.
 
     python3 pipeline/build_meetings.py
 
-The site is a static export, so there is no server to ask "when is the next
-meeting?" at the moment somebody visits. This script asks at build time
-instead: it reads the calendar's public iCal feed, works out the next few
-meetings, and writes data/meetings.json. A weekly GitHub Action re-runs it and
-redeploys, which is what keeps the answer current.
+The site is a static export with no server to ask "when's the next meeting?"
+at visit time, so this asks at build time instead: reads the calendar's
+public iCal feed, works out the next few meetings, writes data/meetings.json.
+A weekly GitHub Action re-runs and redeploys, which is the whole accuracy
+story, a meeting cancelled Thursday stays on the site until the next run, so
+cancel by removing the event (and say so on Instagram if it matters).
 
-That weekly cadence is the whole accuracy story. A meeting cancelled on
-Thursday will still be on the site until the next run, so cancel by removing
-the event and, if it matters, say so on Instagram too.
-
-The event's Location is published, because a club that wants people to turn up
-has to say where. Whatever is typed into that field on the calendar appears on
-the site, so keep it to a building and room and never to anything that reads
-as a person's whereabouts.
+The event's Location is published as typed, so keep it to a building and
+room, never anything that reads as a person's whereabouts.
 
 Only stdlib is used, so there is nothing to install.
 """
@@ -50,20 +45,17 @@ ICAL_URL = (
 # is on Grounds.
 CLUB_TZ = ZoneInfo("America/New_York")
 
-# How many upcoming meetings to write out. More than one on purpose: if a
-# weekly run is missed, the site can still skip past a meeting that has already
-# happened and name a real one instead of a stale one.
+# More than one on purpose: if a weekly run is missed, the site can still
+# skip past an already-happened meeting and name a real one, not a stale one.
 HORIZON = 6
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "meetings.json"
 
 
 # ---------------------------------------------------------------------------
-# iCalendar parsing.
-#
-# Only as much of RFC 5545 as this calendar actually uses. Anything else is
-# reported and skipped rather than guessed at, because a wrong meeting time is
-# worse than no meeting time.
+# iCalendar parsing. Only as much of RFC 5545 as this calendar actually uses;
+# anything else is reported and skipped rather than guessed at, since a wrong
+# meeting time is worse than no meeting time.
 # ---------------------------------------------------------------------------
 
 
@@ -133,9 +125,8 @@ def parse_events(text: str) -> list[Event]:
                 events.append(current)
             current = None
             continue
-        # VCALENDAR is the wrapper around the whole file, so it is not nesting
-        # in any sense that matters here. Anything else — VTIMEZONE and the
-        # STANDARD/DAYLIGHT blocks inside it — is a block to step over.
+        # VCALENDAR wraps the whole file so doesn't count as nesting here;
+        # VTIMEZONE and its STANDARD/DAYLIGHT blocks are stepped over.
         if name == "BEGIN" and value not in ("VEVENT", "VCALENDAR"):
             depth_other += 1
             continue
@@ -176,13 +167,10 @@ WEEKDAYS = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
 
 
 def occurrences(event: Event, after: dt.datetime, limit: int) -> list[dt.datetime]:
-    """The event's start times from `after` onward, soonest first.
-
-    Handles a single event and a weekly rule, which is what a club meeting is.
-    Any other FREQ is reported and skipped: expanding monthly and yearly rules
-    correctly means BYSETPOS and BYMONTHDAY and a pile of edge cases that no
-    club calendar here has ever needed.
-    """
+    """The event's start times from `after` onward, soonest first. Handles a
+    single event and a weekly rule, which is what a club meeting is; any
+    other FREQ is reported and skipped rather than correctly expanded
+    (BYSETPOS/BYMONTHDAY and their edge cases have never been needed here)."""
     if event.cancelled or event.start is None:
         return []
 
@@ -210,18 +198,16 @@ def occurrences(event: Event, after: dt.datetime, limit: int) -> list[dt.datetim
         until = parse_datetime(event.rrule["UNTIL"], {})
     count = int(event.rrule["COUNT"]) if "COUNT" in event.rrule else None
 
-    # Walk week by week from the week the series starts in. Each step is
-    # `interval` weeks, and inside a week every listed weekday is an
-    # occurrence — that is exactly what BYDAY means.
+    # Walk week by week from the series' start week, `interval` weeks per
+    # step; every listed weekday within a week is an occurrence (BYDAY).
     week_start = event.start - dt.timedelta(days=event.start.weekday())
     found: list[dt.datetime] = []
     emitted = 0
 
-    # A generous ceiling so a rule with no UNTIL and no COUNT still terminates.
-    for step in range(520):
+    for step in range(520):  # generous ceiling for a rule with no UNTIL/COUNT
         for weekday in days:
-            # Rebuilding from the date keeps the wall-clock time across a DST
-            # change: 17:30 stays 17:30 in November, it does not become 16:30.
+            # Rebuilding from the date keeps wall-clock time across DST:
+            # 17:30 stays 17:30 in November, not 16:30.
             day = (week_start + dt.timedelta(weeks=step * interval, days=weekday)).date()
             moment = dt.datetime.combine(day, event.start.timetz())
 
@@ -291,10 +277,9 @@ def main() -> None:
 
     if not meetings:
         print(
-            "\n! No upcoming meetings found. The site will hide the next-meeting "
-            "line rather than show an empty one — but if that is a surprise, the "
-            "recurring event has probably run past its UNTIL date and needs "
-            "extending into the new semester.",
+            "\n! No upcoming meetings found (the site will hide the next-meeting "
+            "line). If that's a surprise, the recurring event has probably run "
+            "past its UNTIL date and needs extending into the new semester.",
             file=sys.stderr,
         )
     else:

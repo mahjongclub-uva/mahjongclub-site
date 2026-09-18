@@ -50,3 +50,4 @@ __pycache__/
 # markdown files
 *.md
 !README.md
+!OFFICER_GUIDE.md

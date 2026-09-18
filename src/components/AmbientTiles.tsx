@@ -1,73 +1,94 @@
 "use client";
 
 import { Dots, Bamboo } from "@/components/TileArtwork";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { useEffect, useRef } from "react";
 
 /** Decorative edge tiles drift with the reader, with no continuous animation. */
 export default function AmbientTiles() {
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll();
-  const left = useTransform(scrollYProgress, [0, 1], [0, -120]);
-  const right = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  const turn = useTransform(scrollYProgress, [0, 1], [-15, 12]);
+  const backdrop = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = backdrop.current;
+    if (!element) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      if (reducedMotion.matches) {
+        element.style.removeProperty("--ambient-progress");
+        return;
+      }
+
+      const scrollRange =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollRange > 0 ? window.scrollY / scrollRange : 0;
+      element.style.setProperty(
+        "--ambient-progress",
+        String(Math.max(0, Math.min(1, progress))),
+      );
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    reducedMotion.addEventListener("change", schedule);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      reducedMotion.removeEventListener("change", schedule);
+    };
+  }, []);
+
   return (
-    <div className="ambient-tiles" aria-hidden="true">
-      <motion.span style={reduce ? undefined : { y: left, rotate: turn }} />
-      <motion.span style={reduce ? undefined : { y: right }} />
-      <motion.span style={reduce ? undefined : { y: left }} />
-      <motion.svg
+    <div ref={backdrop} className="ambient-tiles" aria-hidden="true">
+      <span className="ambient-drift-left ambient-turn" />
+      <span className="ambient-drift-right" />
+      <span className="ambient-drift-left" />
+      <svg
         className="ambient-motif ambient-dots"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: right, rotate: turn }}
       >
         <Dots count={3} />
-      </motion.svg>
-      <motion.svg
+      </svg>
+      <svg
         className="ambient-motif ambient-bamboo"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: left }}
       >
         <Bamboo count={2} />
-      </motion.svg>
-      <motion.div
-        className="ambient-character"
-        style={reduce ? undefined : { y: right }}
-      >
-        福
-      </motion.div>
-      <motion.svg
+      </svg>
+      <div className="ambient-character ambient-drift-right">福</div>
+      <svg
         className="ambient-motif ambient-center-dots"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: left }}
       >
         <Dots count={1} />
-      </motion.svg>
-      <motion.svg
+      </svg>
+      <svg
         className="ambient-motif ambient-center-bamboo"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: right, rotate: turn }}
       >
         <Bamboo count={3} />
-      </motion.svg>
-      <motion.svg
+      </svg>
+      <svg
         className="ambient-motif ambient-extra-dots"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: right }}
       >
         <Dots count={5} />
-      </motion.svg>
-      <motion.svg
+      </svg>
+      <svg
         className="ambient-motif ambient-extra-bamboo"
         viewBox="0 0 88 124"
-        style={reduce ? undefined : { y: left, rotate: turn }}
       >
         <Bamboo count={4} />
-      </motion.svg>
+      </svg>
     </div>
   );
 }

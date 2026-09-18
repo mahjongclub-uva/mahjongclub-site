@@ -1,10 +1,37 @@
 # Mahjong Club @ UVA website
 
+A [Next.js](https://nextjs.org/) site, statically exported and served by GitHub Pages.
+For the nontechnical publishing guide, see [OFFICER_GUIDE.md](OFFICER_GUIDE.md).
+
+## Development
+
+Requires Node 22 and Python 3 (for the `pipeline/` scripts).
+
+```bash
+npm install
+npm run dev       # local dev server at http://localhost:3000
+```
+
+Before committing, run what CI runs:
+
+```bash
+npm run lint
+npm test               # component/unit tests
+npm run test:site-content  # validates the officer content pipeline
+npm run photos:check
+npm run build           # production build, static export to out/
+```
+
+`npm run hooks:install` wires these into a pre-commit hook so photo metadata is checked automatically; see [Add photos](#add-photos).
+
 ## Officer content workflow
 
 Officers can update public website copy in Google Sheets without editing code.
 The sheet is read-only from GitHub: it can propose a pull request, but it cannot publish directly.
 A maintainer reviews and merges the pull request to publish through the existing GitHub Pages workflow.
+
+For the day-to-day publishing steps, see [OFFICER_GUIDE.md](OFFICER_GUIDE.md).
+This section covers only the one-time setup a maintainer does once, before officers can use that workflow.
 
 ### One-time setup
 
@@ -17,19 +44,6 @@ A maintainer reviews and merges the pull request to publish through the existing
 
 The published sheet must contain only information intended for the public website.
 Never add the private roster, legal names used only for score processing, personal addresses, or private contact information.
-
-### Publishing an update
-
-1. Edit values in the Sheet without changing the keys.
-2. Confirm permission for every officer name and set that role's `.consent` row to `TRUE`.
-3. Set `ready_to_publish` to `TRUE`.
-4. Wait for the hourly check, or open **Actions → Propose website content update → Run workflow**.
-5. Open the generated **Website content update** pull request and review **Files changed**.
-6. Merge the pull request to publish the update.
-
-Leaving `ready_to_publish` as `TRUE` is safe.
-After an update is merged, later checks do nothing until the sheet content changes again.
-
 The workflow manages homepage and About copy, officer display names, public contact details, and social links.
 Scores remain in the private roster pipeline, meetings remain in Google Calendar, and photos remain a manual consent and metadata-review process.
 

@@ -2,20 +2,14 @@ import { getNextMeeting } from "@/lib/data";
 import { formatMeetingDay, formatMeetingTime } from "@/lib/format";
 
 /**
- * One line naming the next meeting, above the calendar.
+ * One line naming the next meeting, above the calendar (an iframe: loads
+ * late, is a scrollable widget, and asks too much of a phone for what's
+ * really a one-fact question).
  *
- * The embedded calendar below is authoritative and always current, but it is
- * an iframe: it loads late, it is a scrollable widget rather than a sentence,
- * and on a phone it asks for more attention than the question deserves. Most
- * visitors want one fact, so this states it in words.
- *
- * The text is baked in at build time from data/meetings.json, which a weekly
- * Action refreshes. That means it can be up to a week behind — a meeting
- * cancelled on Thursday will still be named here. Nothing on this line implies
- * otherwise, and the live calendar sits directly underneath it.
- *
- * Renders nothing at all when there is no meeting to name, which is the honest
- * state between semesters.
+ * Baked in at build time from data/meetings.json, refreshed weekly, so it
+ * can be up to a week stale (a Thursday cancellation still shows here; the
+ * live calendar underneath is the source of truth). Renders nothing between
+ * semesters, when there's no meeting to name.
  */
 export default function NextMeeting() {
   const meeting = getNextMeeting();
@@ -25,10 +19,8 @@ export default function NextMeeting() {
     <div className="next-meeting">
       <p className="next-meeting-label">Next meeting</p>
 
-      {/* The day is the headline; the time and the room are the two details
-          you need once you have decided to come. The room carries the weight
-          of the two, because "where" is the question the calendar frame
-          underneath answers worst. */}
+      {/* Day is the headline; time and room are the details once you've
+          decided to come ("where" is what the calendar frame answers worst). */}
       <p className="next-meeting-when">
         <time dateTime={meeting.start}>{formatMeetingDay(meeting.start)}</time>
       </p>

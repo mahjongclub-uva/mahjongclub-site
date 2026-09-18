@@ -6,13 +6,10 @@ import { usePathname } from "next/navigation";
 import Logo from "@/components/Logo";
 
 /**
- * The only client component on the site.
- *
- * It exists so the current tab can mark itself, which needs to know the route.
- * The alternative — threading a `current` prop from every page — keeps the
- * site fully server-rendered but means a new page silently gets no active
- * state until somebody remembers. This is the more usual Next pattern and the
- * one a maintainer is likelier to have seen, and it costs very little.
+ * The only client component on the site, so the current tab can mark itself
+ * from the route. The alternative (threading a `current` prop from every
+ * page) keeps things fully server-rendered but silently forgets a new page's
+ * active state; this is the more usual Next pattern and costs very little.
  *
  * If you add a page, add it here.
  */
@@ -27,9 +24,8 @@ export default function Nav() {
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
 
-  // Where the marker sits, in pixels within the list. Null until measured,
-  // which is also what a visitor without JavaScript is left with — see the
-  // CSS note on .nav[data-marker="on"].
+  // Marker position in pixels; null until measured, also what a
+  // no-JS visitor is left with — see .nav[data-marker="on"] in CSS.
   const [marker, setMarker] = useState<{ left: number; width: number } | null>(
     null,
   );
@@ -66,14 +62,10 @@ export default function Nav() {
       <div className="nav-inner">
         <Logo />
         <ul ref={listRef}>
-          {/* Purely decorative: the current tab is announced by aria-current,
-              which is on the link itself and does not depend on any of this.
-
-              No guard against animating on first paint, because there is
-              nothing to guard against: a transition needs a previous computed
-              value to interpolate from, and this element is inserted already
-              carrying its final transform. It slides only on the later
-              changes, which is exactly when it should. */}
+          {/* Purely decorative (aria-current on the link handles a11y). No
+              guard needed against animating on first paint: it's inserted
+              already at its final transform, and only slides on later
+              changes since a transition needs a prior value to interpolate from. */}
           {marker && (
             <li className="nav-marker" aria-hidden="true">
               <span

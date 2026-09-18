@@ -2,18 +2,11 @@ import { CALENDAR_ID } from "@/lib/site";
 import Link from "next/link";
 
 /**
- * The club calendar, embedded from Google Calendar.
- *
- * Set CALENDAR_ID in src/lib/site.ts and the frame appears. Leave it null and
- * this renders a quiet placeholder, which is the right default: an empty or
- * broken calendar frame looks worse than no calendar, and a stale one is
- * worse than both.
- *
- * Two things to know before switching it on:
- *
- *   - The calendar has to be public, or visitors see a permission error.
- *   - Whatever is in an event's Location field becomes public. Keep it to a
- *     building, not a room and a time a stranger could wait outside.
+ * Club calendar, embedded from Google Calendar. Set CALENDAR_ID in
+ * src/lib/site.ts; null renders a placeholder instead of an empty/broken
+ * frame. Before switching on: the calendar must be public, and an event's
+ * Location becomes public too, keep it to a building, not a room+time a
+ * stranger could wait outside.
  */
 export default function Calendar() {
   if (!CALENDAR_ID) {

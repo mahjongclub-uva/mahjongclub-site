@@ -5,12 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { TileFaceArt } from "@/components/TileArt";
 
 /**
- * The Instagram mark, in two layers — the same arrangement as the hero.
- *
- * The drawn tile renders first and stays as the fallback. The 3D version
- * mounts over it and the flat one steps aside only once a frame has actually
- * drawn, so a missing or blocked WebGL context leaves the drawn tile in place
- * rather than a hole.
+ * Instagram mark in two layers, same arrangement as the hero: the drawn tile
+ * renders first as fallback, and only steps aside once the 3D scene has
+ * actually drawn a frame, so a blocked WebGL context leaves it in place.
  */
 const Scene = dynamic(() => import("@/components/InstagramTileScene"), {
   ssr: false,
@@ -28,10 +25,9 @@ export default function InstagramTile({
   const [gaveUp, setGaveUp] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
 
-  // The drawn tile ships hidden, so a snapshot of it never flashes before the
-  // canvas arrives. It is revealed only if the scene fails to turn up — and
-  // the countdown runs only while the page is visible, because a backgrounded
-  // tab draws no frames and would otherwise be judged a failure.
+  // Ships hidden and is revealed only if the 3D scene fails to turn up. The
+  // countdown pauses while backgrounded, since a hidden tab draws no frames
+  // and would otherwise be wrongly judged a failure.
   useEffect(() => {
     if (ready) return;
     let timer: ReturnType<typeof setTimeout> | undefined;

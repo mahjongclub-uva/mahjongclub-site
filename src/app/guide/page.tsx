@@ -17,7 +17,7 @@ export default function Guide() {
           <p className="eyebrow">Mahjong guide</p>
           <h1 className="page-title">Learn your first hand</h1>
           <p className="page-intro">
-            No need to memorize this before you join us. Get to know a few
+            This is one of the ways to play Mahjong. No need to memorize this before you join us. Get to know a few
             tiles, try a hand, and ask questions as you go.
           </p>
           <nav className="guide-index" aria-label="In this guide">
@@ -29,7 +29,7 @@ export default function Guide() {
               </li>
               <li>
                 <a href="#hand">
-                  <span>02</span> Build a hand
+                  <span>02</span> Building a hand
                 </a>
               </li>
               <li>
@@ -151,18 +151,19 @@ export default function Guide() {
         </ol>
         <p className="quiet guide-note">
           A discard can sometimes be claimed to finish a group. Calls vary by
-          situation, so a club member will prompt you when one is available.
+          situation. Club members can help you spot them, and you&apos;ll pick it up quickly.
         </p>
       </Section>
 
       <Section id="first-table" title="Your first table">
         <div className="prose guide-prose reading">
           <p>
-            Just bring yourself. We provide the sets, explain the gold tile, and
-            play a practice hand before recording a score.
+            Just bring yourself. We provide the sets, explain the rules, and
+            practice before getting competitive!
           </p>
           <p>
-            Ask questions as you play. Nobody expects you to know every tile.
+            Ask any questions as you play. Nobody expects you to know every tile and rule.
+            Know any other ways to play? Let us know! We are happy to learn from other players and styles.
           </p>
         </div>
       </Section>

@@ -10,13 +10,7 @@ import {
   LOGO,
 } from "@/lib/site";
 
-/**
- * Appears on every page.
- *
- * The longer CIO and leaderboard consent notes live on About. This footer
- * keeps them reachable from every route without repeating legal copy beneath
- * every page.
- */
+/** Appears on every page; links to the fuller legal notes on About rather than repeating them. */
 export default function Footer() {
   return (
     <footer className="footer">

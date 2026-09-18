@@ -1,9 +1,7 @@
 /**
- * Reads data/*.json at build time and validates it against schema.ts.
- *
- * Everything here runs during `next build` and never in a browser, because the
- * site is a static export. If anything in this file throws, the build stops and
- * nothing deploys.
+ * Reads data/*.json at build time and validates it against schema.ts. Runs
+ * only during `next build` (static export, never in the browser); a throw
+ * here stops the build and nothing deploys.
  */
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -21,10 +19,7 @@ import {
 const DATA_DIR = join(process.cwd(), "data");
 const SEMESTER_DIR = join(DATA_DIR, "semesters");
 
-/**
- * Turns a Zod failure into something you can act on without reading a stack
- * trace: which file, which field, what was wrong.
- */
+/** Turns a Zod failure into an actionable message: which file, field, what was wrong. */
 function parseOrDie<T>(schema: z.ZodType<T>, raw: unknown, file: string): T {
   const result = schema.safeParse(raw);
   if (result.success) return result.data;
@@ -65,11 +60,8 @@ export function getSemester(id: string): Semester {
 }
 
 /**
- * Loads everything and checks the rules that span more than one file, which a
- * per-file schema cannot see.
- *
- * Call this once at build time. It is the only function that can catch
- * meta.json and a semester file disagreeing with each other.
+ * Loads everything and checks cross-file rules a per-file schema can't see
+ * (meta.json and a semester file disagreeing). Call once at build time.
  */
 export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
   const meta = getMeta();
@@ -78,8 +70,8 @@ export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
   for (const summary of meta.semesters) {
     const semester = getSemester(summary.id);
 
-    // Contract rule 7, and the three fields meta.json duplicates from the
-    // semester file. Duplicated data drifts; this is what catches it.
+    // Contract rule 7: catches the three fields meta.json duplicates from
+    // the semester file drifting apart.
     if (semester.id !== summary.id) {
       throw new Error(
         `data/semesters/${summary.id}.json declares id "${semester.id}"`,
@@ -104,8 +96,8 @@ export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
     semesters.set(summary.id, semester);
   }
 
-  // The other direction: a semester file that exists but is not in the nav
-  // would be invisible on the site and is almost certainly a mistake.
+  // Other direction: a semester file not listed in meta.json would be
+  // invisible on the site, almost certainly a mistake.
   const listed = new Set(meta.semesters.map((s) => s.id));
   const onDisk = existsSync(SEMESTER_DIR)
     ? readdirSync(SEMESTER_DIR).filter((f) => f.endsWith(".json"))
@@ -129,17 +121,10 @@ export function getCurrentSemester(): Semester {
 }
 
 /**
- * The next meeting, or null if there is not one to name.
- *
- * Null covers three cases that all deserve silence rather than a placeholder:
- * the file has never been generated, the calendar has run out of events (the
- * usual reason is a recurring event that expired at the end of a semester),
- * and every meeting in the file has already happened because the weekly
- * refresh has not run.
- *
- * That last case is why the file holds several meetings and this picks the
- * first one still ahead. "Now" is the moment of the build, since a static
- * export has no other moment available.
+ * The next meeting, or null (no file yet, calendar ran dry, or every meeting
+ * in the file already passed because the weekly refresh hasn't run — which is
+ * why the file holds several and this picks the first still ahead). "Now" is
+ * build time, the only moment a static export has.
  */
 export function getNextMeeting(): Meeting | null {
   const path = join(DATA_DIR, "meetings.json");

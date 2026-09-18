@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 
-/**
- * A full-bleed page section.
- *
- * The background spans the whole viewport while the content stays inside the
- * reading column. There is one ground across the site now, so sections are
- * separated by their headings rather than by alternating colour.
- */
+/** Full-bleed section; content stays inside the reading column. */
 export default function Section({
   id,
   title,

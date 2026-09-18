@@ -1,4 +1,3 @@
-/** An open oval band with inward spirals, shaped after the supplied reference. */
 export default function WukongHeadband() {
   const rim = "M24 44 C-4 39 0 17 29 10 C57 3 91 6 106 17 C122 29 109 43 88 45";
   const curls =

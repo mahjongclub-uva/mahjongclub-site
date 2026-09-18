@@ -5,20 +5,6 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { TileBody, TileLights, TILE_W, TILE_H, TILE_D, cssVar } from "@/components/Tile3D";
 import * as THREE from "three";
 
-/**
- * The wordmark as real geometry.
- *
- * CSS can only compose flat planes, so a tile there is a rounded front face
- * with square slabs behind it. Here each tile is an actual rounded, bevelled
- * solid, lit properly and casting a real shadow — which is the thing the
- * drawn version could only approximate.
- *
- * This never carries the club's name for accessibility. The <h1> underneath
- * stays in the DOM with the letters as text; this sits on top of it purely as
- * decoration, and if WebGL is unavailable the CSS wordmark simply stays
- * visible.
- */
-
 import { WORDMARK } from "@/lib/site";
 const GAP = 0.09;
 
@@ -31,8 +17,7 @@ function useLetterTextures(letters: string[]) {
       canvas.height = 362;
       const ctx = canvas.getContext("2d")!;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Reads the face colours straight off the page, so the scene and the
-      // CSS version cannot drift apart.
+      // Reads face colours off the page so the scene and CSS can't drift apart.
       ctx.fillStyle = cssVar("--tile-letter", "#9d302b");
       ctx.font = `700 150px ${cssVar("--body", "sans-serif")}`;
       ctx.textAlign = "center";

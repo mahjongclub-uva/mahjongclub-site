@@ -7,16 +7,13 @@ Turns the club's score sheet into the JSON the website reads.
 Reads the Points Tracking tab, checks every table adds up, works out the
 standings, and writes data/meta.json and data/semesters/*.json.
 
-Two things this script will never do:
+Never writes to the sheet (read-only), and never publishes a legal name
+(those live in pipeline/roster.local.json, not committed; only short display
+names like "Eddie Z." reach the website).
 
-  * write to the sheet. The sheet is the secretary's, and the pipeline only
-    ever reads it.
-  * publish a legal name. Names go in pipeline/roster.local.json, which is not
-    committed. Only the short display names ("Eddie Z.") reach the website.
-
-If a table's points do not add up, this stops with an error naming the table and
-does not write anything. That is deliberate: the site keeps showing the last good
-data, which is out of date but correct, instead of showing something wrong.
+If a table's points don't add up, this stops with an error naming the table
+and writes nothing, so the site keeps showing the last good (stale but
+correct) data instead of something wrong.
 
 Only stdlib is used, so there is nothing to install.
 """
@@ -38,8 +35,8 @@ from pathlib import Path
 
 PIPELINE_VERSION = "0.1.0"
 
-# Where the score sheet is. For now this is a downloaded copy of the Google
-# Sheet; see "Swapping in the Google Sheets API" at the bottom of this file.
+# Downloaded copy of the Google Sheet; see "Swapping in the Google Sheets
+# API" at the bottom of this file.
 WORKBOOK = Path.home() / "Documents" / "mahjongclub" / "Copy of ATTENDANCE 25-26.xlsx"
 
 # Every semester the site publishes, newest last. Adding next semester is a
@@ -67,12 +64,9 @@ DATA_DIR = REPO / "data"
 
 
 # ---------------------------------------------------------------------------
-# Reading the workbook.
-#
-# This section is temporary. It exists so we can build the site from a
-# downloaded copy of the sheet before the Google Sheets credential is sorted
-# out. When that lands, only this section is replaced; everything below it
-# works on the parsed tables and does not care where they came from.
+# Reading the workbook. Temporary, until the Google Sheets credential lands;
+# only this section gets replaced then, everything below works on parsed
+# tables and doesn't care where they came from.
 # ---------------------------------------------------------------------------
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
@@ -129,13 +123,9 @@ def cell_ref(ref: str) -> tuple[int, int]:
 
 
 def parse_date(serial: str | None) -> str | None:
-    """
-    Column E holds a date as the number of days since 1899-12-30. Return it as
-    YYYY-MM-DD.
-
-    A blank cell, or the sheet's own "enter date" placeholder left in an unused
-    block, means nobody has filled the date in yet.
-    """
+    """Column E holds a date as days since 1899-12-30; return it as
+    YYYY-MM-DD. Blank, or the sheet's "enter date" placeholder, means nobody
+    filled it in yet."""
     if not serial:
         return None
     try:
@@ -159,10 +149,10 @@ def parse_date(serial: str | None) -> str | None:
 #     Yongnian     298       93
 #     (blank row)
 #
-# Blocks with no players are blank templates waiting to be filled in, and are
-# skipped. Columns to the right hold the secretary's own summaries, which this
-# script deliberately ignores — it recomputes everything from the tables above,
-# so a broken formula over there cannot reach the website.
+# Blocks with no players are blank templates and are skipped. Columns to the
+# right hold the secretary's own summaries, deliberately ignored: everything
+# here is recomputed from the tables above, so a broken formula over there
+# can't reach the website.
 # ---------------------------------------------------------------------------
 
 COL_NAME, COL_POINTS, COL_NET, COL_DATE = 2, 3, 4, 5
@@ -208,21 +198,12 @@ def parse_tables(grid: dict[tuple[int, int], str]) -> list[Table]:
 
 
 def check_tables(tables: list[Table]) -> None:
-    """
-    Collect every problem, then report them together so one pass fixes all.
-
-    Two kinds of problem, treated differently:
-
-    Points that do not add up are fatal. They mean a result was mistyped, and
-    every number downstream would be wrong.
-
-    A missing date is a warning. The date is only used for the session count and
-    for dating an award — the standings do not need it. A table whose date was
-    never written down still happened, and its players still earned what they
-    earned, so dropping it would quietly take real results off real people.
-    Instead it counts toward the standings and adds no session, which makes the
-    published session count a floor rather than a guess.
-    """
+    """Collect every problem, then report them together so one pass fixes
+    all. Points that don't add up are fatal (a mistyped result poisons every
+    downstream number). A missing date is only a warning: the date is used
+    for the session count and dating an award, not the standings, so an
+    undated table still counts toward standings but adds no session rather
+    than being dropped and quietly taking real results off real people."""
     problems: list[str] = []
     warnings: list[str] = []
 
@@ -265,19 +246,15 @@ def check_tables(tables: list[Table]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# The roster.
+# The roster: maps each sheet name to the id and display name the website
+# uses. Not committed, since it's the one place legal and short names sit
+# side by side.
 #
-# Maps each player's name in the sheet to the id and display name the website
-# uses. This file is NOT committed, because it is the one place legal names and
-# short names sit side by side.
-#
-#   "id"       assigned once and never reused, so a player keeps the same id
-#              between builds.
-#   "display"  what the website shows. Defaults to first name + last initial.
-#              Change it here for a nickname, or to tell two people apart.
-#   "opt_out"  true removes the player from the site entirely. Ranks are worked
-#              out after they are removed, so the list has no gaps and nobody
-#              can tell somebody left.
+#   "id"       assigned once, never reused, so a player keeps it across builds.
+#   "display"  what the website shows, default first name + last initial.
+#              Change for a nickname or to tell two people apart.
+#   "opt_out"  true removes the player entirely; ranks are computed after
+#              removal so the list has no gaps and nobody can tell who left.
 # ---------------------------------------------------------------------------
 
 
@@ -326,17 +303,10 @@ def load_roster(names: list[str]) -> dict[str, dict]:
 
 
 # ---------------------------------------------------------------------------
-# Working out the standings.
-#
-# A player's result on one table is their "net": what they finished with, minus
-# the 205 they started with. It can be negative.
-#
-# The website ranks on "gain", which is the same thing with losses treated as
-# zero. Playing more and losing never costs you position, so there is no reason
-# not to sit down at another table.
-#
-# Ranking order:  most gain, then fewest tables to get it, then best net.
-# Two players share a rank only when all three are identical.
+# Standings. "net" is a table result minus the 205 starting points (can be
+# negative). "gain" is the same with losses floored at zero, so playing more
+# and losing never costs position. Rank order: most gain, then fewest tables
+# to get it, then best net; ties only when all three match.
 # ---------------------------------------------------------------------------
 
 
@@ -413,13 +383,9 @@ def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict],
 
 
 def build_awards(tables: list[Table], roster: dict[str, dict]) -> list[dict]:
-    """
-    Awards use raw net, not gain: a win is a win however the season is ranked.
-    They ignore the minimum-tables threshold.
-
-    An award with no winner is left out of the list entirely, so the website
-    never has to render an empty one.
-    """
+    """Awards use raw net, not gain (a win is a win regardless of ranking),
+    and ignore the minimum-tables threshold. No winner means the award is
+    left out entirely, never rendered empty."""
     awards = []
 
     best = None
@@ -533,15 +499,12 @@ if __name__ == "__main__":
 
 
 # ---------------------------------------------------------------------------
-# Swapping in the Google Sheets API
+# Swapping in the Google Sheets API: replace `read_grid` with a version that
+# calls the Sheets API with a read-only service account and returns the same
+# {(row, column): text} dict. Nothing else here needs to change.
 #
-# Everything above `parse_tables` reads a downloaded .xlsx. To read the live
-# sheet instead, replace `read_grid` with a version that calls the Sheets API
-# with a read-only service account and returns the same {(row, column): text}
-# dictionary. Nothing else in this file needs to change.
-#
-# Worth doing at the same time: move the roster into a private tab on the sheet
-# itself. Right now roster.local.json lives on one person's laptop, which means
-# player ids are only stable as long as that laptop is. The sheet is already
-# private, already shared with the officers, and already the source of truth.
+# Worth doing at the same time: move the roster into a private tab on the
+# sheet. Right now roster.local.json lives on one laptop, so player ids are
+# only as stable as that laptop; the sheet is already private, shared with
+# officers, and the real source of truth.
 # ---------------------------------------------------------------------------

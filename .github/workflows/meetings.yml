@@ -4,8 +4,9 @@
 # visits — the answer has to be baked in when the site is built. This runs
 # weekly, commits data/meetings.json, and asks the deploy workflow to rebuild.
 #
-# Saturday, because the club meets Friday evening: by the time this runs, the
-# week's meeting has happened and the next one is genuinely next.
+# 10pm Friday, because the club meets Friday evening and never runs that late:
+# by the time this runs, the week's meeting has happened and the next one is
+# genuinely next.
 #
 # Unlike the scores pipeline, this one is safe to run in CI. It reads a public
 # calendar and touches no roster, so no real name can reach the build log.
@@ -14,10 +15,10 @@ name: Refresh meetings
 
 on:
   schedule:
-    # 08:00 UTC Saturday — early Saturday morning in Charlottesville. GitHub
-    # runs cron in UTC and does not follow daylight saving, so this drifts by
-    # an hour twice a year. At this hour of the morning, nobody notices.
-    - cron: "0 8 * * 6"
+    # 02:00 UTC Saturday = 10pm Friday in Charlottesville (EDT, UTC-4). GitHub
+    # runs cron in UTC and does not follow daylight saving, so this becomes
+    # 9pm once EST (UTC-5) starts and drifts back with the spring change.
+    - cron: "0 2 * * 6"
   workflow_dispatch:
 
 permissions:

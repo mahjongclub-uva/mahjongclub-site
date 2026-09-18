@@ -8,11 +8,8 @@ export function formatDate(iso: string): string {
   });
 }
 
-/** Where the club is, and therefore the only timezone the site ever renders in.
- *
- * Pinned rather than left to the environment: these strings are produced during
- * `next build`, so without this the meeting time would come out in whatever
- * zone the build machine happens to sit in — UTC, on a GitHub runner. */
+/** Pinned rather than read from the environment, since `next build` runs on a
+ * GitHub runner in UTC and meeting times must render in the club's zone. */
 const CLUB_TZ = "America/New_York";
 
 /** "2026-09-18T17:30:00-04:00" -> "Friday 18 September". */

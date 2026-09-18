@@ -5,21 +5,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { TileBody, TileLights, TILE_W, cssVar } from "@/components/Tile3D";
 
-/**
- * Thicker than the wordmark's tiles. A real tile is roughly 20 x 30 x 15mm —
- * genuinely chunky — which looks heavy repeated seven times but correct on a
- * single tile shown by itself.
- */
+/** Thicker than the wordmark's tiles: a real tile is ~20x30x15mm, which
+ * looks heavy repeated seven times but correct shown singly. */
 const DEPTH = 0.62;
-
-/**
- * The Instagram mark on a real tile, matching the wordmark.
- *
- * frameloop is "demand": this sits far down the page and has nothing to
- * animate on its own, so it draws once and then only when the pointer moves
- * over it. A second always-on render loop for a decorative 64px mark would
- * cost battery for nothing.
- */
 
 /** The Instagram glyph, drawn to a canvas so it can be a texture. */
 function useMarkTexture() {
@@ -71,19 +59,11 @@ function Tile({
     const g = group.current;
     if (!g) return;
 
-    // Front-facing at rest. On hover or keyboard focus it makes one deliberate
-    // turn and lifts toward you — a single settled gesture rather than
-    // following the pointer around, which never settles and reads as jitter.
-    //
-    // The edge nearest the cursor comes toward you, on both axes, so the tile
-    // pivots on any corner or edge rather than one fixed hinge.
-    //
-    // Signs, worked out rather than guessed. A positive rotation.y brings the
-    // LEFT edge forward, so a cursor on the right (x > 0) needs a NEGATIVE
-    // rotation.y to bring the right edge forward. A positive rotation.x brings
-    // the TOP forward, and pointer y is -1 at the top, so that one is negated
-    // too. Both axes therefore share a sign — earlier they did not, and the
-    // tile leaned away horizontally while leaning toward you vertically.
+    // Front-facing at rest; on hover/focus makes one settled turn toward the
+    // cursor rather than tracking it (tracking never settles, reads as
+    // jitter). Both axes negate the pointer coordinate so the edge nearest
+    // the cursor comes forward: rotation.y and rotation.x both need a
+    // negative sign for this, don't "fix" one without the other.
     const reach = 0.34;
     const { x, y } = active ? pointer.current : { x: 0, y: 0 };
     const targetY = -x * reach;
@@ -94,7 +74,7 @@ function Tile({
     g.rotation.x += (targetX - g.rotation.x) * 0.12;
     g.position.z += (targetZ - g.position.z) * 0.12;
 
-    // frameloop is "demand", so keep asking for frames until it has settled.
+    // frameloop is "demand": keep asking for frames until settled.
     if (
       Math.abs(targetY - g.rotation.y) > 0.0005 ||
       Math.abs(targetX - g.rotation.x) > 0.0005 ||
@@ -131,15 +111,12 @@ export default function InstagramTileScene({
 }) {
   return (
     <Canvas
-      /* Continuous only while it is being pointed at. The rest of the time
-         there is nothing moving, and a permanent render loop for a 64px mark
-         would cost battery for nothing. */
+      // Continuous only while pointed at; a permanent loop for a 64px
+      // decorative mark would cost battery for nothing.
       frameloop={active ? "always" : "demand"}
       dpr={[1, 2]}
-      /* A moderate lens, raised a little and aimed back at the tile. Long
-         enough that turning it does not stretch the near edge, short enough
-         that you can still see it has a body — and the slight height reveals
-         the top face without rotating the tile off square. */
+      // Raised and angled back at the tile enough to reveal its top face
+      // without stretching the near edge or rotating it off square.
       camera={{ position: [0, 0.85, 6.1], fov: 21 }}
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl, camera }) => {

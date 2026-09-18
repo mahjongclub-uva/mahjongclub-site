@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Noto_Sans_SC, Public_Sans } from "next/font/google";
+import { Barlow_Condensed, Public_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -12,25 +12,6 @@ const display = Barlow_Condensed({
   weight: ["400", "600", "700"],
   variable: "--font-display",
   display: "swap",
-});
-
-/**
- * Carries the ten characters on the rank tiles, 一 through 九 and 萬.
- *
- * A sans rather than a serif on purpose. 一, 二 and 三 are nothing but
- * horizontal strokes, and a serif tapers them to hairlines that all but vanish
- * at tile size. A gothic keeps the stroke even, so the low numerals carry the
- * same weight as 四 through 九.
- */
-const han = Noto_Sans_SC({
-  subsets: ["latin"],
-  weight: ["700", "900"],
-  variable: "--font-han",
-  display: "swap",
-  // Not preloaded on purpose. Preloading would fetch this face's latin subset,
-  // which nothing on the site renders — the ten characters we do use live in
-  // CJK unicode ranges that the browser fetches only when it meets them.
-  preload: false,
 });
 
 const body = Public_Sans({
@@ -51,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${han.variable}`}
+      className={`${display.variable} ${body.variable}`}
     >
       <body>
         {/*

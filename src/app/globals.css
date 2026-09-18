@@ -1,17 +1,15 @@
 /* ==========================================================================
    Mahjong Club @ UVA
 
-     1. Reset            5. Sections        9. Calendar
-     2. Tokens           6. Standings      10. Photographs
-     3. Base             7. Leaderboard    11. Footer
-     4. Hero + tiles     8. Awards         12. Motion
+     1. Reset            5. Sections        9. Calendar     13. Tile set
+     2. Tokens           6. Standings      10. Photographs  14. Halftone
+     3. Base             7. Leaderboard    11. Footer       15. Reading highlight
+     4. Hero + tiles     8. Awards         12. Motion       16. Rolling dot
 
-   The page is built on negative space. Most of the work is in the vertical
-   rhythm and the type scale, not in decoration — if something here starts
-   looking busy, the fix is almost always to remove a thing rather than to
-   balance it with another thing.
+   Built on negative space: most of the work is vertical rhythm and type
+   scale, not decoration. If something looks busy, remove rather than balance.
 
-   Accessibility floor, which is not negotiable:
+   Accessibility floor, non-negotiable:
      - any text at 4.5:1 against its background, metadata included
      - visible keyboard focus, always
      - touch targets at least 44px
@@ -42,6 +40,17 @@ svg {
 /* 2. Tokens =============================================================== */
 
 :root {
+  --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  /* The header's three beats. Read by the wordmark and by the tagline that
+     follows it — which is why they live at the root rather than on .wordmark:
+     .tagline is a sibling, not a descendant, and cannot see a variable scoped
+     to an element it isn't inside. */
+  --rise-duration: 550ms;
+  --rise-stagger: 70ms;
+  --flip-start: 520ms;
+  --flip-stagger: 150ms;
+  --flip-duration: 900ms;
+  --sub-duration: 700ms;
   /* Paper and ink. Celadon is a glaze colour, so the page is barely green —
      the saturation lives on the tiles, where the area is small. Contrast
      ratios against --paper are noted; keep them above 4.5. */
@@ -208,19 +217,14 @@ main {
 
 
 /* 4. Hero and tiles =======================================================
-   The club name is real text inside the <h1>. .tile-scene moves, .tile
-   rotates — two elements because one cannot run two animations that both
-   write `transform`. The resolved state is the default; the animation starts
-   the tiles face-down using `backwards` fill, so reduced motion and a failed
-   stylesheet both leave the name plainly legible.
+   .tile-scene moves, .tile rotates. See Wordmark.tsx for why.
    ======================================================================== */
 
 /* Navigation ------------------------------------------------------------- */
 
-/* Tabs, rather than a row of links: the active one rises out of the rule and
-   merges with the page below it, which gives the header a front and a back. */
-/* A floating rounded-rectangle bar rather than a strip across the top: it
-   reads as a control that belongs to the page instead of a browser chrome. */
+/* Tabs, not plain links: the active one rises and merges with the page,
+   giving the header a front/back. Floating bar, not a full-width strip, so
+   it reads as a page control rather than browser chrome. */
 .nav {
   padding-block: var(--space-3) 0;
 }
@@ -391,12 +395,6 @@ main {
   /* Perspective belongs here, not on the row: the row itself tilts, and an
      element cannot be viewed through its own perspective. */
   perspective: 1100px;
-  --rise-duration: 550ms;
-  --rise-stagger: 70ms;
-  --flip-start: 520ms;
-  --flip-stagger: 150ms;
-  --flip-duration: 900ms;
-  --sub-duration: 700ms;
 }
 
 /* Perspective belongs on the wordmark, not on the row: the row itself tilts,
@@ -773,10 +771,9 @@ main {
 
 
 /* 7. Leaderboard ==========================================================
-   One <table> serves both layouts. Below 768px the header row is hidden and
-   each row becomes a card, with the column heading pulled back in from the
-   data-label attribute. Horizontal scrolling is the one option ruled out:
-   it hides columns with no sign that they exist.
+   One <table> serves both layouts: below 768px each row becomes a card,
+   with the heading pulled back in from data-label. No horizontal scroll,
+   it'd hide columns with no sign they exist.
    ======================================================================== */
 
 .leaderboard {
@@ -1101,11 +1098,10 @@ main {
 }
 
 
-/* Follow us ---------------------------------------------------------------
-   The Instagram mark sits on a tile, in the same vermilion as the wordmark
-   letters, so it belongs to the set rather than reading as a pasted-in brand
-   asset. Hover and keyboard focus both tilt it toward the viewer and lift it,
-   the way you pick a tile up off the table to look at it.
+/* Follow us -----------------------------------------------------------------
+   Instagram mark on a tile, in the wordmark's vermilion so it belongs to the
+   set rather than reading as a pasted-in brand asset. Hover/focus tilt and
+   lift it, like picking a tile up to look at it.
    ------------------------------------------------------------------------ */
 
 .ig {
@@ -1524,7 +1520,6 @@ body {
 .hero-stage[data-scene="waiting"] .tile-scene,
 .hero-stage[data-scene="waiting"] .tile { animation: none; }
 .hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
-.wordmark-sub, .tagline { animation: none !important; }
 
 .guide-head { padding-top: 2.5rem; }
 .guide-index { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; }
@@ -1784,7 +1779,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
   color: var(--ink-soft);
 }
 
-/* 14. The full tile set, on the guide ===================================== */
+/* 13. The full tile set, on the guide ===================================== */
 
 .tile-set {
   margin-block-start: var(--space-4);
@@ -1855,21 +1850,14 @@ h2[id] { scroll-margin-top: 1.5rem; }
   fill: var(--tile-letter);
 }
 
-/* 15. Halftone field ====================================================== */
+/* 14. Halftone field ====================================================== */
 
-/* A modifier for .section: two fields of dots, drifting in from opposite
-   corners. The pop-art version of this uses three saturated colours at 22-35%
-   opacity; this is the same technique at a quarter of the volume, in the
-   palette the tiles already use.
- 
-   Both layers are masked to fade out well before the section's edges, so the
-   field reads as something the paper does rather than a panel with borders.
-   Kept inside the box on purpose — no negative insets — so nothing can widen
-   the page.
- 
-   Decorative only, and behind everything: the dots are tiny and faint enough
-   that text contrast over them still clears 4.5:1. If either opacity goes up,
-   re-measure before shipping it. */
+/* .section modifier: two dot fields drifting in from opposite corners, the
+   pop-art technique at a quarter of its usual volume, in the tiles' palette.
+   Masked to fade out before the section's edges (reads as the paper, not a
+   panel with borders) and kept inside the box, no negative insets. Dots are
+   faint enough that text over them still clears 4.5:1, re-measure if either
+   opacity goes up. */
 .section-halftone {
   position: relative;
   /* Contains the negative z-index below, so the dots sit behind this
@@ -1911,18 +1899,12 @@ h2[id] { scroll-margin-top: 1.5rem; }
 
 /* 15. Reading highlight =================================================== */
 
-/* Body paragraphs sit soft until they reach reading height, then come up to
-   full ink and settle back as they pass. Scroll-driven in CSS, so it costs no
-   JavaScript and cannot jank the thread.
- 
-   The range is deliberately generous: a paragraph is lit for most of the time
-   it is comfortably readable, rather than only at one exact scroll position.
-   A narrow band turns reading into a chase.
- 
-   Both fallbacks are the same and both are correct: without scroll-timeline
-   support, or under reduced motion, every paragraph is simply at full ink.
-   Nothing is ever dimmer than the accessible floor — --ink-soft is 6.07:1 on
-   the page ground, so even the resting state passes on its own. */
+/* Body paragraphs come up to full ink as they cross reading height and
+   settle back after, scroll-driven in CSS (no JS, no thread jank). The
+   range is generous on purpose, a paragraph stays lit for most of the time
+   it's readable rather than one exact scroll position. Both fallbacks
+   (no scroll-timeline support, or reduced motion) render at full ink, never
+   dimmer than the accessible floor: --ink-soft is 6.07:1 on the page ground. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .reading p {
@@ -1955,12 +1937,10 @@ h2[id] { scroll-margin-top: 1.5rem; }
    you pass, not something that detains you. */
 .roll {
   --roll-size: clamp(44px, 9vw, 78px);
-  /* How far it travels each way, expressed in dot diameters rather than
-     viewport units. That is what makes the roll exact: a circle rolling a
-     distance d turns d / (pi * diameter) times, so tying travel to diameter
-     fixes the ratio at every screen width. In vw it drifted — the clamp on
-     --roll-size saturates at both ends, and the dot then slipped like a wheel
-     on ice at some widths and spun in place at others. */
+  /* Travel in dot diameters, not viewport units: a circle rolling distance d
+     turns d / (pi * diameter) times, so tying travel to diameter keeps that
+     ratio exact at every width. In vw it drifted, the --roll-size clamp
+     saturates at both ends and the dot slipped or spun in place. */
   --roll-travel: calc(var(--roll-size) * 4.5);
 
   position: relative;
@@ -1975,12 +1955,10 @@ h2[id] { scroll-margin-top: 1.5rem; }
   inset-inline-start: 50%;
   width: var(--roll-size);
   height: var(--roll-size);
-  /* --progress is published by RevealSection and runs 0..1 across the
-     section's pass. The window below is the stretch of that pass where the
-     roll happens; clamped, so the dot is parked before it and after it.
- 
-     Defaulting --progress to 1 is what makes this safe: with no JavaScript the
-     dot is centred and upright, which is exactly where the roll ends. */
+  /* --progress (published by RevealSection, 0..1 across the section's pass)
+     is clamped to the stretch where the roll happens, so the dot is parked
+     before and after. Defaulting it to 1 makes no-JS safe too: the dot sits
+     centred and upright, exactly where the roll ends. */
   --roll-at: clamp(0, calc((var(--progress, 1) - 0.05) / 0.23), 1);
 
   transform: translate(
@@ -1996,13 +1974,10 @@ h2[id] { scroll-margin-top: 1.5rem; }
   height: 100%;
 }
 
-/* The sliding tab marker.
- 
-   Only rendered once JavaScript has measured the current tab, which is why
-   .nav a[aria-current="page"] keeps its own background above: without JS
-   there is no marker, and the plain background is the whole indicator. The
-   [data-marker="on"] rules below hand over from one to the other, so the two
-   are never both visible. */
+/* Sliding tab marker, rendered only once JS has measured the current tab.
+   .nav a[aria-current="page"] keeps its own background above for the no-JS
+   case; [data-marker="on"] below hands over between the two so they're
+   never both visible. */
 .nav-marker {
   position: absolute;
   inset-block: 4px;
@@ -2047,19 +2022,12 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
 }
 
-/* A section the dot uncovers.
- 
-   One timeline, declared here and read by both the rolling dot above the
-   heading and the heading itself, over the same range. That is the whole
-   trick: two animations on one clock stay in step, where two clocks drift
-   and the dot stops looking like the cause of anything.
- 
-   The ranges are where the section sits around reading height, not the whole
-   pass. A tall section (this one holds the calendar) would otherwise finish
-   the whole reveal while its heading was still below the fold — and that is
-   exactly what went wrong the first time: the dot completed its roll while
-   the band was still down at the bottom edge of the screen, so by the time
-   you looked at it, it had already stopped. */
+/* A section the dot uncovers. One timeline here, read by both the rolling
+   dot and the heading over the same range, so the two animations stay in
+   step (two separate clocks drift, and the dot stops looking like the cause
+   of anything). Ranges track where the section sits around reading height,
+   not the whole pass, otherwise a tall section (this one holds the
+   calendar) finishes its reveal while the heading is still below the fold. */
 .section-reveal {
   position: relative;
 }
@@ -2425,6 +2393,22 @@ body {
 /* Quiet, scroll-driven tile outlines sit outside the reading column. */
 body { isolation: isolate; }
 .ambient-tiles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+.ambient-tiles > * {
+  --ambient-y: calc(var(--ambient-progress, 0) * -120px);
+}
+.ambient-tiles .ambient-drift-right,
+.ambient-tiles .ambient-dots,
+.ambient-tiles .ambient-center-bamboo,
+.ambient-tiles .ambient-extra-dots {
+  --ambient-y: calc(var(--ambient-progress, 0) * 100px);
+}
+.ambient-tiles .ambient-turn,
+.ambient-tiles .ambient-dots,
+.ambient-tiles .ambient-center-bamboo,
+.ambient-tiles .ambient-extra-bamboo {
+  transform: translateY(var(--ambient-y))
+    rotate(calc(-15deg + var(--ambient-progress, 0) * 27deg));
+}
 .ambient-tiles span { position: absolute; width: 135px; height: 185px; border: 2px solid #243d5818; border-radius: 18px; box-shadow: 8px 9px 0 #b997550c, inset 0 0 0 8px #fffaf330; }
 .ambient-tiles span::after { content: ""; position: absolute; inset: 38px 22px; border: 2px solid #9d302b12; border-radius: 50%; box-shadow: inset 0 0 0 10px #9d302b06; }
 .ambient-tiles span:nth-child(1) { left: -75px; top: 20%; transform: rotate(-15deg); }
@@ -2571,6 +2555,19 @@ body::before {
 .leaderboard tbody tr[data-leader="true"] th { font-size: 1.4rem; }
 .ambient-extra-dots { left: 25%; top: 77%; opacity: 0.035; transform: rotate(-15deg); }
 .ambient-extra-bamboo { right: 27%; top: 30%; opacity: 0.03; }
+.ambient-tiles > .ambient-drift-left,
+.ambient-tiles > .ambient-drift-right,
+.ambient-tiles > .ambient-motif,
+.ambient-tiles > .ambient-character {
+  transform: translateY(var(--ambient-y));
+}
+.ambient-tiles > .ambient-turn,
+.ambient-tiles > .ambient-dots,
+.ambient-tiles > .ambient-center-bamboo,
+.ambient-tiles > .ambient-extra-bamboo {
+  transform: translateY(var(--ambient-y))
+    rotate(calc(-15deg + var(--ambient-progress, 0) * 27deg));
+}
 @media (max-width: 560px) {
   .player-name { gap: 0.4rem; flex-wrap: wrap; }
   .player-name .wukong-headband { width: 46px; height: 24px; }
@@ -2591,6 +2588,7 @@ body::before {
 .action-link:active { transform: translateY(3px); box-shadow: 0 1px 0 #b6aa96; }
 .guide-index a { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
+  .ambient-tiles > * { transform: none; }
   .action-link:hover, .action-link:active { transform: none; }
 }
 

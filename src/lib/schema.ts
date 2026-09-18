@@ -1,33 +1,24 @@
 /**
- * The seam between the two halves of this project.
- *
- * The Python pipeline writes data/*.json. This file is the executable version
- * of OUTPUT-CONTRACT.md: every rule the contract states is a check here, and a
- * violation fails `npm run build` with the offending field named.
- *
- * The point is that a bad build never deploys. GitHub Pages keeps serving the
- * last good version, which is stale but correct — always the better failure.
- *
- * If you change a rule here, change OUTPUT-CONTRACT.md in the same commit.
+ * The seam between the Python pipeline (writes data/*.json) and the site.
+ * This is the executable version of OUTPUT-CONTRACT.md: every contract rule
+ * is a check here, and a violation fails `npm run build` naming the field,
+ * so a bad build never deploys (Pages keeps serving the last good version).
+ * Change a rule here and in OUTPUT-CONTRACT.md in the same commit.
  */
 
 import { z } from "zod";
 
 /**
- * How many tables a player must have played to appear in the ranked standings.
- *
- * Pinned here as well as in the data so the pipeline cannot quietly change who
- * qualifies without someone editing the site too. To change the threshold,
- * change this constant AND the pipeline's config in the same commit.
+ * Tables a player must have played to appear in ranked standings. Pinned
+ * here and in the data so the pipeline can't quietly change who qualifies;
+ * change this constant and the pipeline's config together.
  */
 export const MIN_TABLES_TO_RANK = 2;
 
 /**
- * The awards the site knows how to render. The pipeline may emit any subset,
- * in any order, including none at all — but not an award that is not listed
- * here, because there would be no template for it.
- *
- * To add an award: add its id here, emit it from the pipeline, render it.
+ * Awards the site can render. The pipeline may emit any subset/order, or
+ * none, but not an id missing here (no template for it). To add one: list
+ * the id here, emit it from the pipeline, render it.
  */
 export const AWARD_IDS = ["biggest-win"] as const;
 
@@ -36,20 +27,13 @@ const semesterId = z
   .string()
   .regex(/^(spring|summer|fall)-\d{4}$/, "must look like fall-2025");
 
-/**
- * Opaque player identifier, e.g. "p014". Assigned once in the roster and never
- * derived from a name — the p### shape makes that mechanically true rather
- * than merely intended, and it is what keeps player ids out of URLs meaningful.
- */
+/** Opaque player id, e.g. "p014". Assigned once in the roster, never derived from a name; the p### shape makes that mechanically enforced. */
 const playerId = z.string().regex(/^p\d{3,}$/, "must look like p014");
 
 /**
- * A public display name: "Eddie Z." by default, or a handle chosen via the
- * roster overrides.
- *
- * A schema cannot tell a display name from a legal name, so contract rule 4
- * ("never contains a full legal name") is enforced by the pipeline and the
- * roster, not here. All this can do is reject the obviously wrong.
+ * Public display name: "Eddie Z." by default, or a roster-chosen handle. A
+ * schema can't tell display names from legal ones, so contract rule 4 (never
+ * a full legal name) is enforced by the pipeline/roster, not here.
  */
 const displayName = z.string().min(1).max(40).trim();
 

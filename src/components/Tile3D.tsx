@@ -2,23 +2,18 @@
 
 import { RoundedBox, Environment, Lightformer } from "@react-three/drei";
 
-/**
- * The tile itself, and the light it sits in.
- *
- * Shared by the wordmark and the Instagram mark so the two cannot drift apart:
- * change the porcelain here and both change.
- */
+/** The tile itself and the light it sits in, shared by the wordmark and the
+ * Instagram mark so the two can't drift apart. */
 
 export const TILE_W = 1;
 export const TILE_H = 1.41;
 export const TILE_D = 0.42;
 
 /**
- * An ivory block bonded to a jade backing over one footprint, as a tile is.
- *
- * `depth` is adjustable because a row of seven wants to read lighter than a
- * single tile shown on its own — a real tile is about 20 x 30 x 15mm, which is
- * chunkier than looks right repeated across a wordmark.
+ * Ivory block bonded to a jade backing over one footprint, as a real tile is.
+ * `depth` is adjustable: a row of seven wants to read lighter than a single
+ * tile shown alone (a real tile is ~20x30x15mm, chunkier than looks right
+ * repeated across a wordmark).
  */
 export function TileBody({ depth = TILE_D }: { depth?: number }) {
   return (
@@ -59,12 +54,10 @@ export function TileBody({ depth = TILE_D }: { depth?: number }) {
 }
 
 /**
- * Lights, plus an environment built here out of light shapes.
- *
- * drei's `preset` environments fetch an HDR from a CDN and suspend the whole
- * canvas until it arrives — which renders nothing at all while looking
- * perfectly healthy. This one is local. frames={1} bakes it once instead of
- * re-rendering the probe every frame.
+ * Lights, plus an environment built here from light shapes rather than
+ * drei's `preset` (which fetches an HDR from a CDN and suspends the whole
+ * canvas until it arrives, rendering nothing while looking healthy).
+ * frames={1} bakes the probe once instead of every frame.
  */
 export function TileLights() {
   return (

@@ -44,8 +44,6 @@ export default function About() {
       </Section>
 
       <Section id="officers" title="Meet the officers">
-        {/* A description list, because that is what this is: each role is a
-            term and the person holding it is its definition. */}
         <div className="about-officers-layout">
           <dl className="officers">
             {OFFICERS.map((officer) => (
@@ -72,7 +70,7 @@ export default function About() {
               />
               <span>
                 <strong>GroupMe</strong>
-                <small>Reminders, questions and last-minute changes</small>
+                <small>Reminders, questions,   and last-minute changes</small>
               </span>
               <b>
                 Join GroupMe <IconArrowUpRight size={17} aria-hidden="true" />
@@ -102,7 +100,7 @@ export default function About() {
               />
               <span>
                 <strong>Instagram</strong>
-                <small>Photos, announcements and meeting updates</small>
+                <small>Photos, announcements, and meeting updates</small>
               </span>
               <b>
                 Follow us <IconArrowUpRight size={17} aria-hidden="true" />
