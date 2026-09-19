@@ -1,5 +1,5 @@
-/** Shared tile ink */
-const BLACK = "#114ba3";
+/** Shared tile ink. The "black" of a printed set is really a deep blue. */
+const BLUE = "#114ba3";
 const RED = "#c94219";
 const GREEN = "#236951";
 
@@ -32,22 +32,24 @@ const DOT_LAYOUT: Record<number, Point[]> = {
     [29, 85],
     [59, 85],
   ],
+  // Six and seven are not grids: both sets put a small green group on top and
+  // a red block of four underneath. Seven's top three run on a diagonal.
   6: [
-    [30, 30],
-    [58, 30],
-    [30, 59],
-    [58, 59],
-    [30, 88],
-    [58, 88],
-  ],
-  7: [
-    [27, 27],
-    [44, 27],
-    [61, 27],
-    [31, 65],
-    [57, 65],
+    [31, 31],
+    [57, 31],
+    [31, 68],
+    [57, 68],
     [31, 91],
     [57, 91],
+  ],
+  7: [
+    [28, 26],
+    [44, 38],
+    [60, 50],
+    [31, 72],
+    [57, 72],
+    [31, 93],
+    [57, 93],
   ],
   8: [
     [31, 26],
@@ -72,17 +74,24 @@ const DOT_LAYOUT: Record<number, Point[]> = {
   ],
 };
 
-/** Which colour each mark takes, in the order the layout lists them. */
+/**
+ * Which colour each mark takes, in the order the layout lists them.
+ *
+ * These follow the common printed convention rather than being chosen for
+ * looks: two is green and blue, five and nine carry red in the middle, six
+ * and seven sit a green group over a red block of four, and eight is all
+ * blue. Sets do vary, so check ours before treating this as the last word.
+ */
 const DOT_COLOURS: Record<number, string[]> = {
   1: [RED],
-  2: [BLACK, GREEN],
-  3: [RED, GREEN, GREEN],
-  4: [BLACK, BLACK, BLACK, BLACK],
-  5: [BLACK, BLACK, RED, BLACK, BLACK],
-  6: [BLACK, BLACK, BLACK, GREEN, GREEN, GREEN],
-  7: [RED, RED, RED, GREEN, GREEN, GREEN, GREEN],
-  8: [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-  9: [GREEN, GREEN, GREEN, RED, RED, RED, BLACK, BLACK, BLACK],
+  2: [BLUE, GREEN],
+  3: [GREEN, RED, BLUE],
+  4: [BLUE, GREEN, GREEN, BLUE],
+  5: [BLUE, GREEN, RED, GREEN, BLUE],
+  6: [GREEN, GREEN, RED, RED, RED, RED],
+  7: [GREEN, GREEN, GREEN, RED, RED, RED, RED],
+  8: [BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE],
+  9: [GREEN, GREEN, GREEN, RED, RED, RED, BLUE, BLUE, BLUE],
 };
 
 const BAMBOO_LAYOUT: Record<number, Point[]> = {
@@ -138,17 +147,28 @@ const BAMBOO_LAYOUT: Record<number, Point[]> = {
   ],
 };
 
+/**
+ * Bamboo is green throughout except where a set marks it red: the middle
+ * stalk of five, the single top stalk of seven, and the centre *column* of
+ * nine (the layout below is row-major, so that is indices 1, 4 and 7).
+ */
 const BAMBOO_COLOURS: Record<number, string[]> = {
-  2: [BLACK, GREEN],
+  2: [GREEN, GREEN],
   3: [GREEN, GREEN, GREEN],
   4: [GREEN, GREEN, GREEN, GREEN],
-  5: [BLACK, GREEN, RED, GREEN, BLACK],
-  6: [BLACK, BLACK, BLACK, GREEN, GREEN, GREEN],
+  5: [GREEN, GREEN, RED, GREEN, GREEN],
+  6: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
   7: [RED, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
-  9: [RED, RED, RED, GREEN, GREEN, GREEN, RED, RED, RED],
+  9: [GREEN, RED, GREEN, GREEN, RED, GREEN, GREEN, RED, GREEN],
 };
 
-/** One dot: rings inside rings, which is what makes it read as a coin. */
+/**
+ * One dot: a filled coin with a pale ring and a solid core.
+ *
+ * Deliberately only three shapes. The finer petal work that a real tile
+ * carries is smaller than a pixel once nine of these sit on a 60px tile, so
+ * it stopped reading as detail and started reading as a smudge.
+ */
 function Dot({
   x,
   y,
@@ -163,18 +183,15 @@ function Dot({
   return (
     <g>
       <circle cx={x} cy={y} r={r} fill={colour} />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <path
-          key={i}
-          d={`M${x} ${y - r * 0.2} c${-r * 0.55} ${-r * 0.7}, ${r * 0.55} ${-r * 0.7}, 0 0`}
-          transform={`rotate(${i * 72} ${x} ${y})`}
-          fill="none"
-          stroke="#fffdf6"
-          strokeWidth={r * 0.12}
-          strokeLinecap="round"
-        />
-      ))}
-      <circle cx={x} cy={y} r={r * 0.13} fill="#fffdf6" />
+      <circle
+        cx={x}
+        cy={y}
+        r={r * 0.62}
+        fill="none"
+        stroke="#fffdf6"
+        strokeWidth={r * 0.22}
+      />
+      <circle cx={x} cy={y} r={r * 0.28} fill={colour} />
     </g>
   );
 }
@@ -190,7 +207,9 @@ export function Dots({ count }: { count: number }) {
     return <OneDot x={x} y={y} r={23} />;
   }
 
-  const r = count >= 8 ? 8.5 : 9.5;
+  // Nine marks need to be smaller to fit; below that there is room to draw
+  // them large enough to count at a glance.
+  const r = count >= 8 ? 9 : count >= 6 ? 10.5 : 11.5;
   return (
     <>
       {points.map(([x, y], i) => (
@@ -222,7 +241,7 @@ export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
         cy={y}
         r={r}
         fill="none"
-        stroke={BLACK}
+        stroke={BLUE}
         strokeWidth={r * 0.13}
       />
       <circle
@@ -250,7 +269,7 @@ export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
         stroke={RED}
         strokeWidth={r * 0.17}
       />
-      <circle cx={x} cy={y} r={r * 0.12} fill={BLACK} />
+      <circle cx={x} cy={y} r={r * 0.12} fill={BLUE} />
     </g>
   );
 }
@@ -274,14 +293,14 @@ function Stalk({
   colour: string;
   tilt?: number;
 }) {
-  const w = h * 0.26;
+  const w = h * 0.34;
 
   return (
     <g
       transform={`translate(${x} ${y}) rotate(${tilt})`}
       fill="none"
       stroke={colour}
-      strokeWidth={h * 0.075}
+      strokeWidth={h * 0.1}
       strokeLinejoin="round"
     >
       <path
@@ -332,7 +351,12 @@ export function Bamboo({ count }: { count: number }) {
  * is a reading of the shape (body, cocked head, wing, red-fanned tail). */
 export function Bird() {
   return (
-    <g transform="translate(3.5 4.7) scale(.92)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <g
+      transform="translate(3.5 4.7) scale(.92)"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {/* Perch, outlined body, and the folded blue wing. */}
       <path d="M18 69 Q42 67 66 64" stroke={GREEN} strokeWidth="2.5" />
       <path
@@ -342,7 +366,7 @@ export function Bird() {
       />
       <path
         d="M40 39 C25 29 23 43 26 52 C28 63 25 72 18 77 C31 74 36 63 37 52 Z"
-        stroke={BLACK}
+        stroke={BLUE}
         strokeWidth="2"
       />
       <path
@@ -364,7 +388,7 @@ export function Bird() {
       />
       <path
         d="M33 65 Q32 88 50 106 M39 64 Q39 85 56 103"
-        stroke={BLACK}
+        stroke={BLUE}
         strokeWidth="1.5"
       />
       <path
