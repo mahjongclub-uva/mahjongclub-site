@@ -16,7 +16,6 @@
      - nothing overflows horizontally, at any width
    ========================================================================== */
 
-
 /* 1. Reset ================================================================ */
 
 *,
@@ -35,7 +34,6 @@ svg {
   display: block;
   max-width: 100%;
 }
-
 
 /* 2. Tokens =============================================================== */
 
@@ -110,7 +108,6 @@ svg {
   --texture-linen: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27220%27%20height%3D%27220%27%3E%3Cfilter%20id%3D%27l%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.07%200.34%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.18%20%200%200%200%200%200.22%20%200%200%200%200%200.16%20%200%200%200%200.36%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20filter%3D%27url%28%23l%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
   --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.8%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.20%20%200%200%200%200%200.26%20%200%200%200%200%200.19%20%200%200%200%200.55%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27160%27%20height%3D%27160%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
 }
-
 
 /* 3. Base ================================================================= */
 
@@ -214,7 +211,6 @@ main {
   border-radius: 1px;
   background: var(--tile-back);
 }
-
 
 /* 4. Hero and tiles =======================================================
    .tile-scene moves, .tile rotates. See Wordmark.tsx for why.
@@ -382,13 +378,11 @@ main {
   opacity: 1;
 }
 
-
 /* Once the scene is up, the flat tiles step aside. The <h1> stays in the DOM
    and stays the accessible name — it just stops being what you look at. */
 .hero-stage[data-scene="ready"] .wordmark-tiles {
   opacity: 0;
 }
-
 
 .wordmark {
   margin: 0;
@@ -600,22 +594,10 @@ main {
 .action-link-primary:hover {
   color: var(--tile-face-hi);
   background: var(--tile-back-lo);
-}
-
-.hero-mark {
-  margin: var(--space-5) auto 0;
-  opacity: 0.5;
-}
-
-
-/* 5. Sections ============================================================= */
+}/* 5. Sections ============================================================= */
 
 /* Three colour blocks in the palette's own colours. A mark in the whitespace,
    the way a dinkus works in a printed book — not a band across the page. */
-
-
-
-
 
 .section-title {
   margin: 0 0 var(--space-4);
@@ -657,18 +639,7 @@ main {
 
 .welcome p {
   margin-block: 0 var(--space-3);
-}
-
-.text-link {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  font-weight: 650;
-}
-
-/* A section straight after the page heading does not need the full break —
+}/* A section straight after the page heading does not need the full break —
    the heading it follows is already the separation. */
 .page-head + .section {
   padding-block-start: var(--space-4);
@@ -713,64 +684,11 @@ main {
   font-weight: 600;
   font-size: var(--text-2xl);
   letter-spacing: -0.02em;
-}
-
-.leaders-name {
-  font-family: var(--display);
-  font-size: var(--text-lg);
-}
-
-/* Running prose. Paragraphs already cap at --measure; this just gives them
+}/* Running prose. Paragraphs already cap at --measure; this just gives them
    air between one another. */
 .prose p + p {
   margin-block-start: var(--space-3);
-}
-
-.section-more {
-  margin-block-start: var(--space-4);
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-}
-
-
-/* 6. Standings, homepage ================================================== */
-
-.leaders {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  max-width: var(--measure);
-}
-
-.leaders li {
-  display: grid;
-  grid-template-columns: 2ch 1fr auto;
-  gap: var(--space-3);
-  align-items: baseline;
-  padding-block: var(--space-3);
-  border-block-end: 1px solid var(--rule);
-}
-
-.leaders li:last-child {
-  border-block-end: 0;
-}
-
-.leaders-rank {
-  font-family: var(--sans);
-  font-size: var(--text-xs);
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-.leaders-score {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-}
-
-
-/* 7. Leaderboard ==========================================================
+}/* 7. Leaderboard ==========================================================
    One <table> serves both layouts: below 768px each row becomes a card,
    with the heading pulled back in from data-label. No horizontal scroll,
    it'd hide columns with no sign they exist.
@@ -867,7 +785,6 @@ main {
   font-weight: 600;
   font-size: var(--text-xl);
 }
-
 
 .leaderboard td {
   font-family: var(--sans);
@@ -985,7 +902,6 @@ main {
     0 1px 3px rgba(46, 46, 44, 0.18);
 }
 
-
 @media (max-width: 767px) {
   /* Hidden from sight, kept for screen readers. */
   .leaderboard thead {
@@ -1083,22 +999,7 @@ main {
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: baseline;
-}
-
-.awards-name {
-  font-family: var(--display);
-  font-size: var(--text-lg);
-}
-
-.awards-value {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-
-/* Follow us -----------------------------------------------------------------
+}/* Follow us -----------------------------------------------------------------
    Instagram mark on a tile, in the wordmark's vermilion so it belongs to the
    set rather than reading as a pasted-in brand asset. Hover/focus tilt and
    lift it, like picking a tile up to look at it.
@@ -1168,9 +1069,6 @@ main {
   opacity: 1;
 }
 
-
-
-
 .ig-body {
   display: grid;
   gap: 2px;
@@ -1197,7 +1095,6 @@ main {
   outline-offset: 6px;
   border-radius: 4px;
 }
-
 
 /* 9. Calendar ============================================================= */
 
@@ -1250,7 +1147,6 @@ main {
   color: var(--ink-soft);
 }
 
-
 /* 10. Photographs ========================================================= */
 
 .photo-grid {
@@ -1278,7 +1174,6 @@ main {
   height: 100%;
   object-fit: cover;
 }
-
 
 /* Guide and club information ------------------------------------------- */
 
@@ -1444,7 +1339,6 @@ main {
   }
 }
 
-
 /* 11. Footer ============================================================== */
 
 .footer {
@@ -1484,7 +1378,6 @@ main {
   display: inline-flex;
   align-items: center;
 }
-
 
 /* 12. Motion ==============================================================
    Every animation is opt-in. The resting state of every element is its
@@ -1563,8 +1456,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
   /* Derived from the cascade rather than hardcoded, so retuning the tiles
      above cannot leave the name out of step. */
   .wordmark-sub,
-  .tagline,
-  .hero-mark {
+  .tagline {
     animation: settle-in var(--sub-duration) ease-out backwards;
     animation-delay: calc(
       var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration)
@@ -1577,13 +1469,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
     );
   }
 
-  .hero-mark {
-    animation-delay: calc(
-      var(--flip-start) + 6 * var(--flip-stagger) + var(--flip-duration) + 240ms
-    );
-  }
-
-  /* The tile tilts toward you on hover, and equally on keyboard focus, so
+/* The tile tilts toward you on hover, and equally on keyboard focus, so
      the effect is not mouse-only. */
   .ig-tile {
     transition:
@@ -1828,16 +1714,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
      stretched. */
   aspect-ratio: 88 / 124;
   filter: drop-shadow(0 2px 3px rgba(35, 60, 45, 0.18));
-}
-
-.set-tile-ink {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.set-ink-numeral {
+}.set-ink-numeral {
   font-family: var(--font-han), sans-serif;
   font-weight: 900;
   font-size: 36px;
@@ -1851,51 +1728,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }
 
 /* 14. Halftone field ====================================================== */
-
-/* .section modifier: two dot fields drifting in from opposite corners, the
-   pop-art technique at a quarter of its usual volume, in the tiles' palette.
-   Masked to fade out before the section's edges (reads as the paper, not a
-   panel with borders) and kept inside the box, no negative insets. Dots are
-   faint enough that text over them still clears 4.5:1, re-measure if either
-   opacity goes up. */
-.section-halftone {
-  position: relative;
-  /* Contains the negative z-index below, so the dots sit behind this
-     section's own content and nothing else's. */
-  isolation: isolate;
-}
-
-.section-halftone::before,
-.section-halftone::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  inset-block: 0;
-}
-
-/* Jade, drifting in from the top right. */
-.section-halftone::before {
-  inset-inline-end: 0;
-  width: 58%;
-  background-image: radial-gradient(circle, var(--jade) 1.1px, transparent 1.2px);
-  background-size: 8px 8px;
-  opacity: 0.16;
-  -webkit-mask-image: radial-gradient(circle at 82% 18%, #000, transparent 70%);
-  mask-image: radial-gradient(circle at 82% 18%, #000, transparent 70%);
-}
-
-/* Vermilion, finer, from the bottom left — a second grain rather than a
-   mirror of the first. */
-.section-halftone::after {
-  inset-inline-start: 0;
-  width: 46%;
-  background-image: radial-gradient(circle, var(--tile-letter) 1px, transparent 1.1px);
-  background-size: 6px 6px;
-  opacity: 0.11;
-  -webkit-mask-image: radial-gradient(circle at 16% 84%, #000, transparent 66%);
-  mask-image: radial-gradient(circle at 16% 84%, #000, transparent 66%);
-}
 
 /* 15. Reading highlight =================================================== */
 
@@ -1929,49 +1761,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   100% {
     color: var(--ink-soft);
   }
-}
-
-/* 16. The rolling dot ===================================================== */
-
-/* A section divider that happens to move. Short on purpose: this is something
-   you pass, not something that detains you. */
-.roll {
-  --roll-size: clamp(44px, 9vw, 78px);
-  /* Travel in dot diameters, not viewport units: a circle rolling distance d
-     turns d / (pi * diameter) times, so tying travel to diameter keeps that
-     ratio exact at every width. In vw it drifted, the --roll-size clamp
-     saturates at both ends and the dot slipped or spun in place. */
-  --roll-travel: calc(var(--roll-size) * 4.5);
-
-  position: relative;
-  height: clamp(120px, 22vh, 200px);
-  /* The dot leaves at both ends rather than stopping at an invisible wall. */
-  overflow: hidden;
-}
-
-.roll-dot {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  width: var(--roll-size);
-  height: var(--roll-size);
-  /* --progress (published by RevealSection, 0..1 across the section's pass)
-     is clamped to the stretch where the roll happens, so the dot is parked
-     before and after. Defaulting it to 1 makes no-JS safe too: the dot sits
-     centred and upright, exactly where the roll ends. */
-  --roll-at: clamp(0, calc((var(--progress, 1) - 0.05) / 0.23), 1);
-
-  transform: translate(
-      calc(-50% - var(--roll-travel) * 2 * (1 - var(--roll-at))),
-      -50%
-    )
-    rotate(calc((var(--roll-at) - 1) * 1032deg));
-  opacity: 0.85;
-}
-
-.roll-dot svg {
-  width: 100%;
-  height: 100%;
 }
 
 /* Sliding tab marker, rendered only once JS has measured the current tab.
@@ -2069,21 +1858,16 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .welcome { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
 .home-page .welcome > div:first-child { padding-top: 1rem; }
 .home-page .welcome p { max-width: 36ch; font-size: 1.15rem; }
-.home-page .welcome .welcome-lead { font-family: var(--display); font-size: clamp(1.6rem, 3vw, 2.3rem); line-height: 1.2; max-width: 20ch; }
-.home-page .welcome .text-link { display: inline-flex; align-items: center; min-height: 48px; margin-top: 1rem; font-weight: 600; }
 .home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
 .home-page .section:has(#first-night) > .section-wrap { position: relative; }
-.photo-navigation button { font: 600 0.95rem var(--sans); min-height: 44px; padding: 0.5rem 1rem; border: 0; border-radius: 8px; cursor: pointer; background: transparent; color: var(--jade); }
 .home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
 .home-page .next-meeting { border-left: 3px solid var(--jade); padding: 1.25rem 0 1.25rem 1.5rem; }
 .home-page .next-meeting-when { font-size: clamp(1.7rem, 3vw, 2.6rem); }
 .home-page .calendar-frame { width: 100%; margin: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px #254a3510; }
-.home-page .roll { height: 90px; }
 .home-page .section-reveal { border-block: 1px solid var(--rule); }
 .action-link { border-radius: 9px; min-height: 48px; box-shadow: 0 3px 0 #23483226; }
 .action-link-primary:hover { color: var(--tile-face-hi); background: #204b3d; }
 :focus-visible { outline: 3px solid var(--jade); outline-offset: 5px; }
-.photo-intro { margin-bottom: 2rem; font-size: 1.2rem; }
 .photo-grid { grid-template-columns: 1.35fr 1fr; align-items: start; gap: 2rem; }
 .photo-slot { aspect-ratio: auto; background: none; border-radius: 0; overflow: visible; animation: none; }
 .photo-slot:nth-child(2n) { padding-top: 5rem; }
@@ -2091,17 +1875,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .photo-slot button { display: block; position: relative; padding: 0; border: 0; width: 100%; overflow: hidden; border-radius: 14px; background: #dce7da; cursor: zoom-in; }
 .photo-slot img { aspect-ratio: 4 / 3; object-fit: cover; }
 .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 5; }
-.photo-slot figcaption { padding-top: 0.75rem; color: var(--ink-soft); }
-.photo-open { position: absolute; right: 1rem; bottom: 1rem; background: var(--tile-face); color: #254735; padding: 0.5rem 0.75rem; border-radius: 7px; font: 600 0.9rem var(--sans); }
-.photo-dialog { width: min(1100px, 94vw); max-height: 94dvh; padding: 1rem; border: 1px solid var(--rule); border-radius: 16px; background: #edf2e9; color: var(--ink); }
-.photo-dialog::backdrop { background: #102a20db; }
-.photo-dialog-inner > img { width: 100%; height: min(68dvh, 800px); object-fit: contain; }
-.photo-dialog form { display: flex; justify-content: end; margin-bottom: 1rem; }
-.photo-dialog button { cursor: pointer; }
-.photo-navigation { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-.photo-navigation p { text-align: center; font-size: 0.9rem; }
-.photo-navigation button:disabled { opacity: 0.4; cursor: default; }
-@media (prefers-reduced-motion: no-preference) {
+.photo-slot figcaption { padding-top: 0.75rem; color: var(--ink-soft); }@media (prefers-reduced-motion: no-preference) {
   .action-link, .social-list > a { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
   .action-link:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #23483226; }
   .action-link:active { transform: translateY(2px); box-shadow: none; }
@@ -2118,14 +1892,10 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .home-page .next-meeting { margin: 0; }
   .photo-grid { grid-template-columns: 1fr; }
   .photo-slot:nth-child(2n) { padding-top: 0; }
-  .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }
-  .photo-navigation { gap: 0.25rem; }
-  .photo-navigation button { padding-inline: 0.5rem; }
-}
+  .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }}
 @media (prefers-reduced-motion: reduce) {
   .wordmark-tiles { transition: none; }
   .section-title-reveal { clip-path: none; }
-  .roll-dot { transform: translate(-50%, -50%); }
 }
 
 .home-page .tagline { max-width: 46ch; }
@@ -2191,8 +1961,13 @@ body {
   overflow: clip;
   pointer-events: none;
 }
+/* The dot's box spans the travel, so translating it by 100% lands its trailing
+   edge on the heading's far edge, where the clip-path ends too.
+   --progress is published by RevealSection, 0..1 across the section's pass;
+   defaulting it to 1 is what makes no-JS safe, the dot simply sits at the end. */
 .rolling-heading .roll-dot {
   --roll-at: var(--progress, 1);
+  position: absolute;
   width: calc(100% - var(--dot-size));
   height: var(--dot-size);
   left: 0;
@@ -2200,10 +1975,18 @@ body {
   transform: translate(calc(var(--roll-at) * 100%), -50%);
   opacity: 1;
 }
+/* A circle rolling a distance d turns d / (pi * diameter) times. Travel here is
+   the heading's width, which CSS cannot divide by the dot's diameter, so
+   RevealSection measures both and publishes the turn count. The 2 fallback is
+   only for the frame before that measurement lands. */
 .rolling-heading .roll-dot svg {
   width: var(--dot-size);
   height: var(--dot-size);
-  transform: rotate(calc(var(--roll-at) * 720deg));
+  transform: rotate(calc(var(--roll-at) * var(--roll-turns, 2) * 360deg));
+  /* A circular compositing boundary prevents a rectangular surface around the dot. */
+  background: transparent;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
 }
 @media (prefers-reduced-motion: reduce) {
   .home-page .rolling-heading .section-title { clip-path: none; }
@@ -2273,12 +2056,6 @@ body {
   .home-page .rolling-heading .section-title { font-size: clamp(1.35rem, 6.4vw, 2.1rem); }
 }
 
-/* A circular compositing boundary prevents a rectangular surface around the dot. */
-.rolling-heading .roll-dot svg {
-  background: transparent;
-  border-radius: 50%;
-  clip-path: circle(50% at 50% 50%);
-}
 /* Six groups form a balanced three-by-two hand diagram on larger screens. */
 .hand-groups { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .hand-pair { grid-column: auto; }
@@ -2288,10 +2065,7 @@ body {
 .call-guide dt { font: 600 1.6rem var(--display); }
 .call-guide dt span { display: block; margin-top: 0.4rem; font: 600 0.9rem var(--sans); color: var(--jade); }
 .call-guide dd { margin: 0.75rem 0 0; max-width: 40ch; }
-.guide-call-intro { max-width: 48ch; }
-.leader-badge { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font: 700 0.75rem var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); }
-.leader-seal { display: grid; place-items: center; width: 27px; height: 27px; border: 3px double var(--gold); border-radius: 50%; background: #fff5cf; font: 700 0.85rem var(--display); box-shadow: 0 1px 3px #6e521026; }
-@media (max-width: 900px) {
+.guide-call-intro { max-width: 48ch; }@media (max-width: 900px) {
   .hand-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
@@ -2305,9 +2079,7 @@ body {
 .guide-index li:not(:last-child)::after { content: "→"; color: var(--jade); }
 .guide-index a { padding: 0.45rem 0.7rem; gap: 0.6rem; border: 1px solid #416d5340; border-radius: 8px; text-decoration: none; }
 .guide-index a:hover { background: #dce7da; }
-.guide-index a span { color: var(--jade); font-variant-numeric: tabular-nums; }
-.guide-next { margin-top: 2rem; }
-.player-search label { display: block; font-weight: 600; margin-bottom: 0.65rem; }
+.guide-index a span { color: var(--jade); font-variant-numeric: tabular-nums; }.player-search label { display: block; font-weight: 600; margin-bottom: 0.65rem; }
 .search-field { display: flex; gap: 0.75rem; max-width: 38rem; margin-bottom: 1rem; }
 .search-field input { width: 100%; min-width: 0; min-height: 48px; padding: 0.8rem 1rem; font: inherit; color: inherit; background: var(--tile-face-hi); border: 1px solid #416d5380; border-radius: 8px; }
 .search-field button { font: inherit; cursor: pointer; }
@@ -2363,18 +2135,11 @@ body {
 .footer-contact a { display: inline-flex; align-items: center; gap: 0.55rem; min-height: 44px; overflow-wrap: anywhere; }
 .footer-contact svg { flex-shrink: 0; }
 .footer-links { margin-left: auto; }
-.leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #f1e2bb, #fbf7eb); }
-.leader-seal { width: 32px; height: 38px; border-radius: 3px 3px 12px 12px; background: #243d58; color: #fff0c9; border: 2px solid #b99755; box-shadow: 0 3px 0 #b9975550; }
-.leader-badge { color: #654a13; letter-spacing: 0.08em; }
-@media (max-width: 560px) {
+.leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #f1e2bb, #fbf7eb); }@media (max-width: 560px) {
   .footer-inner { gap: 0.5rem; }
   .footer-contact { display: grid; gap: 0.25rem; }
   .footer-links { margin-left: 0; width: 100%; }
-}
-
-.outlook-icon { filter: invert(1); flex-shrink: 0; }
-
-/* Quiet, scroll-driven tile outlines sit outside the reading column. */
+}/* Quiet, scroll-driven tile outlines sit outside the reading column. */
 body { isolation: isolate; }
 .ambient-tiles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
 .ambient-tiles > * {
@@ -2423,28 +2188,17 @@ body { isolation: isolate; }
   .search-decoration { width: 52px; right: 0.7rem; top: 0.7rem; }
   .search-field { gap: 0.4rem; }
   .search-field .action-link { padding-inline: 0.6rem; }
-}
-.photo-dialog { background: #faf6ee; }
-.photo-dialog::backdrop { background: #172c42db; }
-.photo-dialog-inner > img { height: auto; max-height: 68dvh; }
-.photo-navigation:has(button:disabled) { justify-content: center; }
-.photo-navigation button:disabled { display: none; }
-
-/* Give the welcome heading its own row, clear of the photograph. */
+}/* Give the welcome heading its own row, clear of the photograph. */
 .home-page .section-title#first-night { font-size: clamp(2rem, 4.7vw, 3.6rem); margin-bottom: 2rem; }
 .home-page .club-photos { margin-top: 0; }
 .home-page .welcome { gap: clamp(2rem, 5vw, 4rem); align-items: center; }
 .home-page .welcome > div:first-child { padding-top: 0; }
-.home-page .welcome .welcome-lead { font-size: clamp(1.5rem, 2.8vw, 2rem); }
 .photo-slot > img { border-radius: 14px; }
 body { background-image: none; }
 .ambient-motif { position: absolute; width: 90px; height: 125px; opacity: 0.11; }
 .ambient-dots { left: 2%; top: 67%; }
 .ambient-bamboo { right: 1%; top: 14%; transform: rotate(12deg); }
-.ambient-character { position: absolute; left: 4%; top: 7%; color: #9d302b; opacity: 0.07; font: 700 64px var(--font-han); }
-.leader-crown { color: #856019; fill: #ead086; filter: drop-shadow(0 2px 1px #85601930); flex-shrink: 0; }
-.leader-badge { display: flex; align-items: center; gap: 0.6rem; }
-.search-panel .section-title { font-size: clamp(1.5rem, 3vw, 2rem); padding-right: 2rem; }
+.ambient-character { position: absolute; left: 4%; top: 7%; color: #9d302b; opacity: 0.07; font: 700 64px var(--font-han); }.search-panel .section-title { font-size: clamp(1.5rem, 3vw, 2rem); padding-right: 2rem; }
 .search-panel .search-field { margin-bottom: 0; }
 .footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1.1rem 2rem; }
 .footer-brand { display: flex; gap: 0.65rem; align-items: center; text-decoration: none; font-weight: 700; font-size: 0.95rem; min-width: 0; }
@@ -2481,9 +2235,7 @@ body { background-image: none; }
 .about-story .prose p { margin-bottom: 1.3rem; }
 .about-photo-placeholder { min-height: 280px; aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.65rem; padding: 1.5rem; background: #e9e1d3; color: #655c4c; border: 8px solid #fffaf1; outline: 1px solid #d5caba; border-radius: 3px; box-shadow: 5px 7px 0 #c9b99b30; transform: rotate(2deg); }
 .about-photo-placeholder > span { font-weight: 700; }
-.about-photo-placeholder small { font-size: 0.8rem; }
-.about-photo-portrait { aspect-ratio: 4 / 5; min-height: 300px; transform: rotate(-2deg); background: #e1e6e9; color: #455564; }
-.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.about-photo-placeholder small { font-size: 0.8rem; }.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
 .about-page .officers { gap: 2rem; }
 .about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
 .about-page .social-list { display: grid; gap: 1rem; border: 0; }
@@ -2519,9 +2271,7 @@ body { background-image: none; }
   .ambient-center-dots, .ambient-center-bamboo { opacity: 0.025; }
 }
 @media (max-width: 560px) {
-  .wukong-headband { width: 44px; height: 24px; }
-  .leader-badge { gap: 0.4rem; font-size: 0.62rem; white-space: nowrap; }
-}
+  .wukong-headband { width: 44px; height: 24px; }}
 
 /* Static paper grain and short, irregular fibers, behind the page content. */
 body::before {

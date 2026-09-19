@@ -25,8 +25,28 @@ export default function RevealSection({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
 
+    // A circle rolling a distance d turns d / (pi * diameter) times. The dot's
+    // box spans the travel and the svg inside it is one diameter, so measuring
+    // both here is what keeps the dot rolling instead of slipping or spinning
+    // in place. CSS cannot divide one length by another, hence the measurement.
+    const measureTurns = () => {
+      const dot = headingElement.querySelector<HTMLElement>(".roll-dot");
+      const svg = dot?.querySelector("svg");
+      if (!dot || !svg) return;
+      // Layout widths, not bounding rects: the svg is already rotated, and a
+      // rect measures the rotated box, which would feed the error back in.
+      const travel = dot.offsetWidth;
+      const diameter = parseFloat(getComputedStyle(svg).width);
+      if (!travel || !diameter) return;
+      sectionElement.style.setProperty(
+        "--roll-turns",
+        String(travel / (Math.PI * diameter)),
+      );
+    };
+
     const update = () => {
       frame = 0;
+      measureTurns();
       if (reducedMotion.matches) {
         sectionElement.style.setProperty("--progress", "1");
         return;
@@ -46,6 +66,9 @@ export default function RevealSection({
     };
 
     update();
+    // The heading is nowrap in a web font, so its width jumps when that font
+    // swaps in. Neither scroll nor resize fires for that.
+    document.fonts?.ready.then(schedule);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     reducedMotion.addEventListener("change", schedule);
