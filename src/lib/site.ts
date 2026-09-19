@@ -37,8 +37,8 @@ export const GROUPME_URL: string | null = siteContent.groupme_url || null;
  * Homepage photos. Put files in public/photos/, list them here with alt text
  * and intrinsic width/height (avoids layout reflow on load).
  *
- * Before adding anyone's photo: read the privacy rules in CLAUDE.md (no full
- * legal names or precise meeting location anywhere, strip EXIF/GPS first).
+ * Before adding anyone's photo, follow the consent and preparation steps in
+ * OFFICER_GUIDE.md so only approved, metadata-free images are published.
  */
 export type Photo = {
   src: string;

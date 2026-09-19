@@ -2073,19 +2073,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .welcome .text-link { display: inline-flex; align-items: center; min-height: 48px; margin-top: 1rem; font-weight: 600; }
 .home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
 .home-page .section:has(#first-night) > .section-wrap { position: relative; }
-.tile-showcase { margin-top: -8rem; border-radius: 18px; background: #dce7da; border: 1px solid #c5d5c5; overflow: hidden; }
-.showcase-viewport { position: relative; height: clamp(270px, 33vw, 390px); background: radial-gradient(ellipse at 45% 30%, #fbfff2a6, transparent 70%); }
-.showcase-fallback { position: absolute; width: 160px; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-6deg); filter: drop-shadow(10px 20px 14px #254a3529); }
-.showcase-art { position: absolute; inset: 0; width: 100%; height: 100%; }
-.showcase-viewport[data-ready="true"] .showcase-fallback { opacity: 0; }
-.showcase-canvas { position: absolute !important; inset: 0; }
-.showcase-controls { text-align: center; padding: 0 1rem 1.25rem; }
-.suit-selector { display: flex; gap: 4px; padding: 4px; width: fit-content; margin: auto; border: 1px solid #b9ccbb; border-radius: 12px; }
-.suit-selector button, .turn-tile, .photo-navigation button { font: 600 0.95rem var(--sans); min-height: 44px; padding: 0.5rem 1rem; border: 0; border-radius: 8px; cursor: pointer; background: transparent; color: var(--jade); }
-.suit-selector button[aria-pressed="true"] { background: var(--tile-face); box-shadow: 0 2px 3px #2a63501f; color: #254735; }
-.showcase-controls p { font-size: 0.95rem !important; margin: 1rem auto 0.2rem; min-height: 2.8em; }
-.turn-tile { text-decoration: underline; text-underline-offset: 4px; }
-.turn-tile span { display: inline-block; margin-left: 0.4rem; font-size: 1.3rem; }
+.photo-navigation button { font: 600 0.95rem var(--sans); min-height: 44px; padding: 0.5rem 1rem; border: 0; border-radius: 8px; cursor: pointer; background: transparent; color: var(--jade); }
 .home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
 .home-page .next-meeting { border-left: 3px solid var(--jade); padding: 1.25rem 0 1.25rem 1.5rem; }
 .home-page .next-meeting-when { font-size: clamp(1.7rem, 3vw, 2.6rem); }
@@ -2114,10 +2102,9 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .photo-navigation p { text-align: center; font-size: 0.9rem; }
 .photo-navigation button:disabled { opacity: 0.4; cursor: default; }
 @media (prefers-reduced-motion: no-preference) {
-  .action-link, .social-list > a, .suit-selector button, .turn-tile { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+  .action-link, .social-list > a { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
   .action-link:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #23483226; }
-  .action-link:active, .turn-tile:active { transform: translateY(2px); box-shadow: none; }
-  .suit-selector button:hover { background-color: #f6f3ea99; }
+  .action-link:active { transform: translateY(2px); box-shadow: none; }
   .set-tile-body { transition: transform 240ms ease, filter 240ms ease; }
   .set-tile:hover .set-tile-body { transform: translateY(-7px) rotate(-3deg); filter: drop-shadow(3px 10px 5px #254a3530); }
   .photo-slot img { transition: transform 450ms cubic-bezier(.2,.7,.3,1); }
@@ -2127,8 +2114,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .home-page .hero { padding-block: 3.25rem 2.5rem; }
   .home-page .welcome, .home-page .meeting-layout { grid-template-columns: 1fr; gap: 2rem; }
   .home-page .section-title { max-width: 100%; }
-  .tile-showcase { margin-top: 0; }
-  .showcase-viewport { height: 300px; }
   .home-page .welcome > div:first-child { padding-top: 0; }
   .home-page .next-meeting { margin: 0; }
   .photo-grid { grid-template-columns: 1fr; }
@@ -2143,7 +2128,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .roll-dot { transform: translate(-50%, -50%); }
 }
 
-.showcase-turn { min-height: 44px; }
 .home-page .tagline { max-width: 46ch; }
 .nav a:active { background: #d2decc; }
 
