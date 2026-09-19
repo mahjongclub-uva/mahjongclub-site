@@ -70,9 +70,18 @@ That prints `Sheet is not marked ready_to_publish; no file changed` unless
 ships with it `FALSE`, and with every officer `.consent` `FALSE`, so flip them
 in a scratch copy rather than committing them `TRUE`.
 
-Adding or removing a field means four files, in this order: the template CSV,
-`TEXT_FIELDS` and the returned dict in `build_site_content.py`, `src/lib/site.ts`,
-and the component that renders it. Then regenerate `data/site.json`.
+Adding or removing a field means four files: the template CSV, `TEXT_FIELDS` and
+the returned dict in `build_site_content.py`, `src/lib/site.ts`, and the
+component that renders it. Then regenerate `data/site.json`.
+
+**The officer Sheet is a fifth place, and it is the one that breaks CI.**
+`validate` rejects both unknown and missing keys, so a row that exists in one
+and not the other fails the workflow. Sequence it:
+
+- **Adding a field:** add the row to the Sheet _first_, then ship the code. A
+  row the code does not know about yet fails with `unknown key(s)`.
+- **Removing a field:** ship the code first, then delete the row. Deleting it
+  while the code still expects it fails with `missing key(s)`.
 
 ### One-time setup
 
