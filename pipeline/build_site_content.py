@@ -29,7 +29,6 @@ TEXT_FIELDS = {
     "about.game": 500,
     "about.variety": 300,
     "about.other_styles": 500,
-    "about.table_photo": 80,
     "contact_email": 160,
     "location": 120,
     "instagram": 40,
@@ -147,7 +146,6 @@ def validate(values: dict[str, str]) -> dict[str, object] | None:
             "game": values["about.game"],
             "variety": values["about.variety"],
             "other_styles": values["about.other_styles"],
-            "table_photo": values["about.table_photo"],
         },
         "officers": officers,
     }

@@ -2251,9 +2251,9 @@ body { background-image: none; }
 .about-page .section-title { margin-bottom: 2rem; }
 .about-story { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
 .about-story .prose p { margin-bottom: 1.3rem; }
-.about-photo-placeholder { min-height: 280px; aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.65rem; padding: 1.5rem; background: #e9e1d3; color: #655c4c; border: 8px solid #fffaf1; outline: 1px solid #d5caba; border-radius: 3px; box-shadow: 5px 7px 0 #c9b99b30; transform: rotate(2deg); }
-.about-photo-placeholder > span { font-weight: 700; }
-.about-photo-placeholder small { font-size: 0.8rem; }.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.about-photo { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: #e9e1d3; border: 8px solid #fffaf1; outline: 1px solid #d5caba; border-radius: 3px; box-shadow: 5px 7px 0 #c9b99b30; transform: rotate(2deg); }
+.about-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
 .about-page .officers { gap: 2rem; }
 .about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
 .about-page .social-list { display: grid; gap: 1rem; border: 0; }
@@ -2268,8 +2268,7 @@ body { background-image: none; }
 }
 @media (max-width: 700px) {
   .about-story, .about-officers-layout { grid-template-columns: 1fr; gap: 2rem; }
-  .about-photo-placeholder { min-height: 220px; aspect-ratio: 4 / 3; margin: 0.5rem; }
-  .about-officers-layout .about-photo-placeholder { order: 2; }
+  .about-photo { aspect-ratio: 4 / 3; margin: 0.5rem; }
   .about-page .social-list > a { padding: 1.2rem; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; }
   .about-page .social-list > a b { grid-column: 2; justify-self: start; }
   .ambient-dots { left: 4%; }
@@ -2372,8 +2371,6 @@ body::before {
 .call-guide > div, .home-page .next-meeting { border-color: var(--accent); }
 :focus-visible { outline-color: var(--accent); }
 .search-panel { background: #eee6d7; border-color: var(--rule); box-shadow: 0 4px 0 #b6aa9633; }
-.about-photo-placeholder { color: var(--ink-soft); border-color: #998d7a; background: #eee6d766; }
-.about-photo-placeholder svg { color: var(--accent); }
 .about-officers-layout { display: block; }
 .about-officers-layout .officers { width: 100%; }
 .meeting-summary { min-width: 0; display: grid; gap: 1.5rem; }
