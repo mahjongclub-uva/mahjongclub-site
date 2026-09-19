@@ -56,6 +56,15 @@ def read_source(path: str | None, url: str | None) -> str:
 
 
 def parse_rows(text: str) -> dict[str, str]:
+    # An empty body is its own failure, and a common one: Publish to web
+    # returns 200 with no content when it is pointed at the wrong tab. Saying
+    # "two columns named key and value" for that sends you looking at column
+    # headings that are not the problem.
+    if not text.strip():
+        die(
+            "the published CSV was empty. Check File > Share > Publish to web "
+            "is publishing the tab that holds the key/value rows"
+        )
     reader = csv.DictReader(io.StringIO(text))
     if reader.fieldnames != ["key", "value"]:
         die("the sheet must have exactly two columns named key and value")
