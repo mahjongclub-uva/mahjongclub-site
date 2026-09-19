@@ -24,10 +24,8 @@ TEXT_FIELDS = {
     "tagline": 120,
     "home.welcome_title": 80,
     "home.welcome": 300,
-    "home.welcome_note": 100,
     "home.meeting_photo_pending": 120,
     "home.photos_pending": 100,
-    "home.photo_intro": 160,
     "about.intro": 180,
     "about.game": 500,
     "about.variety": 300,
@@ -134,10 +132,8 @@ def validate(values: dict[str, str]) -> dict[str, object] | None:
         "home": {
             "welcome_title": values["home.welcome_title"],
             "welcome": values["home.welcome"],
-            "welcome_note": values["home.welcome_note"],
             "meeting_photo_pending": values["home.meeting_photo_pending"],
             "photos_pending": values["home.photos_pending"],
-            "photo_intro": values["home.photo_intro"],
         },
         "about": {
             "intro": values["about.intro"],

@@ -31,7 +31,6 @@ export default function Home() {
       <Section id="first-night" title={HOME.welcomeTitle}>
         <div className="welcome">
           <div>
-            <p className="welcome-lead">{HOME.welcomeNote}</p>
             <p>{HOME.welcome}</p>
             <Link className="action-link" href="/guide/#first-table">
               What should I expect?
@@ -43,18 +42,17 @@ export default function Home() {
 
       <RevealSection id="when" title="When do we play?" lead={<RollingDot />}>
         <div className="meeting-summary">
-        <NextMeeting />
-        <div className="meeting-photo-placeholder">
-          <span aria-hidden="true">▧</span>
-          <p>{HOME.meetingPhotoPending}</p>
-        </div>
+          <NextMeeting />
+          <div className="meeting-photo-placeholder">
+            <span aria-hidden="true">▧</span>
+            <p>{HOME.meetingPhotoPending}</p>
+          </div>
         </div>
         <Calendar />
       </RevealSection>
 
       {PHOTOS.length > 2 && (
         <Section id="table" title="At the table">
-          <p className="photo-intro">{HOME.photoIntro}</p>
           <Photos photos={PHOTOS.slice(2)} />
         </Section>
       )}

@@ -1,16 +1,14 @@
 {
-  "tagline": "Good tiles. Good company. Pull up a chair.",
+  "tagline": "Come for a hand. Stay for another.",
   "instagram": "mahjongclub_uva",
   "groupme_url": "https://groupme.com/join_group/103973752/UZkrxfg4",
   "contact_email": "zrk2xw@virginia.edu",
   "location": "Charlottesville, VA",
   "home": {
-    "welcome_title": "New to the table? You're welcome here.",
-    "welcome": "Bring a friend, or meet one here. We’ll bring the tiles and help you find your feet. No experience needed.",
-    "welcome_note": "Come for a hand. Stay for another.",
-    "meeting_photo_pending": "A peek at game night, coming soon.",
-    "photos_pending": "More club photos on the way.",
-    "photo_intro": "The people, the hands, and the moments between games."
+    "welcome_title": "Welcome to the UVA Mahjong Club!",
+    "welcome": "Come to learn, play, and just hang out, whether you’re studying, socializing, or just vibing, there’s a seat for you at the table. Grab your friends and join us for a relaxing (and maybe a little competitive 👀) mahjong session!",
+    "meeting_photo_pending": "Coming soon.",
+    "photos_pending": "More club photos on the way."
   },
   "about": {
     "intro": "A few good hands, a few new friends, and always room for another player.",

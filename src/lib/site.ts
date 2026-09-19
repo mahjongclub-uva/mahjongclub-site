@@ -77,10 +77,8 @@ export const OFFICERS: Officer[] = siteContent.officers;
 export const HOME = {
   welcomeTitle: siteContent.home.welcome_title,
   welcome: siteContent.home.welcome,
-  welcomeNote: siteContent.home.welcome_note,
   meetingPhotoPending: siteContent.home.meeting_photo_pending,
   photosPending: siteContent.home.photos_pending,
-  photoIntro: siteContent.home.photo_intro,
 };
 
 /** Public footer contact details. */
