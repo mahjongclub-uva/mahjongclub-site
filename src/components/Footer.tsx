@@ -46,7 +46,9 @@ export default function Footer() {
             {CONTACT_EMAIL}
           </a>
         </address>
-        <p className="footer-disclaimer">© 2026 {FULL_NAME}</p>
+        <p className="footer-disclaimer">
+          © 2026 {FULL_NAME}. All rights reserved.
+        </p>
         <p className="footer-links">
           <Link href="/about/#connect">Join the club</Link>
           <Link href="/about/#notes">Club notes</Link>
