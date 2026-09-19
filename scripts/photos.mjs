@@ -1,10 +1,11 @@
-import { mkdir, readFile, readdir, rename } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, stat } from "node:fs/promises";
 import { basename, extname, join, relative } from "node:path";
 import process from "node:process";
 import sharp from "sharp";
 
 const ROOT = process.cwd();
 const INBOX = join(ROOT, "photo-inbox");
+const PROCESSED = join(INBOX, "processed");
 const PUBLIC_PHOTOS = join(ROOT, "public", "photos");
 const INPUT_EXTENSIONS = new Set([
   ".avif",
@@ -43,6 +44,23 @@ function slug(filename) {
     .replace(/^-|-$/g, "");
 }
 
+/** A free path next to `path`, since rename() would overwrite an existing
+ *  archived original without a word. Two cameras really do both produce
+ *  IMG_0001.jpg. */
+async function freePath(path) {
+  const extension = extname(path);
+  const stem = path.slice(0, -extension.length || undefined);
+  for (let n = 0; ; n++) {
+    const candidate = n === 0 ? path : `${stem}-${n}${extension}`;
+    try {
+      await stat(candidate);
+    } catch (error) {
+      if (error.code === "ENOENT") return candidate;
+      throw error;
+    }
+  }
+}
+
 async function filesIn(directory, extensions) {
   let entries;
   try {
@@ -62,6 +80,7 @@ async function filesIn(directory, extensions) {
 
 async function prepare() {
   await mkdir(INBOX, { recursive: true });
+  await mkdir(PROCESSED, { recursive: true });
   await mkdir(PUBLIC_PHOTOS, { recursive: true });
   const inputs = await filesIn(INBOX, INPUT_EXTENSIONS);
   if (!inputs.length) {
@@ -90,6 +109,15 @@ async function prepare() {
     console.log(`  src: "/photos/${basename(output)}",`);
     console.log(`  width: ${info.width},`);
     console.log(`  height: ${info.height},`);
+
+    // Clear the original out of the inbox, so a second run is a no-op rather
+    // than re-encoding every photo ever added. Archived rather than deleted:
+    // this is usually the only full-resolution copy, and the public WebP is
+    // resized and stripped, so it cannot be turned back into the original.
+    // photo-inbox/ is gitignored in full, archive included.
+    const archived = await freePath(join(PROCESSED, basename(input)));
+    await rename(input, archived);
+    console.log(`  original moved to ${relative(ROOT, archived)}`);
   }
 }
 

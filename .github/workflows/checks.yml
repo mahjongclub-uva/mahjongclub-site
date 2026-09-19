@@ -1,0 +1,51 @@
+# Runs on pull requests, so a change is verified before it reaches main.
+#
+# Deliberately separate from deploy.yml rather than adding a pull_request
+# trigger there: that workflow holds pages: write and ends in a deploy job, so
+# running it on a pull request would publish unreviewed work.
+#
+# Like the deploy, this never runs the score pipeline. It only checks what is
+# already committed, because the pipeline needs the roster and the roster holds
+# real names.
+
+name: Checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same pull request cancels the previous run.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run format:check
+
+      - run: npm test
+
+      - run: npm run test:site-content
+
+      - run: npm run photos:check
+
+      # Last, because it is the slowest and the one most likely to be made
+      # redundant by a failure above.
+      - run: npm run build

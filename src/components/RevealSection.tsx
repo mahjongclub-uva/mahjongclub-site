@@ -55,9 +55,19 @@ export default function RevealSection({
       const top = headingElement.getBoundingClientRect().top;
       const progress =
         (window.innerHeight * 0.9 - top) / (window.innerHeight * 0.5);
+
+      // Finish the reveal once there is no scrolling left to do. The formula
+      // above assumes the heading keeps rising, but on a tall viewport the
+      // page runs out of scroll first, and the heading would then sit
+      // permanently half revealed: the title clipped mid-word and the dot
+      // parked mid-roll. Reported on a 1440p screen, invisible on a laptop.
+      const atEnd =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 1;
+
       sectionElement.style.setProperty(
         "--progress",
-        String(Math.max(0, Math.min(1, progress))),
+        atEnd ? "1" : String(Math.max(0, Math.min(1, progress))),
       );
     };
 

@@ -59,6 +59,14 @@ export const PHOTOS: Photo[] = [
   },
 ];
 
+/** Shown beside the calendar, so it sits with the "when do we play" answer. */
+export const MEETING_PHOTO: Photo = {
+  src: "/photos/20260130-mahjong-lng-c2-0555.webp",
+  alt: "Hands washing mahjong tiles at a table.",
+  width: 2400,
+  height: 1601,
+};
+
 /**
  * Officers, in About-page order. name: null renders as "To be announced" for
  * an unfilled role. This is the one place the site shows more than a first
@@ -77,7 +85,6 @@ export const OFFICERS: Officer[] = siteContent.officers;
 export const HOME = {
   welcomeTitle: siteContent.home.welcome_title,
   welcome: siteContent.home.welcome,
-  meetingPhotoPending: siteContent.home.meeting_photo_pending,
   photosPending: siteContent.home.photos_pending,
 };
 
