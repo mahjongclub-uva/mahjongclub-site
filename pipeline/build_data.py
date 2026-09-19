@@ -503,10 +503,11 @@ if __name__ == "__main__":
 # calls the Sheets API with a read-only service account and returns the same
 # {(row, column): text} dict. Nothing else here needs to change.
 #
-# Read "Scores: reading the sheet" in README.md before starting. The short
-# version: it costs the stdlib-only promise (a private sheet needs a service
-# account, which needs RSA signing, which needs google-auth) and a credential
-# to look after, and it still cannot run in CI. Do it for the roster, which
-# currently lives on one laptop and takes every player id with it if that
-# laptop dies. Skipping the manual download is not on its own worth it.
+# Know what it costs before starting. A private sheet needs a service account,
+# which authenticates by signing a JWT with an RSA key, which the standard
+# library cannot do, so this ends the "nothing to install" promise above and
+# adds a credential to look after. It still cannot run in CI either, because
+# the roster holds real names. Do it for the roster, which currently lives on
+# one laptop and takes every player id with it if that laptop dies. Skipping
+# the manual download is not on its own worth it.
 # ---------------------------------------------------------------------------
