@@ -503,8 +503,10 @@ if __name__ == "__main__":
 # calls the Sheets API with a read-only service account and returns the same
 # {(row, column): text} dict. Nothing else here needs to change.
 #
-# Worth doing at the same time: move the roster into a private tab on the
-# sheet. Right now roster.local.json lives on one laptop, so player ids are
-# only as stable as that laptop; the sheet is already private, shared with
-# officers, and the real source of truth.
+# Read "Scores: reading the sheet" in README.md before starting. The short
+# version: it costs the stdlib-only promise (a private sheet needs a service
+# account, which needs RSA signing, which needs google-auth) and a credential
+# to look after, and it still cannot run in CI. Do it for the roster, which
+# currently lives on one laptop and takes every player id with it if that
+# laptop dies. Skipping the manual download is not on its own worth it.
 # ---------------------------------------------------------------------------

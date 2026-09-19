@@ -8,11 +8,17 @@ You do not need to know how to code to update ordinary club information.
 | What you want to change                   | Where to change it          | What happens next                              |
 | ----------------------------------------- | --------------------------- | ---------------------------------------------- |
 | Homepage or About page wording            | Officer Google Sheet        | GitHub prepares a review request               |
+| Tagline                                   | Officer Google Sheet        | GitHub prepares a review request               |
 | Officer names or contact details          | Officer Google Sheet        | GitHub prepares a review request               |
+| Instagram handle or GroupMe link          | Officer Google Sheet        | GitHub prepares a review request               |
 | Meeting time or room                      | Public club Google Calendar | The website refreshes automatically            |
 | Scores or leaderboard results             | Private score workbook      | A maintainer runs the private score update     |
 | Club photos                               | Private photo inbox         | A maintainer prepares and adds approved photos |
 | Layout, colors, animations, or Guide page | Website code                | Ask a maintainer                               |
+
+The Sheet is the only place to change wording. Editing the website's own copy
+file directly looks like it works and then breaks the next build, so the Sheet
+is not merely the easy route, it is the supported one.
 
 If you are unsure where a change belongs, ask the website maintainer before adding it anywhere public.
 
