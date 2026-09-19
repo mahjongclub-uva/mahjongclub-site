@@ -1,11 +1,17 @@
 import {
-  IconPhoto,
   IconBrandInstagram,
   IconMessageCircle,
   IconArrowUpRight,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { ABOUT, GROUPME_URL, INSTAGRAM, OFFICERS } from "@/lib/site";
+import {
+  ABOUT,
+  ABOUT_PHOTO,
+  GROUPME_URL,
+  INSTAGRAM,
+  OFFICERS,
+} from "@/lib/site";
+import { asset } from "@/lib/asset";
 import Section from "@/components/Section";
 
 export const metadata = {
@@ -35,11 +41,17 @@ export default function About() {
               New to mahjong? Start here
             </Link>
           </div>
-          <div className="about-photo-placeholder">
-            <IconPhoto size={42} stroke={1.2} aria-hidden="true" />
-            <span>{ABOUT.tablePhoto}</span>
-            <small>Coming soon</small>
-          </div>
+          <figure className="about-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset(ABOUT_PHOTO.src)}
+              alt={ABOUT_PHOTO.alt}
+              width={ABOUT_PHOTO.width}
+              height={ABOUT_PHOTO.height}
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
       </Section>
 

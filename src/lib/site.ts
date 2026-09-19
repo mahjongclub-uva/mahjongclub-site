@@ -67,6 +67,14 @@ export const MEETING_PHOTO: Photo = {
   height: 1601,
 };
 
+/** Shown beside "What we play" on the About page. */
+export const ABOUT_PHOTO: Photo = {
+  src: "/photos/20260130-mahjong-lng-c2-0579.webp",
+  alt: "A hand of mahjong tiles being arranged on a table.",
+  width: 2400,
+  height: 1601,
+};
+
 /**
  * Officers, in About-page order. name: null renders as "To be announced" for
  * an unfilled role. This is the one place the site shows more than a first
@@ -97,5 +105,4 @@ export const ABOUT = {
   game: siteContent.about.game,
   variety: siteContent.about.variety,
   otherStyles: siteContent.about.other_styles,
-  tablePhoto: siteContent.about.table_photo,
 };
