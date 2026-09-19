@@ -67,9 +67,24 @@ export function TileLights() {
       <directionalLight position={[-3.5, 5, 5]} intensity={1.7} />
       <directionalLight position={[4, 1.5, 3]} intensity={0.7} />
       <Environment resolution={256} frames={1}>
-        <Lightformer position={[0, 3, 3]} scale={[8, 3, 1]} intensity={2.4} color="#fffaf0" />
-        <Lightformer position={[-4, 1, 2]} scale={[3, 4, 1]} intensity={1.3} color="#eef3ff" />
-        <Lightformer position={[4, -1, 2]} scale={[3, 3, 1]} intensity={0.9} color="#fff2dd" />
+        <Lightformer
+          position={[0, 3, 3]}
+          scale={[8, 3, 1]}
+          intensity={2.4}
+          color="#fffaf0"
+        />
+        <Lightformer
+          position={[-4, 1, 2]}
+          scale={[3, 4, 1]}
+          intensity={1.3}
+          color="#eef3ff"
+        />
+        <Lightformer
+          position={[4, -1, 2]}
+          scale={[3, 3, 1]}
+          intensity={0.9}
+          color="#fff2dd"
+        />
       </Environment>
     </>
   );
@@ -78,5 +93,8 @@ export function TileLights() {
 /** Reads a CSS custom property off the page so the scene matches the page. */
 export function cssVar(name: string, fallback: string) {
   if (typeof document === "undefined") return fallback;
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+    fallback
+  );
 }

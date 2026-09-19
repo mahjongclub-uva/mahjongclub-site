@@ -41,7 +41,9 @@ function parseOrDie<T>(schema: z.ZodType<T>, raw: unknown, file: string): T {
 
 function readJson(path: string, file: string): unknown {
   if (!existsSync(path)) {
-    throw new Error(`${file} is missing. Run the pipeline: python3 pipeline/build_data.py`);
+    throw new Error(
+      `${file} is missing. Run the pipeline: python3 pipeline/build_data.py`,
+    );
   }
   try {
     return JSON.parse(readFileSync(path, "utf8"));
@@ -51,12 +53,20 @@ function readJson(path: string, file: string): unknown {
 }
 
 export function getMeta(): Meta {
-  return parseOrDie(metaSchema, readJson(join(DATA_DIR, "meta.json"), "data/meta.json"), "data/meta.json");
+  return parseOrDie(
+    metaSchema,
+    readJson(join(DATA_DIR, "meta.json"), "data/meta.json"),
+    "data/meta.json",
+  );
 }
 
 export function getSemester(id: string): Semester {
   const file = `data/semesters/${id}.json`;
-  return parseOrDie(semesterSchema, readJson(join(SEMESTER_DIR, `${id}.json`), file), file);
+  return parseOrDie(
+    semesterSchema,
+    readJson(join(SEMESTER_DIR, `${id}.json`), file),
+    file,
+  );
 }
 
 /**
@@ -138,6 +148,7 @@ export function getNextMeeting(): Meeting | null {
 
   const now = Date.now();
   return (
-    data.meetings.find((m) => new Date(m.end ?? m.start).getTime() > now) ?? null
+    data.meetings.find((m) => new Date(m.end ?? m.start).getTime() > now) ??
+    null
   );
 }

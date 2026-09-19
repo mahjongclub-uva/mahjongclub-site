@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { TileBody, TileLights, TILE_W, TILE_H, TILE_D, cssVar } from "@/components/Tile3D";
+import {
+  TileBody,
+  TileLights,
+  TILE_W,
+  TILE_H,
+  TILE_D,
+  cssVar,
+} from "@/components/Tile3D";
 import * as THREE from "three";
 
 import { WORDMARK } from "@/lib/site";
@@ -28,7 +35,10 @@ function useLetterTextures(letters: string[]) {
       return texture;
     });
   }, [letters]);
-  useEffect(() => () => textures.forEach((texture) => texture.dispose()), [textures]);
+  useEffect(
+    () => () => textures.forEach((texture) => texture.dispose()),
+    [textures],
+  );
   return textures;
 }
 
@@ -88,7 +98,10 @@ function Row({ letters }: { letters: string[] }) {
   return (
     <group ref={group} scale={Math.min(1, viewport.width / (span + 0.5))}>
       {letters.map((letter, i) => (
-        <group key={i} position={[i * (TILE_W + GAP) - span / 2 + TILE_W / 2, 0, 0]}>
+        <group
+          key={i}
+          position={[i * (TILE_W + GAP) - span / 2 + TILE_W / 2, 0, 0]}
+        >
           <Tile index={i} letter={letter} texture={textures[i]} />
         </group>
       ))}
@@ -121,7 +134,6 @@ export default function TileScene({ onReady }: { onReady?: () => void }) {
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => {
         gl.setClearAlpha(0);
-
       }}
       onError={() => setFailed(true)}
     >

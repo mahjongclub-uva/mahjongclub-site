@@ -52,41 +52,23 @@ export default function AmbientTiles() {
       <span className="ambient-drift-left ambient-turn" />
       <span className="ambient-drift-right" />
       <span className="ambient-drift-left" />
-      <svg
-        className="ambient-motif ambient-dots"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-dots" viewBox="0 0 88 124">
         <Dots count={3} />
       </svg>
-      <svg
-        className="ambient-motif ambient-bamboo"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-bamboo" viewBox="0 0 88 124">
         <Bamboo count={2} />
       </svg>
       <div className="ambient-character ambient-drift-right">福</div>
-      <svg
-        className="ambient-motif ambient-center-dots"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-center-dots" viewBox="0 0 88 124">
         <Dots count={1} />
       </svg>
-      <svg
-        className="ambient-motif ambient-center-bamboo"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-center-bamboo" viewBox="0 0 88 124">
         <Bamboo count={3} />
       </svg>
-      <svg
-        className="ambient-motif ambient-extra-dots"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-extra-dots" viewBox="0 0 88 124">
         <Dots count={5} />
       </svg>
-      <svg
-        className="ambient-motif ambient-extra-bamboo"
-        viewBox="0 0 88 124"
-      >
+      <svg className="ambient-motif ambient-extra-bamboo" viewBox="0 0 88 124">
         <Bamboo count={4} />
       </svg>
     </div>

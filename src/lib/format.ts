@@ -41,6 +41,7 @@ export function formatMeetingTime(start: string, end: string | null): string {
   const to = parts(end);
   // "5:30–7:30 pm" reads better than "5:30 pm–7:30 pm", but only when the two
   // ends share a day period. A meeting running 11:30 to 1:30 has to say both.
-  const head = from.marker === to.marker ? from.clock : `${from.clock} ${from.marker}`;
+  const head =
+    from.marker === to.marker ? from.clock : `${from.clock} ${from.marker}`;
   return `${head}–${to.clock} ${to.marker}`;
 }

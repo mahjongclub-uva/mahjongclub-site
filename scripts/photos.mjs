@@ -6,8 +6,25 @@ import sharp from "sharp";
 const ROOT = process.cwd();
 const INBOX = join(ROOT, "photo-inbox");
 const PUBLIC_PHOTOS = join(ROOT, "public", "photos");
-const INPUT_EXTENSIONS = new Set([".avif", ".heic", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"]);
-const PUBLIC_EXTENSIONS = new Set([".avif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"]);
+const INPUT_EXTENSIONS = new Set([
+  ".avif",
+  ".heic",
+  ".jpeg",
+  ".jpg",
+  ".png",
+  ".tif",
+  ".tiff",
+  ".webp",
+]);
+const PUBLIC_EXTENSIONS = new Set([
+  ".avif",
+  ".jpeg",
+  ".jpg",
+  ".png",
+  ".tif",
+  ".tiff",
+  ".webp",
+]);
 const FORBIDDEN_MARKERS = [
   /<x:xmpmeta/i,
   /GPSLatitude/i,
@@ -35,7 +52,10 @@ async function filesIn(directory, extensions) {
     throw error;
   }
   return entries
-    .filter((entry) => entry.isFile() && extensions.has(extname(entry.name).toLowerCase()))
+    .filter(
+      (entry) =>
+        entry.isFile() && extensions.has(extname(entry.name).toLowerCase()),
+    )
     .map((entry) => join(directory, entry.name))
     .sort();
 }
@@ -51,12 +71,18 @@ async function prepare() {
 
   for (const input of inputs) {
     const name = slug(input);
-    if (!name) throw new Error(`Cannot make a safe filename from ${basename(input)}`);
+    if (!name)
+      throw new Error(`Cannot make a safe filename from ${basename(input)}`);
     const output = join(PUBLIC_PHOTOS, `${name}.webp`);
     const temporary = `${output}.tmp`;
     const info = await sharp(input)
       .autoOrient()
-      .resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true })
+      .resize({
+        width: 2400,
+        height: 2400,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
       .webp({ quality: 86, effort: 4 })
       .toFile(temporary);
     await rename(temporary, output);
@@ -72,26 +98,39 @@ async function check() {
   const unsafe = [];
 
   for (const image of images) {
-    const [metadata, bytes] = await Promise.all([sharp(image).metadata(), readFile(image)]);
+    const [metadata, bytes] = await Promise.all([
+      sharp(image).metadata(),
+      readFile(image),
+    ]);
     const fields = ["exif", "iptc", "xmp", "comments"].filter((field) => {
       const value = metadata[field];
-      return Array.isArray(value) ? value.length > 0 : Boolean(value?.length ?? value);
+      return Array.isArray(value)
+        ? value.length > 0
+        : Boolean(value?.length ?? value);
     });
     const text = bytes.toString("latin1");
-    const markers = FORBIDDEN_MARKERS.filter((pattern) => pattern.test(text)).map((pattern) => pattern.source);
+    const markers = FORBIDDEN_MARKERS.filter((pattern) =>
+      pattern.test(text),
+    ).map((pattern) => pattern.source);
     if (fields.length || markers.length) {
-      unsafe.push(`${relative(ROOT, image)} (${[...fields, ...markers].join(", ")})`);
+      unsafe.push(
+        `${relative(ROOT, image)} (${[...fields, ...markers].join(", ")})`,
+      );
     }
   }
 
   if (unsafe.length) {
     console.error("Public images contain private or editor metadata:");
     for (const image of unsafe) console.error(`  - ${image}`);
-    console.error("Move originals to photo-inbox/ and run npm run photos:prepare.");
+    console.error(
+      "Move originals to photo-inbox/ and run npm run photos:prepare.",
+    );
     process.exitCode = 1;
     return;
   }
-  console.log(`Checked ${images.length} public image${images.length === 1 ? "" : "s"}; no prohibited metadata found.`);
+  console.log(
+    `Checked ${images.length} public image${images.length === 1 ? "" : "s"}; no prohibited metadata found.`,
+  );
 }
 
 const command = process.argv[2];

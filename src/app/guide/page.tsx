@@ -17,8 +17,9 @@ export default function Guide() {
           <p className="eyebrow">Mahjong guide</p>
           <h1 className="page-title">Learn your first hand</h1>
           <p className="page-intro">
-            This is one of the ways to play Mahjong. No need to memorize this before you join us. Get to know a few
-            tiles, try a hand, and ask questions as you go.
+            This is one of the ways to play Mahjong. No need to memorize this
+            before you join us. Get to know a few tiles, try a hand, and ask
+            questions as you go.
           </p>
           <nav className="guide-index" aria-label="In this guide">
             <ol>
@@ -97,7 +98,9 @@ export default function Guide() {
           <div>
             <dt>
               Pung / pong / peng
-              <span className="call-character" lang="zh-Hans">碰</span>
+              <span className="call-character" lang="zh-Hans">
+                碰
+              </span>
               <span>Three of a kind</span>
             </dt>
             <dd>
@@ -109,7 +112,9 @@ export default function Guide() {
           <div>
             <dt>
               Chow / chi
-              <span className="call-character" lang="zh-Hans">吃</span>
+              <span className="call-character" lang="zh-Hans">
+                吃
+              </span>
               <span>A sequence</span>
             </dt>
             <dd>
@@ -151,7 +156,8 @@ export default function Guide() {
         </ol>
         <p className="quiet guide-note">
           A discard can sometimes be claimed to finish a group. Calls vary by
-          situation. Club members can help you spot them, and you&apos;ll pick it up quickly.
+          situation. Club members can help you spot them, and you&apos;ll pick
+          it up quickly.
         </p>
       </Section>
 
@@ -162,8 +168,9 @@ export default function Guide() {
             practice before getting competitive!
           </p>
           <p>
-            Ask any questions as you play. Nobody expects you to know every tile and rule.
-            Know any other ways to play? Let us know! We are happy to learn from other players and styles.
+            Ask any questions as you play. Nobody expects you to know every tile
+            and rule. Know any other ways to play? Let us know! We are happy to
+            learn from other players and styles.
           </p>
         </div>
       </Section>

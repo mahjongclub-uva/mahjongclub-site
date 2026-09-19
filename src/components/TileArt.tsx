@@ -10,7 +10,13 @@ const VIEW = "0 0 88 124";
 /** Render once, high in the tree; paints nothing itself. */
 export function TileArtDefs() {
   return (
-    <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
+    <svg
+      width="0"
+      height="0"
+      aria-hidden="true"
+      focusable="false"
+      style={{ position: "absolute" }}
+    >
       <defs>
         {/* Ivory body, lit top-left. */}
         <linearGradient id="tileBody" x1="0.05" y1="0" x2="0.9" y2="1">
@@ -51,7 +57,12 @@ export function TileArtDefs() {
 
 export function TileFaceArt() {
   return (
-    <svg className="tile-art" viewBox={VIEW} aria-hidden="true" focusable="false">
+    <svg
+      className="tile-art"
+      viewBox={VIEW}
+      aria-hidden="true"
+      focusable="false"
+    >
       {/* Green backing, visible as a sliver along the bottom. */}
       <rect x="0" y="0" width="88" height="124" rx="11" fill="url(#tileBase)" />
       {/* Ivory body, stopping short so the backing shows. */}
@@ -79,8 +90,20 @@ export function TileFaceArt() {
 
 export function TileBackArt() {
   return (
-    <svg className="tile-art" viewBox={VIEW} aria-hidden="true" focusable="false">
-      <rect x="0" y="0" width="88" height="124" rx="11" fill="url(#tileReverse)" />
+    <svg
+      className="tile-art"
+      viewBox={VIEW}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="0"
+        y="0"
+        width="88"
+        height="124"
+        rx="11"
+        fill="url(#tileReverse)"
+      />
       <path
         d="M11 1h66a10 10 0 0 1 10 10v102a10 10 0 0 1-10 10H11a10 10 0 0 1-10-10V11A10 10 0 0 1 11 1z"
         fill="none"
@@ -88,7 +111,14 @@ export function TileBackArt() {
         strokeOpacity="0.28"
         strokeWidth="1.6"
       />
-      <rect x="0" y="0" width="88" height="124" rx="11" fill="url(#tileSheen)" />
+      <rect
+        x="0"
+        y="0"
+        width="88"
+        height="124"
+        rx="11"
+        fill="url(#tileSheen)"
+      />
     </svg>
   );
 }

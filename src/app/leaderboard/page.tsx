@@ -118,8 +118,8 @@ export default function Leaderboard() {
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
             <p>
-              The board adds up only your winning tables; losses don’t subtract from your total. Play{" "}
-              {MIN_TABLES_TO_RANK} tables to be ranked.
+              The board adds up only your winning tables; losses don’t subtract
+              from your total. Play {MIN_TABLES_TO_RANK} tables to be ranked.
             </p>
             <p>
               <Link className="action-link" href="/guide/">

@@ -25,7 +25,11 @@ export default function Wordmark() {
     <h1 className="wordmark" aria-label={FULL_NAME}>
       <span className="wordmark-tiles">
         {WORDMARK.split("").map((letter, i) => (
-          <span className="tile-scene" key={i} style={{ "--i": i } as CSSProperties}>
+          <span
+            className="tile-scene"
+            key={i}
+            style={{ "--i": i } as CSSProperties}
+          >
             <span className="tile">
               {/* Side walls give the tile a body; without them it's two planes
                   that collapse to a line mid-flip. */}

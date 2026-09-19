@@ -80,7 +80,12 @@ function validMeta() {
     pipeline_version: "0.1.0",
     current_semester: "fall-2025",
     semesters: [
-      { id: "fall-2025", label: "Fall 2025", sessions: 8, last_session: "2025-11-14" },
+      {
+        id: "fall-2025",
+        label: "Fall 2025",
+        sessions: 8,
+        last_session: "2025-11-14",
+      },
     ],
   };
 }

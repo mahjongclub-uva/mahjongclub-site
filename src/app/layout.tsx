@@ -30,10 +30,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${body.variable}`}
-    >
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         {/*
           No JavaScript means no canvas is coming and no fallback timer will

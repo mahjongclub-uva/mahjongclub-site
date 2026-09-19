@@ -70,7 +70,7 @@ export default function About() {
               />
               <span>
                 <strong>GroupMe</strong>
-                <small>Reminders, questions,   and last-minute changes</small>
+                <small>Reminders, questions, and last-minute changes</small>
               </span>
               <b>
                 Join GroupMe <IconArrowUpRight size={17} aria-hidden="true" />

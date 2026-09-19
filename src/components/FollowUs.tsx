@@ -57,9 +57,7 @@ export default function FollowUs() {
 
       <span className="ig-body">
         <span className="ig-handle">@{INSTAGRAM}</span>
-        <span className="ig-sub">
-          Photos and meeting updates on Instagram.
-        </span>
+        <span className="ig-sub">Photos and meeting updates on Instagram.</span>
       </span>
     </a>
   );
