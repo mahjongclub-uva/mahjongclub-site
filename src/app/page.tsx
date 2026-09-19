@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PHOTOS, TAGLINE, HOME } from "@/lib/site";
+import { PHOTOS, TAGLINE, HOME, MEETING_PHOTO } from "@/lib/site";
+import { asset } from "@/lib/asset";
 import ClubPhotos from "@/components/ClubPhotos";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
@@ -43,10 +44,17 @@ export default function Home() {
       <RevealSection id="when" title="When do we play?" lead={<RollingDot />}>
         <div className="meeting-summary">
           <NextMeeting />
-          <div className="meeting-photo-placeholder">
-            <span aria-hidden="true">▧</span>
-            <p>{HOME.meetingPhotoPending}</p>
-          </div>
+          <figure className="meeting-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset(MEETING_PHOTO.src)}
+              alt={MEETING_PHOTO.alt}
+              width={MEETING_PHOTO.width}
+              height={MEETING_PHOTO.height}
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
         <Calendar />
       </RevealSection>
