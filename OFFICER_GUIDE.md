@@ -121,6 +121,7 @@ The preparation tool then:
 - Converts them to WebP.
 - Removes hidden camera, location, and editing metadata.
 - Reports the dimensions needed by the website.
+- Moves the original into a processed folder, so it is not prepared twice.
 
 GitHub checks public images again before deployment and rejects files that still contain prohibited metadata.
 The original photo remains local and is never committed.
