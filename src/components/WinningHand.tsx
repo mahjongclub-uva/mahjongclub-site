@@ -37,10 +37,7 @@ export default function WinningHand() {
       </figcaption>
       <div className="hand-groups">
         {GROUPS.map((group, i) => (
-          <div
-            className={i === 0 ? "hand-group hand-pair" : "hand-group"}
-            key={i}
-          >
+          <div className="hand-group" key={i}>
             <ul className="tile-row" aria-label={group.label}>
               {group.ranks.map((rank, j) => (
                 <PlayingTile key={j} suit={group.suit} rank={rank} />

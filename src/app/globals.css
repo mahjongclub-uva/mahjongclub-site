@@ -2020,19 +2020,36 @@ body {
 .guide-page .tile-group-note { grid-column: 1; margin: 0; }
 .guide-page .tile-group > .tile-row { grid-column: 2; grid-row: 1 / 3; align-self: center; }
 .guide-page .tile-key { margin-top: 3rem; grid-template-columns: repeat(3, 1fr); }
-.guide-page .set-tile { width: clamp(44px, 5.4vw, 62px); }
 .guide-page .set-tile-body { filter: none; }
 .guide-tile { width: 100%; height: 100%; }
 .winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; background: #e6ede0; }
 .winning-hand figcaption { display: grid; gap: 0.3rem; text-align: center; }
 .winning-hand figcaption strong { font: 600 clamp(1.4rem, 3vw, 2rem) var(--display); }
 .winning-hand figcaption span { color: var(--ink-soft); font-size: 0.95rem; }
-.hand-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
 .hand-group .tile-row { justify-content: center; flex-wrap: nowrap; }
 .hand-group p { margin: 0.5rem auto 0; text-align: center; font-size: 0.9rem; color: var(--jade); }
-.hand-pair { grid-column: 1 / -1; }
-.guide-page .winning-hand .set-tile { width: clamp(54px, 8vw, 86px); }
 .guide-page #hand + .winning-hand { margin-top: 1rem; }
+
+/* Tile sizes on the guide. Widths are shares of the row, so a row never
+   overflows, capped so tiles stay tile-sized on wide screens. */
+.guide-page .tile-row { --tile-gap: 0.5rem; gap: var(--tile-gap); }
+/* The reference set: a suit fills one row; on phones it wraps five over
+   four. Honour and bonus rows use the same size, so every tile matches. */
+.guide-page .tile-set .set-tile { width: min(76px, calc((100% - 8 * var(--tile-gap)) / 9)); }
+/* The example hand: three groups a row, two on narrower screens, each group
+   sized for three tiles so the pair matches the sets. */
+.hand-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 1.5rem; margin-top: 2rem; }
+.hand-group .set-tile { width: min(76px, calc((100% - 2 * var(--tile-gap)) / 3)); }
+@media (max-width: 900px) {
+  .hand-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .guide-page .tile-set .set-tile { width: min(64px, calc((100% - 4 * var(--tile-gap)) / 5)); }
+  .guide-page .tile-row { --tile-gap: 0.35rem; }
+  .winning-hand { padding: 1rem 0.75rem; }
+  .hand-groups { gap: 1.25rem 0.5rem; }
+  .hand-group .tile-row { --tile-gap: 0.25rem; }
+}
 
 /* Bamboo stalk dividers, with visible joints and a round cross-section. */
 .leaderboard-page .leaderboard tbody tr::after {
@@ -2056,28 +2073,18 @@ body {
   .guide-page .tile-key { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .hand-groups { grid-template-columns: 1fr; gap: 1.5rem; }
-  .guide-page .winning-hand .set-tile { width: 70px; }
-  .guide-page .tile-row { gap: 0.4rem; }
   .rolling-heading { --dot-size: 32px; padding-right: 46px; }
   .home-page .rolling-heading .section-title { font-size: clamp(1.35rem, 6.4vw, 2.1rem); }
 }
 
-/* Six groups form a balanced three-by-two hand diagram on larger screens. */
-.hand-groups { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.hand-pair { grid-column: auto; }
-.guide-page .winning-hand .set-tile { width: clamp(48px, 6vw, 76px); }
 .call-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
 .call-guide > div { border-top: 2px solid var(--jade); padding-top: 1rem; }
 .call-guide dt { font: 600 1.6rem var(--display); }
 .call-guide dt span { display: block; margin-top: 0.4rem; font: 600 0.9rem var(--sans); color: var(--jade); }
 .call-guide dd { margin: 0.75rem 0 0; max-width: 40ch; }
-.guide-call-intro { max-width: 48ch; }@media (max-width: 900px) {
-  .hand-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+.guide-call-intro { max-width: 48ch; }
 @media (max-width: 560px) {
-  .hand-groups, .call-guide { grid-template-columns: 1fr; }
-  .guide-page .winning-hand .set-tile { width: 70px; }
+  .call-guide { grid-template-columns: 1fr; }
 }
 
 /* A connected reading path, wrapping into a vertical path on phones. */
