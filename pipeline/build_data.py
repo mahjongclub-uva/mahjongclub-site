@@ -126,23 +126,28 @@ def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str
     except ImportError:
         die("install the Sheets API packages with: python3 -m pip install -r pipeline/requirements.txt")
 
-    credentials = None
-    if OAUTH_TOKEN.exists():
-        credentials = Credentials.from_authorized_user_file(OAUTH_TOKEN, SHEETS_SCOPE)
+    if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        from google.auth import default
 
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-        else:
-            if not OAUTH_CLIENT.exists():
-                die(f"download a Desktop OAuth client and save it to {OAUTH_CLIENT}")
-            credentials = InstalledAppFlow.from_client_secrets_file(
-                OAUTH_CLIENT, SHEETS_SCOPE
-            ).run_local_server(port=0)
-        OAUTH_TOKEN.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        OAUTH_TOKEN.parent.chmod(0o700)
-        OAUTH_TOKEN.write_text(credentials.to_json(), encoding="utf-8")
-        OAUTH_TOKEN.chmod(0o600)
+        credentials, _ = default(scopes=SHEETS_SCOPE)
+    else:
+        credentials = None
+        if OAUTH_TOKEN.exists():
+            credentials = Credentials.from_authorized_user_file(OAUTH_TOKEN, SHEETS_SCOPE)
+
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                credentials.refresh(Request())
+            else:
+                if not OAUTH_CLIENT.exists():
+                    die(f"download a Desktop OAuth client and save it to {OAUTH_CLIENT}")
+                credentials = InstalledAppFlow.from_client_secrets_file(
+                    OAUTH_CLIENT, SHEETS_SCOPE
+                ).run_local_server(port=0)
+            OAUTH_TOKEN.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            OAUTH_TOKEN.parent.chmod(0o700)
+            OAUTH_TOKEN.write_text(credentials.to_json(), encoding="utf-8")
+            OAUTH_TOKEN.chmod(0o600)
 
     try:
         service = build("sheets", "v4", credentials=credentials, cache_discovery=False)
@@ -268,8 +273,7 @@ def check_tables(tables: list[Table]) -> None:
         if table.date is None:
             warnings.append(
                 f"{table} has no date in column E, so it counts toward the "
-                "standings but not toward the session count. Players: "
-                + ", ".join(name for name, _, _ in table.seats)
+                "standings but not toward the session count."
             )
 
         if len(table.seats) != SEATS_PER_TABLE:
@@ -280,10 +284,10 @@ def check_tables(tables: list[Table]) -> None:
         if total != expected:
             problems.append(f"{table} points add up to {total}, expected {expected}")
 
-        for name, points, net in table.seats:
+        for _, points, net in table.seats:
             if net != points - START_AMOUNT:
                 problems.append(
-                    f"{table}: {name} has {points} points and net {net}, "
+                    f"{table} has {points} points and net {net}, "
                     f"but {points} - {START_AMOUNT} is {points - START_AMOUNT}"
                 )
 
@@ -328,8 +332,15 @@ def load_roster(names: list[str]) -> dict[str, dict]:
         roster = json.loads(ROSTER_PATH.read_text())["players"]
 
     used = {entry["id"] for entry in roster.values()}
+    missing = [name for name in names if name not in roster]
+    if missing and os.environ.get("GITHUB_ACTIONS") == "true":
+        die(
+            f"the private roster is missing {len(missing)} player(s); "
+            "update the SCORES_ROSTER_JSON secret before rerunning"
+        )
+
     added = []
-    for name in names:
+    for name in missing:
         if name in roster:
             continue
         number = 1
@@ -355,7 +366,7 @@ def load_roster(names: list[str]) -> dict[str, dict]:
     )
 
     if added:
-        print(f"  added {len(added)} player(s) to the roster: {', '.join(added)}")
+        print(f"  added {len(added)} player(s) to the local roster")
     return roster
 
 
