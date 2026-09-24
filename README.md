@@ -74,14 +74,11 @@ Adding or removing a field means four files: the template CSV, `TEXT_FIELDS` and
 the returned dict in `build_site_content.py`, `src/lib/site.ts`, and the
 component that renders it. Then regenerate `data/site.json`.
 
-**The officer Sheet is a fifth place, and it is the one that breaks CI.**
-`validate` rejects both unknown and missing keys, so a row that exists in one
-and not the other fails the workflow. Sequence it:
-
-- **Adding a field:** add the row to the Sheet _first_, then ship the code. A
-  row the code does not know about yet fails with `unknown key(s)`.
-- **Removing a field:** ship the code first, then delete the row. Deleting it
-  while the code still expects it fails with `missing key(s)`.
+**The officer Sheet is a fifth place.** Rows the code does not use yet are
+ignored with a note in the pull request, but a row the code expects and the
+Sheet lacks fails the workflow with `missing key(s)`. So add a field's row to
+the Sheet before shipping its code, and ship the code that drops a field
+before deleting its row.
 
 ### One-time setup
 
