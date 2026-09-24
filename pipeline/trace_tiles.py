@@ -62,12 +62,10 @@ INKS = {
     "GREEN": (85, 190, 80, 15),
 }
 FACE_W, FACE_H = 88, 124
-WORK = 2  # upscale the stalk before tracing, for smoother edges
 TRACE_HEIGHT = 800  # working height, in pixels, every face is traced at
 FACE_EROSION = 12  # pixels trimmed off the face's edge, to drop bevel shading
 RIDGE_CONTRAST = 6  # how much brighter than its surroundings a ridge line is
-# Blur radius in upscaled pixels. Bamboo takes more, to close the moulded
-# ridges into solid stalks; flowers keep their fine leaves and lettering.
+# Blur radius: more for bamboo, to close its moulded ridges.
 SMOOTH = {"bamboo": 3, "bird": 2, "flower": 2, "season": 2}
 
 # The top-left green stalk of the 7-bamboo, in preview coordinates.
@@ -93,18 +91,15 @@ def ink_masks(crop: Image.Image, smooth: float, face: np.ndarray | bool = True) 
         ink = (hsv[..., 1] > sat) & (hsv[..., 2] > val) & face
         in_hue = (hue >= lo) & (hue <= hi) if lo < hi else (hue >= lo) | (hue <= hi)
         mask = Image.fromarray(np.where(ink & in_hue, 0, 255).astype(np.uint8))
-        # Blur and re-threshold: rounds off the moulding's ridges and camera
-        # glare, which otherwise trace as speckle and hairline gaps.
+        # Blur and re-threshold, to drop glare speckle.
         mask = mask.filter(ImageFilter.GaussianBlur(smooth))
         masks[name] = mask.point(lambda v: 0 if v < 128 else 255)
     return masks
 
 
 def ridges(crop: Image.Image, ink: np.ndarray) -> np.ndarray:
-    """The moulded ridges inside the ink: they catch the light, so they read
-    as lines a little brighter than the ink around them. Only looked for
-    where the ink is broad enough to hold one (petals, leaves, the bird's
-    body), and returned slightly widened so they survive at tile size."""
+    """Moulded ridges inside the ink: lines slightly brighter than the ink
+    around them, widened a little so they survive at tile size."""
     lum = np.asarray(crop.convert("L"), dtype=np.float32)
     bright = lum - ndimage.gaussian_filter(lum, 4) > RIDGE_CONTRAST
     lines = bright & ndimage.binary_erosion(ink, iterations=2)
@@ -113,7 +108,7 @@ def ridges(crop: Image.Image, ink: np.ndarray) -> np.ndarray:
     return ndimage.binary_dilation(lines, iterations=1) & ink
 
 
-def trace(mask: Image.Image, k: float = 1, origin: tuple[float, float] = (0, 0)) -> list[str]:
+def trace(mask: Image.Image) -> list[str]:
     """Trace a black-on-white mask; return path data in mask pixels."""
     # The file-based call. vtracer crashes under Python 3.14; use 3.12.
     with tempfile.TemporaryDirectory() as tmp:
@@ -135,20 +130,19 @@ def trace(mask: Image.Image, k: float = 1, origin: tuple[float, float] = (0, 0))
     for d, tx, ty in re.findall(
         r'<path d="([^"]+)"[^>]*transform="translate\(([-\d.]+),([-\d.]+)\)"', svg
     ):
-        paths.append(shift(d, float(tx) - origin[0], float(ty) - origin[1], k))
+        paths.append(shift(d, float(tx), float(ty)))
     return paths
 
 
-def shift(d: str, tx: float, ty: float, k: float = 1) -> str:
-    """Map absolute path coordinates v to (v + t) * k; vtracer emits M/L/C/Z only."""
+def shift(d: str, tx: float, ty: float) -> str:
+    """Move absolute path coordinates by (tx, ty); vtracer emits M/L/C/Z only."""
     out, xy = [], 0
     for token in re.findall(r"[A-Za-z]|-?\d+(?:\.\d+)?", d):
         if token.isalpha():
             out.append(token)
             xy = 0
             continue
-        value = (float(token) + (tx if xy == 0 else ty)) * k
-        out.append(str(round(value, 1)) if k != 1 else str(round(value)))
+        out.append(str(round(float(token) + (tx if xy == 0 else ty))))
         xy ^= 1
     return re.sub(r" ?([A-Za-z]) ?", r"\1", " ".join(out))
 
@@ -174,8 +168,7 @@ def face(name: str, photos: Path, photo: str, box: tuple[int, int, int, int]) ->
     k = TRACE_HEIGHT / crop.height
     crop = crop.resize((round(crop.width * k), TRACE_HEIGHT), Image.LANCZOS)
     face_mask = tile_face(np.asarray(crop.convert("HSV"), dtype=np.float32))
-    # Map the photographed face onto the site's 88 x 124 face: one uniform
-    # scale set by its width, centred vertically, so nothing is stretched.
+    # Fit the photographed face to 88 x 124 by width, centred vertically.
     ys, xs = np.nonzero(face_mask)
     inset = FACE_EROSION  # tile_face pulled the edge in by this much
     left, right = xs.min() - inset, xs.max() + inset
@@ -205,15 +198,12 @@ def face(name: str, photos: Path, photo: str, box: tuple[int, int, int, int]) ->
 def stalk(photos: Path) -> str:
     """One green stalk, centred on the origin and 100 units tall.
 
-    Not traced edge for edge: the photographed stalk leans and its moulded
-    edge is ragged. Its width is measured row by row instead, and rebuilt as
-    a straight, symmetric stalk with the set's three lobes. The pale groove
-    down the middle is cut out as a slot.
+    Rebuilt rather than traced, since the photographed stalk leans: its
+    widest lobe and pinch are measured, and three ovals drawn from them.
     """
     photo, box = STALK
     image = Image.open(photos / f"{photo}-image.jpg").convert("RGB")
     crop = image.crop(tuple(round(v * PREVIEW_SCALE) for v in box))
-    crop = crop.resize((crop.width * WORK, crop.height * WORK), Image.LANCZOS)
     ink = ndimage.binary_fill_holes(np.asarray(ink_masks(crop, SMOOTH["bamboo"])["GREEN"]) == 0)
     regions = label(ink)  # the stalk alone, not stray specks around it
     ink = regions == max(regionprops(regions), key=lambda r: r.area).label
@@ -222,9 +212,6 @@ def stalk(photos: Path) -> str:
     k = 100 / (bottom - top)
     half = np.array([np.ptp(np.nonzero(ink[y])[0]) / 2 for y in range(top, bottom + 1)]) * k
     half = np.convolve(np.pad(half, 8, mode="edge"), np.ones(17) / 17, mode="valid")
-    # Two measurements define it: the widest lobe and the pinch between
-    # lobes. The outline is then three equal overlapping ovals with exactly
-    # that ratio, so the lobes are smooth and the ends round.
     wide = half.max()
     middle = half[len(half) // 6 : -len(half) // 6]
     pinch = middle.min()
@@ -238,7 +225,7 @@ def stalk(photos: Path) -> str:
     right = [f"{w:.1f} {y:.1f}" for w, y in zip(widths, yy)]
     left = [f"{-w:.1f} {y:.1f}" for w, y in zip(widths[::-1], yy[::-1])]
     outline = "M" + "L".join(right + left) + "Z"
-    # The groove: a slim capsule down the middle, a tenth of the widest lobe.
+    # The groove: a slim capsule down the middle.
     g, r = 0.1 * widths.max(), 36
     groove = f"M{-g:.1f} {-r}A{g:.1f} {g:.1f} 0 0 1 {g:.1f} {-r}V{r}A{g:.1f} {g:.1f} 0 0 1 {-g:.1f} {r}Z"
     return outline + groove

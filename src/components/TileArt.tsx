@@ -53,16 +53,15 @@ export function TileArtDefs() {
           <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
 
-        {/* One traced bamboo stalk; every stalk tile draws copies of it. */}
+        {/* Bamboo stalk, reused by every stalk tile. */}
         <path id="tileStalk" d={STALK} fillRule="evenodd" />
 
-        {/* The span between eight-bamboo's upright sticks: its Vs are cut to
-            it, so they end where they meet the sticks. */}
+        {/* Cuts eight-bamboo's Vs off at its upright sticks. */}
         <clipPath id="eightVee" clipPathUnits="userSpaceOnUse">
           <rect x="30" y="0" width="28" height="124" />
         </clipPath>
 
-        {/* Printed halftone for the illustrated tiles' celadon edge. */}
+        {/* Halftone for tile sides. */}
         <pattern
           id="tileHalftone"
           width="3.2"
@@ -73,11 +72,7 @@ export function TileArtDefs() {
           <circle cx="1.6" cy="1.6" r="0.8" fill="var(--tile-back-hi)" />
         </pattern>
 
-        {/* Engraved ink, for every mark on the illustrated tiles. The set's
-            marks are cut into the tile and filled with paint, so the edge is
-            never quite machine-crisp (a faint wobble) and the top of each
-            recess sits in a little shadow (a thin inner shade). Kept faint
-            enough to leave the marks crisp at phone size. */}
+        {/* Engraved ink: a faint edge wobble and a thin shade on the top rim. */}
         <filter id="engrave" x="-5%" y="-5%" width="110%" height="110%">
           <feTurbulence
             type="fractalNoise"

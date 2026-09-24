@@ -7,9 +7,8 @@ const FACE = "var(--tile-face-hi)";
 
 type Point = [number, number];
 
-/* Coordinates are the tile face's own 88 x 124 box. The index sits in the
-   top-left corner (about x 5..14, y 5..17), so marks keep clear of it. The
-   reference is the club's own set: flat ink, no shading. */
+/* Coordinates are the tile face's 88 x 124 box; marks keep clear of the
+   top-left index. */
 
 const DOT_LAYOUT: Record<number, { r: number; points: Point[] }> = {
   2: {
@@ -46,9 +45,6 @@ const DOT_LAYOUT: Record<number, { r: number; points: Point[] }> = {
       [62, 90],
     ],
   },
-  // Six and seven put a small green group over a red block of four; seven's
-  // three run on a diagonal. Every gap is at least two units, so no two dots
-  // touch even at phone size.
   6: {
     r: 11.5,
     points: [
@@ -101,7 +97,7 @@ const DOT_LAYOUT: Record<number, { r: number; points: Point[] }> = {
   },
 };
 
-/** Colours in layout order, read off the club's set (photo 1). */
+/** Colours in layout order, from the club's set. */
 const DOT_COLOURS: Record<number, string[]> = {
   2: [GREEN, BLUE],
   3: [GREEN, RED, BLUE],
@@ -113,11 +109,7 @@ const DOT_COLOURS: Record<number, string[]> = {
   9: [GREEN, GREEN, GREEN, RED, RED, RED, BLUE, BLUE, BLUE],
 };
 
-/**
- * One dot, as the club's set cuts it: a solid disc with two fine rings
- * engraved into it. At phone size the engraving fades and the dot still
- * reads as a solid coin, rather than greying out like open rings would.
- */
+/** A solid disc with two fine rings cut into it. */
 function Dot({
   x,
   y,
@@ -152,12 +144,7 @@ export function Dots({ count }: { count: number }) {
   );
 }
 
-/**
- * The one dot, after the club's set: a ring of sixteen open green petals
- * around a red seal with a pale mark. Exported on its own because it also
- * rolls across the homepage; the petals and the mark make the rotation
- * legible.
- */
+/** The one dot; also the homepage's rolling dot. */
 export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
   return (
     <g transform={`translate(${x} ${y})`}>
@@ -189,10 +176,7 @@ export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
   );
 }
 
-/**
- * One bamboo stalk, traced from the club's set (pipeline/trace_tiles.py),
- * defined once in <TileArtDefs> and placed by the layouts below.
- */
+/** One stalk, defined once in <TileArtDefs> as #tileStalk. */
 function Stalk({
   x,
   y,
@@ -223,10 +207,7 @@ type StalkSpec = [
   tilt?: number,
 ];
 
-/**
- * Every stalk is the same thickness, on every tile, whatever its length:
- * the width it is drawn at, as a fraction of the traced stalk's width.
- */
+/** Every stalk is the same thickness, whatever its length. */
 const STALK_WIDTH = 0.26;
 
 const BAMBOO_LAYOUT: Record<number, { h: number; stalks: StalkSpec[] }> = {
@@ -275,7 +256,6 @@ const BAMBOO_LAYOUT: Record<number, { h: number; stalks: StalkSpec[] }> = {
       [64, 86, GREEN],
     ],
   },
-  // One red on top, then two rows of three with a blue middle column.
   7: {
     h: 28,
     stalks: [
@@ -288,9 +268,7 @@ const BAMBOO_LAYOUT: Record<number, { h: number; stalks: StalkSpec[] }> = {
       [64, 94, GREEN],
     ],
   },
-  // Two Ms, the top one upside down. The Vs are drawn first, as two
-  // leaning stalks meeting at a point, each starting where it meets an
-  // upright stick, so the sticks stand in front.
+  // Two Ms: V arms first, then the upright sticks in front.
   8: {
     h: 38,
     stalks: [
@@ -320,38 +298,21 @@ const BAMBOO_LAYOUT: Record<number, { h: number; stalks: StalkSpec[] }> = {
   },
 };
 
-/**
- * What makes each V of eight one continuous stalk rather than two arms: a
- * green bend filling the joint at the point, and one groove running from
- * stick to stick around it. Laid over the arms, under the upright sticks.
- */
-const EIGHT_VEES = [
-  // Path, and the width of its bend and groove, matched to the stalks.
-  { d: "M30.5 44 L44 25 L57.5 44", width: 8.3, groove: 0.98 },
-  { d: "M30.5 70 L44 93 L57.5 70", width: 8.3, groove: 0.98 },
-];
+/** Joins each V's arms into one continuous stalk: a filled bend, one groove. */
+const EIGHT_VEES = ["M30.5 44 L44 25 L57.5 44", "M30.5 70 L44 93 L57.5 70"];
 
-function VeeJoin({
-  d,
-  width,
-  groove,
-}: {
-  d: string;
-  width: number;
-  groove: number;
-}) {
+function VeeJoin({ d }: { d: string }) {
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d={d} stroke={GREEN} strokeWidth={width} />
-      <path d={d} stroke={FACE} strokeWidth={groove} />
+      <path d={d} stroke={GREEN} strokeWidth={8.3} />
+      <path d={d} stroke={FACE} strokeWidth={0.98} />
     </g>
   );
 }
 
-/** Stalk tiles, two to nine. One bamboo is the bird, a traced face. */
+/** Stalk tiles, two to nine. */
 export function Bamboo({ count }: { count: number }) {
   const { h, stalks } = BAMBOO_LAYOUT[count];
-  // Eight lists its four V arms first, then the four upright sticks.
   const [under, over] =
     count === 8 ? [stalks.slice(0, 4), stalks.slice(4)] : [[], stalks];
   const draw = (list: StalkSpec[]) =>
@@ -362,8 +323,7 @@ export function Bamboo({ count }: { count: number }) {
     <>
       <g clipPath={count === 8 ? "url(#eightVee)" : undefined}>
         {draw(under)}
-        {count === 8 &&
-          EIGHT_VEES.map((vee) => <VeeJoin key={vee.d} {...vee} />)}
+        {count === 8 && EIGHT_VEES.map((d) => <VeeJoin key={d} d={d} />)}
       </g>
       {draw(over)}
     </>
