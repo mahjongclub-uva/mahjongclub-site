@@ -100,13 +100,35 @@ export function Glyph({
   );
 }
 
+/** A character face: an optional numeral over a large character. */
+export function CharacterFace({
+  top,
+  bottom,
+  ink = RED,
+}: {
+  top?: string;
+  bottom: string;
+  ink?: string;
+}) {
+  return (
+    <>
+      {top && <Glyph char={top} x={45} y={40} size={42} fill={BLUE} />}
+      {top ? (
+        <Glyph char={bottom} x={44} y={88} size={48} fill={ink} />
+      ) : (
+        <Glyph char={bottom} x={44} y={64} size={62} fill={ink} />
+      )}
+    </>
+  );
+}
+
 export function CharacterTile({
   name,
   top,
   bottom,
   index,
   indexColour,
-  ink = RED,
+  ink,
 }: {
   name: string;
   top?: string;
@@ -117,14 +139,30 @@ export function CharacterTile({
 }) {
   return (
     <Tile name={name} index={index} indexColour={indexColour}>
-      {top && <Glyph char={top} x={45} y={40} size={42} fill={BLUE} />}
-      {top ? (
-        <Glyph char={bottom} x={44} y={88} size={48} fill={ink} />
-      ) : (
-        <Glyph char={bottom} x={44} y={64} size={62} fill={ink} />
-      )}
+      <CharacterFace top={top} bottom={bottom} ink={ink} />
     </Tile>
   );
+}
+
+/** The white dragon: a blue frame with notched corners, like a ticket. */
+export function WhiteDragonFace() {
+  return (
+    <g fill="none" stroke={BLUE}>
+      <path
+        strokeWidth="5"
+        d="M26 22 H62 Q62 28 68 28 V96 Q62 96 62 102 H26 Q26 96 20 96 V28 Q26 28 26 22 Z"
+      />
+      <rect x="29" y="33" width="30" height="58" rx="2" strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Any suit tile's face, without the tile around it. */
+export function SuitFace({ suit, rank }: { suit: Suit; rank: number }) {
+  if (suit === "characters")
+    return <CharacterFace top={NUMERALS[rank]} bottom="萬" />;
+  if (suit === "dots") return <Dots count={rank} />;
+  return rank === 1 ? <Traced face="bird" /> : <Bamboo count={rank} />;
 }
 
 export default function PlayingTile({
@@ -134,25 +172,9 @@ export default function PlayingTile({
   suit: Suit;
   rank: number;
 }) {
-  const name = `${rank} of ${suit}`;
-  if (suit === "characters")
-    return (
-      <CharacterTile
-        name={name}
-        index={rank}
-        top={NUMERALS[rank]}
-        bottom="萬"
-      />
-    );
   return (
-    <Tile name={name} index={rank}>
-      {suit === "dots" ? (
-        <Dots count={rank} />
-      ) : rank === 1 ? (
-        <Traced face="bird" />
-      ) : (
-        <Bamboo count={rank} />
-      )}
+    <Tile name={`${rank} of ${suit}`} index={rank}>
+      <SuitFace suit={suit} rank={rank} />
     </Tile>
   );
 }

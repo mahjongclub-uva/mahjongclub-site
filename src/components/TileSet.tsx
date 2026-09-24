@@ -1,5 +1,9 @@
 import FlowerTile, { SeasonTile } from "@/components/FlowerTile";
-import PlayingTile, { Tile, CharacterTile } from "@/components/PlayingTile";
+import PlayingTile, {
+  Tile,
+  CharacterTile,
+  WhiteDragonFace,
+} from "@/components/PlayingTile";
 import { BLUE, GREEN } from "@/components/TileArtwork";
 
 function Group({
@@ -76,14 +80,7 @@ export default function TileSet() {
         <CharacterTile name="Red dragon" bottom="中" />
         <CharacterTile name="Green dragon" bottom="發" ink={GREEN} />
         <Tile name="White dragon">
-          {/* A frame with notched corners, like a ticket. */}
-          <g fill="none" stroke={BLUE}>
-            <path
-              strokeWidth="5"
-              d="M26 22 H62 Q62 28 68 28 V96 Q62 96 62 102 H26 Q26 96 20 96 V28 Q26 28 26 22 Z"
-            />
-            <rect x="29" y="33" width="30" height="58" rx="2" strokeWidth="2" />
-          </g>
+          <WhiteDragonFace />
         </Tile>
       </Group>
 
