@@ -15,12 +15,14 @@ If a table's points don't add up, this stops with an error naming the table
 and writes nothing, so the site keeps showing the last good (stale but
 correct) data instead of something wrong.
 
-Only stdlib is used, so there is nothing to install.
+Excel imports use the standard library. Google Sheets imports use the optional packages in requirements.txt.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import re
 import sys
 import zipfile
@@ -35,9 +37,11 @@ from pathlib import Path
 
 PIPELINE_VERSION = "0.1.0"
 
-# Downloaded copy of the Google Sheet; see "Swapping in the Google Sheets
-# API" at the bottom of this file.
+# Downloaded workbook remains available as a fallback source.
 WORKBOOK = Path.home() / "Documents" / "mahjongclub" / "Copy of ATTENDANCE 25-26.xlsx"
+OAUTH_CLIENT = Path.home() / ".config" / "mahjongclub-site" / "google-oauth-client.json"
+OAUTH_TOKEN = Path.home() / ".config" / "mahjongclub-site" / "google-token.json"
+SHEETS_SCOPE = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # Every semester the site publishes, newest last. Adding next semester is a
 # change to this list and nothing else.
@@ -64,16 +68,15 @@ DATA_DIR = REPO / "data"
 
 
 # ---------------------------------------------------------------------------
-# Reading the workbook. Temporary, until the Google Sheets credential lands;
-# only this section gets replaced then, everything below works on parsed
-# tables and doesn't care where they came from.
+# Reading source data. Both readers produce the same grid, so the scoring
+# logic below does not depend on whether data came from Excel or Sheets.
 # ---------------------------------------------------------------------------
 
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
 
-def read_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
+def read_excel_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
     """Return one tab as {(row, column): text}, both 1-based. Blanks are absent."""
     if not workbook.exists():
         die(f"cannot find the workbook at {workbook}")
@@ -110,6 +113,58 @@ def read_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
         text = shared[int(value.text)] if cell.get("t") == "s" else value.text
         if text.strip():
             grid[cell_ref(cell.get("r"))] = text.strip()
+    return grid
+
+
+def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str]:
+    """Read columns B:E from one private Google Sheet tab using local OAuth."""
+    try:
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        from googleapiclient.discovery import build
+    except ImportError:
+        die("install the Sheets API packages with: python3 -m pip install -r pipeline/requirements.txt")
+
+    credentials = None
+    if OAUTH_TOKEN.exists():
+        credentials = Credentials.from_authorized_user_file(OAUTH_TOKEN, SHEETS_SCOPE)
+
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            if not OAUTH_CLIENT.exists():
+                die(f"download a Desktop OAuth client and save it to {OAUTH_CLIENT}")
+            credentials = InstalledAppFlow.from_client_secrets_file(
+                OAUTH_CLIENT, SHEETS_SCOPE
+            ).run_local_server(port=0)
+        OAUTH_TOKEN.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        OAUTH_TOKEN.parent.chmod(0o700)
+        OAUTH_TOKEN.write_text(credentials.to_json(), encoding="utf-8")
+        OAUTH_TOKEN.chmod(0o600)
+
+    try:
+        service = build("sheets", "v4", credentials=credentials, cache_discovery=False)
+        result = (
+            service.spreadsheets()
+            .values()
+            .get(
+                spreadsheetId=spreadsheet_id,
+                range=f"'{tab}'!B:E",
+                valueRenderOption="UNFORMATTED_VALUE",
+                dateTimeRenderOption="SERIAL_NUMBER",
+            )
+            .execute()
+        )
+    except Exception as error:
+        die(f"could not read the configured private spreadsheet ({type(error).__name__}); check access, spreadsheet ID, and tab name")
+
+    grid: dict[tuple[int, int], str] = {}
+    for row_number, row in enumerate(result.get("values", []), start=1):
+        for offset, value in enumerate(row):
+            if value not in (None, ""):
+                grid[row_number, offset + 2] = str(value)
     return grid
 
 
@@ -169,6 +224,8 @@ class Table:
 
 
 def parse_tables(grid: dict[tuple[int, int], str]) -> list[Table]:
+    if not grid:
+        return []
     last_row = max(row for row, _ in grid)
     tables: list[Table] = []
     current: Table | None = None
@@ -427,11 +484,24 @@ def die(message: str) -> None:
 
 
 def main() -> None:
-    print(f"Reading {WORKBOOK.name}")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", choices=("excel", "sheets"), default="excel")
+    parser.add_argument("--spreadsheet-id", default=None)
+    args = parser.parse_args()
+
+    spreadsheet_id = args.spreadsheet_id or os.environ.get("SCORES_SPREADSHEET_ID")
+    if args.source == "sheets" and not spreadsheet_id:
+        die("pass --spreadsheet-id or set SCORES_SPREADSHEET_ID")
+    print("Reading the private Google Sheet" if args.source == "sheets" else f"Reading {WORKBOOK.name}")
 
     summaries = []
     for config in SEMESTERS:
-        tables = parse_tables(read_grid(WORKBOOK, config["tab"]))
+        grid = (
+            read_sheets_grid(spreadsheet_id, config["tab"])
+            if args.source == "sheets"
+            else read_excel_grid(WORKBOOK, config["tab"])
+        )
+        tables = parse_tables(grid)
         if not tables:
             print(f"  {config['label']}: no tables played yet")
 
@@ -496,18 +566,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-# ---------------------------------------------------------------------------
-# Swapping in the Google Sheets API: replace `read_grid` with a version that
-# calls the Sheets API with a read-only service account and returns the same
-# {(row, column): text} dict. Nothing else here needs to change.
-#
-# Know what it costs before starting. A private sheet needs a service account,
-# which authenticates by signing a JWT with an RSA key, which the standard
-# library cannot do, so this ends the "nothing to install" promise above and
-# adds a credential to look after. It still cannot run in CI either, because
-# the roster holds real names. Do it for the roster, which currently lives on
-# one laptop and takes every player id with it if that laptop dies. Skipping
-# the manual download is not on its own worth it.
-# ---------------------------------------------------------------------------
