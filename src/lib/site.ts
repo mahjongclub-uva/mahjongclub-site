@@ -11,6 +11,13 @@ export const CLUB_NAME = "Club @ UVA";
 /** Read by screen readers in place of the seven separate tiles. */
 export const FULL_NAME = "Mahjong Club @ UVA";
 
+/**
+ * Required verbatim by the club's CIO agreement with the University. Shown on the About page.
+ * Hardcoded rather than in the officer Sheet so it can't be edited away.
+ */
+export const UNIVERSITY_STATEMENT =
+  "Although this organization has members who are University of Virginia students and may have University employees associated or engaged in its activities and affairs, the organization is not a part of or an agency of the University. It is a separate and independent organization which is responsible for and manages its own activities and affairs. The University does not direct, supervise, or control the organization and is not responsible for the organization’s contracts, acts, or omissions.";
+
 export const TAGLINE = siteContent.tagline;
 
 /**
