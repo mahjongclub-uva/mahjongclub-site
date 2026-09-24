@@ -28,12 +28,17 @@ jobs:
       - name: Check configuration
         id: config
         env:
+          SCORES_SYNC_ENABLED: ${{ vars.SCORES_SYNC_ENABLED }}
           SCORES_SPREADSHEET_ID: ${{ vars.SCORES_SPREADSHEET_ID }}
           GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           SCORES_ROSTER_JSON: ${{ secrets.SCORES_ROSTER_JSON }}
         run: |
           ready=true
+          if [ "$SCORES_SYNC_ENABLED" != "true" ]; then
+            echo "Score sync is not enabled."
+            ready=false
+          fi
           for setting in SCORES_SPREADSHEET_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT SCORES_ROSTER_JSON; do
             if [ -z "${!setting}" ]; then
               echo "Missing Actions setting: $setting"
