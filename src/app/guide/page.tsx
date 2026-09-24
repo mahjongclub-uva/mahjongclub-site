@@ -18,8 +18,9 @@ export default function Guide() {
           <h1 className="page-title">Learn your first hand</h1>
           <p className="page-intro">
             This is one of the ways to play Mahjong. No need to memorize this
-            before you join us. Get to know a few tiles, try a hand, and ask
-            questions as you go.
+            before you join us: we provide the sets and explain the rules as we
+            play. Get to know a few tiles, try a hand, and ask questions as you
+            go.
           </p>
           <nav className="guide-index" aria-label="In this guide">
             <ol>
@@ -29,23 +30,18 @@ export default function Guide() {
                 </a>
               </li>
               <li>
+                <a href="#turn">
+                  <span>02</span> Take a turn
+                </a>
+              </li>
+              <li>
                 <a href="#hand">
-                  <span>02</span> Building a hand
+                  <span>03</span> Build a hand
                 </a>
               </li>
               <li>
                 <a href="#calls">
-                  <span>03</span> Learn the calls
-                </a>
-              </li>
-              <li>
-                <a href="#turn">
-                  <span>04</span> Take a turn
-                </a>
-              </li>
-              <li>
-                <a href="#first-table">
-                  <span>05</span> Join a table
+                  <span>04</span> Learn the calls
                 </a>
               </li>
             </ol>
@@ -72,6 +68,28 @@ export default function Guide() {
             </dd>
           </div>
         </dl>
+      </Section>
+
+      <Section id="turn" title="Take a turn">
+        <ol className="turn-flow">
+          <li>
+            <strong>Draw</strong>
+            <span>Take one tile from the wall.</span>
+          </li>
+          <li>
+            <strong>Read your hand</strong>
+            <span>Look for matching tiles and runs in one suit.</span>
+          </li>
+          <li>
+            <strong>Discard</strong>
+            <span>Return one tile face-up to the center.</span>
+          </li>
+        </ol>
+        <p className="quiet guide-note">
+          A discard can sometimes be claimed to finish a group. Calls vary by
+          situation. Club members can help you spot them, and you&apos;ll pick
+          it up quickly.
+        </p>
       </Section>
 
       <Section id="hand" title="Build a winning hand">
@@ -137,42 +155,6 @@ export default function Guide() {
           ; <a href="https://riichi.wiki/Naki">chi and pon call names</a>. Rules
           vary by mahjong style.
         </p>
-      </Section>
-
-      <Section id="turn" title="Take a turn">
-        <ol className="turn-flow">
-          <li>
-            <strong>Draw</strong>
-            <span>Take one tile from the wall.</span>
-          </li>
-          <li>
-            <strong>Read your hand</strong>
-            <span>Look for groups that are complete or one tile away.</span>
-          </li>
-          <li>
-            <strong>Discard</strong>
-            <span>Return one tile face-up to the center.</span>
-          </li>
-        </ol>
-        <p className="quiet guide-note">
-          A discard can sometimes be claimed to finish a group. Calls vary by
-          situation. Club members can help you spot them, and you&apos;ll pick
-          it up quickly.
-        </p>
-      </Section>
-
-      <Section id="first-table" title="Your first table">
-        <div className="prose guide-prose reading">
-          <p>
-            Just bring yourself. We provide the sets, explain the rules, and
-            practice before getting competitive!
-          </p>
-          <p>
-            Ask any questions as you play. Nobody expects you to know every tile
-            and rule. Know any other ways to play? Let us know! We are happy to
-            learn from other players and styles.
-          </p>
-        </div>
       </Section>
       <div className="guide-top-link">
         <a className="action-link" href="#guide-top">
