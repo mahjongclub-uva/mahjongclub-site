@@ -43,6 +43,7 @@ next-env.d.ts
 # Keep a backup somewhere private — player ids come from here, and losing it
 # means everyone gets renumbered.
 /pipeline/roster.local.json
+/.venv/
 
 # python
 __pycache__/

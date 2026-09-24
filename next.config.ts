@@ -1,13 +1,8 @@
 import type { NextConfig } from "next";
 
-// The site is published to GitHub Pages at
-//   https://mahjongclub-uva.github.io/mahjongclub-site/
-// so every route and every asset lives under /mahjongclub-site.
-//
-// If the repo is ever renamed, or moved into a repo literally named
-// "mahjongclub-uva.github.io", this is the one line to change. Setting it to ""
-// serves the site from the domain root.
-const BASE_PATH = "/mahjongclub-site";
+// The project-page prefix is the default. A configured custom domain serves
+// the site from its root.
+const BASE_PATH = process.env.NEXT_PUBLIC_SITE_URL ? "" : "/mahjongclub-site";
 
 const nextConfig: NextConfig = {
   // GitHub Pages serves files off disk. There is no Node server at runtime, so
