@@ -22,6 +22,10 @@ const body = Public_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      "https://mahjongclub-uva.github.io/mahjongclub-site",
+  ),
   title: FULL_NAME,
   description: `Fuzhou-style 16-tile mahjong at the University of Virginia. ${TAGLINE}`,
 };
