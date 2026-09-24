@@ -74,6 +74,7 @@ svg {
   --tile-back-hi: #58a992;
   --tile-back: #2f6656;            /* 6.0:1 against the face */
   --tile-back-lo: #1b4437;
+  --tile-side: #a9d2c3;            /* celadon side of an illustrated tile */
   --tile-rim: rgba(63, 136, 113, 0.3);
 
   /* Type. Barlow Condensed gives headings a printed poster character; Public Sans
@@ -1715,22 +1716,12 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .set-tile-body {
   position: relative;
   display: block;
-  /* The proportions of TileFaceArt's own viewBox, so the drawing is never
-     stretched. */
-  aspect-ratio: 88 / 124;
+  /* The illustrated tile's viewBox: an 88 x 124 face plus its edge. */
+  aspect-ratio: 98 / 135;
   filter: drop-shadow(0 2px 3px rgba(35, 60, 45, 0.18));
-}.set-ink-numeral {
-  font-family: var(--font-han), sans-serif;
-  font-weight: 900;
-  font-size: 36px;
-  fill: var(--ink);
-}
+}/* Every mark on an illustrated tile is engraved (see #engrave). */
+.tile-ink { filter: url(#engrave); }
 
-.set-ink-suit {
-  font-family: var(--font-han), sans-serif;
-  font-weight: 700;
-  fill: var(--tile-letter);
-}
 
 /* 14. Halftone field ====================================================== */
 
@@ -2032,8 +2023,6 @@ body {
 .guide-page .set-tile { width: clamp(44px, 5.4vw, 62px); }
 .guide-page .set-tile-body { filter: none; }
 .guide-tile { width: 100%; height: 100%; }
-.guide-page .set-ink-numeral { fill: #114ba3; font-size: 36px; }
-.guide-page .set-ink-suit { fill: #c94219; }
 .winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; background: #e6ede0; }
 .winning-hand figcaption { display: grid; gap: 0.3rem; text-align: center; }
 .winning-hand figcaption strong { font: 600 clamp(1.4rem, 3vw, 2rem) var(--display); }

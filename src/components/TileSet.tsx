@@ -1,5 +1,6 @@
-import FlowerTile from "@/components/FlowerTile";
+import FlowerTile, { SeasonTile } from "@/components/FlowerTile";
 import PlayingTile, { Tile, CharacterTile } from "@/components/PlayingTile";
+import { BLUE, GREEN } from "@/components/TileArtwork";
 
 function Group({
   id,
@@ -61,10 +62,10 @@ export default function TileSet() {
         title="Winds"
         note="East, south, west and north. No sequences - winds only ever group with their own kind."
       >
-        <CharacterTile name="East wind" bottom="東" ink="#114ba3" />
-        <CharacterTile name="South wind" bottom="南" ink="#114ba3" />
-        <CharacterTile name="West wind" bottom="西" ink="#114ba3" />
-        <CharacterTile name="North wind" bottom="北" ink="#114ba3" />
+        <CharacterTile name="East wind" index="E" bottom="東" ink={BLUE} />
+        <CharacterTile name="South wind" index="S" bottom="南" ink={BLUE} />
+        <CharacterTile name="West wind" index="W" bottom="西" ink={BLUE} />
+        <CharacterTile name="North wind" index="N" bottom="北" ink={BLUE} />
       </Group>
 
       <Group
@@ -73,18 +74,16 @@ export default function TileSet() {
         note="Red, green and white. The white dragon is a blank face in some sets and an empty frame in others."
       >
         <CharacterTile name="Red dragon" bottom="中" />
-        <CharacterTile name="Green dragon" bottom="發" ink="#236951" />
+        <CharacterTile name="Green dragon" bottom="發" ink={GREEN} />
         <Tile name="White dragon">
-          <rect
-            x="24"
-            y="28"
-            width="40"
-            height="62"
-            rx="4"
-            fill="none"
-            stroke="var(--tile-back)"
-            strokeWidth="4"
-          />
+          {/* A frame with notched corners, like a ticket. */}
+          <g fill="none" stroke={BLUE}>
+            <path
+              strokeWidth="5"
+              d="M26 22 H62 Q62 28 68 28 V96 Q62 96 62 102 H26 Q26 96 20 96 V28 Q26 28 26 22 Z"
+            />
+            <rect x="29" y="33" width="30" height="58" rx="2" strokeWidth="2" />
+          </g>
         </Tile>
       </Group>
 
@@ -103,30 +102,10 @@ export default function TileSet() {
         title="Seasons"
         note="Spring, summer, autumn and winter form a second set of four bonus tiles. Their use depends on the rules at your table."
       >
-        <CharacterTile
-          name="Spring season"
-          rank={1}
-          ink="#114ba3"
-          bottom="春"
-        />
-        <CharacterTile
-          name="Summer season"
-          rank={2}
-          ink="#114ba3"
-          bottom="夏"
-        />
-        <CharacterTile
-          name="Autumn season"
-          rank={3}
-          ink="#114ba3"
-          bottom="秋"
-        />
-        <CharacterTile
-          name="Winter season"
-          rank={4}
-          ink="#114ba3"
-          bottom="冬"
-        />
+        <SeasonTile rank={1} />
+        <SeasonTile rank={2} />
+        <SeasonTile rank={3} />
+        <SeasonTile rank={4} />
       </Group>
     </div>
   );

@@ -38,9 +38,11 @@ export default function RevealSection({
       const travel = dot.offsetWidth;
       const diameter = parseFloat(getComputedStyle(svg).width);
       if (!travel || !diameter) return;
+      // Rounded to whole turns, so the dot always comes to rest upright; the
+      // slip that costs is a fraction of a turn over the whole heading.
       sectionElement.style.setProperty(
         "--roll-turns",
-        String(travel / (Math.PI * diameter)),
+        String(Math.max(1, Math.round(travel / (Math.PI * diameter)))),
       );
     };
 

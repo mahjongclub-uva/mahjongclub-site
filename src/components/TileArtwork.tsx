@@ -1,173 +1,122 @@
 /** Shared tile ink. The "black" of a printed set is really a deep blue. */
-const BLUE = "#114ba3";
-const RED = "#c94219";
-const GREEN = "#236951";
+export const BLUE = "#114ba3";
+export const RED = "#c94219";
+export const GREEN = "#236951";
+/** Cut-outs in the ink are the tile face showing through. */
+const FACE = "var(--tile-face-hi)";
 
 type Point = [number, number];
 
-/* Coordinates are TileFaceArt's own 88 x 124 viewBox. The recessed panel runs
-   x 7..81 and y 7..111, so marks stay inside roughly x 20..68, y 24..96. */
+/* Coordinates are the tile face's own 88 x 124 box. The index sits in the
+   top-left corner (about x 5..14, y 5..17), so marks keep clear of it. The
+   reference is the club's own set: flat ink, no shading. */
 
-const DOT_LAYOUT: Record<number, Point[]> = {
-  1: [[44, 59]],
-  2: [
-    [44, 38],
-    [44, 80],
-  ],
-  3: [
-    [27, 31],
-    [44, 59],
-    [61, 87],
-  ],
-  4: [
-    [30, 39],
-    [58, 39],
-    [30, 79],
-    [58, 79],
-  ],
-  5: [
-    [29, 33],
-    [59, 33],
-    [44, 59],
-    [29, 85],
-    [59, 85],
-  ],
-  // Six and seven are not grids: both sets put a small green group on top and
-  // a red block of four underneath. Seven's top three run on a diagonal.
-  6: [
-    [31, 31],
-    [57, 31],
-    [31, 68],
-    [57, 68],
-    [31, 91],
-    [57, 91],
-  ],
-  7: [
-    [28, 26],
-    [44, 38],
-    [60, 50],
-    [31, 72],
-    [57, 72],
-    [31, 93],
-    [57, 93],
-  ],
-  8: [
-    [31, 26],
-    [57, 26],
-    [31, 48],
-    [57, 48],
-    [31, 70],
-    [57, 70],
-    [31, 92],
-    [57, 92],
-  ],
-  9: [
-    [27, 31],
-    [44, 31],
-    [61, 31],
-    [27, 59],
-    [44, 59],
-    [61, 59],
-    [27, 87],
-    [44, 87],
-    [61, 87],
-  ],
+const DOT_LAYOUT: Record<number, { r: number; points: Point[] }> = {
+  2: {
+    r: 14,
+    points: [
+      [44, 38],
+      [44, 88],
+    ],
+  },
+  3: {
+    r: 13,
+    points: [
+      [25, 33],
+      [44, 62],
+      [63, 91],
+    ],
+  },
+  4: {
+    r: 13,
+    points: [
+      [27, 40],
+      [61, 40],
+      [27, 84],
+      [61, 84],
+    ],
+  },
+  5: {
+    r: 12,
+    points: [
+      [26, 34],
+      [62, 34],
+      [44, 62],
+      [26, 90],
+      [62, 90],
+    ],
+  },
+  // Six and seven put a small green group over a red block of four; seven's
+  // three run on a diagonal. Every gap is at least two units, so no two dots
+  // touch even at phone size.
+  6: {
+    r: 11.5,
+    points: [
+      [29, 32],
+      [59, 32],
+      [29, 70],
+      [59, 70],
+      [29, 95],
+      [59, 95],
+    ],
+  },
+  7: {
+    r: 10.5,
+    points: [
+      [24, 28],
+      [44, 40],
+      [64, 52],
+      [30, 75],
+      [58, 75],
+      [30, 99],
+      [58, 99],
+    ],
+  },
+  8: {
+    r: 10,
+    points: [
+      [32, 29],
+      [56, 29],
+      [32, 53],
+      [56, 53],
+      [32, 77],
+      [56, 77],
+      [32, 101],
+      [56, 101],
+    ],
+  },
+  9: {
+    r: 10,
+    points: [
+      [22, 34],
+      [44, 34],
+      [66, 34],
+      [22, 62],
+      [44, 62],
+      [66, 62],
+      [22, 90],
+      [44, 90],
+      [66, 90],
+    ],
+  },
 };
 
-/**
- * Which colour each mark takes, in the order the layout lists them.
- *
- * These follow the common printed convention rather than being chosen for
- * looks: two is green and blue, five and nine carry red in the middle, six
- * and seven sit a green group over a red block of four, and eight is all
- * blue. Sets do vary, so check ours before treating this as the last word.
- */
+/** Colours in layout order, read off the club's set (photo 1). */
 const DOT_COLOURS: Record<number, string[]> = {
-  1: [RED],
-  2: [BLUE, GREEN],
+  2: [GREEN, BLUE],
   3: [GREEN, RED, BLUE],
   4: [BLUE, GREEN, GREEN, BLUE],
   5: [BLUE, GREEN, RED, GREEN, BLUE],
   6: [GREEN, GREEN, RED, RED, RED, RED],
   7: [GREEN, GREEN, GREEN, RED, RED, RED, RED],
-  8: [BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE],
+  8: Array(8).fill(BLUE),
   9: [GREEN, GREEN, GREEN, RED, RED, RED, BLUE, BLUE, BLUE],
 };
 
-const BAMBOO_LAYOUT: Record<number, Point[]> = {
-  2: [
-    [44, 37],
-    [44, 81],
-  ],
-  3: [
-    [44, 30],
-    [32, 79],
-    [56, 79],
-  ],
-  4: [
-    [31, 37],
-    [57, 37],
-    [31, 81],
-    [57, 81],
-  ],
-  5: [
-    [31, 31],
-    [57, 31],
-    [44, 59],
-    [31, 87],
-    [57, 87],
-  ],
-  6: [
-    [27, 37],
-    [44, 37],
-    [61, 37],
-    [27, 81],
-    [44, 81],
-    [61, 81],
-  ],
-  7: [
-    [44, 25],
-    [27, 62],
-    [44, 62],
-    [61, 62],
-    [27, 93],
-    [44, 93],
-    [61, 93],
-  ],
-  9: [
-    [27, 28],
-    [44, 28],
-    [61, 28],
-    [27, 59],
-    [44, 59],
-    [61, 59],
-    [27, 90],
-    [44, 90],
-    [61, 90],
-  ],
-};
-
 /**
- * Bamboo is green throughout except where a set marks it red: the middle
- * stalk of five, the single top stalk of seven, and the centre *column* of
- * nine (the layout below is row-major, so that is indices 1, 4 and 7).
- */
-const BAMBOO_COLOURS: Record<number, string[]> = {
-  2: [GREEN, GREEN],
-  3: [GREEN, GREEN, GREEN],
-  4: [GREEN, GREEN, GREEN, GREEN],
-  5: [GREEN, GREEN, RED, GREEN, GREEN],
-  6: [GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
-  7: [RED, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN],
-  9: [GREEN, RED, GREEN, GREEN, RED, GREEN, GREEN, RED, GREEN],
-};
-
-/**
- * One dot: a filled coin with a pale ring and a solid core.
- *
- * Deliberately only three shapes. The finer petal work that a real tile
- * carries is smaller than a pixel once nine of these sit on a 60px tile, so
- * it stopped reading as detail and started reading as a smudge.
+ * One dot, as the club's set cuts it: a solid disc with two fine rings
+ * engraved into it. At phone size the engraving fades and the dot still
+ * reads as a solid coin, rather than greying out like open rings would.
  */
 function Dot({
   x,
@@ -183,102 +132,66 @@ function Dot({
   return (
     <g>
       <circle cx={x} cy={y} r={r} fill={colour} />
-      <circle
-        cx={x}
-        cy={y}
-        r={r * 0.62}
-        fill="none"
-        stroke="#fffdf6"
-        strokeWidth={r * 0.22}
-      />
-      <circle cx={x} cy={y} r={r * 0.28} fill={colour} />
+      <g fill="none" stroke={FACE} strokeWidth={r * 0.1}>
+        <circle cx={x} cy={y} r={r * 0.66} />
+        <circle cx={x} cy={y} r={r * 0.34} />
+      </g>
     </g>
   );
 }
 
 export function Dots({ count }: { count: number }) {
-  const points = DOT_LAYOUT[count];
-  const colours = DOT_COLOURS[count];
-
-  // One dot has the face to itself and carries more rings than the rest,
-  // which is how every set draws it.
-  if (count === 1) {
-    const [[x, y]] = points;
-    return <OneDot x={x} y={y} r={23} />;
-  }
-
-  // Nine marks need to be smaller to fit; below that there is room to draw
-  // them large enough to count at a glance.
-  const r = count >= 8 ? 9 : count >= 6 ? 10.5 : 11.5;
+  if (count === 1) return <OneDot x={44} y={62} r={32} />;
+  const { r, points } = DOT_LAYOUT[count];
   return (
     <>
       {points.map(([x, y], i) => (
-        <Dot key={i} x={x} y={y} r={r} colour={colours[i]} />
+        <Dot key={i} x={x} y={y} r={r} colour={DOT_COLOURS[count][i]} />
       ))}
     </>
   );
 }
 
 /**
- * The one dot, exported on its own because it rolls across the homepage.
- * Concentric rings alone are rotationally symmetric so rolling wouldn't
- * read; the eight petals make the rotation legible (and match a real 一筒).
+ * The one dot, after the club's set: a ring of sixteen open green petals
+ * around a red seal with a pale mark. Exported on its own because it also
+ * rolls across the homepage; the petals and the mark make the rotation
+ * legible.
  */
 export function OneDot({ x, y, r }: { x: number; y: number; r: number }) {
-  const petals = Array.from({ length: 8 }, (_, i) => {
-    const a = (i * Math.PI * 2) / 8;
-    return {
-      cx: x + Math.cos(a) * r * 0.63,
-      cy: y + Math.sin(a) * r * 0.63,
-      i,
-    };
-  });
-
   return (
-    <g>
-      <circle
-        cx={x}
-        cy={y}
-        r={r}
+    <g transform={`translate(${x} ${y})`}>
+      <g fill="none" stroke={GREEN} strokeWidth={r * 0.07}>
+        {Array.from({ length: 16 }, (_, i) => (
+          <ellipse
+            key={i}
+            cy={-r * 0.71}
+            rx={r * 0.13}
+            ry={r * 0.25}
+            transform={`rotate(${i * 22.5})`}
+          />
+        ))}
+        <circle r={r * 0.46} />
+      </g>
+      <circle r={r * 0.38} fill={RED} />
+      <path
+        d={`M${-r * 0.2} ${-r * 0.05} Q0 ${-r * 0.32} ${r * 0.2} ${-r * 0.05}
+            M${-r * 0.24} ${r * 0.05} H${r * 0.24}
+            M${-r * 0.13} ${r * 0.05} V${r * 0.2} H${r * 0.13} V${r * 0.05}
+            M0 ${-r * 0.19} V${r * 0.2}`}
         fill="none"
-        stroke={BLUE}
-        strokeWidth={r * 0.13}
+        stroke={FACE}
+        strokeWidth={r * 0.06}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <circle
-        cx={x}
-        cy={y}
-        r={r * 0.82}
-        fill="none"
-        stroke={GREEN}
-        strokeWidth={r * 0.2}
-      />
-      {petals.map(({ cx, cy, i }) => (
-        <circle
-          key={i}
-          cx={cx}
-          cy={cy}
-          r={r * 0.15}
-          fill={i % 2 ? RED : GREEN}
-        />
-      ))}
-      <circle
-        cx={x}
-        cy={y}
-        r={r * 0.4}
-        fill="none"
-        stroke={RED}
-        strokeWidth={r * 0.17}
-      />
-      <circle cx={x} cy={y} r={r * 0.12} fill={BLUE} />
     </g>
   );
 }
 
 /**
- * One bamboo stalk: three segments with pinched joints.
- *
- * The pinch is the whole tell. A plain bar reads as a domino pip; the waisted
- * chain reads as cane.
+ * One bamboo stalk, traced from the club's set (pipeline/trace_tiles.py),
+ * defined once in <TileArtDefs> and placed by the layouts below.
  */
 function Stalk({
   x,
@@ -293,110 +206,166 @@ function Stalk({
   colour: string;
   tilt?: number;
 }) {
-  const w = h * 0.34;
-
   return (
-    <g
-      transform={`translate(${x} ${y}) rotate(${tilt})`}
-      fill="none"
-      stroke={colour}
-      strokeWidth={h * 0.1}
-      strokeLinejoin="round"
-    >
-      <path
-        d={`M${-w / 2} ${-h / 2} Q0 ${-h / 2 - 1} ${w / 2} ${-h / 2}
-        L${w / 2} ${-h * 0.36} Q${w * 0.18} 0 ${w / 2} ${h * 0.36}
-        L${w / 2} ${h / 2} Q0 ${h / 2 + 1} ${-w / 2} ${h / 2}
-        L${-w / 2} ${h * 0.36} Q${-w * 0.18} 0 ${-w / 2} ${-h * 0.36} Z`}
-      />
-      <path
-        d={`M${-w / 2} ${-h * 0.36} H${w / 2} M${-w / 2} ${h * 0.36} H${w / 2} M${-w * 0.3} 0 H${w * 0.3}`}
-      />
+    <use
+      href="#tileStalk"
+      fill={colour}
+      transform={`translate(${x} ${y}) rotate(${tilt}) scale(${STALK_WIDTH} ${h / 100})`}
+    />
+  );
+}
+
+type StalkSpec = [
+  x: number,
+  y: number,
+  colour: string,
+  h?: number,
+  tilt?: number,
+];
+
+/**
+ * Every stalk is the same thickness, on every tile, whatever its length:
+ * the width it is drawn at, as a fraction of the traced stalk's width.
+ */
+const STALK_WIDTH = 0.26;
+
+const BAMBOO_LAYOUT: Record<number, { h: number; stalks: StalkSpec[] }> = {
+  2: {
+    h: 42,
+    stalks: [
+      [44, 38, GREEN],
+      [44, 86, GREEN],
+    ],
+  },
+  3: {
+    h: 40,
+    stalks: [
+      [44, 36, GREEN],
+      [30, 86, GREEN],
+      [58, 86, GREEN],
+    ],
+  },
+  4: {
+    h: 40,
+    stalks: [
+      [30, 38, GREEN],
+      [58, 38, GREEN],
+      [30, 86, GREEN],
+      [58, 86, GREEN],
+    ],
+  },
+  5: {
+    h: 38,
+    stalks: [
+      [24, 36, GREEN],
+      [64, 36, GREEN],
+      [44, 62, RED],
+      [24, 88, GREEN],
+      [64, 88, GREEN],
+    ],
+  },
+  6: {
+    h: 40,
+    stalks: [
+      [24, 38, GREEN],
+      [44, 38, GREEN],
+      [64, 38, GREEN],
+      [24, 86, GREEN],
+      [44, 86, GREEN],
+      [64, 86, GREEN],
+    ],
+  },
+  // One red on top, then two rows of three with a blue middle column.
+  7: {
+    h: 28,
+    stalks: [
+      [44, 28, RED],
+      [24, 62, GREEN],
+      [44, 62, BLUE],
+      [64, 62, GREEN],
+      [24, 94, GREEN],
+      [44, 94, BLUE],
+      [64, 94, GREEN],
+    ],
+  },
+  // Two Ms, the top one upside down. The Vs are drawn first, as two
+  // leaning stalks meeting at a point, each starting where it meets an
+  // upright stick, so the sticks stand in front.
+  8: {
+    h: 38,
+    stalks: [
+      [37.25, 34.5, GREEN, 23.3, 35.4],
+      [50.75, 34.5, GREEN, 23.3, -35.4],
+      [37.25, 81.5, GREEN, 26.7, 149.6],
+      [50.75, 81.5, GREEN, 26.7, -149.6],
+      [28, 33.5, GREEN],
+      [60, 33.5, GREEN],
+      [28, 81, GREEN, 44],
+      [60, 81, GREEN, 44],
+    ],
+  },
+  9: {
+    h: 27,
+    stalks: [
+      [24, 28, GREEN],
+      [44, 28, RED],
+      [64, 28, GREEN],
+      [24, 62, GREEN],
+      [44, 62, RED],
+      [64, 62, GREEN],
+      [24, 96, GREEN],
+      [44, 96, RED],
+      [64, 96, GREEN],
+    ],
+  },
+};
+
+/**
+ * What makes each V of eight one continuous stalk rather than two arms: a
+ * green bend filling the joint at the point, and one groove running from
+ * stick to stick around it. Laid over the arms, under the upright sticks.
+ */
+const EIGHT_VEES = [
+  // Path, and the width of its bend and groove, matched to the stalks.
+  { d: "M30.5 44 L44 25 L57.5 44", width: 8.3, groove: 0.98 },
+  { d: "M30.5 70 L44 93 L57.5 70", width: 8.3, groove: 0.98 },
+];
+
+function VeeJoin({
+  d,
+  width,
+  groove,
+}: {
+  d: string;
+  width: number;
+  groove: number;
+}) {
+  return (
+    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} stroke={GREEN} strokeWidth={width} />
+      <path d={d} stroke={FACE} strokeWidth={groove} />
     </g>
   );
 }
 
+/** Stalk tiles, two to nine. One bamboo is the bird, a traced face. */
 export function Bamboo({ count }: { count: number }) {
-  if (count === 1) return <Bird />;
-
-  // Eight stalks: upright sides and overlapping diagonals, as in the reference.
-  if (count === 8)
-    return (
-      <g transform="translate(4.4 5.9) scale(.9)">
-        <Stalk x={23} y={34} h={42} colour={GREEN} />
-        <Stalk x={65} y={34} h={42} colour={GREEN} />
-        <Stalk x={36} y={40} h={42} colour={GREEN} tilt={45} />
-        <Stalk x={52} y={40} h={42} colour={GREEN} tilt={-45} />
-        <Stalk x={23} y={84} h={42} colour={GREEN} />
-        <Stalk x={65} y={84} h={42} colour={GREEN} />
-        <Stalk x={36} y={78} h={42} colour={GREEN} tilt={-45} />
-        <Stalk x={52} y={78} h={42} colour={GREEN} tilt={45} />
-      </g>
-    );
-
-  const points = BAMBOO_LAYOUT[count];
-  const colours = BAMBOO_COLOURS[count];
-  const h = count >= 7 ? 26 : count >= 4 ? 32 : 36;
-
+  const { h, stalks } = BAMBOO_LAYOUT[count];
+  // Eight lists its four V arms first, then the four upright sticks.
+  const [under, over] =
+    count === 8 ? [stalks.slice(0, 4), stalks.slice(4)] : [[], stalks];
+  const draw = (list: StalkSpec[]) =>
+    list.map(([x, y, colour, length = h, tilt], i) => (
+      <Stalk key={i} x={x} y={y} h={length} colour={colour} tilt={tilt} />
+    ));
   return (
     <>
-      {points.map(([x, y], i) => (
-        <Stalk key={i} x={x} y={y} h={h} colour={colours[i]} />
-      ))}
+      <g clipPath={count === 8 ? "url(#eightVee)" : undefined}>
+        {draw(under)}
+        {count === 8 &&
+          EIGHT_VEES.map((vee) => <VeeJoin key={vee.d} {...vee} />)}
+      </g>
+      {draw(over)}
     </>
-  );
-}
-
-/** One bamboo is a bird, not a stalk; every set draws it differently, so this
- * is a reading of the shape (body, cocked head, wing, red-fanned tail). */
-export function Bird() {
-  return (
-    <g
-      transform="translate(3.5 4.7) scale(.92)"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* Perch, outlined body, and the folded blue wing. */}
-      <path d="M18 69 Q42 67 66 64" stroke={GREEN} strokeWidth="2.5" />
-      <path
-        d="M41 34 C35 43 36 51 35 62 C49 64 59 53 60 43 C61 34 53 34 52 43"
-        stroke={GREEN}
-        strokeWidth="2"
-      />
-      <path
-        d="M40 39 C25 29 23 43 26 52 C28 63 25 72 18 77 C31 74 36 63 37 52 Z"
-        stroke={BLUE}
-        strokeWidth="2"
-      />
-      <path
-        d="M38 46 Q47 48 47 39 M41 44 L40 54 M46 44 L45 53 M50 42 L49 51"
-        stroke={GREEN}
-        strokeWidth="1.5"
-      />
-      {/* Small crested head and a long, fine fan of tail feathers. */}
-      <path
-        d="M39 36 C34 32 34 23 39 21 C47 17 52 24 50 33 L47 40"
-        stroke={GREEN}
-        strokeWidth="2"
-      />
-      <circle cx="43" cy="27" r="1.7" fill={GREEN} stroke="none" />
-      <path
-        d="M35 26 L30 24 L35 31 M37 21 Q30 14 45 16 Q55 17 59 12 Q56 24 43 21"
-        stroke={RED}
-        strokeWidth="2"
-      />
-      <path
-        d="M33 65 Q32 88 50 106 M39 64 Q39 85 56 103"
-        stroke={BLUE}
-        strokeWidth="1.5"
-      />
-      <path
-        d="M36 65 Q35 88 53 106 M43 62 Q43 85 59 101"
-        stroke={RED}
-        strokeWidth="1.5"
-      />
-      <path d="M40 64 Q40 86 54 102" stroke={GREEN} strokeWidth="1.5" />
-    </g>
   );
 }
