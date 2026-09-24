@@ -9,6 +9,7 @@ permissions:
   contents: write
   id-token: write
   pull-requests: write
+  issues: write
 
 concurrency:
   group: score-update
@@ -16,6 +17,7 @@ concurrency:
 
 env:
   BRANCH: scores/weekly
+  FAILURE_TITLE: Score update is failing
 
 jobs:
   propose:
@@ -77,7 +79,24 @@ jobs:
         if: steps.config.outputs.ready == 'true'
         env:
           SCORES_SPREADSHEET_ID: ${{ vars.SCORES_SPREADSHEET_ID }}
-        run: python pipeline/build_data.py --source sheets --spreadsheet-id "$SCORES_SPREADSHEET_ID"
+        run: |
+          set -o pipefail
+          python pipeline/build_data.py --source sheets --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
+            | tee "$RUNNER_TEMP/score-update.log"
+
+      # The bot's pull request gets no checks of its own, so check the data here.
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the site builds with this data
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm test
+          npm run build
 
       - name: Open or update the score review pull request
         if: steps.config.outputs.ready == 'true'
@@ -113,4 +132,36 @@ jobs:
             gh pr create --base main --head "$BRANCH" \
               --title "Score update" \
               --body-file "$RUNNER_TEMP/score-update.md"
+          fi
+
+      # Messages from build_data.py name tables and counts, never players.
+      - name: Report the failure in an issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "The last score update failed, so the leaderboard is not being refreshed."
+            echo
+            echo '```'
+            tail -n 20 "$RUNNER_TEMP/score-update.log" 2>/dev/null || echo "No log; see the run."
+            echo '```'
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > "$RUNNER_TEMP/failure.md"
+          issue="$(gh issue list --state open --search "\"$FAILURE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body-file "$RUNNER_TEMP/failure.md"
+          else
+            gh issue create --title "$FAILURE_TITLE" --body-file "$RUNNER_TEMP/failure.md"
+          fi
+
+      - name: Close the failure issue once it works again
+        if: success() && steps.config.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issue="$(gh issue list --state open --search "\"$FAILURE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "Working again as of $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           fi
