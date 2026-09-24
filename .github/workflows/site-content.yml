@@ -8,10 +8,15 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 concurrency:
   group: site-content
   cancel-in-progress: false
+
+env:
+  BRANCH: content/site
+  FAILURE_TITLE: Website content update is failing
 
 jobs:
   propose:
@@ -32,74 +37,99 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Check for an existing content proposal
-        if: steps.config.outputs.configured == 'true'
-        id: existing
-        run: |
-          count="$(gh pr list --state open --search 'Website content update in:title' --json number --jq 'length')"
-          if [ "$count" -gt 0 ]; then
-            echo "open=true" >> "$GITHUB_OUTPUT"
-            echo "A website content pull request is already waiting for review."
-          else
-            echo "open=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Read and validate the website sheet
-        if: steps.config.outputs.configured == 'true' && steps.existing.outputs.open == 'false'
+        if: steps.config.outputs.configured == 'true'
         run: |
-          python3 pipeline/build_site_content.py --summary "$RUNNER_TEMP/site-content-summary.md"
+          set -o pipefail
+          python3 pipeline/build_site_content.py --summary "$RUNNER_TEMP/site-content-summary.md" 2>&1 \
+            | tee "$RUNNER_TEMP/site-content.log"
           if [ -f "$RUNNER_TEMP/site-content-summary.md" ]; then
             cat "$RUNNER_TEMP/site-content-summary.md" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      # Compared against main, and against the proposal already waiting, so a
+      # waiting pull request is updated with later edits instead of going stale.
       - name: Detect a content change
-        if: steps.config.outputs.configured == 'true' && steps.existing.outputs.open == 'false'
+        if: steps.config.outputs.configured == 'true'
         id: change
         run: |
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
           if git diff --quiet -- data/site.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No approved website changes found."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "The Sheet matches the site."
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          if [ -n "$pr" ] && git fetch --quiet origin "$BRANCH" \
+            && git diff --quiet FETCH_HEAD -- data/site.json; then
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+            echo "Pull request #$pr already proposes this content."
           fi
 
+      - name: Close a proposal the Sheet no longer wants
+        if: steps.change.outputs.changed == 'false' && steps.change.outputs.pr != ''
+        run: |
+          gh pr close "${{ steps.change.outputs.pr }}" --delete-branch \
+            --comment "The Sheet matches the site again, so this proposal is no longer needed."
+
       - uses: actions/setup-node@v4
-        if: steps.change.outputs.changed == 'true'
+        if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
         with:
           node-version: 22
           cache: npm
 
-      - if: steps.change.outputs.changed == 'true'
-        run: npm ci
+      - name: Check the site builds with this content
+        if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
+        run: |
+          npm ci
+          npm run lint
+          npm test
+          npm run test:site-content
+          npm run photos:check
+          npm run build
 
-      - if: steps.change.outputs.changed == 'true'
-        run: npm run lint
-
-      - if: steps.change.outputs.changed == 'true'
-        run: npm test
-
-      - if: steps.change.outputs.changed == 'true'
-        run: npm run test:site-content
-
-      - if: steps.change.outputs.changed == 'true'
-        run: npm run photos:check
-
-      - if: steps.change.outputs.changed == 'true'
-        run: npm run build
-
-      - name: Open a review pull request
-        if: steps.change.outputs.changed == 'true'
-        env:
-          BRANCH_NAME: content/site-${{ github.run_id }}
+      - name: Open or update the review pull request
+        if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c "$BRANCH_NAME"
+          git switch -c "$BRANCH"
           git add data/site.json
           git commit -m "content: update public website copy"
-          git push --set-upstream origin "$BRANCH_NAME"
-          gh pr create \
-            --base main \
-            --head "$BRANCH_NAME" \
-            --title "Website content update" \
-            --body-file "$RUNNER_TEMP/site-content-summary.md"
+          git push --force origin "$BRANCH"
+          pr="${{ steps.change.outputs.pr }}"
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --body-file "$RUNNER_TEMP/site-content-summary.md"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "Website content update" \
+              --body-file "$RUNNER_TEMP/site-content-summary.md"
+          fi
+
+      - name: Report the failure in an issue
+        if: failure()
+        run: |
+          {
+            echo "The last website content run failed, so Sheet edits are not reaching the site."
+            echo
+            echo '```'
+            tail -n 20 "$RUNNER_TEMP/site-content.log" 2>/dev/null || echo "No log; see the run."
+            echo '```'
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > "$RUNNER_TEMP/failure.md"
+          issue="$(gh issue list --state open --search "\"$FAILURE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body-file "$RUNNER_TEMP/failure.md"
+          else
+            gh issue create --title "$FAILURE_TITLE" --body-file "$RUNNER_TEMP/failure.md"
+          fi
+
+      - name: Close the failure issue once it works again
+        if: success()
+        run: |
+          issue="$(gh issue list --state open --search "\"$FAILURE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "Working again as of $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi

@@ -43,6 +43,13 @@ class SiteContentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "consent is not checked"):
             validate(rows)
 
+    def test_unknown_row_is_ignored_with_a_warning(self) -> None:
+        rows = self.approved_rows()
+        rows["home.new_field"] = "Not read yet"
+        warnings: list[str] = []
+        self.assertIsNotNone(validate(rows, warnings))
+        self.assertIn("home.new_field", warnings[0])
+
     def test_summary_flattens_officers_by_role(self) -> None:
         content = validate(self.approved_rows())
         self.assertEqual(flatten(content)["officer.President"], "Loy Luo")

@@ -82,16 +82,17 @@ def truthy(value: str) -> bool:
     return value.strip().lower() in {"true", "yes", "1", "ready"}
 
 
-def validate(values: dict[str, str]) -> dict[str, object] | None:
+def validate(values: dict[str, str], warnings: list[str] | None = None) -> dict[str, object] | None:
     officer_keys = {
         f"officer.{role.lower().replace(' ', '_')}.{suffix}"
         for role in ROLES
         for suffix in ("name", "consent")
     }
     allowed = set(TEXT_FIELDS) | officer_keys | {"ready_to_publish"}
+    # Ignored, not fatal, so a row can go into the Sheet before the code that reads it.
     unknown = sorted(set(values) - allowed)
-    if unknown:
-        die(f"unknown key(s): {', '.join(unknown)}")
+    if unknown and warnings is not None:
+        warnings.append(f"Ignored row(s) the site does not use yet: {', '.join(unknown)}")
 
     missing = sorted(set(TEXT_FIELDS) - set(values))
     if missing:
@@ -165,7 +166,7 @@ def flatten(value: object, prefix: str = "") -> dict[str, str]:
     return {prefix: "" if value is None else str(value)}
 
 
-def write_summary(path: str, previous: object, proposed: object) -> None:
+def write_summary(path: str, previous: object, proposed: object, warnings: list[str]) -> None:
     before = flatten(previous)
     after = flatten(proposed)
     lines = [
@@ -182,6 +183,7 @@ def write_summary(path: str, previous: object, proposed: object) -> None:
         old = before.get(key, "").replace("|", "\\|").replace("\n", " ")
         new = after.get(key, "").replace("|", "\\|").replace("\n", " ")
         lines.append(f"| `{key}` | {old or '*(blank)*'} | {new or '*(blank)*'} |")
+    lines += [f"\n> **Note:** {warning}" for warning in warnings]
     lines += [
         "",
         "Review this list and the Files changed tab. Merge the pull request to publish through the normal Pages workflow.",
@@ -196,7 +198,10 @@ def main() -> int:
     args = parser.parse_args()
     try:
         source = read_source(args.input, os.environ.get("SITE_CONTENT_CSV_URL"))
-        content = validate(parse_rows(source))
+        warnings: list[str] = []
+        content = validate(parse_rows(source), warnings)
+        for warning in warnings:
+            print(f"warning: {warning}")
     except (OSError, UnicodeError, ValueError, urllib.error.URLError) as error:
         print(f"site content error: {error}", file=sys.stderr)
         return 1
@@ -204,7 +209,7 @@ def main() -> int:
         return 0
     previous = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     if args.summary:
-        write_summary(args.summary, previous, content)
+        write_summary(args.summary, previous, content, warnings)
     OUT.write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {OUT.relative_to(REPO)}")
     return 0

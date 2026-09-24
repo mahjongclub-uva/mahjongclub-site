@@ -65,14 +65,18 @@ GitHub checks the Sheet once an hour.
 A maintainer can also start the check from the repository's **Actions** page.
 
 If the content passes its checks, GitHub opens a pull request titled **Website content update**.
+Edits made while it is waiting update that same pull request.
 The Sheet cannot publish directly.
+
+If something in the Sheet stops the check, GitHub opens an issue titled **Website content update is failing** that says what is wrong.
+It closes itself once the Sheet is fixed.
 
 ## Review a website-content pull request
 
 1. Open the **Website content update** pull request.
 2. Read the proposed-changes table in its description.
 3. Open **Files changed** and check the wording, names, email address, location, and links.
-4. Confirm that the automated checks are green.
+4. Confirm the description says the content passed its checks.
 5. Merge the pull request if everything is correct.
 
 The site normally updates a few minutes after the merge.
