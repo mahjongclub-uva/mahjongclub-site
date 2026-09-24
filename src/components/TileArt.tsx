@@ -5,6 +5,8 @@
  * share. The letter itself is not drawn here, it stays real DOM text on top.
  */
 
+import { STALK } from "@/components/tracedStalk";
+
 const VIEW = "0 0 88 124";
 
 /** Render once, high in the tree; paints nothing itself. */
@@ -50,6 +52,52 @@ export function TileArtDefs() {
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.4" />
           <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
+
+        {/* Bamboo stalk, reused by every stalk tile. */}
+        <path id="tileStalk" d={STALK} fillRule="evenodd" />
+
+        {/* Cuts eight-bamboo's Vs off at its upright sticks. */}
+        <clipPath id="eightVee" clipPathUnits="userSpaceOnUse">
+          <rect x="30" y="0" width="28" height="124" />
+        </clipPath>
+
+        {/* Halftone for tile sides. */}
+        <pattern
+          id="tileHalftone"
+          width="3.2"
+          height="3.2"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <circle cx="1.6" cy="1.6" r="0.8" fill="var(--tile-back-hi)" />
+        </pattern>
+
+        {/* Engraved ink: a faint edge wobble and a thin shade on the top rim. */}
+        <filter id="engrave" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="1.1"
+            numOctaves="2"
+            seed="3"
+            result="grain"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="grain"
+            scale="0.9"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="ink"
+          />
+          <feOffset in="ink" dx="0.35" dy="0.6" result="shifted" />
+          <feComposite in="ink" in2="shifted" operator="out" result="rim" />
+          <feFlood floodColor="#000" floodOpacity="0.28" />
+          <feComposite in2="rim" operator="in" result="shade" />
+          <feMerge>
+            <feMergeNode in="ink" />
+            <feMergeNode in="shade" />
+          </feMerge>
+        </filter>
       </defs>
     </svg>
   );

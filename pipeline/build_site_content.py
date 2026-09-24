@@ -18,7 +18,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 OUT = REPO / "data" / "site.json"
-ROLES = ["President", "Vice President", "Secretary", "Treasurer", "Publicity"]
+ROLES = ["President", "Vice President", "Secretary", "Treasurer", "Publicity", "Webmaster"]
 
 TEXT_FIELDS = {
     "tagline": 120,

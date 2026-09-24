@@ -74,6 +74,8 @@ svg {
   --tile-back-hi: #58a992;
   --tile-back: #2f6656;            /* 6.0:1 against the face */
   --tile-back-lo: #1b4437;
+  --tile-side: #a9d2c3;            /* celadon side of an illustrated tile */
+  --tile-body: #ddd4bd;            /* ivory body, seen on a tile's side */
   --tile-rim: rgba(63, 136, 113, 0.3);
 
   /* Type. Barlow Condensed gives headings a printed poster character; Public Sans
@@ -1715,22 +1717,12 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .set-tile-body {
   position: relative;
   display: block;
-  /* The proportions of TileFaceArt's own viewBox, so the drawing is never
-     stretched. */
-  aspect-ratio: 88 / 124;
+  /* The illustrated tile's viewBox: an 88 x 124 face plus its edge. */
+  aspect-ratio: 98 / 135;
   filter: drop-shadow(0 2px 3px rgba(35, 60, 45, 0.18));
-}.set-ink-numeral {
-  font-family: var(--font-han), sans-serif;
-  font-weight: 900;
-  font-size: 36px;
-  fill: var(--ink);
-}
+}/* Every mark on an illustrated tile is engraved (see #engrave). */
+.tile-ink { filter: url(#engrave); }
 
-.set-ink-suit {
-  font-family: var(--font-han), sans-serif;
-  font-weight: 700;
-  fill: var(--tile-letter);
-}
 
 /* 14. Halftone field ====================================================== */
 
@@ -2029,21 +2021,36 @@ body {
 .guide-page .tile-group-note { grid-column: 1; margin: 0; }
 .guide-page .tile-group > .tile-row { grid-column: 2; grid-row: 1 / 3; align-self: center; }
 .guide-page .tile-key { margin-top: 3rem; grid-template-columns: repeat(3, 1fr); }
-.guide-page .set-tile { width: clamp(44px, 5.4vw, 62px); }
 .guide-page .set-tile-body { filter: none; }
 .guide-tile { width: 100%; height: 100%; }
-.guide-page .set-ink-numeral { fill: #114ba3; font-size: 36px; }
-.guide-page .set-ink-suit { fill: #c94219; }
 .winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; background: #e6ede0; }
 .winning-hand figcaption { display: grid; gap: 0.3rem; text-align: center; }
 .winning-hand figcaption strong { font: 600 clamp(1.4rem, 3vw, 2rem) var(--display); }
 .winning-hand figcaption span { color: var(--ink-soft); font-size: 0.95rem; }
-.hand-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
 .hand-group .tile-row { justify-content: center; flex-wrap: nowrap; }
 .hand-group p { margin: 0.5rem auto 0; text-align: center; font-size: 0.9rem; color: var(--jade); }
-.hand-pair { grid-column: 1 / -1; }
-.guide-page .winning-hand .set-tile { width: clamp(54px, 8vw, 86px); }
 .guide-page #hand + .winning-hand { margin-top: 1rem; }
+
+/* Tile sizes on the guide. Widths are shares of the row, so a row never
+   overflows, capped so tiles stay tile-sized on wide screens. */
+.guide-page .tile-row { --tile-gap: 0.5rem; gap: var(--tile-gap); }
+/* The reference set: a suit fills one row; on phones it wraps five over
+   four. Honour and bonus rows use the same size, so every tile matches. */
+.guide-page .tile-set .set-tile { width: min(76px, calc((100% - 8 * var(--tile-gap)) / 9)); }
+/* The example hand: three groups a row, two on narrower screens, each group
+   sized for three tiles so the pair matches the sets. */
+.hand-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 1.5rem; margin-top: 2rem; }
+.hand-group .set-tile { width: min(76px, calc((100% - 2 * var(--tile-gap)) / 3)); }
+@media (max-width: 900px) {
+  .hand-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .guide-page .tile-set .set-tile { width: min(64px, calc((100% - 4 * var(--tile-gap)) / 5)); }
+  .guide-page .tile-row { --tile-gap: 0.35rem; }
+  .winning-hand { padding: 1rem 0.75rem; }
+  .hand-groups { gap: 1.25rem 0.5rem; }
+  .hand-group .tile-row { --tile-gap: 0.25rem; }
+}
 
 /* Bamboo stalk dividers, with visible joints and a round cross-section. */
 .leaderboard-page .leaderboard tbody tr::after {
@@ -2067,28 +2074,18 @@ body {
   .guide-page .tile-key { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .hand-groups { grid-template-columns: 1fr; gap: 1.5rem; }
-  .guide-page .winning-hand .set-tile { width: 70px; }
-  .guide-page .tile-row { gap: 0.4rem; }
   .rolling-heading { --dot-size: 32px; padding-right: 46px; }
   .home-page .rolling-heading .section-title { font-size: clamp(1.35rem, 6.4vw, 2.1rem); }
 }
 
-/* Six groups form a balanced three-by-two hand diagram on larger screens. */
-.hand-groups { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.hand-pair { grid-column: auto; }
-.guide-page .winning-hand .set-tile { width: clamp(48px, 6vw, 76px); }
 .call-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
 .call-guide > div { border-top: 2px solid var(--jade); padding-top: 1rem; }
 .call-guide dt { font: 600 1.6rem var(--display); }
 .call-guide dt span { display: block; margin-top: 0.4rem; font: 600 0.9rem var(--sans); color: var(--jade); }
 .call-guide dd { margin: 0.75rem 0 0; max-width: 40ch; }
-.guide-call-intro { max-width: 48ch; }@media (max-width: 900px) {
-  .hand-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+.guide-call-intro { max-width: 48ch; }
 @media (max-width: 560px) {
-  .hand-groups, .call-guide { grid-template-columns: 1fr; }
-  .guide-page .winning-hand .set-tile { width: 70px; }
+  .call-guide { grid-template-columns: 1fr; }
 }
 
 /* A connected reading path, wrapping into a vertical path on phones. */
@@ -2157,30 +2154,28 @@ body {
   .footer-inner { gap: 0.5rem; }
   .footer-contact { display: grid; gap: 0.25rem; }
   .footer-links { margin-left: 0; width: 100%; }
-}/* Quiet, scroll-driven tile outlines sit outside the reading column. */
+}/* Tiles tossed round the page, behind the content (see AmbientTiles). */
 body { isolation: isolate; }
 .ambient-tiles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
-.ambient-tiles > * {
-  --ambient-y: calc(var(--ambient-progress, 0) * -120px);
+.ambient-tile {
+  position: absolute;
+  width: calc(clamp(84px, 8vw, 118px) * var(--size, 1));
+  filter: drop-shadow(0 8px 10px rgba(40, 60, 45, 0.16));
+  /* Eased, so each tile settles a beat behind the scroll. */
+  transform: translateY(calc(var(--ambient-progress, 0) * var(--drift)))
+    rotate(calc(var(--turn) + var(--ambient-progress, 0) * var(--spin)));
+  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.ambient-tiles .ambient-drift-right,
-.ambient-tiles .ambient-dots,
-.ambient-tiles .ambient-center-bamboo,
-.ambient-tiles .ambient-extra-dots {
-  --ambient-y: calc(var(--ambient-progress, 0) * 100px);
+@media (max-width: 760px) {
+  .ambient-tile { display: none; }
+  /* Beside the tagline, clear of the navigation. */
+  .ambient-tile.is-phone { display: block; width: calc(56px * var(--size, 1)); opacity: 0.7; --offset: -20px !important; }
+  .ambient-tile.is-phone:nth-child(1) { --top: 15% !important; }
+  .ambient-tile.is-phone:nth-child(2) { --top: 22% !important; }
 }
-.ambient-tiles .ambient-turn,
-.ambient-tiles .ambient-dots,
-.ambient-tiles .ambient-center-bamboo,
-.ambient-tiles .ambient-extra-bamboo {
-  transform: translateY(var(--ambient-y))
-    rotate(calc(-15deg + var(--ambient-progress, 0) * 27deg));
+@media (prefers-reduced-motion: reduce) {
+  .ambient-tile { transform: rotate(var(--turn)); transition: none; }
 }
-.ambient-tiles span { position: absolute; width: 135px; height: 185px; border: 2px solid #243d5818; border-radius: 18px; box-shadow: 8px 9px 0 #b997550c, inset 0 0 0 8px #fffaf330; }
-.ambient-tiles span::after { content: ""; position: absolute; inset: 38px 22px; border: 2px solid #9d302b12; border-radius: 50%; box-shadow: inset 0 0 0 10px #9d302b06; }
-.ambient-tiles span:nth-child(1) { left: -75px; top: 20%; transform: rotate(-15deg); }
-.ambient-tiles span:nth-child(2) { right: -75px; top: 48%; transform: rotate(18deg); }
-.ambient-tiles span:nth-child(3) { right: 5%; top: -140px; transform: rotate(-25deg); }
 .page-title, .section-title { letter-spacing: -0.035em; }
 .tagline { font-weight: 600; }
 .club-photos .photo-grid:has(> :only-child) { grid-template-columns: 1fr; }
@@ -2201,7 +2196,6 @@ body { isolation: isolate; }
 .search-results li > span { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.9rem; }
 .search-results li > span:last-child { margin-left: auto; }
 @media (max-width: 560px) {
-  .ambient-tiles span { opacity: 0.5; }
   .search-results { grid-template-columns: 1fr; }
   .search-decoration { width: 52px; right: 0.7rem; top: 0.7rem; }
   .search-field { gap: 0.4rem; }
@@ -2213,10 +2207,6 @@ body { isolation: isolate; }
 .home-page .welcome > div:first-child { padding-top: 0; }
 .photo-slot > img { border-radius: 14px; }
 body { background-image: none; }
-.ambient-motif { position: absolute; width: 90px; height: 125px; opacity: 0.11; }
-.ambient-dots { left: 2%; top: 67%; }
-.ambient-bamboo { right: 1%; top: 14%; transform: rotate(12deg); }
-.ambient-character { position: absolute; left: 4%; top: 7%; color: #9d302b; opacity: 0.07; font: 700 64px var(--font-han); }.search-panel .section-title { font-size: clamp(1.5rem, 3vw, 2rem); padding-right: 2rem; }
 .search-panel .search-field { margin-bottom: 0; }
 .footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1.1rem 2rem; }
 .footer-brand { display: flex; gap: 0.65rem; align-items: center; text-decoration: none; font-weight: 700; font-size: 0.95rem; min-width: 0; }
@@ -2232,7 +2222,6 @@ body { background-image: none; }
   .footer-inner { grid-template-columns: 1fr; gap: 0.7rem; }
   .footer-pages { justify-content: space-between; gap: 0.3rem; }
   .footer-links { justify-self: start; }
-  .ambient-motif, .ambient-character { opacity: 0.045; }
 }
 
 /* Clean sans headings and a distinct ink navigation bar. */
@@ -2244,9 +2233,6 @@ body { background-image: none; }
 .nav-marker span { background: #fffaf0; }
 .nav[data-marker="on"] ul a[aria-current="page"] { background: transparent; color: #243344; }
 .nav ul a:focus-visible { outline-color: #c6a76a; outline-offset: -3px; }
-.ambient-dots { left: 9%; }
-.ambient-bamboo { right: 9%; }
-.ambient-character { left: 13%; }
 .about-page .section { padding-block: clamp(2.5rem, 6vw, 5rem); }
 .about-page .section-title { margin-bottom: 2rem; }
 .about-story { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
@@ -2271,9 +2257,6 @@ body { background-image: none; }
   .about-photo { aspect-ratio: 4 / 3; margin: 0.5rem; }
   .about-page .social-list > a { padding: 1.2rem; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; }
   .about-page .social-list > a b { grid-column: 2; justify-self: start; }
-  .ambient-dots { left: 4%; }
-  .ambient-bamboo { right: 4%; }
-  .ambient-character { left: 8%; }
 }
 .about-page .section-wrap { max-width: 70rem; }
 .about-page .page-intro { max-width: 42rem; }
@@ -2282,11 +2265,6 @@ body { background-image: none; }
 /* Tab measurements already include the list's padding. */
 .nav-marker { inset-inline-start: 0; }
 .wukong-headband { width: 54px; height: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 1px #805b1628); }
-.ambient-center-dots { left: 39%; top: 18%; opacity: 0.035; width: 100px; }
-.ambient-center-bamboo { left: 58%; top: 70%; opacity: 0.035; }
-@media (max-width: 560px) {
-  .ambient-center-dots, .ambient-center-bamboo { opacity: 0.025; }
-}
 @media (max-width: 560px) {
   .wukong-headband { width: 44px; height: 24px; }}
 
@@ -2303,25 +2281,9 @@ body::before {
 .player-name { display: inline-flex; align-items: center; gap: 0.8rem; }
 .player-name .wukong-headband { width: 64px; height: 32px; filter: none; }
 .leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #eee3c5b3, #faf6eb60); }
-.ambient-extra-dots { left: 25%; top: 77%; opacity: 0.035; transform: rotate(-15deg); }
-.ambient-extra-bamboo { right: 27%; top: 30%; opacity: 0.03; }
-.ambient-tiles > .ambient-drift-left,
-.ambient-tiles > .ambient-drift-right,
-.ambient-tiles > .ambient-motif,
-.ambient-tiles > .ambient-character {
-  transform: translateY(var(--ambient-y));
-}
-.ambient-tiles > .ambient-turn,
-.ambient-tiles > .ambient-dots,
-.ambient-tiles > .ambient-center-bamboo,
-.ambient-tiles > .ambient-extra-bamboo {
-  transform: translateY(var(--ambient-y))
-    rotate(calc(-15deg + var(--ambient-progress, 0) * 27deg));
-}
 @media (max-width: 560px) {
   .player-name { gap: 0.4rem; flex-wrap: wrap; }
   .player-name .wukong-headband { width: 46px; height: 24px; }
-  .ambient-extra-dots, .ambient-extra-bamboo { width: 65px; opacity: 0.025; }
 }
 .call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
 
@@ -2337,7 +2299,6 @@ body::before {
 .action-link:active { transform: translateY(3px); box-shadow: 0 1px 0 #b6aa96; }
 .guide-index a { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
-  .ambient-tiles > * { transform: none; }
   .action-link:hover, .action-link:active { transform: none; }
 }
 

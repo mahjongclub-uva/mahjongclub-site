@@ -10,6 +10,7 @@ import {
   GROUPME_URL,
   INSTAGRAM,
   OFFICERS,
+  UNIVERSITY_STATEMENT,
 } from "@/lib/site";
 import { asset } from "@/lib/asset";
 import Section from "@/components/Section";
@@ -127,10 +128,7 @@ export default function About() {
           <h2 id="notes">Club notes</h2>
           <ol>
             <li>
-              Mahjong Club @ UVA operates independently as a Contracted
-              Independent Organization. The University does not direct or
-              control the club and is not responsible for its activities. Read
-              the University&apos;s{" "}
+              {UNIVERSITY_STATEMENT} Read the University&apos;s{" "}
               <a
                 href="https://studentaffairs.virginia.edu/subsite/student-engagement/cio-support/about-student-orgs"
                 rel="noopener noreferrer"
