@@ -647,40 +647,6 @@ main {
   padding-block-start: var(--space-4);
 }
 
-/* Two facts on one line where there is room, stacked when there is not. */
-.table-note {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin-block-start: var(--space-4);
-}
-
-.table-note span + span::before {
-  content: "·";
-  margin-inline-end: var(--space-3);
-  color: var(--rule);
-}
-
-/* Stacked on a phone. The separator only makes sense between two things on
-   one line — wrapped, it dangles at the start of the second. */
-@media (max-width: 767px) {
-  .table-note {
-    display: block;
-  }
-
-  .table-note span {
-    display: block;
-  }
-
-  .table-note span + span {
-    margin-block-start: var(--space-1);
-  }
-
-  .table-note span + span::before {
-    content: none;
-  }
-}
-
 .page-title {
   margin: 0;
   font-weight: 600;
@@ -690,301 +656,7 @@ main {
    air between one another. */
 .prose p + p {
   margin-block-start: var(--space-3);
-}/* 7. Leaderboard ==========================================================
-   One <table> serves both layouts: below 768px each row becomes a card,
-   with the heading pulled back in from data-label. No horizontal scroll,
-   it'd hide columns with no sign they exist.
-   ======================================================================== */
-
-.leaderboard {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-.leaderboard th,
-.leaderboard td {
-  padding: var(--space-3) var(--space-2);
-  text-align: left;
-  font-weight: 400;
-  border: 0;
-}
-
-/* Rows are separated by a face-down tile rather than a rule: the jade back
-   sits on the ivory body, which shows as a pale edge beneath and beside it. */
-.leaderboard tbody tr {
-  position: relative;
-}
-
-.leaderboard tbody tr::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
-  height: 8px;
-  border-radius: 2px;
-  /* The ivory half has to be lighter than the paper it sits on, or it vanishes
-     into it — which is what happened when the ground went from sage to cream.
-     Hard stop at 58% so the two materials meet at an edge rather than blend. */
-  background: linear-gradient(
-    to bottom,
-    var(--tile-back-hi) 0%,
-    var(--tile-back) 38%,
-    var(--tile-back-lo) 58%,
-    #fffefa 58%,
-    #f8f2e2 100%
-  );
-  box-shadow: 0 1px 1.5px rgba(34, 39, 29, 0.12);
-  opacity: 0.9;
-}
-
-.leaderboard tbody tr:last-child::after {
-  display: none;
-}
-
-.leaderboard thead th {
-  font-family: var(--sans);
-  font-size: var(--text-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  border-block-end: 1px solid var(--ink-soft);
-}
-
-.leaderboard tbody th {
-  font-family: var(--display);
-  font-size: var(--text-lg);
-}
-
-/* Hover or hold turns the rank over. Outside the reduced-motion guard, so the
-   swap still happens for someone who has asked for less movement — it just
-   happens at once instead of turning. */
-.leaderboard tbody tr:hover .rank-tile,
-.leaderboard tbody tr:active .rank-tile {
-  transform: rotateY(180deg);
-}
-
-/* The player at the top, marked with a gold wash that fades out to the right.
-   Decorative reinforcement only — the rank number already says who is first,
-   so nothing here is carried by colour alone. */
-.leaderboard tbody tr[data-leader="true"] {
-  background: linear-gradient(
-    to right,
-    var(--gold-wash) 0%,
-    var(--gold-wash) 46%,
-    rgba(234, 226, 196, 0.35) 78%,
-    rgba(234, 226, 196, 0) 100%
-  );
-  box-shadow: inset 0 1px 0 rgba(110, 82, 16, 0.26);
-}
-
-.leaderboard tbody tr[data-leader="true"] td[data-label="Rank"],
-.leaderboard tbody tr[data-leader="true"] th {
-  color: var(--gold);
-}
-
-/* The leader is the one name meant to stand out, so it stays in the same
-   display face as every other row and is only ever larger. Successive passes
-   had layered four overrides on this cell, and the last one won: the leader
-   ended up in the body font at 1.1rem against 1.5rem for everyone else, which
-   read as a mistake rather than emphasis. */
-.leaderboard tbody tr[data-leader="true"] th {
-  font-weight: 600;
-  font-size: var(--text-xl);
-}
-
-.leaderboard td {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
-}
-
-.leaderboard td[data-label="Score"] {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.leaderboard td:first-child {
-  width: 4.25rem;
-  /* The tile turns in here. */
-  perspective: 420px;
-}
-
-/* The rank, on a tile. Ivory face, jade edge, same materials as everything
-   else on the site. */
-/* The rank as a character tile that turns over on hover to show the number it
-   stands for. Two faces, as the wordmark tiles are. */
-.rank-tile {
-  position: relative;
-  display: block;
-  width: 42px;
-  aspect-ratio: 44 / 62;
-  transform-style: preserve-3d;
-}
-
-.rank-face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 4px;
-  backface-visibility: hidden;
-}
-
-.rank-front {
-  background: linear-gradient(
-    155deg,
-    var(--tile-face-hi) 0%,
-    var(--tile-face) 50%,
-    var(--tile-face-lo) 100%
-  );
-  box-shadow:
-    inset 0 -2px 0 var(--tile-edge),
-    inset 0 0 0 1px var(--tile-rim),
-    0 1px 2px rgba(46, 46, 44, 0.14);
-}
-
-.rank-back {
-  transform: rotateY(180deg);
-  background: linear-gradient(
-    155deg,
-    var(--tile-back-hi) 0%,
-    var(--tile-back) 55%,
-    var(--tile-back-lo) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 1px 2px rgba(46, 46, 44, 0.18);
-  font-family: var(--sans);
-  font-size: var(--text-base);
-  color: var(--tile-face-hi);
-}
-
-/* Numeral above, 萬 below, the way a real character tile is laid out. */
-
-/* Roughly 55:45 in favour of the red 萬 below — sized by area rather than by
-   height, so the ratio is sqrt(55/45) ≈ 1.1 between the two. */
-.rank-numeral {
-  font-family: var(--font-han), "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
-    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
-  font-size: 16px;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--ink);
-}
-
-.rank-suit {
-  font-family: var(--font-han), "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
-    "Source Han Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  margin-block-start: 1px;
-  color: var(--tile-letter);
-}
-
-/* Beyond nine there is no character tile, so the number stands alone. */
-.rank-plain {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
-}
-
-/* Available to assistive technology, invisible on screen. */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* The leader's tile is gilt rather than jade. */
-.leaderboard tbody tr[data-leader="true"] .rank-front {
-  box-shadow:
-    inset 0 -2px 0 var(--gold),
-    inset 0 0 0 1px rgba(110, 82, 16, 0.45),
-    0 1px 3px rgba(46, 46, 44, 0.18);
-}
-
-@media (max-width: 767px) {
-  /* Hidden from sight, kept for screen readers. */
-  .leaderboard thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .leaderboard,
-  .leaderboard tbody,
-  .leaderboard tr,
-  .leaderboard th,
-  .leaderboard td {
-    display: block;
-  }
-
-  /* Name and score share the top line, tables sits under the name. A grid
-     rather than flow, because the score has to sit hard right against a name
-     of any length. */
-  .leaderboard tbody tr {
-    position: relative;
-    display: grid;
-    grid-template-columns: 3.6rem 1fr auto;
-    column-gap: var(--space-2);
-    align-items: baseline;
-    padding-block: var(--space-3);
-  }
-
-  .leaderboard th,
-  .leaderboard td {
-    padding: 0;
-    border: 0;
-  }
-
-  .leaderboard td[data-label="Rank"] {
-    grid-column: 1;
-    grid-row: 1 / 3;
-    align-self: center;
-    width: auto;
-  }
-
-  .leaderboard tbody th {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .leaderboard td[data-label="Score"] {
-    grid-column: 3;
-    grid-row: 1;
-    text-align: right;
-    font-size: var(--text-base);
-    color: var(--ink);
-  }
-
-  .leaderboard td[data-label="Tables"] {
-    grid-column: 2 / 4;
-    grid-row: 2;
-    font-size: var(--text-xs);
-    margin-block-start: 2px;
-  }
-
-  /* Ranked players have played at least two tables, so the plural is safe. */
-  .leaderboard td[data-label="Tables"]::after {
-    content: " tables";
-  }
-
-  /* The divider spans the whole row, tile included. */
-  .leaderboard tbody tr::after {
-    inset-inline-start: 0;
-  }
-}
-
-/* 8. Awards =============================================================== */
+}/* 8. Awards =============================================================== */
 
 .awards {
   margin: 0;
@@ -1443,11 +1115,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* The tile turns over on hover, and on touch while held. */
-  .rank-tile {
-    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
   .tile-scene {
     animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
       backwards;
@@ -2052,15 +1719,6 @@ body {
   .hand-group .tile-row { --tile-gap: 0.25rem; }
 }
 
-/* Bamboo stalk dividers, with visible joints and a round cross-section. */
-.leaderboard-page .leaderboard tbody tr::after {
-  height: 7px;
-  border-radius: 5px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 72px, #3c6750 72px 74px, #bdd0a0 74px 77px, #557851 77px 79px, transparent 79px 150px),
-    linear-gradient(#c0d3a4 0%, #729660 35%, #4e764d 66%, #9cb480 100%);
-  box-shadow: 0 1px 2px #30462926;
-}
 @media (max-width: 900px) {
   .guide-page .tile-group { grid-template-columns: 1fr; }
   .guide-page .tile-group > .tile-row { grid-column: 1; grid-row: auto; }
@@ -2150,7 +1808,7 @@ body {
 .footer-contact a { display: inline-flex; align-items: center; gap: 0.55rem; min-height: 44px; overflow-wrap: anywhere; }
 .footer-contact svg { flex-shrink: 0; }
 .footer-links { margin-left: auto; }
-.leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #f1e2bb, #fbf7eb); }@media (max-width: 560px) {
+@media (max-width: 560px) {
   .footer-inner { gap: 0.5rem; }
   .footer-contact { display: grid; gap: 0.25rem; }
   .footer-links { margin-left: 0; width: 100%; }
@@ -2264,9 +1922,6 @@ body { background-image: none; }
 
 /* Tab measurements already include the list's padding. */
 .nav-marker { inset-inline-start: 0; }
-.wukong-headband { width: 54px; height: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 1px #805b1628); }
-@media (max-width: 560px) {
-  .wukong-headband { width: 44px; height: 24px; }}
 
 /* Static paper grain and short, irregular fibers, behind the page content. */
 body::before {
@@ -2278,13 +1933,6 @@ body::before {
 }
 .page-title, .section-title { font-weight: 600; letter-spacing: -0.025em; }
 .eyebrow { letter-spacing: 0.1em; }
-.player-name { display: inline-flex; align-items: center; gap: 0.8rem; }
-.player-name .wukong-headband { width: 64px; height: 32px; filter: none; }
-.leaderboard tbody tr[data-leader="true"] { background: linear-gradient(100deg, #eee3c5b3, #faf6eb60); }
-@media (max-width: 560px) {
-  .player-name { gap: 0.4rem; flex-wrap: wrap; }
-  .player-name .wukong-headband { width: 46px; height: 24px; }
-}
 .call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
 
 /* Printed game-room palette and solid, tile-like controls. */
@@ -2304,24 +1952,12 @@ body::before {
 
 /* Even navigation rim and quieter leaderboard alignment. */
 .nav ul { box-shadow: 0 6px 16px #29272220; }
-.player-name { gap: .55rem; flex-wrap: nowrap; }
-.player-name .wukong-headband { width: 48px; height: 25px; }
 .tile-letter { font-family: var(--body); font-weight: 700; }
 .page-head { padding-bottom: clamp(2rem, 5vw, 3.5rem); }
 .call-guide { column-gap: 2.5rem; row-gap: 2rem; }
 @media (max-width: 560px) {
-  .player-name .wukong-headband { width: 36px; height: 20px; }
   .page-title { line-height: 1.08; }
   .guide-index ol { row-gap: .75rem; }
-}
-
-/* Slightly larger standings, with the stacked phone layout retained. */
-.leaderboard-page { --content: 52rem; }
-.leaderboard tbody th { font-size: 1.5rem; }
-.leaderboard tbody td { font-size: 1.05rem; }
-@media (max-width: 560px) {
-  .leaderboard tbody th { font-size: 1.4rem; }
-  .leaderboard tbody td { font-size: 1.1rem; }
 }
 
 /* Club theme: ivory paper, charcoal ink, vermilion interface accents. */
@@ -2358,3 +1994,111 @@ body > main { flex: 1 0 auto; }
   .not-found-tile { animation: not-found-drop 520ms cubic-bezier(0.2, 0.8, 0.3, 1.2) backwards; animation-delay: calc(var(--i) * 110ms); }
 }
 @keyframes not-found-drop { from { opacity: 0; translate: 0 -40px; rotate: 10deg; } }
+
+/* Available to assistive technology, invisible on screen. */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Leaderboard: open rows under column headings. A row answers the pointer
+   or a tap: a highlighter wash sweeps across it and its tile turns over. */
+.leaderboard-page { --content: 64rem; --rank-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+.leaderboard-page .page-head { padding-block: 1.25rem 1.25rem; }
+.leaderboard-page .page-title { font-size: clamp(3.5rem, 7vw, 5.5rem); line-height: 0.95; }
+.leaderboard-page .page-head + .section { padding-top: 0; }
+.leaderboard-page .eyebrow { margin-bottom: 0.65rem; }
+.leaderboard-meta { margin: 0.9rem 0 0; font-size: 0.9rem; color: var(--ink-soft); }
+.standings { display: grid; gap: 0.15rem; margin: 0; padding: 0; list-style: none; }
+.standings-head, .standing { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) minmax(10rem, auto); column-gap: 1.5rem; padding-inline: 0.75rem 1.25rem; }
+.standings-head { margin-bottom: 0.5rem; padding-block: 0 0.6rem; border-bottom: 1px solid var(--rule); font-size: 0.85rem; color: var(--ink-soft); }
+.standings-head span:is(:first-child, :last-child) { justify-self: end; }
+.standing { position: relative; align-items: center; min-height: 70px; padding-block: 0.5rem; border-radius: 10px; background: linear-gradient(#a9d2c347, #a9d2c347) no-repeat 0 0 / 0% 100%; }
+.standing:has(.rank-toggle[aria-pressed="true"], .rank-toggle:focus-visible) { background-size: 100% 100%; }
+.standing-tile { display: block; justify-self: end; width: 44px; }
+.standing-player { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.2rem; }
+.standing-name { font: 600 1.8rem / 1.1 var(--display); overflow-wrap: break-word; }
+.standing-tables { font-size: 0.75rem; color: var(--ink-soft); }
+.standing-score { display: flex; align-items: baseline; justify-content: flex-end; gap: 0.65rem; font-size: 0.8rem; color: var(--ink-soft); }
+.standing-score b { font: 700 2.1rem / 1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.standing[data-place="1"] .rank-flip { rotate: -4deg; }
+.standing[data-place="1"] .standing-score b { color: var(--jade); }
+/* The top three grow only where there is width; a phone keeps one size. */
+@media (min-width: 601px) {
+  .standing:is([data-place="1"], [data-place="2"], [data-place="3"]) { padding-block: 0.75rem; }
+  .standing:is([data-place="2"], [data-place="3"]) .standing-tile { width: 64px; }
+  .standing:is([data-place="2"], [data-place="3"]) .standing-name { font-size: 2.4rem; }
+  .standing:is([data-place="2"], [data-place="3"]) .standing-score b { font-size: 3rem; }
+  .standing[data-place="1"] .standing-tile { width: 88px; }
+  .standing[data-place="1"] .rank-flip { rotate: -6deg; }
+  .standing[data-place="1"] .standing-name { font-size: clamp(2.8rem, 5vw, 4rem); font-weight: 700; }
+  .standing[data-place="1"] .standing-score b { font-size: 4.5rem; }
+}
+.rank-plain { display: grid; place-items: center; aspect-ratio: 98 / 135; font: 700 1.5rem var(--display); }
+
+.rank-flip .guide-tile > rect { fill: url(#tilePanel); stroke: #b5c5ae; }
+.rank-toggle { display: block; width: 100%; min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; font: inherit; border-radius: 8px; touch-action: manipulation; cursor: pointer; }
+.rank-toggle:focus-visible { outline: 2px solid var(--jade); outline-offset: 5px; }
+/* The whole row is the tile's hit area, so a tap anywhere turns it over. */
+.rank-toggle::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 10px; }
+/* Each face turns on its own perspective rather than inside a shared 3D
+   context, which the rows' arrival animation would flatten. */
+.rank-flip { position: relative; display: grid; }
+.rank-front, .rank-back { grid-area: 1 / 1; backface-visibility: hidden; filter: drop-shadow(0 3px 2px #17372a25); transform: perspective(700px) rotateY(0); }
+.rank-back { transform: perspective(700px) rotateY(-180deg); }
+.rank-flip svg { display: block; width: 100%; height: auto; }
+.rank-toggle:active .rank-flip { scale: 0.96; }
+.rank-toggle[aria-pressed="true"] .rank-front { transform: perspective(700px) rotateY(180deg); }
+.rank-toggle[aria-pressed="true"] .rank-back { transform: perspective(700px) rotateY(0); }
+.rank-touch-hint { display: none; margin: 1rem 0 0; color: var(--ink-soft); font-size: 0.8rem; }
+@media (hover: none) and (pointer: coarse) {
+  .rank-touch-hint { display: block; }
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.standing:hover, .rank-toggle:focus-visible) .rank-front { transform: perspective(700px) rotateY(180deg); }
+  :is(.standing:hover, .rank-toggle:focus-visible) .rank-back { transform: perspective(700px) rotateY(0); }
+  .standing:hover { background-size: 100% 100%; }
+}
+/* Keep only two perimeter accents on this page, away from the standings. */
+body:has(.leaderboard-page) .ambient-tile:not(:first-child):not(:nth-child(3)) { display: none; }
+body:has(.leaderboard-page) .ambient-tile:nth-child(3) { left: auto !important; right: -42px; }
+@media (max-width: 600px) {
+  .leaderboard-page .section-wrap { padding-inline: 1.25rem; }
+  .leaderboard-page .page-head { padding-block: 2rem 1.5rem; }
+  .standings-head, .standing { grid-template-columns: 44px minmax(0, 1fr) auto; column-gap: 0.85rem; padding-inline: 0.5rem 0.75rem; }
+  .standing { min-height: 68px; }
+  .standing-name { font-size: clamp(1.35rem, 6.5vw, 1.6rem); }
+  .standing-score b { font-size: 2rem; }
+  body:has(.leaderboard-page) .ambient-tiles { display: none; }
+}
+/* Scores count up from 0. The real number stays in the page, see-through,
+   for screen readers and copying; the counter is a copy drawn over it.
+   ponytail: no fallback without @property (Firefox before 128 flashes 0 mid-count). */
+@property --n { syntax: "<integer>"; inherits: false; initial-value: 0; }
+.count { position: relative; }
+.count-up { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .rank-front, .rank-back { transition: transform 360ms var(--rank-ease); }
+  .rank-flip { transition: scale 120ms ease-out; }
+  .standing[data-place="1"] .rank-flip { animation: leader-settle 650ms var(--rank-ease) both; }
+  /* Places arrive in rank order, each score counting as its row lands. */
+  .standing { animation: standing-in 520ms var(--rank-ease) calc(var(--i, 0) * 70ms) backwards; transition: background-size 420ms var(--rank-ease); }
+  .count-value { color: transparent; }
+  .count-up { display: block; position: absolute; inset: 0; text-align: right; counter-reset: n var(--n); animation: count-up 1.2s var(--rank-ease) calc(var(--i, 0) * 70ms + 150ms) both; }
+  .count-up::after { content: counter(n); }
+}
+@keyframes count-up {
+  from { --n: 0; }
+  to { --n: var(--to); }
+}
+/* Reduced motion still shows the order, as a fade without movement. */
+@media (prefers-reduced-motion: reduce) {
+  .standing { animation: standing-fade 300ms ease-out calc(var(--i, 0) * 70ms) backwards; }
+}
+@keyframes standing-fade {
+  from { opacity: 0; }
+}
+@keyframes standing-in {
+  from { opacity: 0; translate: 0 12px; }
+}
+@keyframes leader-settle {
+  from { transform: translateY(-14px) rotate(9deg); }
+  to { transform: translateY(0) rotate(0); }
+}

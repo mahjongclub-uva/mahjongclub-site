@@ -1,45 +1,55 @@
-import WukongHeadband from "@/components/WukongHeadband";
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { CharacterFace, TileFace } from "@/components/PlayingTile";
+import { RED } from "@/components/TileArtwork";
 import { getCurrentSemester } from "@/lib/data";
 import { MIN_TABLES_TO_RANK } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import PlayerSearch from "@/components/PlayerSearch";
+import RankTileFlip from "@/components/RankTileFlip";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
 
-/** 一 through 九. Index 0 is unused so the array reads by rank. */
-const NUMERALS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+/** 一 through 九, with 伍 for five as on the guide's tiles. */
+const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
 
 /**
- * Rank as a character tile: numeral above, 萬 below, laid out as a real 萬子
- * tile. Hovering flips it to show the Arabic numeral for anyone who doesn't
- * read the characters; also present for assistive tech at all times, since
- * hover isn't available to everyone.
+ * A rank as the guide's character tile, turning over to show the number for
+ * anyone who doesn't read the characters. Plain number past nine.
  */
 function RankTile({ rank }: { rank: number }) {
   const numeral = NUMERALS[rank];
   if (!numeral) return <span className="rank-plain">{rank}</span>;
-
   return (
-    <span className="rank-tile">
-      <span className="rank-face rank-front" aria-hidden="true">
-        <span className="rank-numeral">{numeral}</span>
-        <span className="rank-suit">萬</span>
+    <RankTileFlip rank={rank}>
+      <span className="rank-front">
+        <TileFace>
+          <CharacterFace top={numeral} bottom="萬" />
+        </TileFace>
       </span>
-      {/* The reverse, showing the number the character stands for. */}
-      <span className="rank-face rank-back" aria-hidden="true">
-        {rank}
+      <span className="rank-back">
+        <TileFace>
+          <text
+            x="44"
+            y="84"
+            textAnchor="middle"
+            fontFamily="var(--body), sans-serif"
+            fontWeight="700"
+            fontSize="64"
+            fill={RED}
+          >
+            {rank}
+          </text>
+        </TileFace>
       </span>
-      <span className="sr-only">{rank}</span>
-    </span>
+    </RankTileFlip>
   );
 }
 
 export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
-  const hidden = semester.standings.length - shown.length;
 
   return (
     <main className="leaderboard-page">
@@ -47,6 +57,14 @@ export default function Leaderboard() {
         <div className="section-wrap">
           <p className="eyebrow">{semester.label}</p>
           <h1 className="page-title">Leaderboard</h1>
+          {semester.last_session && (
+            <p className="leaderboard-meta">
+              Updated{" "}
+              <time dateTime={semester.last_session}>
+                {formatDate(semester.last_session)}
+              </time>
+            </p>
+          )}
         </div>
       </header>
 
@@ -56,52 +74,49 @@ export default function Leaderboard() {
             <p className="quiet">No tables played yet this semester.</p>
           ) : (
             <>
-              <table className="leaderboard">
-                <caption className="sr-only">
-                  {semester.label} leaderboard
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Rank</th>
-                    <th scope="col">Player</th>
-                    <th scope="col">Score</th>
-                    <th scope="col">Tables</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {shown.map((player) => (
-                    <tr key={player.id} data-leader={player.rank === 1}>
-                      <td data-label="Rank">
-                        <RankTile rank={player.rank} />
-                      </td>
-                      <th scope="row">
-                        <span className="player-name">
-                          <span>{player.display}</span>
-                          {player.rank === 1 && <WukongHeadband />}
-                        </span>
-                      </th>
-                      <td data-label="Score">{player.total_gain}</td>
-                      <td data-label="Tables">{player.tables_played}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Visual only: each row already reads out its rank and points. */}
+              <div className="standings-head" aria-hidden="true">
+                <span>Rank</span>
+                <span>Player</span>
+                <span>Points</span>
+              </div>
+              <ol
+                className="standings"
+                aria-label={`${semester.label} standings`}
+              >
+                {shown.map((player, i) => (
+                  <li
+                    key={player.id}
+                    className="standing"
+                    data-place={i + 1}
+                    style={{ "--i": i } as CSSProperties}
+                  >
+                    <span className="standing-tile">
+                      <RankTile rank={player.rank} />
+                    </span>
+                    <span className="sr-only">Rank {player.rank}: </span>
+                    <span className="standing-player">
+                      <span className="standing-name">{player.display}</span>
+                      <span className="standing-tables">
+                        {player.tables_played} tables
+                      </span>
+                    </span>
+                    <span className="standing-score">
+                      <b
+                        className="count"
+                        style={{ "--to": player.total_gain } as CSSProperties}
+                      >
+                        <span className="count-value">{player.total_gain}</span>
+                        <span className="count-up" aria-hidden="true" />
+                      </b>
+                      <span className="sr-only">points</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
 
-              <p className="quiet table-note">
-                {semester.last_session && (
-                  <span>
-                    Last updated{" "}
-                    <time dateTime={semester.last_session}>
-                      {formatDate(semester.last_session)}
-                    </time>
-                  </span>
-                )}
-                {hidden > 0 && (
-                  <span>
-                    Showing the top {SHOWN} of {semester.standings.length}{" "}
-                    ranked players
-                  </span>
-                )}
+              <p className="rank-touch-hint">
+                Tap a player to flip their tile.
               </p>
             </>
           )}

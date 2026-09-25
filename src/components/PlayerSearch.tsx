@@ -34,6 +34,7 @@ export default function PlayerSearch({
           <h2 className="section-title" id="find-player">
             Don’t see yourself?
           </h2>
+          <p className="quiet">Search all {standings.length} ranked players.</p>
           <label className="sr-only" htmlFor="player-query">
             Search for your name
           </label>
