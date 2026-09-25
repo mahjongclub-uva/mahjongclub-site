@@ -6,19 +6,67 @@ import type { ReactNode } from "react";
 const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
 export type Suit = "bamboo" | "dots" | "characters";
 
-/**
- * One illustrated tile, shared by the tile reference and example hand. The
- * face is its own 88 x 124 box, so artwork is drawn at full size; the
- * celadon edge hangs off its right and bottom.
- */
-export function Tile({
-  name,
+/** The illustrated tile's artwork: an 88 x 124 face with its celadon edge. */
+export function TileFace({
   index,
   indexColour = GREEN,
   children,
 }: {
-  name: string;
   /** Corner mark: a number, or a wind's letter, for readers new to the glyphs. */
+  index?: string | number;
+  indexColour?: string;
+  children: ReactNode;
+}) {
+  return (
+    <svg
+      viewBox="0 0 98 135"
+      className="guide-tile"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M8 1 H80 L97 18 V127 Q97 134 90 134 H18 L1 117 V8 Q1 1 8 1 Z"
+        fill="var(--tile-side)"
+      />
+      <path
+        d="M8 1 H80 L97 18 V127 Q97 134 90 134 H18 L1 117 V8 Q1 1 8 1 Z"
+        fill="url(#tileHalftone)"
+      />
+      <rect
+        x="1"
+        y="1"
+        width="86"
+        height="122"
+        rx="8"
+        fill="var(--tile-face)"
+        stroke="var(--tile-side)"
+        strokeWidth="2"
+      />
+      <g className="tile-ink">{children}</g>
+      {index !== undefined && (
+        <text
+          x="6"
+          y="18"
+          fontFamily="var(--sans), sans-serif"
+          fontWeight="700"
+          fontSize="15"
+          fill={indexColour}
+        >
+          {index}
+        </text>
+      )}
+    </svg>
+  );
+}
+
+/** One tile in a list, as on the guide. */
+export function Tile({
+  name,
+  index,
+  indexColour,
+  children,
+}: {
+  name: string;
   index?: string | number;
   indexColour?: string;
   children: ReactNode;
@@ -26,44 +74,9 @@ export function Tile({
   return (
     <li className="set-tile">
       <span className="set-tile-body">
-        <svg
-          viewBox="0 0 98 135"
-          className="guide-tile"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            d="M8 1 H80 L97 18 V127 Q97 134 90 134 H18 L1 117 V8 Q1 1 8 1 Z"
-            fill="var(--tile-side)"
-          />
-          <path
-            d="M8 1 H80 L97 18 V127 Q97 134 90 134 H18 L1 117 V8 Q1 1 8 1 Z"
-            fill="url(#tileHalftone)"
-          />
-          <rect
-            x="1"
-            y="1"
-            width="86"
-            height="122"
-            rx="8"
-            fill="var(--tile-face)"
-            stroke="var(--tile-side)"
-            strokeWidth="2"
-          />
-          <g className="tile-ink">{children}</g>
-          {index !== undefined && (
-            <text
-              x="6"
-              y="18"
-              fontFamily="var(--sans), sans-serif"
-              fontWeight="700"
-              fontSize="15"
-              fill={indexColour}
-            >
-              {index}
-            </text>
-          )}
-        </svg>
+        <TileFace index={index} indexColour={indexColour}>
+          {children}
+        </TileFace>
       </span>
       <span className="sr-only">{name}</span>
     </li>
