@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { CharacterFace, TileFace } from "@/components/PlayingTile";
 import { RED } from "@/components/TileArtwork";
 import { getCurrentSemester } from "@/lib/data";
-import { MIN_TABLES_TO_RANK } from "@/lib/schema";
+import { SEASON_START } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import PlayerSearch from "@/components/PlayerSearch";
 import RankTileFlip from "@/components/RankTileFlip";
@@ -50,6 +50,7 @@ function RankTile({ rank }: { rank: number }) {
 export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
+  const seasonNet = semester.scoring_rule === "season-net";
 
   return (
     <main className="leaderboard-page">
@@ -98,15 +99,26 @@ export default function Leaderboard() {
                     <span className="standing-player">
                       <span className="standing-name">{player.display}</span>
                       <span className="standing-tables">
-                        {player.tables_played} tables
+                        {player.tables_played}{" "}
+                        {player.tables_played === 1 ? "table" : "tables"}
                       </span>
                     </span>
                     <span className="standing-score">
                       <b
                         className="count"
-                        style={{ "--to": player.total_gain } as CSSProperties}
+                        style={
+                          {
+                            "--to": seasonNet
+                              ? SEASON_START + player.total_net
+                              : player.total_gain,
+                          } as CSSProperties
+                        }
                       >
-                        <span className="count-value">{player.total_gain}</span>
+                        <span className="count-value">
+                          {seasonNet
+                            ? SEASON_START + player.total_net
+                            : player.total_gain}
+                        </span>
                         <span className="count-up" aria-hidden="true" />
                       </b>
                       <span className="sr-only">points</span>
@@ -126,6 +138,7 @@ export default function Leaderboard() {
       <PlayerSearch
         standings={semester.standings}
         unranked={semester.unranked}
+        seasonNet={seasonNet}
       />
       <section className="section">
         <div className="section-wrap">
@@ -133,8 +146,12 @@ export default function Leaderboard() {
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
             <p>
-              The board adds up only your winning tables; losses don’t subtract
-              from your total. Play {MIN_TABLES_TO_RANK} tables to be ranked.
+              {seasonNet
+                ? `Everyone starts at ${SEASON_START} points. Each table’s net result moves your season score up or down. `
+                : "The board adds up only your winning tables; losses don’t subtract from your total. "}
+              Play {semester.min_tables_to_rank}{" "}
+              {semester.min_tables_to_rank === 1 ? "table" : "tables"} to be
+              ranked.
             </p>
             <p>
               <Link className="action-link" href="/guide/">

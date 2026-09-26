@@ -176,6 +176,25 @@ test("accepts a shared rank when gain, tables and net are all equal", () => {
   );
 });
 
+test("Fall 2026 ranks by cumulative net even when gain suggests another order", () => {
+  const s = {
+    ...validSemester(),
+    id: "fall-2026",
+    label: "Fall 2026",
+    min_tables_to_rank: 1,
+    scoring_rule: "season-net" as const,
+    unranked: [],
+  };
+  s.standings[1].total_gain = 649;
+  s.standings[1].avg_gain = 54.1;
+  assert.equal(semesterSchema.safeParse(s).success, true);
+
+  [s.standings[0], s.standings[1]] = [s.standings[1], s.standings[0]];
+  s.standings[0].rank = 1;
+  s.standings[1].rank = 2;
+  assert.equal(semesterSchema.safeParse(s).success, false);
+});
+
 // --- arithmetic ------------------------------------------------------------
 
 rejects("an average that does not match its total", () => {

@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
-// The project-page prefix is the default. A configured custom domain serves
-// the site from its root.
-const BASE_PATH = process.env.NEXT_PUBLIC_SITE_URL ? "" : "/mahjongclub-site";
+// The custom domain serves the site from its root, including local previews.
+const BASE_PATH = "";
 
 const nextConfig: NextConfig = {
   // GitHub Pages serves files off disk. There is no Node server at runtime, so

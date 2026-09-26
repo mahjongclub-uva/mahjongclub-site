@@ -81,7 +81,7 @@ jobs:
           SCORES_SPREADSHEET_ID: ${{ vars.SCORES_SPREADSHEET_ID }}
         run: |
           set -o pipefail
-          python pipeline/build_data.py --source sheets --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
+          python pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
             | tee "$RUNNER_TEMP/score-update.log"
 
       # The bot's pull request gets no checks of its own, so check the data here.

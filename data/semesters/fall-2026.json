@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "id": "fall-2026",
+  "label": "Fall 2026",
+  "sessions": 2,
+  "last_session": "2026-09-25",
+  "min_tables_to_rank": 1,
+  "standings": [
+    {
+      "id": "p035",
+      "rank": 1,
+      "display": "Jun L.",
+      "tables_played": 3,
+      "total_gain": 191,
+      "avg_gain": 63.7,
+      "best_table": 95,
+      "total_net": 191,
+      "avg_net": 63.7
+    },
+    {
+      "id": "p017",
+      "rank": 2,
+      "display": "Kevin J.",
+      "tables_played": 1,
+      "total_gain": 115,
+      "avg_gain": 115.0,
+      "best_table": 115,
+      "total_net": 115,
+      "avg_net": 115.0
+    },
+    {
+      "id": "p007",
+      "rank": 3,
+      "display": "Benjamin L.",
+      "tables_played": 1,
+      "total_gain": 34,
+      "avg_gain": 34.0,
+      "best_table": 34,
+      "total_net": 34,
+      "avg_net": 34.0
+    },
+    {
+      "id": "p010",
+      "rank": 4,
+      "display": "Eddie Z.",
+      "tables_played": 1,
+      "total_gain": 20,
+      "avg_gain": 20.0,
+      "best_table": 20,
+      "total_net": 20,
+      "avg_net": 20.0
+    },
+    {
+      "id": "p036",
+      "rank": 5,
+      "display": "Kevin L.",
+      "tables_played": 3,
+      "total_gain": 28,
+      "avg_gain": 9.3,
+      "best_table": 15,
+      "total_net": 15,
+      "avg_net": 5.0
+    },
+    {
+      "id": "p020",
+      "rank": 6,
+      "display": "Lily P.",
+      "tables_played": 1,
+      "total_gain": 8,
+      "avg_gain": 8.0,
+      "best_table": 8,
+      "total_net": 8,
+      "avg_net": 8.0
+    },
+    {
+      "id": "p039",
+      "rank": 7,
+      "display": "Tyler S.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -3,
+      "total_net": -3,
+      "avg_net": -3.0
+    },
+    {
+      "id": "p032",
+      "rank": 8,
+      "display": "Belca D.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -12,
+      "total_net": -12,
+      "avg_net": -12.0
+    },
+    {
+      "id": "p027",
+      "rank": 9,
+      "display": "Sean P.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -15,
+      "total_net": -15,
+      "avg_net": -15.0
+    },
+    {
+      "id": "p034",
+      "rank": 10,
+      "display": "Joyce Z.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -16,
+      "total_net": -16,
+      "avg_net": -16.0
+    },
+    {
+      "id": "p037",
+      "rank": 11,
+      "display": "Matthew J.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -17,
+      "total_net": -17,
+      "avg_net": -17.0
+    },
+    {
+      "id": "p038",
+      "rank": 12,
+      "display": "Robi L.",
+      "tables_played": 2,
+      "total_gain": 3,
+      "avg_gain": 1.5,
+      "best_table": 3,
+      "total_net": -32,
+      "avg_net": -16.0
+    },
+    {
+      "id": "p033",
+      "rank": 13,
+      "display": "Daniel S.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -79,
+      "total_net": -79,
+      "avg_net": -79.0
+    },
+    {
+      "id": "p024",
+      "rank": 14,
+      "display": "Nathan F.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -101,
+      "total_net": -101,
+      "avg_net": -101.0
+    },
+    {
+      "id": "p008",
+      "rank": 15,
+      "display": "Brittney M.",
+      "tables_played": 1,
+      "total_gain": 0,
+      "avg_gain": 0.0,
+      "best_table": -108,
+      "total_net": -108,
+      "avg_net": -108.0
+    }
+  ],
+  "unranked": [],
+  "awards": [
+    {
+      "id": "biggest-win",
+      "label": "Biggest single table",
+      "display": "Kevin J.",
+      "value": 115,
+      "unit": "points",
+      "detail": "2026-09-18"
+    }
+  ],
+  "scoring_rule": "season-net"
+}

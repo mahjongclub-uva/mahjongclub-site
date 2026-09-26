@@ -46,8 +46,8 @@ It refreshes Fridays at 10pm; for a same-week fix, ask a maintainer to run **Ref
 ## How scoring works
 
 Points are counted with playing cards and won under Fuzhou scoring.
-The leaderboard only adds up points won, so a losing table never lowers anyone's score.
-Play 2 tables to be ranked.
+For Fall 2026, everyone starts at 205 season points. Each recorded table's net result is added to or subtracted from that season score.
+One completed table is enough to appear in the standings.
 The exact rules live in the score workbook and may change.
 
 Scores go through a private process because the workbook and roster hold real names.

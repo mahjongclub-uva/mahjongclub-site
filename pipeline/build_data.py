@@ -43,24 +43,27 @@ OAUTH_CLIENT = Path.home() / ".config" / "mahjongclub-site" / "google-oauth-clie
 OAUTH_TOKEN = Path.home() / ".config" / "mahjongclub-site" / "google-token.json"
 SHEETS_SCOPE = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-# Every semester the site publishes, newest last. Adding next semester is a
-# change to this list and nothing else.
+# Each semester has its own source tab and qualification rule. Import one
+# semester at a time so a new private Sheet need not contain older seasons.
 SEMESTERS = [
-    {"id": "fall-2025", "label": "Fall 2025", "tab": "Fall Points Tracking"},
+    {"id": "fall-2025", "label": "Fall 2025", "tab": "Fall Points Tracking", "min_tables": 2},
+    {
+        "id": "fall-2026",
+        "label": "Fall 2026",
+        "tab": "Fall Points Tracking",
+        "min_tables": 1,
+        "scoring_rule": "season-net",
+    },
 ]
 
 # The semester the site opens on. Set this by hand. Never derive it from
 # today's date, or a visitor in July lands on an empty page.
-CURRENT_SEMESTER = "fall-2025"
+CURRENT_SEMESTER = "fall-2026"
 
 # Each player starts a table with this many points, so a table always has
 # 4 x 205 = 820 points on it and one player's win is another's loss.
 START_AMOUNT = 205
 SEATS_PER_TABLE = 4
-
-# How many tables you must play to appear in the ranked standings.
-# This number is also pinned in src/lib/schema.ts. Change both together.
-MIN_TABLES_TO_RANK = 2
 
 REPO = Path(__file__).resolve().parent.parent
 ROSTER_PATH = REPO / "pipeline" / "roster.local.json"
@@ -348,7 +351,8 @@ def load_roster(names: list[str]) -> dict[str, dict]:
             number += 1
         new_id = f"p{number:03d}"
         used.add(new_id)
-        roster[name] = {"id": new_id, "display": default_display(name), "opt_out": False}
+        # New names stay private until an officer confirms public display.
+        roster[name] = {"id": new_id, "display": default_display(name), "opt_out": True}
         added.append(f"{new_id} {roster[name]['display']}")
 
     ROSTER_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -372,9 +376,8 @@ def load_roster(names: list[str]) -> dict[str, dict]:
 
 # ---------------------------------------------------------------------------
 # Standings. "net" is a table result minus the 205 starting points (can be
-# negative). "gain" is the same with losses floored at zero, so playing more
-# and losing never costs position. Rank order: most gain, then fewest tables
-# to get it, then best net; ties only when all three match.
+# negative). Fall 2026 ranks by cumulative net, with 205 added only once when
+# displayed. Older data retains its positive-gain ranking until revisited.
 # ---------------------------------------------------------------------------
 
 
@@ -382,7 +385,10 @@ def round1(value: float) -> float:
     return round(value, 1)
 
 
-def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict], list[dict]]:
+def aggregate(
+    tables: list[Table], roster: dict[str, dict], min_tables: int = 2,
+    scoring_rule: str | None = None,
+) -> tuple[list[dict], list[dict]]:
     totals: dict[str, dict] = {}
 
     for table in tables:
@@ -401,9 +407,13 @@ def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict],
         (
             (name, totals[name])
             for name in totals
-            if totals[name]["tables"] >= MIN_TABLES_TO_RANK
+            if totals[name]["tables"] >= min_tables
         ),
-        key=lambda item: (-item[1]["gain"], item[1]["tables"], -item[1]["net"]),
+        key=(
+            (lambda item: (-item[1]["net"], item[1]["tables"]))
+            if scoring_rule == "season-net"
+            else (lambda item: (-item[1]["gain"], item[1]["tables"], -item[1]["net"]))
+        ),
     )
 
     standings = []
@@ -413,10 +423,11 @@ def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict],
         else:
             previous = ranked[position - 1][1]
             same = (
-                previous["gain"] == player["gain"]
+                previous["net"] == player["net"]
                 and previous["tables"] == player["tables"]
-                and previous["net"] == player["net"]
             )
+            if scoring_rule != "season-net":
+                same = same and previous["gain"] == player["gain"]
             rank = standings[-1]["rank"] if same else standings[-1]["rank"] + 1
 
         standings.append(
@@ -439,10 +450,10 @@ def aggregate(tables: list[Table], roster: dict[str, dict]) -> tuple[list[dict],
                 "id": roster[name]["id"],
                 "display": roster[name]["display"],
                 "tables_played": player["tables"],
-                "tables_needed": MIN_TABLES_TO_RANK - player["tables"],
+                "tables_needed": min_tables - player["tables"],
             }
             for name, player in totals.items()
-            if player["tables"] < MIN_TABLES_TO_RANK
+            if player["tables"] < min_tables
         ),
         key=lambda p: (-p["tables_played"], p["display"]),
     )
@@ -498,6 +509,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", choices=("excel", "sheets"), default="excel")
     parser.add_argument("--spreadsheet-id", default=None)
+    parser.add_argument(
+        "--semester", choices=[s["id"] for s in SEMESTERS], default="fall-2025"
+    )
     args = parser.parse_args()
 
     spreadsheet_id = args.spreadsheet_id or os.environ.get("SCORES_SPREADSHEET_ID")
@@ -505,58 +519,74 @@ def main() -> None:
         die("pass --spreadsheet-id or set SCORES_SPREADSHEET_ID")
     print("Reading the private Google Sheet" if args.source == "sheets" else f"Reading {WORKBOOK.name}")
 
+    config = next(s for s in SEMESTERS if s["id"] == args.semester)
     summaries = []
-    for config in SEMESTERS:
-        grid = (
-            read_sheets_grid(spreadsheet_id, config["tab"])
-            if args.source == "sheets"
-            else read_excel_grid(WORKBOOK, config["tab"])
-        )
-        tables = parse_tables(grid)
-        if not tables:
-            print(f"  {config['label']}: no tables played yet")
+    grid = (
+        read_sheets_grid(spreadsheet_id, config["tab"])
+        if args.source == "sheets"
+        else read_excel_grid(WORKBOOK, config["tab"])
+    )
+    tables = parse_tables(grid)
+    if not tables:
+        print(f"  {config['label']}: no tables played yet")
 
-        check_tables(tables)
+    check_tables(tables)
 
-        names = sorted({name for table in tables for name, _, _ in table.seats})
-        roster = load_roster(names)
+    names = sorted({name for table in tables for name, _, _ in table.seats})
+    roster = load_roster(names)
 
-        standings, unranked = aggregate(tables, roster)
-        # Only tables with a date count as a session. An undated table still
-        # counts toward the standings; see check_tables.
-        dates = sorted({table.date for table in tables if table.date})
+    standings, unranked = aggregate(
+        tables, roster, config["min_tables"], config.get("scoring_rule")
+    )
+    # Only tables with a date count as a session. An undated table still
+    # counts toward the standings; see check_tables.
+    dates = sorted({table.date for table in tables if table.date})
 
-        write_json(
-            DATA_DIR / "semesters" / f"{config['id']}.json",
-            {
-                "schema_version": 1,
-                "id": config["id"],
-                "label": config["label"],
-                "sessions": len(dates),
-                "last_session": dates[-1] if dates else None,
-                "min_tables_to_rank": MIN_TABLES_TO_RANK,
-                "standings": standings,
-                "unranked": unranked,
-                "awards": build_awards(tables, roster),
-            },
-        )
+    semester_data = {
+        "schema_version": 1,
+        "id": config["id"],
+        "label": config["label"],
+        "sessions": len(dates),
+        "last_session": dates[-1] if dates else None,
+        "min_tables_to_rank": config["min_tables"],
+        "standings": standings,
+        "unranked": unranked,
+        "awards": build_awards(tables, roster),
+    }
+    if config.get("scoring_rule"):
+        semester_data["scoring_rule"] = config["scoring_rule"]
+    write_json(
+        DATA_DIR / "semesters" / f"{config['id']}.json",
+        semester_data,
+    )
 
-        summaries.append(
-            {
-                "id": config["id"],
-                "label": config["label"],
-                "sessions": len(dates),
-                "last_session": dates[-1] if dates else None,
-            }
-        )
+    summaries.append(
+        {
+            "id": config["id"],
+            "label": config["label"],
+            "sessions": len(dates),
+            "last_session": dates[-1] if dates else None,
+        }
+    )
 
-        print(
-            f"  {config['label']}: {len(tables)} tables over {len(dates)} sessions, "
-            f"{len(standings)} ranked, {len(unranked)} not yet ranked"
-        )
+    print(
+        f"  {config['label']}: {len(tables)} tables over {len(dates)} sessions, "
+        f"{len(standings)} ranked, {len(unranked)} not yet ranked"
+    )
+
+    for other in SEMESTERS:
+        if other["id"] == config["id"]:
+            continue
+        path = DATA_DIR / "semesters" / f"{other['id']}.json"
+        if path.exists():
+            published = json.loads(path.read_text(encoding="utf-8"))
+            summaries.append({
+                key: published[key]
+                for key in ("id", "label", "sessions", "last_session")
+            })
 
     # meta.json lists semesters newest first; the site renders them in order.
-    summaries.reverse()
+    summaries.sort(key=lambda s: s["id"], reverse=True)
 
     write_json(
         DATA_DIR / "meta.json",
@@ -567,7 +597,11 @@ def main() -> None:
             .isoformat()
             .replace("+00:00", "Z"),
             "pipeline_version": PIPELINE_VERSION,
-            "current_semester": CURRENT_SEMESTER,
+            "current_semester": (
+                CURRENT_SEMESTER
+                if any(s["id"] == CURRENT_SEMESTER for s in summaries)
+                else "fall-2025"
+            ),
             "semesters": summaries,
         },
     )
