@@ -2,7 +2,7 @@
 #
 # The site is a static export, so it cannot look up the calendar when somebody
 # visits — the answer has to be baked in when the site is built. This runs
-# weekly, commits data/meetings.json, and asks the deploy workflow to rebuild.
+# weekly and proposes a data/meetings.json update for review.
 #
 # 10pm Friday, because the club meets Friday evening and never runs that late:
 # by the time this runs, the week's meeting has happened and the next one is
@@ -23,8 +23,7 @@ on:
 
 permissions:
   contents: write
-  # Needed only to start the deploy workflow at the end.
-  actions: write
+  pull-requests: write
 
 concurrency:
   group: meetings
@@ -33,29 +32,42 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Reuse an open proposal or start a new one
+        id: proposal
+        run: |
+          pr="$(gh pr list --state open --json number,headRefName,author,headRepositoryOwner \
+            --jq '[.[] | select((.headRefName | startswith("meetings/")) and .author.login == "app/github-actions" and .headRepositoryOwner.login == "mahjongclub-uva")][0].number // empty')"
+          if [ -n "$pr" ]; then
+            branch="$(gh pr view "$pr" --json headRefName --jq .headRefName)"
+            git fetch origin "$branch"
+            git switch -c "$branch" FETCH_HEAD
+          else
+            branch="meetings/$GITHUB_RUN_ID"
+            git switch -c "$branch"
+          fi
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
       - run: python3 pipeline/build_meetings.py
 
-      - id: commit
+      - name: Open or update the meeting review pull request
         run: |
           if git diff --quiet -- data/meetings.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Calendar unchanged; nothing to deploy."
+            echo "Calendar unchanged; nothing to propose."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/meetings.json
           git commit -m "chore(data): refresh next meeting from the calendar"
-          git push
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      # A push made with GITHUB_TOKEN deliberately does not trigger other
-      # workflows, or a workflow could push itself into a loop. So the deploy
-      # has to be asked for by name.
-      - if: steps.commit.outputs.changed == 'true'
-        run: gh workflow run deploy.yml --ref main
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push -u origin "${{ steps.proposal.outputs.branch }}"
+          if [ -z "${{ steps.proposal.outputs.pr }}" ]; then
+            gh pr create --base main --head "${{ steps.proposal.outputs.branch }}" \
+              --title "Meeting calendar update" \
+              --body "Updates the next meeting from the club's public calendar. Review the date and location before merging."
+          fi

@@ -8,7 +8,7 @@ How to keep the club website current. No coding needed.
 | --------------------------------------- | ---------------------- | ----------------------------- |
 | Home or About wording, tagline          | Officer Google Sheet   | GitHub opens a review request |
 | Officer names, contact details, socials | Officer Google Sheet   | GitHub opens a review request |
-| Meeting time or room                    | Club Google Calendar   | The site refreshes on its own |
+| Meeting time or room                    | Club Google Calendar   | Review the meeting update PR  |
 | Scores                                  | Private score workbook | A maintainer runs the update  |
 | Photos                                  | Private photo inbox    | A maintainer prepares them    |
 | Layout, colours, animations, Guide page | Website code           | Ask a maintainer              |
@@ -41,7 +41,9 @@ Leaving `ready_to_publish` on `TRUE` is fine; nothing happens while the Sheet ma
 
 The homepage reads upcoming meetings from the club's public Google Calendar.
 Use real times, put only a public building and room in the location, and delete cancelled meetings.
-It refreshes Fridays at 10pm; for a same-week fix, ask a maintainer to run **Refresh meetings** in Actions.
+The Friday 10pm refresh opens or updates a **Meeting calendar update** pull request when the next meeting changes.
+Review and merge it to publish the new date; for a same-week fix, ask a maintainer to run **Refresh meetings** in Actions.
+For pull requests opened by GitHub Actions, GitHub may ask a maintainer to approve the **Checks** workflow before merging.
 
 ## How scoring works
 
