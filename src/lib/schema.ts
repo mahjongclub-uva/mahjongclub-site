@@ -8,12 +8,7 @@
 
 import { z } from "zod";
 
-/**
- * Tables a player must have played to appear in ranked standings. Pinned
- * here and in the data so the pipeline can't quietly change who qualifies;
- * change this constant and the pipeline's config together.
- */
-export const MIN_TABLES_TO_RANK = 2;
+export const SEASON_START = 205;
 
 /**
  * Awards the site can render. The pipeline may emit any subset/order, or
@@ -79,13 +74,6 @@ const standingsEntry = z
   // and it should be noticed here rather than silently ignored.
   .strict()
   .superRefine((p, ctx) => {
-    if (p.tables_played < MIN_TABLES_TO_RANK) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["tables_played"],
-        message: `ranked with ${p.tables_played} tables, below the threshold of ${MIN_TABLES_TO_RANK}`,
-      });
-    }
     if (!isCorrectAverage(p.avg_gain, p.total_gain, p.tables_played)) {
       ctx.addIssue({
         code: "custom",
@@ -135,23 +123,7 @@ const unrankedEntry = z
     tables_played: z.number().int().positive(),
     tables_needed: z.number().int().positive(),
   })
-  .strict()
-  .superRefine((p, ctx) => {
-    if (p.tables_played >= MIN_TABLES_TO_RANK) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["tables_played"],
-        message: `unranked with ${p.tables_played} tables, at or above the threshold of ${MIN_TABLES_TO_RANK}`,
-      });
-    }
-    if (p.tables_needed !== MIN_TABLES_TO_RANK - p.tables_played) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["tables_needed"],
-        message: `should be ${MIN_TABLES_TO_RANK - p.tables_played}, got ${p.tables_needed}`,
-      });
-    }
-  });
+  .strict();
 
 const award = z
   .object({
@@ -171,13 +143,39 @@ export const semesterSchema = z
     label: z.string().min(1),
     sessions: z.number().int().nonnegative(),
     last_session: z.iso.date().nullable(),
-    min_tables_to_rank: z.literal(MIN_TABLES_TO_RANK),
+    min_tables_to_rank: z.number().int().positive(),
+    scoring_rule: z.enum(["season-net"]).optional(),
     standings: z.array(standingsEntry),
     unranked: z.array(unrankedEntry),
     awards: z.array(award),
   })
   .strict()
   .superRefine((s, ctx) => {
+    s.standings.forEach((p, i) => {
+      if (p.tables_played < s.min_tables_to_rank) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["standings", i, "tables_played"],
+          message: `ranked with ${p.tables_played} tables, below the threshold of ${s.min_tables_to_rank}`,
+        });
+      }
+    });
+    s.unranked.forEach((p, i) => {
+      if (p.tables_played >= s.min_tables_to_rank) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["unranked", i, "tables_played"],
+          message: `unranked with ${p.tables_played} tables, at or above the threshold of ${s.min_tables_to_rank}`,
+        });
+      }
+      if (p.tables_needed !== s.min_tables_to_rank - p.tables_played) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["unranked", i, "tables_needed"],
+          message: `should be ${s.min_tables_to_rank - p.tables_played}, got ${p.tables_needed}`,
+        });
+      }
+    });
     // Contract rule 6, reconciled with rule 8: a semester that has not been
     // played yet has no last session. Any other combination is a pipeline bug.
     if ((s.sessions === 0) !== (s.last_session === null)) {
@@ -201,10 +199,8 @@ export const semesterSchema = z
       seen.add(p.id);
     }
 
-    // Contract rule 1, as amended: rank by total_gain desc, then fewer tables
-    // played, then total_net desc. Ranks start at 1 and never gap. Two players
-    // share a rank only when all three keys are equal, which makes them
-    // genuinely indistinguishable.
+    // Fall 2026 uses the starting score plus cumulative net. Earlier data
+    // keeps its existing gain-based ranking until its history is revisited.
     s.standings.forEach((cur, i) => {
       if (i === 0) {
         if (cur.rank !== 1) {
@@ -221,11 +217,19 @@ export const semesterSchema = z
 
       let ordered: boolean;
       let tied = false;
-      if (prev.total_gain !== cur.total_gain) {
+      if (s.scoring_rule === "season-net" && prev.total_net !== cur.total_net) {
+        ordered = prev.total_net > cur.total_net;
+      } else if (
+        s.scoring_rule !== "season-net" &&
+        prev.total_gain !== cur.total_gain
+      ) {
         ordered = prev.total_gain > cur.total_gain;
       } else if (prev.tables_played !== cur.tables_played) {
         ordered = prev.tables_played < cur.tables_played;
-      } else if (prev.total_net !== cur.total_net) {
+      } else if (
+        s.scoring_rule !== "season-net" &&
+        prev.total_net !== cur.total_net
+      ) {
         ordered = prev.total_net > cur.total_net;
       } else {
         ordered = true;

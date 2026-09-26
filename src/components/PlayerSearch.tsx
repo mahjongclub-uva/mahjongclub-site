@@ -2,14 +2,16 @@
 
 import { IconSearch, IconCards, IconTrophy } from "@tabler/icons-react";
 import { useState } from "react";
-import type { Standing, Unranked } from "@/lib/schema";
+import { SEASON_START, type Standing, type Unranked } from "@/lib/schema";
 
 export default function PlayerSearch({
   standings,
   unranked,
+  seasonNet,
 }: {
   standings: Standing[];
   unranked: Unranked[];
+  seasonNet: boolean;
 }) {
   const [query, setQuery] = useState("");
   const term = query.trim().toLocaleLowerCase();
@@ -81,7 +83,12 @@ export default function PlayerSearch({
                     <b>{player.rank}</b>
                   </span>
                   <span>
-                    <b>{player.total_gain}</b> points
+                    <b>
+                      {seasonNet
+                        ? SEASON_START + player.total_net
+                        : player.total_gain}
+                    </b>{" "}
+                    points
                   </span>
                 </li>
               ))}

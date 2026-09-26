@@ -48,7 +48,7 @@ The published Sheet is public. Never put the roster, legal names, addresses or p
 
 ## Scores
 
-`python3 pipeline/build_data.py` reads a local copy of the score workbook and writes public data files under `data/`.
+`python3 pipeline/build_data.py --semester fall-2026 --source sheets --spreadsheet-id <spreadsheet-id>` reads the current private score Sheet and writes public data files under `data/`.
 Real names stay in `pipeline/roster.local.json`, which is gitignored and must never be committed.
 The scoring rules are in [OFFICER_GUIDE.md](OFFICER_GUIDE.md#how-scoring-works).
 
@@ -63,10 +63,11 @@ source .venv/bin/activate
 python3 -m pip install -r pipeline/requirements.txt
 ```
 
-Then run `python3 pipeline/build_data.py --source sheets --spreadsheet-id <spreadsheet-id>`.
+Then run `python3 pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id <spreadsheet-id>`.
 The first run opens Google sign-in with read-only spreadsheet access; its token stays under `~/.config/mahjongclub-site/` and outside the repository.
 An OAuth app left in Google's Testing status issues refresh tokens that expire after seven days, so use the appropriate production setup or expect to sign in again weekly.
 Review the generated public data before committing it.
+Fall 2026 starts each player at 205 once and adds every recorded table's signed net result. Everyone with a completed table appears in the rankings. The older Fall 2025 data remains unchanged for now.
 
 After approval, opening a pull request with generated data runs the existing checks; merging it to `main` starts the existing GitHub Pages deployment.
 The website-copy workflow remains separate: it proposes a pull request from the published public copy Sheet and does not receive access to the private score Sheet.
