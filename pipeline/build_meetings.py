@@ -7,9 +7,9 @@ Turns the club's public Google Calendar into the JSON the website reads.
 The site is a static export with no server to ask "when's the next meeting?"
 at visit time, so this asks at build time instead: reads the calendar's
 public iCal feed, works out the next few meetings, writes data/meetings.json.
-A weekly GitHub Action re-runs and redeploys, which is the whole accuracy
-story, a meeting cancelled Thursday stays on the site until the next run, so
-cancel by removing the event (and say so on Instagram if it matters).
+A weekly GitHub Action proposes changes for review. A meeting cancelled
+Thursday stays on the site until the next run and merge, so cancel by removing
+the event (and say so on Instagram if it matters).
 
 The event's Location is published as typed, so keep it to a building and
 room, never anything that reads as a person's whereabouts.
@@ -266,6 +266,10 @@ def main() -> None:
                 "location": event.location or None,
             }
         )
+
+    if OUT.exists() and json.loads(OUT.read_text())["meetings"] == meetings:
+        print("\nUpcoming meetings unchanged; nothing to propose.")
+        return
 
     OUT.write_text(json.dumps({
         "generated_at": dt.datetime.now(dt.timezone.utc)
