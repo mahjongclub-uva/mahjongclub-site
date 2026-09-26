@@ -84,3 +84,13 @@ Put originals in `photo-inbox/` and run `npm run photos:prepare`.
 It fixes orientation, resizes to 2400px, strips metadata, writes WebP to `public/photos/`, prints the size for `src/lib/site.ts`, and moves the original to `photo-inbox/processed/`.
 All of `photo-inbox/` is gitignored.
 CI rejects public images that still carry metadata.
+
+## License
+
+The code is under the [MIT License](LICENSE).
+The license does not cover the club's content: its name and logo, photographs, standings and other data under `data/`, and site copy. These stay with the Mahjong Club at UVA, all rights reserved, because the people in them agreed to appear on this site only.
+
+Third-party parts keep their own terms:
+
+- The rank and guide tile characters in `src/components/glyphs.ts` are baked from [LXGW WenKai](https://github.com/lxgw/LxgwWenKai) (SIL Open Font License 1.1).
+- `public/icons/outlook-color.svg` is covered by `public/icons/outlook-color-LICENSE`.
