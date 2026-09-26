@@ -1,5 +1,6 @@
 # Mahjong Club @ UVA website
 
+[Mahjong Club @ UVA website](https://mahjongclubuva.org/)
 A statically exported [Next.js](https://nextjs.org/) site on GitHub Pages.
 Officers: see [OFFICER_GUIDE.md](OFFICER_GUIDE.md).
 
