@@ -1,6 +1,7 @@
 # Builds the site and publishes it to GitHub Pages.
 #
-# This does NOT run the pipeline. data/*.json is committed by whoever updates
+# It reads the club's public calendar for the next meeting, which holds no
+# private data. It does NOT run the score pipeline. data/*.json is committed by whoever updates
 # the scores, and CI only turns that committed data into HTML. That is
 # deliberate: the pipeline needs the roster, the roster holds real names, and
 # real names must never reach this public repo or its build logs.
@@ -16,6 +17,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Daily at 10:00 UTC (6am Eastern in summer), so a calendar change reaches
+  # the homepage within a day without anyone committing it.
+  schedule:
+    - cron: "0 10 * * *"
   # Lets you redeploy from the Actions tab without pushing anything.
   workflow_dispatch:
 
@@ -45,6 +50,11 @@ jobs:
       - run: npm ci
 
       - run: npm run photos:check
+
+      # A failed read keeps the committed data/meetings.json, so a Google
+      # outage never blocks a deploy.
+      - name: Read upcoming meetings from the calendar
+        run: python3 pipeline/build_meetings.py || echo "::warning::Could not read the calendar; keeping the committed meetings."
 
       # Fails if data/*.json breaks the output contract, which stops the deploy
       # and leaves the last good version of the site up.
