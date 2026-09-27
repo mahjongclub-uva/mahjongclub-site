@@ -163,7 +163,8 @@ def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str
                 valueRenderOption="UNFORMATTED_VALUE",
                 dateTimeRenderOption="SERIAL_NUMBER",
             )
-            .execute()
+            # The client retries timeouts and server errors with backoff.
+            .execute(num_retries=3)
         )
     except Exception as error:
         die(f"could not read the configured private spreadsheet ({type(error).__name__}); check access, spreadsheet ID, and tab name")

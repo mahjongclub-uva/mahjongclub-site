@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.parse
 import urllib.error
 import urllib.request
@@ -49,8 +50,19 @@ def read_source(path: str | None, url: str | None) -> str:
     if parsed.scheme != "https" or parsed.hostname != "docs.google.com":
         die("SITE_CONTENT_CSV_URL must be an HTTPS docs.google.com CSV export")
     request = urllib.request.Request(url, headers={"User-Agent": "mahjongclub-site/1"})
-    with urllib.request.urlopen(request, timeout=20) as response:
-        return response.read().decode("utf-8-sig")
+    # Google occasionally times out or errors for a moment. The run is weekly,
+    # so retry those; a 404 means the Sheet was unpublished, and fails at once.
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                return response.read().decode("utf-8-sig")
+        except urllib.error.HTTPError as error:
+            if error.code < 500 or attempt == 2:
+                raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt == 2:
+                raise
+        time.sleep(5 * (attempt + 1))
 
 
 def parse_rows(text: str) -> dict[str, str]:

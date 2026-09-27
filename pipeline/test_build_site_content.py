@@ -1,8 +1,10 @@
 import json
 import unittest
+import urllib.error
 from pathlib import Path
+from unittest import mock
 
-from pipeline.build_site_content import ROLES, flatten, parse_rows, validate
+from pipeline.build_site_content import ROLES, flatten, parse_rows, read_source, validate
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -57,3 +59,23 @@ class SiteContentTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadSourceRetryTests(unittest.TestCase):
+    URL = "https://docs.google.com/spreadsheets/d/e/x/pub?output=csv"
+
+    def test_retries_a_timeout_then_succeeds(self) -> None:
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"key,value\n"
+        with mock.patch("urllib.request.urlopen", side_effect=[TimeoutError("timed out"), response]) as urlopen, \
+                mock.patch("time.sleep"):
+            self.assertEqual(read_source(None, self.URL), "key,value\n")
+        self.assertEqual(urlopen.call_count, 2)
+
+    def test_does_not_retry_an_unpublished_sheet(self) -> None:
+        missing = urllib.error.HTTPError(self.URL, 404, "Not Found", {}, None)
+        with mock.patch("urllib.request.urlopen", side_effect=missing) as urlopen, \
+                mock.patch("time.sleep"):
+            with self.assertRaises(urllib.error.HTTPError):
+                read_source(None, self.URL)
+        self.assertEqual(urlopen.call_count, 1)
