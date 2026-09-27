@@ -25,7 +25,7 @@ TEXT_FIELDS = {
     "home.welcome_title": 80,
     "home.welcome": 300,
     "home.photos_pending": 100,
-    "about.intro": 180,
+    "about.intro": 240,
     "about.game": 500,
     "about.variety": 300,
     "about.other_styles": 500,
