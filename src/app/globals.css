@@ -1826,12 +1826,10 @@ body { isolation: isolate; }
 }
 @media (max-width: 760px) {
   .ambient-tile { display: none; }
-  /* Beside the tagline, clear of the navigation. */
-  .ambient-tile.is-phone { display: block; width: calc(56px * var(--size, 1)); opacity: 0.7; --offset: -20px !important; }
+  /* Keep a sliver of each tile at the edge, clear of page headings and copy. */
+  .ambient-tile.is-phone { display: block; width: calc(56px * var(--size, 1)); opacity: 0.7; --offset: -55px !important; }
   .ambient-tile.is-phone:nth-child(1) { --top: 15% !important; }
-  .ambient-tile.is-phone:nth-child(2) { --top: 22% !important; }
-  body:has(.about-page, .guide-page) .ambient-tile.is-phone { --offset: -56px !important; }
-  body:has(.about-page, .guide-page) .ambient-tile.is-phone:nth-child(2) { --offset: -70px !important; }
+  .ambient-tile.is-phone:nth-child(2) { --top: 22% !important; --offset: -58px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ambient-tile { transform: rotate(var(--turn)); transition: none; }
@@ -2058,9 +2056,6 @@ body > main { flex: 1 0 auto; }
   :is(.standing:hover, .rank-toggle:focus-visible) .rank-back { transform: perspective(700px) rotateY(0); }
   .standing:hover { background-size: 100% 100%; }
 }
-/* Keep only two perimeter accents on this page, away from the standings. */
-body:has(.leaderboard-page) .ambient-tile:not(:first-child):not(:nth-child(3)) { display: none; }
-body:has(.leaderboard-page) .ambient-tile:nth-child(3) { left: auto !important; right: -42px; }
 @media (max-width: 600px) {
   .leaderboard-page .section-wrap { padding-inline: 1.25rem; }
   .leaderboard-page .page-head { padding-block: 2rem 1.5rem; }
@@ -2068,7 +2063,6 @@ body:has(.leaderboard-page) .ambient-tile:nth-child(3) { left: auto !important; 
   .standing { min-height: 68px; }
   .standing-name { font-size: clamp(1.35rem, 6.5vw, 1.6rem); }
   .standing-score b { font-size: 2rem; }
-  body:has(.leaderboard-page) .ambient-tiles { display: none; }
 }
 /* Scores count up from 0. The real number stays in the page, see-through,
    for screen readers and copying; the counter is a copy drawn over it.

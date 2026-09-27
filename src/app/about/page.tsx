@@ -21,6 +21,14 @@ export const metadata = {
     "What the Mahjong Club at UVA plays, how to join, and how public club data is handled.",
 };
 
+function emphasizeStyles(copy: string, styles: RegExp) {
+  return copy
+    .split(styles)
+    .map((part, index) =>
+      index % 2 === 1 ? <strong key={index}>{part}</strong> : part,
+    );
+}
+
 export default function About() {
   return (
     <main className="about-page">
@@ -35,9 +43,19 @@ export default function About() {
       <Section id="game" title="What we play">
         <div className="about-story">
           <div className="prose reading">
-            <p>{ABOUT.game}</p>
+            <p>
+              {emphasizeStyles(
+                ABOUT.game,
+                /(Fuzhounese \(Fuzhou-style\) mahjong)/g,
+              )}
+            </p>
             <p>{ABOUT.variety}</p>
-            <p>{ABOUT.otherStyles}</p>
+            <p>
+              {emphasizeStyles(
+                ABOUT.otherStyles,
+                /(Japanese riichi|Hong Kong-style mahjong|American mahjong)/g,
+              )}
+            </p>
             <Link className="action-link" href="/guide/">
               New to mahjong? Start here
             </Link>
