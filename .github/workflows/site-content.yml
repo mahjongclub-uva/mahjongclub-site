@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
+  # Needed only to start the Checks workflow on the proposal branch.
+  actions: write
   contents: write
   pull-requests: write
   issues: write
@@ -106,6 +108,9 @@ jobs:
               --title "Website content update" \
               --body-file "$RUNNER_TEMP/site-content-summary.md"
           fi
+          # Pull requests opened with GITHUB_TOKEN start no other workflows, so
+          # the required Checks run is started by name on this branch.
+          gh workflow run checks.yml --ref "$BRANCH"
 
       - name: Report the failure in an issue
         if: failure()

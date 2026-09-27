@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
+  # Needed only to start the Checks workflow on the proposal branch.
+  actions: write
   contents: write
   id-token: write
   pull-requests: write
@@ -133,6 +135,9 @@ jobs:
               --title "Score update" \
               --body-file "$RUNNER_TEMP/score-update.md"
           fi
+          # Pull requests opened with GITHUB_TOKEN start no other workflows, so
+          # the required Checks run is started by name on this branch.
+          gh workflow run checks.yml --ref "$BRANCH"
 
       # Messages from build_data.py name tables and counts, never players.
       - name: Report the failure in an issue
