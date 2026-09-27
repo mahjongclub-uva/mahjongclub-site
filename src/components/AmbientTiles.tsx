@@ -63,6 +63,7 @@ const TILES: Toss[] = [
     side: 300,
     depth: 11,
     face: <CharacterFace bottom="中" />,
+    phone: true,
   },
   {
     edge: "right",

@@ -7,6 +7,7 @@ import { SEASON_START } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import PlayerSearch from "@/components/PlayerSearch";
 import RankTileFlip from "@/components/RankTileFlip";
+import CountUp from "@/components/CountUp";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
@@ -104,22 +105,15 @@ export default function Leaderboard() {
                       </span>
                     </span>
                     <span className="standing-score">
-                      <b
-                        className="count"
-                        style={
-                          {
-                            "--to": seasonNet
+                      <b>
+                        <CountUp
+                          value={
+                            seasonNet
                               ? SEASON_START + player.total_net
-                              : player.total_gain,
-                          } as CSSProperties
-                        }
-                      >
-                        <span className="count-value">
-                          {seasonNet
-                            ? SEASON_START + player.total_net
-                            : player.total_gain}
-                        </span>
-                        <span className="count-up" aria-hidden="true" />
+                              : player.total_gain
+                          }
+                          delay={i * 70 + 150}
+                        />
                       </b>
                       <span className="sr-only">points</span>
                     </span>

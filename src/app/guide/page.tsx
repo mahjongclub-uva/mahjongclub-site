@@ -1,7 +1,7 @@
-import { IconArrowUp } from "@tabler/icons-react";
 import Section from "@/components/Section";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
+import BackToTop from "@/components/BackToTop";
 
 export const metadata = {
   title: "Mahjong Guide - Mahjong Club @ UVA",
@@ -156,11 +156,7 @@ export default function Guide() {
           vary by mahjong style.
         </p>
       </Section>
-      <div className="guide-top-link">
-        <a className="action-link" href="#guide-top">
-          <IconArrowUp size={18} aria-hidden="true" /> Back to top
-        </a>
-      </div>
+      <BackToTop target="guide-top" />
     </main>
   );
 }

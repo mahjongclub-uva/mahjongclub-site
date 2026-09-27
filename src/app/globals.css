@@ -1732,8 +1732,9 @@ body {
   .guide-page .tile-key { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .rolling-heading { --dot-size: 32px; padding-right: 46px; }
-  .home-page .rolling-heading .section-title { font-size: clamp(1.35rem, 6.4vw, 2.1rem); }
+  /* Same size as the other homepage headings; it still fits beside its dot. */
+  .rolling-heading { --dot-size: 34px; padding-right: 48px; }
+  .home-page .rolling-heading .section-title { font-size: 2rem; }
 }
 
 .call-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
@@ -1792,8 +1793,17 @@ body {
 .guide-index a:hover { background: #e8edf2; }
 .guide-index a span, .guide-index li:not(:last-child)::after { color: var(--nav-ink); }
 .guide-index a:active { transform: translateY(2px); box-shadow: none; }
-.guide-top-link { position: sticky; bottom: 1rem; display: flex; justify-content: flex-end; padding: 0 1rem; margin-top: 2rem; pointer-events: none; z-index: 3; }
-.guide-top-link a { pointer-events: auto; }
+.back-to-top { position: sticky; bottom: 1rem; display: flex; justify-content: flex-end; padding: 0 1rem; margin-top: 2rem; pointer-events: none; z-index: 3; }
+.back-to-top a { pointer-events: auto; }
+/* Hidden at the top of the page, where it has nothing to do, and fading in
+   over the first screen of scrolling. Browsers without scroll timelines keep
+   it always visible. */
+@supports (animation-timeline: scroll()) {
+  .back-to-top a { animation: back-to-top-in linear both; animation-timeline: scroll(root); animation-range: 0 80vh; }
+}
+@keyframes back-to-top-in {
+  from { opacity: 0; visibility: hidden; }
+}
 .winning-hand { background: #ebe6dd; border-color: #d5cec1; }
 .club-photo-placeholder { background: linear-gradient(145deg, #eee5d6, #e4d6c1); border-color: #cdbda5; }
 .social-list > a { border-color: #243d5835; }
@@ -1826,10 +1836,12 @@ body { isolation: isolate; }
 }
 @media (max-width: 760px) {
   .ambient-tile { display: none; }
-  /* Keep a sliver of each tile at the edge, clear of page headings and copy. */
-  .ambient-tile.is-phone { display: block; width: calc(56px * var(--size, 1)); opacity: 0.7; --offset: -55px !important; }
-  .ambient-tile.is-phone:nth-child(1) { --top: 15% !important; }
-  .ambient-tile.is-phone:nth-child(2) { --top: 22% !important; --offset: -58px !important; }
+  /* About half of each tile shows, inside the page margin: present, but clear
+     of the hero tiles and the text column. */
+  .ambient-tile.is-phone { display: block; width: calc(56px * var(--size, 1)); opacity: 0.85; --offset: -32px !important; }
+  .ambient-tile.is-phone:nth-child(1) { --top: 15% !important; --offset: -44px !important; }
+  .ambient-tile.is-phone:nth-child(2) { --top: 22% !important; --offset: -34px !important; }
+  .ambient-tile.is-phone:nth-child(3) { --top: 68% !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ambient-tile { transform: rotate(var(--turn)); transition: none; }
@@ -1897,6 +1909,17 @@ body { background-image: none; }
 .about-story .prose p { margin-bottom: 1.3rem; }
 .about-photo { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: #e9e1d3; border: 8px solid #fffaf1; outline: 1px solid #d5caba; border-radius: 3px; box-shadow: 5px 7px 0 #c9b99b30; transform: rotate(2deg); }
 .about-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about-photo.about-intro-photo { max-width: 42rem; margin-top: 2rem; aspect-ratio: 3 / 2; transform: rotate(-1.5deg); }
+/* Side by side where there is width, so the photo fills the space beside the
+   intro instead of hanging under it. */
+@media (min-width: 900px) {
+  .about-page .page-head .section-wrap:has(.about-intro-photo) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); column-gap: clamp(2.5rem, 5vw, 5rem); align-content: center; }
+  .about-page .page-head .section-wrap:has(.about-intro-photo) > :not(figure) { grid-column: 1; }
+  .about-photo.about-intro-photo { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; max-width: none; }
+  /* The intro's photo sits right, so the next one sits left: they alternate. */
+  .about-page:has(.about-intro-photo) .about-story { grid-template-columns: 1fr 1.2fr; }
+  .about-page:has(.about-intro-photo) .about-story .about-photo { grid-row: 1; grid-column: 1; transform: rotate(-2deg); }
+}
 .about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
 .about-page .officers { gap: 2rem; }
 .about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
@@ -2064,25 +2087,18 @@ body > main { flex: 1 0 auto; }
   .standing-name { font-size: clamp(1.35rem, 6.5vw, 1.6rem); }
   .standing-score b { font-size: 2rem; }
 }
-/* Scores count up from 0. The real number stays in the page, see-through,
-   for screen readers and copying; the counter is a copy drawn over it.
-   ponytail: no fallback without @property (Firefox before 128 flashes 0 mid-count). */
-@property --n { syntax: "<integer>"; inherits: false; initial-value: 0; }
-.count { position: relative; }
-.count-up { display: none; }
+/* CountUp takes over each score once JavaScript runs; until then it is hidden
+   rather than showing the final number and snapping back to 0. Without
+   JavaScript the scripting query fails and the number simply shows. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .count:not([data-counted]) { visibility: hidden; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .rank-front, .rank-back { transition: transform 360ms var(--rank-ease); }
   .rank-flip { transition: scale 120ms ease-out; }
   .standing[data-place="1"] .rank-flip { animation: leader-settle 650ms var(--rank-ease) both; }
-  /* Places arrive in rank order, each score counting as its row lands. */
+  /* Places arrive in rank order; CountUp starts each score as its row lands. */
   .standing { animation: standing-in 520ms var(--rank-ease) calc(var(--i, 0) * 70ms) backwards; transition: background-size 420ms var(--rank-ease); }
-  .count-value { color: transparent; }
-  .count-up { display: block; position: absolute; inset: 0; text-align: right; counter-reset: n var(--n); animation: count-up 1.2s var(--rank-ease) calc(var(--i, 0) * 70ms + 150ms) both; }
-  .count-up::after { content: counter(n); }
-}
-@keyframes count-up {
-  from { --n: 0; }
-  to { --n: var(--to); }
 }
 /* Reduced motion still shows the order, as a fade without movement. */
 @media (prefers-reduced-motion: reduce) {
