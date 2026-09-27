@@ -22,8 +22,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  # Needed only to start the Checks workflow on the proposal branch.
-  actions: write
   contents: write
   pull-requests: write
 
@@ -73,6 +71,3 @@ jobs:
               --title "Meeting calendar update" \
               --body "Updates the next meeting from the club's public calendar. Review the date and location before merging."
           fi
-          # Pull requests opened with GITHUB_TOKEN start no other workflows, so
-          # the required Checks run is started by name on this branch.
-          gh workflow run checks.yml --ref "${{ steps.proposal.outputs.branch }}"
