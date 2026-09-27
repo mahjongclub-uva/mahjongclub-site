@@ -6,6 +6,7 @@ import {
 import Link from "next/link";
 import {
   ABOUT,
+  ABOUT_INTRO_PHOTO,
   ABOUT_PHOTO,
   GROUPME_URL,
   INSTAGRAM,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/site";
 import { asset } from "@/lib/asset";
 import Section from "@/components/Section";
+import BackToTop from "@/components/BackToTop";
 
 export const metadata = {
   title: "About - Mahjong Club @ UVA",
@@ -31,12 +33,24 @@ function emphasizeStyles(copy: string, styles: RegExp) {
 
 export default function About() {
   return (
-    <main className="about-page">
+    <main className="about-page" id="about-top">
       <header className="page-head">
         <div className="section-wrap">
           <p className="eyebrow">About</p>
           <h1 className="page-title">The club</h1>
           <p className="page-intro">{ABOUT.intro}</p>
+          {ABOUT_INTRO_PHOTO && (
+            <figure className="about-photo about-intro-photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={asset(ABOUT_INTRO_PHOTO.src)}
+                alt={ABOUT_INTRO_PHOTO.alt}
+                width={ABOUT_INTRO_PHOTO.width}
+                height={ABOUT_INTRO_PHOTO.height}
+                decoding="async"
+              />
+            </figure>
+          )}
         </div>
       </header>
 
@@ -164,6 +178,7 @@ export default function About() {
           </ol>
         </div>
       </section>
+      <BackToTop target="about-top" />
     </main>
   );
 }

@@ -74,6 +74,17 @@ export const MEETING_PHOTO: Photo = {
   height: 1601,
 };
 
+/**
+ * A wide photo under "The club" intro on the About page. null leaves the space
+ * out, so set it only once a photo has been approved.
+ */
+export const ABOUT_INTRO_PHOTO: Photo | null = {
+  src: "/photos/20260130-mahjong-lng-c2-0606.webp",
+  alt: "Club members laughing around a mahjong table mid-hand, with blue-backed tiles laid out in front of them.",
+  width: 2400,
+  height: 1601,
+};
+
 /** Shown beside "What we play" on the About page. */
 export const ABOUT_PHOTO: Photo = {
   src: "/photos/20260130-mahjong-lng-c2-0579.webp",
