@@ -54,7 +54,7 @@ jobs:
             echo "::notice::Score sync is inactive until the listed repository variables and secret are configured."
           fi
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         if: steps.config.outputs.ready == 'true'
         with:
           python-version: "3.12"
