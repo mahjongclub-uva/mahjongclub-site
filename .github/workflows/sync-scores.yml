@@ -59,7 +59,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: google-github-actions/auth@v3
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         if: steps.config.outputs.ready == 'true'
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -85,6 +85,12 @@ jobs:
           set -o pipefail
           python pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
             | tee "$RUNNER_TEMP/score-update.log"
+
+      # npm runs third-party code next, so real names and the Google credential
+      # leave the disk first. Nothing after this step needs them.
+      - name: Remove private files
+        if: always() && steps.config.outputs.ready == 'true'
+        run: rm -f pipeline/roster.local.json "$GOOGLE_APPLICATION_CREDENTIALS"
 
       # The bot's pull request gets no checks of its own, so check the data here.
       - uses: actions/setup-node@v4
@@ -115,6 +121,8 @@ jobs:
             exit 0
           fi
 
+          # Checkout kept no credentials, so hand the token to git only here.
+          gh auth setup-git
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
