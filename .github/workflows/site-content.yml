@@ -25,9 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SITE_CONTENT_CSV_URL: ${{ vars.SITE_CONTENT_CSV_URL }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      # No stored token: npm runs third-party code below, so only the steps
+      # that call gh or push are given GH_TOKEN.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Check configuration
         id: config
@@ -54,6 +57,8 @@ jobs:
       - name: Detect a content change
         if: steps.config.outputs.configured == 'true'
         id: change
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
           echo "pr=$pr" >> "$GITHUB_OUTPUT"
@@ -71,6 +76,8 @@ jobs:
 
       - name: Close a proposal the Sheet no longer wants
         if: steps.change.outputs.changed == 'false' && steps.change.outputs.pr != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr close "${{ steps.change.outputs.pr }}" --delete-branch \
             --comment "The Sheet matches the site again, so this proposal is no longer needed."
@@ -93,7 +100,10 @@ jobs:
 
       - name: Open or update the review pull request
         if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh auth setup-git
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
@@ -114,6 +124,8 @@ jobs:
 
       - name: Report the failure in an issue
         if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           {
             echo "The last website content run failed, so Sheet edits are not reaching the site."
@@ -133,6 +145,8 @@ jobs:
 
       - name: Close the failure issue once it works again
         if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           issue="$(gh issue list --state open --search "\"$FAILURE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
           if [ -n "$issue" ]; then

@@ -1,9 +1,8 @@
 /**
  * The seam between the Python pipeline (writes data/*.json) and the site.
- * This is the executable version of OUTPUT-CONTRACT.md: every contract rule
- * is a check here, and a violation fails `npm run build` naming the field,
- * so a bad build never deploys (Pages keeps serving the last good version).
- * Change a rule here and in OUTPUT-CONTRACT.md in the same commit.
+ * Every contract rule is a check here, and a violation fails `npm run build`
+ * naming the field, so a bad build never deploys (Pages keeps serving the
+ * last good version).
  */
 
 import { z } from "zod";
@@ -289,14 +288,8 @@ export const semesterSchema = z
     }
   });
 
-const semesterSummary = z
-  .object({
-    id: semesterId,
-    label: z.string().min(1),
-    sessions: z.number().int().nonnegative(),
-    last_session: z.iso.date().nullable(),
-  })
-  .strict();
+/** Only the id: label and session counts live in the semester file. */
+const semesterSummary = z.object({ id: semesterId }).strict();
 
 export const metaSchema = z
   .object({

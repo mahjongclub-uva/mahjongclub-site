@@ -77,7 +77,6 @@ export default function Nav() {
             </li>
           )}
           {TABS.map((tab) => {
-            // basePath is stripped from usePathname, so these compare cleanly.
             const current =
               tab.href === "/"
                 ? pathname === "/"

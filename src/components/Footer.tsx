@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { asset } from "@/lib/asset";
 import { IconMapPin } from "@tabler/icons-react";
 import {
   CONTACT_EMAIL,
@@ -20,7 +19,7 @@ export default function Footer() {
           href="/"
           aria-label={`${FULL_NAME} home`}
         >
-          {LOGO && <Image src={asset(LOGO)} width={34} height={34} alt="" />}
+          {LOGO && <Image src={LOGO} width={34} height={34} alt="" />}
           <span>{FULL_NAME}</span>
         </Link>
         <nav className="footer-pages" aria-label="Footer pages">
@@ -38,7 +37,7 @@ export default function Footer() {
           <a href={`mailto:${CONTACT_EMAIL}`}>
             <Image
               className="outlook-color-icon"
-              src={asset("/icons/outlook-color.svg")}
+              src="/icons/outlook-color.svg"
               width={20}
               height={20}
               alt=""

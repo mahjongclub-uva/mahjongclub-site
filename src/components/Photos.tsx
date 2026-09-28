@@ -1,5 +1,4 @@
 import { PHOTOS, type Photo } from "@/lib/site";
-import { asset } from "@/lib/asset";
 
 /** Inline club photographs, with descriptive alt text and no viewer controls. */
 export default function Photos({ photos = PHOTOS }: { photos?: Photo[] }) {
@@ -10,7 +9,7 @@ export default function Photos({ photos = PHOTOS }: { photos?: Photo[] }) {
         <figure className="photo-slot" key={photo.src}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={asset(photo.src)}
+            src={photo.src}
             alt={photo.alt}
             width={photo.width}
             height={photo.height}

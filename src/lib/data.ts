@@ -34,8 +34,7 @@ function parseOrDie<T>(schema: z.ZodType<T>, raw: unknown, file: string): T {
   throw new Error(
     `${file} does not match the output contract:\n${problems}\n\n` +
       `The pipeline wrote data the site cannot render. Fix the pipeline, or ` +
-      `update src/lib/schema.ts and OUTPUT-CONTRACT.md together if the ` +
-      `contract itself is changing.`,
+      `update src/lib/schema.ts if the contract itself is changing.`,
   );
 }
 
@@ -80,26 +79,9 @@ export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
   for (const summary of meta.semesters) {
     const semester = getSemester(summary.id);
 
-    // Contract rule 7: catches the three fields meta.json duplicates from
-    // the semester file drifting apart.
     if (semester.id !== summary.id) {
       throw new Error(
         `data/semesters/${summary.id}.json declares id "${semester.id}"`,
-      );
-    }
-    if (semester.label !== summary.label) {
-      throw new Error(
-        `label mismatch for ${summary.id}: meta.json says "${summary.label}", the semester file says "${semester.label}"`,
-      );
-    }
-    if (semester.sessions !== summary.sessions) {
-      throw new Error(
-        `sessions mismatch for ${summary.id}: meta.json says ${summary.sessions}, the semester file says ${semester.sessions}`,
-      );
-    }
-    if (semester.last_session !== summary.last_session) {
-      throw new Error(
-        `last_session mismatch for ${summary.id}: meta.json says ${JSON.stringify(summary.last_session)}, the semester file says ${JSON.stringify(semester.last_session)}`,
       );
     }
 

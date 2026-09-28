@@ -5,16 +5,10 @@
   "current_semester": "fall-2026",
   "semesters": [
     {
-      "id": "fall-2026",
-      "label": "Fall 2026",
-      "sessions": 2,
-      "last_session": "2026-09-25"
+      "id": "fall-2026"
     },
     {
-      "id": "fall-2025",
-      "label": "Fall 2025",
-      "sessions": 8,
-      "last_session": "2025-11-22"
+      "id": "fall-2025"
     }
   ]
 }

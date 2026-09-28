@@ -79,14 +79,7 @@ function validMeta() {
     generated_at: "2026-09-07T04:12:00Z",
     pipeline_version: "0.1.0",
     current_semester: "fall-2025",
-    semesters: [
-      {
-        id: "fall-2025",
-        label: "Fall 2025",
-        sessions: 8,
-        last_session: "2025-11-14",
-      },
-    ],
+    semesters: [{ id: "fall-2025" }],
   };
 }
 
@@ -314,12 +307,7 @@ rejects(
   "semesters listed oldest first",
   () => {
     const m = validMeta();
-    m.semesters.push({
-      id: "spring-2026",
-      label: "Spring 2026",
-      sessions: 3,
-      last_session: "2026-02-10",
-    });
+    m.semesters.push({ id: "spring-2026" });
     return m;
   },
   metaSchema,
