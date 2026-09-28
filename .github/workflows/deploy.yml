@@ -60,7 +60,7 @@ jobs:
       # and leaves the last good version of the site up.
       - run: npm run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: out
 
