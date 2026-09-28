@@ -13,7 +13,6 @@ import {
   OFFICERS,
   UNIVERSITY_STATEMENT,
 } from "@/lib/site";
-import { asset } from "@/lib/asset";
 import Section from "@/components/Section";
 import BackToTop from "@/components/BackToTop";
 
@@ -43,7 +42,7 @@ export default function About() {
             <figure className="about-photo about-intro-photo">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={asset(ABOUT_INTRO_PHOTO.src)}
+                src={ABOUT_INTRO_PHOTO.src}
                 alt={ABOUT_INTRO_PHOTO.alt}
                 width={ABOUT_INTRO_PHOTO.width}
                 height={ABOUT_INTRO_PHOTO.height}
@@ -77,7 +76,7 @@ export default function About() {
           <figure className="about-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={asset(ABOUT_PHOTO.src)}
+              src={ABOUT_PHOTO.src}
               alt={ABOUT_PHOTO.alt}
               width={ABOUT_PHOTO.width}
               height={ABOUT_PHOTO.height}

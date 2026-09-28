@@ -561,14 +561,7 @@ def main() -> None:
         semester_data,
     )
 
-    summaries.append(
-        {
-            "id": config["id"],
-            "label": config["label"],
-            "sessions": len(dates),
-            "last_session": dates[-1] if dates else None,
-        }
-    )
+    summaries.append({"id": config["id"]})
 
     print(
         f"  {config['label']}: {len(tables)} tables over {len(dates)} sessions, "
@@ -578,13 +571,8 @@ def main() -> None:
     for other in SEMESTERS:
         if other["id"] == config["id"]:
             continue
-        path = DATA_DIR / "semesters" / f"{other['id']}.json"
-        if path.exists():
-            published = json.loads(path.read_text(encoding="utf-8"))
-            summaries.append({
-                key: published[key]
-                for key in ("id", "label", "sessions", "last_session")
-            })
+        if (DATA_DIR / "semesters" / f"{other['id']}.json").exists():
+            summaries.append({"id": other["id"]})
 
     # meta.json lists semesters newest first; the site renders them in order.
     summaries.sort(key=lambda s: s["id"], reverse=True)

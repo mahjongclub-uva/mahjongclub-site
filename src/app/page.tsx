@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PHOTOS, TAGLINE, HOME, MEETING_PHOTO } from "@/lib/site";
-import { asset } from "@/lib/asset";
 import ClubPhotos from "@/components/ClubPhotos";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
@@ -47,7 +46,7 @@ export default function Home() {
           <figure className="meeting-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={asset(MEETING_PHOTO.src)}
+              src={MEETING_PHOTO.src}
               alt={MEETING_PHOTO.alt}
               width={MEETING_PHOTO.width}
               height={MEETING_PHOTO.height}
