@@ -22,7 +22,7 @@ If you're unsure where something belongs, ask before putting it anywhere public.
 2. Only list an officer's name in the exact form they agreed to, and set their `.consent` row to `TRUE`.
 3. Set `ready_to_publish` to `TRUE` when the Sheet is ready.
 
-GitHub checks the Sheet once an hour.
+GitHub checks the Sheet every Monday.
 A maintainer can also start the check from the repository's **Actions** page.
 
 If the content passes, GitHub opens a pull request called **Website content update**.
