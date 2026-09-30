@@ -11,3 +11,7 @@ src/app/globals.css
 
 .next/
 package-lock.json
+
+# Local tool state, ignored by Git.
+.claude/
+.impeccable/

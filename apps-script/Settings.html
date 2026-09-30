@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <base target="_top" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font:
+          14px system-ui,
+          sans-serif;
+        margin: 20px;
+        color: #202124;
+      }
+      label {
+        display: block;
+        margin: 12px 0;
+      }
+      input {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 8px;
+        margin-top: 4px;
+        font: inherit;
+      }
+      fieldset {
+        margin: 20px 0;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 8px 12px;
+        font: inherit;
+        cursor: pointer;
+      }
+      #message {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="settings">
+      <label
+        >Semester code<input
+          name="code"
+          required
+          minlength="8"
+          maxlength="64"
+          pattern="[A-Z0-9]+(-[A-Z0-9]+)*"
+          placeholder="Two uppercase words with a hyphen"
+      /></label>
+      <label>Club calendar ID<input name="calendarId" required /></label>
+      <p>
+        Find the ID in Google Calendar's Settings, under Integrate calendar.
+      </p>
+      <label
+        >Open check-in this many minutes before the event<input
+          name="checkinMinutesBefore"
+          type="number"
+          min="0"
+          max="1440"
+          required
+      /></label>
+      <label
+        >Keep scores open this many minutes after the event<input
+          name="scoreMinutesAfter"
+          type="number"
+          min="0"
+          max="1440"
+          required
+      /></label>
+      <div id="semesters"></div>
+      <button type="button" id="add">Add semester</button>
+      <button type="submit" id="save" disabled>Save settings</button>
+      <p id="message" role="status" aria-live="polite">Loading settings...</p>
+    </form>
+    <template id="semester">
+      <fieldset>
+        <legend>Semester</legend>
+        <label
+          >Semester ID<input
+            name="id"
+            required
+            pattern="[a-z0-9-]+"
+            placeholder="fall-2026"
+        /></label>
+        <label>First date<input name="start" type="date" required /></label>
+        <label>Last date<input name="end" type="date" required /></label>
+        <label
+          >Attendance tab name<input name="attendanceTab" required
+        /></label>
+        <label
+          >Points Tracking tab name<input name="pointsTab" required
+        /></label>
+        <button type="button" class="remove">Remove semester</button>
+      </fieldset>
+    </template>
+    <script>
+      const form = document.getElementById("settings");
+      const semesters = document.getElementById("semesters");
+      const message = document.getElementById("message");
+      const save = document.getElementById("save");
+      function addSemester(value = {}) {
+        const fragment = document
+          .getElementById("semester")
+          .content.cloneNode(true);
+        const group = fragment.querySelector("fieldset");
+        group.querySelectorAll("input").forEach((input) => {
+          input.value = value[input.name] || "";
+        });
+        group.querySelector(".remove").onclick = () => group.remove();
+        semesters.append(fragment);
+      }
+      function failed(error) {
+        message.textContent = error.message;
+        save.disabled = false;
+      }
+      document.getElementById("add").onclick = () => addSemester();
+      google.script.run
+        .withSuccessHandler((value) => {
+          for (const key of [
+            "code",
+            "calendarId",
+            "checkinMinutesBefore",
+            "scoreMinutesAfter",
+          ])
+            form.elements[key].value = value[key];
+          value.semesters.forEach(addSemester);
+          message.textContent =
+            "Close any open meeting before changing settings.";
+          save.disabled = false;
+        })
+        .withFailureHandler(failed)
+        .clubReadSettings();
+      form.onsubmit = (event) => {
+        event.preventDefault();
+        save.disabled = true;
+        message.textContent = "Saving...";
+        const value = {
+          code: form.elements.code.value,
+          calendarId: form.elements.calendarId.value,
+          checkinMinutesBefore: Number(
+            form.elements.checkinMinutesBefore.value,
+          ),
+          scoreMinutesAfter: Number(form.elements.scoreMinutesAfter.value),
+          semesters: Array.from(
+            semesters.querySelectorAll("fieldset"),
+            (group) =>
+              Object.fromEntries(
+                Array.from(group.querySelectorAll("input"), (input) => [
+                  input.name,
+                  input.value,
+                ]),
+              ),
+          ),
+        };
+        google.script.run
+          .withSuccessHandler((result) => {
+            message.textContent = result;
+            save.disabled = false;
+          })
+          .withFailureHandler(failed)
+          .clubSaveSettings(value);
+      };
+    </script>
+  </body>
+</html>

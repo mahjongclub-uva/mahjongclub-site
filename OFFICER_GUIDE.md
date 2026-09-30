@@ -58,6 +58,97 @@ The maintainer can read the private Google Sheet with the read-only API importer
 The importer writes only the generated public leaderboard files; review those files in a pull request, then merge to deploy.
 The website-copy Sheet remains separate and continues to create its own review pull request automatically.
 
+## Meeting check-in backend
+
+The backend is ready for a rehearsal on a disposable workbook with fake names.
+The check-in and score pages are a later build step, and automatic score publishing is not enabled yet.
+Keep recording production meetings as before until the rehearsal passes.
+
+### Install and configure
+
+1. In the rehearsal workbook, open **Extensions > Apps Script**.
+2. Add the code from `apps-script/Rules.gs` and `apps-script/Club.gs` as script files named `Rules` and `Club`.
+3. Add `apps-script/Settings.html` as an HTML file named `Settings`.
+4. In **Project Settings**, enable the manifest editor and replace `appsscript.json` with `apps-script/appsscript.json`.
+5. Save, run `onOpen`, and return to the workbook.
+6. Open **Club > Settings** and enter the calendar ID, a new uppercase semester code, semester dates, and the exact Attendance and Points Tracking tab names.
+7. Run **Club > Set up** and grant the requested permissions as the account that will own the timer and deployment.
+8. Deploy a new **Web app**, executing as yourself with access for **Anyone**, and save its `/exec` URL privately.
+
+Set the workbook timezone to America/New_York.
+The timer checks the calendar every minute and treats every timed event as a meeting; all-day events are ignored.
+Overlapping meeting windows are refused.
+Set up is safe to repeat for the same account and preserves unrelated timers.
+The script stays bound to the workbook, while Set up stores the workbook ID so web requests can open it explicitly.
+
+The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onward, checkbox cells, and at least one member row with a `# Meets` formula.
+Points Tracking needs distinct `Table N` blocks in B:E, a `Player | Points | Net | date` header, and four player rows.
+An empty block can have existing Net formulas evaluating to -205; those formulas are preserved.
+Columns G onward are never written.
+When all templates are full, an officer must add another correctly numbered block.
+
+**Club > Open now** opens a two-hour manual meeting, followed by the configured score grace period.
+**Club > Close now** immediately closes check-in and scores and prevents the same calendar event reopening.
+For a visitor without a computing ID, add a unique `player_id`, full name, short name and opt-out checkbox to Roster, select that row, and choose **Club > Check in selected member**.
+You can also select their existing Attendance row.
+**Club > Recheck** validates filled tables against roster names, attendance, whole totals, the 820 total, and Net values, and highlights invalid blocks in pale red.
+Recheck does not alter scores or start publishing.
+
+### Public-name suggestions
+
+Suggestions are disabled until a maintainer installs a snapshot of published short names.
+They never use private Roster rows alone as evidence that someone is public.
+Generate that snapshot from the committed public leaderboard data:
+
+```bash
+node --input-type=module - <<'JS'
+import fs from 'node:fs';
+const players = new Map();
+for (const file of fs.readdirSync('data/semesters').filter(file => file.endsWith('.json'))) {
+  const data = JSON.parse(fs.readFileSync('data/semesters/' + file));
+  for (const player of [...data.standings, ...data.unranked]) {
+    players.set(player.id, { id: player.id, display: player.display });
+  }
+}
+console.log(JSON.stringify([...players.values()]));
+JS
+```
+
+With the meeting closed, edit the `settings` Script property in **Project Settings** and replace only its `publishedPlayers` array with this output.
+Use fake published players for the rehearsal, never the real roster.
+Refresh the snapshot after new official standings are published.
+Current opt-outs and claimed rows are excluded even if they appear in an older snapshot.
+
+### Rehearsal and request contract
+
+Use a new private workbook with fake names and the layouts above, including blank rows with checkboxes and empty tables with Net formulas.
+Use a test calendar with an event for the rehearsal date.
+Run Set up twice and confirm there is only one `clubTick` timer for your account.
+Test calendar opening, the check-in cutoff, the score grace period, and Close now.
+Confirm the exact row, checkbox, formula and table cells after each write, including that G onward stayed unchanged.
+Also try one unscheduled date and one newcomer.
+
+Every response is JSON with a numeric `status`; read that field even when transport status is 200.
+Send POST bodies as `text/plain` to avoid a browser preflight.
+
+| Request                                                                  | Fields and response                                                                                                        |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `GET ?r=meeting`                                                         | Public `open`, `checkinsOpen`, `meetingId`, `date`, `semester`; add `k` to get the checked-in lobby during an open meeting |
+| `GET ?r=results&k=...`                                                   | Tonight's tables, opaque ids, short names, totals and nets; cached for 30 seconds                                          |
+| `POST {r:"checkins", k, computingId}`                                    | Returning-player check-in; 404 means the name registration form is needed                                                  |
+| `POST {r:"players", k, computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                      |
+| `POST {r:"players", k, computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                                  |
+| `POST {r:"results", k, meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                         |
+
+Use one random submission ID per table and retain it until the receipt arrives.
+Receipts reserve a Table N block using its heading cell note before writing, so a retry after a write failure uses the same block.
+Do not remove those notes during corrections.
+Try a repeated submission, changed totals with the same ID, repeated player, fractional total, incorrect sum, unchecked player, wrong code, stale meeting and closed meeting.
+None of the rejected cases should fill another table.
+Check the request from a phone browser as well as locally, since local tests cannot verify Google's deployment, redirects or cross-origin behavior.
+Opted-out players use an anonymous `Player pNNN` label in the lobby and results.
+Full names and computing IDs are never included in responses.
+
 ## Photos
 
 Get permission from everyone identifiable before a photo goes up.
