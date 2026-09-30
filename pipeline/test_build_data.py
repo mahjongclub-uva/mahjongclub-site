@@ -69,7 +69,10 @@ class PrivateLogTests(unittest.TestCase):
     def test_new_local_players_are_opted_out_until_approved(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             roster_path = Path(temp_dir) / "roster.local.json"
-            with patch.object(build_data, "ROSTER_PATH", roster_path):
+            with (
+                patch.object(build_data, "ROSTER_PATH", roster_path),
+                patch.dict(os.environ, {"GITHUB_ACTIONS": "false"}),
+            ):
                 roster = build_data.load_roster(["Private Player"])
 
             self.assertTrue(roster["Private Player"]["opt_out"])
