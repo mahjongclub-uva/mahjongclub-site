@@ -42,7 +42,7 @@ jobs:
 
       - run: npm test
 
-      - run: npm run test:site-content
+      - run: npm run test:pipeline
 
       - run: npm run photos:check
 

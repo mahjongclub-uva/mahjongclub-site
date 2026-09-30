@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test 'src/**/*.test.ts'",
-    "test:site-content": "python3 -m unittest pipeline/test_build_site_content.py",
+    "test:pipeline": "python3 -m unittest pipeline/test_*.py",
     "photos:prepare": "node scripts/photos.mjs prepare",
     "photos:check": "node scripts/photos.mjs check",
     "hooks:install": "git config core.hooksPath .githooks",
