@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Barlow_Condensed, Public_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
+import MeetingLinks from "@/components/MeetingLinks";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
@@ -49,6 +50,7 @@ export default function RootLayout({
         <TileArtDefs />
         <AmbientTiles />
         <Nav />
+        <MeetingLinks />
         {children}
         <Footer />
       </body>

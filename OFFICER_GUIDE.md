@@ -61,7 +61,8 @@ The website-copy Sheet remains separate and continues to create its own review p
 ## Meeting check-in backend
 
 The backend is ready for a rehearsal on a disposable workbook with fake names.
-The check-in and score pages are a later build step, and automatic score publishing is not enabled yet.
+The check-in and score entry pages are connected to the fake-name rehearsal workbook.
+Automatic score publishing is not enabled yet.
 Keep recording production meetings as before until the rehearsal passes.
 
 ### Install and configure
@@ -148,6 +149,32 @@ None of the rejected cases should fill another table.
 Check the request from a phone browser as well as locally, since local tests cannot verify Google's deployment, redirects or cross-origin behavior.
 Opted-out players use an anonymous `Player pNNN` label in the lobby and results.
 Full names and computing IDs are never included in responses.
+
+## Meeting pages
+
+The unlisted pages are `/checkin/` and `/score/`.
+They are excluded from the public navigation and sitemap and marked noindex.
+The endpoint and rehearsal notice are configured by `MEETING_SERVICE_URL` and `MEETING_REHEARSAL` in `src/lib/site.ts`.
+Keep rehearsal mode on until the live workbook installation and a real phone test pass.
+Use fake names and computing IDs with the current endpoint.
+
+A table QR link uses `/checkin/?k=<semester-code>`.
+The page removes the code from the address bar after reading it and remembers only the code in session storage for up to 12 hours.
+It does not store computing IDs or full names.
+After a valid code is accepted, a "Tonight’s meeting" row offers Check in and Record a table across the site while the meeting is open.
+Players can visit the Guide or homepage and return through that row without scanning again.
+Players without a computing ID still check in through an officer in the Sheet.
+
+The score page lists only tonight's checked-in short names, prevents repeated players, and requires four whole ending totals summing to 820.
+Select four short-name chips, then type ending totals or tap each card in the optional keypad.
+Undo last card and Clear cards correct counting mistakes before applying a total.
+Before sending a table, the page stores its opaque player IDs, totals, meeting ID and random submission ID in session storage.
+If the response is lost or the page reloads, retry the same save; the players and totals stay locked until a receipt arrives.
+If an unconfirmed save belongs to an earlier meeting, an officer must check the Sheet before the submitter starts over.
+Corrections to confirmed results are officer edits in the Sheet.
+The receipt links to the official leaderboard until the provisional `/live` page is added in step 4.
+
+If the site is unavailable, an officer records attendance and results directly in the Sheet.
 
 ## Photos
 

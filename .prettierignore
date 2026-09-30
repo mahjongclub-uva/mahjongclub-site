@@ -15,3 +15,6 @@ package-lock.json
 # Local tool state, ignored by Git.
 .claude/
 .impeccable/
+
+# Local design prototype, excluded from Git.
+docs/specs/demo/
