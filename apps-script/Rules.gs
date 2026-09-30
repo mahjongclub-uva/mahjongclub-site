@@ -88,9 +88,15 @@ function rosterLayout(grid) {
     );
   const players = [];
   grid.slice(1).forEach((row, index) => {
-    if (!row[2]) return;
+    if (!row[2]) {
+      if (row[0] || row[1] || row[3])
+        fail(503, "Roster row " + (index + 2) + " is incomplete.");
+      return;
+    }
     if (
       !/^p\d{3,}$/.test(row[0]) ||
+      typeof row[2] !== "string" ||
+      typeof row[3] !== "string" ||
       !row[3] ||
       ![true, false, ""].includes(row[4])
     )

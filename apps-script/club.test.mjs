@@ -445,6 +445,18 @@ test("name derivation matches migration, and layout changes fail before writing"
   const snapshot = JSON.stringify(h.tabs.Attendance.grid);
   assert.equal(h.post({ r: "checkins", computingId: "a1" }).status, 503);
   assert.equal(JSON.stringify(h.tabs.Attendance.grid), snapshot);
+  const incomplete = harness();
+  incomplete.tabs.Roster.grid[7][0] = "p999";
+  const before = JSON.stringify(incomplete.tabs.Roster.grid);
+  assert.equal(
+    incomplete.post({
+      r: "players",
+      computingId: "new1",
+      fullName: "Nova Spruce",
+    }).status,
+    503,
+  );
+  assert.equal(JSON.stringify(incomplete.tabs.Roster.grid), before);
 });
 
 test("an unscheduled meeting inserts a date inside the formula range", () => {
