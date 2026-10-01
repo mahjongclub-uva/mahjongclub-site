@@ -28,7 +28,7 @@ jobs:
     steps:
       # No stored token: npm runs third-party code below, so only the steps
       # that call gh or push are given GH_TOKEN.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
