@@ -182,9 +182,11 @@ def write_summary(path: str, previous: object, proposed: object, warnings: list[
     before = flatten(previous)
     after = flatten(proposed)
     lines = [
-        "Public website copy was read from the officer Google Sheet and passed validation, lint, tests, and the production build.",
+        "## Intent",
         "",
-        "## Proposed changes",
+        "Update public website copy from the officer Google Sheet.",
+        "",
+        "## What Changed",
         "",
         "| Field | Current | Proposed |",
         "| --- | --- | --- |",
@@ -198,7 +200,13 @@ def write_summary(path: str, previous: object, proposed: object, warnings: list[
     lines += [f"\n> **Note:** {warning}" for warning in warnings]
     lines += [
         "",
-        "Review this list and the Files changed tab. Merge the pull request to publish through the normal Pages workflow.",
+        "## Risk",
+        "",
+        "Merging publishes this copy through GitHub Pages. Review names, links, and proposed text before merging.",
+        "",
+        "## Test/Validation",
+        "",
+        "Sheet validation passed. The proposal workflow runs lint, Node and pipeline tests, photo checks, and the production build before creating or updating the PR; consult the workflow run for their results.",
     ]
     Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
