@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
   postMeeting,
+  rememberMeetingPage,
   requestError,
   type Meeting,
   type Player,
@@ -60,6 +62,7 @@ function CheckInForm({
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
       setPlayer(reply.player);
+      rememberMeetingPage("/score/");
       setComputingId("");
       setFullName("");
       setSuggestions([]);
@@ -75,24 +78,33 @@ function CheckInForm({
     return (
       <div className="meeting-receipt" role="status">
         <p className="eyebrow">You’re checked in</p>
-        <h2>
-          {register ? "Welcome" : "Welcome back"}, {player.display}
-        </h2>
-        <p>Your attendance is recorded. You’re ready to play.</p>
+        <span className="meeting-check" aria-hidden="true">
+          ✓
+        </span>
+        <h1>You’re in, {player.display.split(" ")[0]}.</h1>
+        <p>
+          You’re ready to play. After a hand, one person enters everyone’s card
+          totals.
+        </p>
         <div className="meeting-actions">
           <Link className="meeting-primary" href="/score/">
             Record a table
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              setPlayer(null);
-              setRegister(false);
-              setError("");
-            }}
-          >
-            Check in someone else
-          </button>
+          <div className="meeting-quiet-actions">
+            <Link href="/live/">Leaderboard</Link>
+            <button
+              className="meeting-text"
+              type="button"
+              onClick={() => {
+                rememberMeetingPage("/checkin/");
+                setPlayer(null);
+                setRegister(false);
+                setError("");
+              }}
+            >
+              Switch player
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -115,6 +127,38 @@ function CheckInForm({
         void submit();
       }}
     >
+      {!register && !suggestions.length && (
+        <>
+          <h1>
+            Grab a <span className="meeting-accent">seat.</span>
+          </h1>
+          <p className="meeting-intro">Check in, find your table, and play.</p>
+          <div className="meeting-tiles" aria-hidden="true">
+            {(
+              [
+                { suit: "dots", rank: 2 },
+                { suit: "characters", rank: 1 },
+                { suit: "bamboo", rank: 3 },
+              ] as const
+            ).map(({ suit, rank }) => (
+              <span key={suit}>
+                <TileFace index={rank}>
+                  <SuitFace suit={suit} rank={rank} />
+                </TileFace>
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+      {register && !suggestions.length && (
+        <>
+          <h1>What’s your name?</h1>
+          <p className="meeting-intro">
+            Tell us once. If you’ve played before, we’ll keep your past scores
+            together.
+          </p>
+        </>
+      )}
       <fieldset disabled={busy}>
         <legend className="sr-only">Player check-in</legend>
         <label htmlFor="computing-id">UVA computing ID</label>
@@ -138,11 +182,6 @@ function CheckInForm({
         </p>
         {register && (
           <>
-            <h2>First time checking in?</h2>
-            <p>
-              Enter your full name once to connect your attendance and any
-              previous scores.
-            </p>
             <label htmlFor="full-name">Full name</label>
             <input
               id="full-name"
@@ -169,7 +208,10 @@ function CheckInForm({
         {suggestions.length > 0 ? (
           <div className="meeting-notice">
             <h2>Is one of these you?</h2>
-            <p>Choose your published name to keep your previous scores.</p>
+            <p>
+              There’s a similar name on the leaderboard. Choose it to keep your
+              past scores.
+            </p>
             <div className="meeting-actions">
               {suggestions.map((suggestion) => (
                 <button
@@ -184,7 +226,7 @@ function CheckInForm({
                 type="button"
                 onClick={() => void submit({ createNew: true })}
               >
-                No, add me as a new player
+                No, I’m new
               </button>
             </div>
           </div>
@@ -198,6 +240,9 @@ function CheckInForm({
           </button>
         )}
       </fieldset>
+      <Link className="meeting-text" href="/live/">
+        See the leaderboard ↗
+      </Link>
       <p className="quiet">
         No computing ID? An officer can check you in from the Sheet.
       </p>

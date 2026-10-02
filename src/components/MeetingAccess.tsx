@@ -10,6 +10,9 @@ import {
   type Meeting,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
+import Link from "next/link";
+import Image from "next/image";
+import { LOGO } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 
 export default function MeetingAccess({
@@ -91,6 +94,30 @@ export default function MeetingAccess({
   const authorized = Boolean(code && meeting?.open && meeting.players);
   return (
     <div className="meeting-access">
+      <header className="meeting-header">
+        <div className="meeting-brand">
+          {LOGO && <Image src={LOGO} alt="" width={36} height={36} />}
+          <span>
+            <strong>
+              {meeting?.date
+                ? `${formatDate(meeting.date)} - Meeting`
+                : "Mahjong meeting"}
+            </strong>
+            <small>Mahjong Club @ UVA</small>
+          </span>
+        </div>
+        <Link href="/" className="meeting-website">
+          Club website ↗
+        </Link>
+      </header>
+      {meeting?.open && (
+        <p className="meeting-status">
+          <span className="meeting-live-dot" aria-hidden="true" />
+          {meeting.checkinsOpen
+            ? "We’re playing right now!"
+            : "Scores are still open"}
+        </p>
+      )}
       {error && (
         <div className="meeting-notice" role="alert">
           <p>{error}</p>
@@ -125,15 +152,14 @@ export default function MeetingAccess({
         >
           <h2>Enter tonight’s code</h2>
           <p>
-            Find the semester code under your table’s QR code, or ask an
-            officer.
+            Find the code under your table’s QR code, or ask a club officer.
           </p>
           {code && (
             <p role="alert">
               That code isn’t recognized. Check it and try again.
             </p>
           )}
-          <label htmlFor="meeting-code">Semester code</label>
+          <label htmlFor="meeting-code">Meeting code</label>
           <input
             id="meeting-code"
             value={entry}
@@ -149,32 +175,7 @@ export default function MeetingAccess({
           </button>
         </form>
       )}
-      {authorized && meeting && (
-        <>
-          <div className="meeting-session">
-            <span>
-              {meeting.date ? formatDate(meeting.date) : "Tonight’s meeting"}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                try {
-                  sessionStorage.removeItem(CODE_STORAGE);
-                  window.dispatchEvent(new Event(CODE_EVENT));
-                } catch {
-                  /* Storage can be disabled. */
-                }
-                setCode("");
-                setEntry("");
-                setMeeting(null);
-              }}
-            >
-              Change code
-            </button>
-          </div>
-          {children(code!, meeting, refresh)}
-        </>
-      )}
+      {authorized && meeting && <>{children(code!, meeting, refresh)}</>}
       <noscript>
         <p>
           Enable JavaScript to check in or submit a score. An officer can also

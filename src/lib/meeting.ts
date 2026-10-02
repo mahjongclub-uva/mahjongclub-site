@@ -138,3 +138,74 @@ export function requestError(error: unknown): string {
     ? error.message
     : "Could not confirm the request. Please retry or ask an officer.";
 }
+
+export const RETURN_STORAGE = "club-meeting-return";
+export const DRAFT_STORAGE = "club-table-draft";
+export const draftSchema = z.object({
+  meetingId: z.string(),
+  ids: z.array(z.union([playerSchema.shape.id, z.literal("")])).length(4),
+  totals: z.array(z.string().max(4)).length(4),
+});
+export function isMeetingPage(path: string) {
+  return /^\/(checkin|score|live)\/?$/.test(path);
+}
+export function rememberMeetingPage(path: string) {
+  try {
+    sessionStorage.setItem(RETURN_STORAGE, path);
+    window.dispatchEvent(new Event(CODE_EVENT));
+  } catch {
+    /* Navigation still works without storage. */
+  }
+}
+const resultsSchema = z.object({
+  status: z.literal(200),
+  meetingId: z.string(),
+  date: z.iso.date(),
+  tables: z
+    .array(
+      z.object({
+        table: z.number().int().positive(),
+        seats: z
+          .array(
+            playerSchema.extend({
+              total: z.number().int().min(0).max(820),
+              net: z.number().int(),
+            }),
+          )
+          .length(4),
+      }),
+    )
+    .superRefine((tables, ctx) => {
+      const numbers = new Set<number>();
+      for (const table of tables) {
+        if (
+          numbers.has(table.table) ||
+          new Set(table.seats.map((s) => s.id)).size !== 4 ||
+          table.seats.reduce((n, s) => n + s.total, 0) !== 820 ||
+          table.seats.some((s) => s.net !== s.total - 205)
+        )
+          ctx.addIssue({
+            code: "custom",
+            message: "An officer needs to recheck tonight’s results.",
+          });
+        numbers.add(table.table);
+      }
+    }),
+});
+export type Results = z.infer<typeof resultsSchema>;
+export async function getResults(
+  url: string,
+  code: string,
+  signal?: AbortSignal,
+): Promise<Results> {
+  const target = new URL(url);
+  target.searchParams.set("r", "results");
+  target.searchParams.set("k", code);
+  const { body, reply } = await readResponse(target.href, {
+    signal,
+    cache: "no-store",
+  });
+  if (reply.status !== 200)
+    throw new Error(reply.message || "Could not load tonight’s scores.");
+  return resultsSchema.parse(body);
+}

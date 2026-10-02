@@ -3,6 +3,7 @@ import { Barlow_Condensed, Public_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
 import MeetingLinks from "@/components/MeetingLinks";
+import SiteChrome from "@/components/SiteChrome";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
@@ -48,11 +49,18 @@ export default function RootLayout({
 
         {/* Tile gradients, declared once for every tile on every page. */}
         <TileArtDefs />
-        <AmbientTiles />
-        <Nav />
-        <MeetingLinks />
-        {children}
-        <Footer />
+        <SiteChrome
+          navigation={
+            <>
+              <AmbientTiles />
+              <Nav />
+              <MeetingLinks />
+            </>
+          }
+          footer={<Footer />}
+        >
+          {children}
+        </SiteChrome>
       </body>
     </html>
   );

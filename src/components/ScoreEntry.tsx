@@ -1,80 +1,176 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
   CARD_VALUES,
   PENDING_STORAGE,
+  DRAFT_STORAGE,
   cardTotal,
+  draftSchema,
   pendingSchema,
   postMeeting,
   requestError,
   tableError,
+  rememberMeetingPage,
   type Meeting,
   type Submission,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
 function CardCalculator({
-  seat,
+  name,
+  initial,
   apply,
+  close,
 }: {
-  seat: number;
+  name: string;
+  initial: string;
   apply: (total: string) => void;
+  close: () => void;
 }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [value, setValue] = useState(initial || "0");
+  const [base, setBase] = useState(Number(initial || 0));
   const [cards, setCards] = useState<number[]>([]);
+  const total = value.trim() === "" ? NaN : Number(value);
+  const valid = Number.isSafeInteger(total) && total >= 0 && total <= 820;
   const counts = CARD_VALUES.map(
-    (value) => cards.filter((card) => card === value).length,
+    (card) => cards.filter((n) => n === card).length,
   );
-  const total = cardTotal(counts);
+  useEffect(() => {
+    const element = dialog.current!;
+    element.showModal();
+    return () => element.close();
+  }, []);
   return (
-    <details className="card-calculator">
-      <summary>Count player {seat}’s cards</summary>
-      <p className="quiet">
-        Tap once for each card. Face cards are 50; ace is 1.
-      </p>
+    <dialog
+      ref={dialog}
+      className="meeting-calculator"
+      aria-labelledby="calculator-name"
+      onCancel={close}
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const r = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < r.left ||
+          event.clientX > r.right ||
+          event.clientY < r.top ||
+          event.clientY > r.bottom
+        )
+          close();
+      }}
+    >
+      <div className="calculator-head">
+        <div>
+          <p className="eyebrow">Count your cards</p>
+          <h2 id="calculator-name">{name}</h2>
+        </div>
+        <button
+          className="meeting-text"
+          type="button"
+          onClick={close}
+          aria-label="Close calculator"
+        >
+          ×
+        </button>
+      </div>
+      <p className="quiet">Enter points, or tap the cards you’re holding.</p>
+      <label htmlFor="card-total">Card total</label>
+      <input
+        id="card-total"
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={820}
+        step={1}
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setBase(Number(e.target.value));
+          setCards([]);
+        }}
+      />
       <div className="card-keypad">
-        {CARD_VALUES.map((value, index) => (
+        {CARD_VALUES.map((card, i) => (
           <button
-            key={value}
             type="button"
-            aria-label={`${value === 50 ? "Face card" : value === 1 ? "Ace" : value}, ${value} points`}
-            disabled={total + value > 820}
-            onClick={() => setCards((previous) => [...previous, value])}
+            key={card}
+            disabled={!valid || total + card > 820}
+            aria-label={`${card === 50 ? "Face card" : card === 1 ? "Ace" : card}, ${card} points`}
+            onClick={() => {
+              const next = [...cards, card];
+              setCards(next);
+              setValue(
+                String(
+                  base +
+                    cardTotal(
+                      CARD_VALUES.map(
+                        (n) => next.filter((c) => c === n).length,
+                      ),
+                    ),
+                ),
+              );
+            }}
           >
             <strong>
-              {value === 50 ? "J / Q / K" : value === 1 ? "A" : value}
+              {card === 50 ? "J / Q / K" : card === 1 ? "A" : card}
             </strong>
-            <small>
-              {counts[index] ? `× ${counts[index]}` : `${value} pts`}
-            </small>
+            <small>{counts[i] ? `× ${counts[i]}` : `${card} pts`}</small>
           </button>
         ))}
       </div>
-      <p role="status">
-        Card total: <strong>{total}</strong>
-      </p>
-      <div className="meeting-actions">
+      <div className="meeting-quiet-actions">
         <button
+          className="meeting-text"
           type="button"
           disabled={!cards.length}
-          onClick={() => setCards((previous) => previous.slice(0, -1))}
+          onClick={() => {
+            const next = cards.slice(0, -1);
+            setCards(next);
+            setValue(
+              String(
+                base +
+                  cardTotal(
+                    CARD_VALUES.map((n) => next.filter((c) => c === n).length),
+                  ),
+              ),
+            );
+          }}
         >
           Undo last card
         </button>
         <button
+          className="meeting-text"
           type="button"
-          disabled={!cards.length}
-          onClick={() => setCards([])}
+          onClick={() => {
+            setCards([]);
+            setBase(0);
+            setValue("0");
+          }}
         >
           Clear cards
         </button>
-        <button type="button" onClick={() => apply(String(total))}>
-          Use {total} as ending total
-        </button>
       </div>
-    </details>
+      {!valid && (
+        <p className="meeting-error" role="alert">
+          Enter a whole number from 0 to 820.
+        </p>
+      )}
+      <button
+        type="button"
+        className="meeting-primary"
+        disabled={!valid}
+        onClick={() => apply(value)}
+      >
+        Use {valid ? total : "these"} points
+      </button>
+      <p className="quiet">
+        Everyone starts with 205 points. Together, your cards must add up to
+        820.
+      </p>
+    </dialog>
   );
 }
 
@@ -89,23 +185,40 @@ function ScoreForm({
 }) {
   const [ids, setIds] = useState(["", "", "", ""]);
   const [totals, setTotals] = useState(["", "", "", ""]);
+  const [phase, setPhase] = useState<"pick" | "score" | "review">("pick");
+  const [active, setActive] = useState<number | null>(null);
   const [pending, setPending] = useState<Submission | null>(null);
   const [ready, setReady] = useState(false);
   const [restoreFailed, setRestoreFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [draftError, setDraftError] = useState(false);
   const [receipt, setReceipt] = useState<number | null>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const players = meeting.players || [];
-  const seats = ids.map((id, index) => ({
+  const seats = ids.map((id, i) => ({
     id,
-    total: totals[index].trim() === "" ? NaN : Number(totals[index]),
+    total: totals[i].trim() === "" ? NaN : Number(totals[i]),
   }));
   const validation = tableError(seats, players);
   const sum = seats.reduce(
-    (value, seat) => value + (Number.isFinite(seat.total) ? seat.total : 0),
+    (n, s) => n + (Number.isFinite(s.total) ? s.total : 0),
     0,
   );
-
+  const locked = busy || Boolean(pending) || !ready || restoreFailed;
+  const stage = pending ? "review" : phase;
+  const name = (id: string) =>
+    players.find((p) => p.id === id)?.display || `Player ${id}`;
+  const avatar = (display: string) => (
+    <span className="meeting-avatar" aria-hidden="true">
+      {display[0]}
+    </span>
+  );
+  function changePhase(next: typeof phase) {
+    setPhase(next);
+    heading.current?.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
   useEffect(() => {
     async function restore() {
       try {
@@ -113,23 +226,46 @@ function ScoreForm({
         if (saved) {
           const parsed = pendingSchema.parse(JSON.parse(saved));
           setPending(parsed);
-          setIds(parsed.seats.map((seat) => seat.id));
-          setTotals(parsed.seats.map((seat) => String(seat.total)));
+          setIds(parsed.seats.map((s) => s.id));
+          setTotals(parsed.seats.map((s) => String(s.total)));
+          setPhase("review");
           setError(
             "There is an unconfirmed save. Retry it before recording another table.",
           );
+        } else {
+          const draft = sessionStorage.getItem(DRAFT_STORAGE);
+          if (draft) {
+            const parsed = draftSchema.safeParse(JSON.parse(draft));
+            if (parsed.success && parsed.data.meetingId === meeting.meetingId) {
+              setIds(parsed.data.ids);
+              setTotals(parsed.data.totals);
+              if (parsed.data.ids.every(Boolean)) setPhase("score");
+            }
+          }
         }
       } catch {
         setRestoreFailed(true);
         setError(
-          "Could not restore the previous save. Ask an officer to check the Sheet before submitting another table.",
+          "Could not restore the previous save. Ask an officer to check before submitting another table.",
         );
       }
+      rememberMeetingPage("/score/");
       setReady(true);
     }
     void restore();
-  }, []);
-
+  }, [meeting.meetingId]);
+  useEffect(() => {
+    if (!ready || pending || receipt !== null || restoreFailed) return;
+    try {
+      sessionStorage.setItem(
+        DRAFT_STORAGE,
+        JSON.stringify({ meetingId: meeting.meetingId, ids, totals }),
+      );
+    } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Report an external storage failure, not derived render state.
+      setDraftError(true);
+    }
+  }, [ready, pending, receipt, restoreFailed, meeting.meetingId, ids, totals]);
   async function submit() {
     if (busy || !ready || restoreFailed) return;
     if (!pending && validation) {
@@ -178,6 +314,8 @@ function ScoreForm({
       sessionStorage.removeItem(PENDING_STORAGE);
       setPending(null);
       setReceipt(reply.table);
+      sessionStorage.removeItem(DRAFT_STORAGE);
+      refresh();
     } catch (failure) {
       setError(
         requestError(failure) +
@@ -188,181 +326,239 @@ function ScoreForm({
     }
   }
 
+  function reset() {
+    setReceipt(null);
+    setIds(["", "", "", ""]);
+    setTotals(["", "", "", ""]);
+    setError("");
+    setPhase("pick");
+    refresh();
+  }
+  const scoreRows = (
+    <div className="score-rows">
+      {ids.map((id, i) =>
+        id ? (
+          <div className="score-row" key={id}>
+            {avatar(name(id))}
+            <span className="score-name">
+              {name(id)}
+              <small>
+                {totals[i].trim() && Number.isFinite(seats[i].total)
+                  ? `${seats[i].total >= 205 ? "+" : ""}${seats[i].total - 205} this table`
+                  : "Add their card total"}
+              </small>
+            </span>
+            {stage === "score" && receipt === null ? (
+              <button
+                type="button"
+                className="total-button"
+                disabled={locked}
+                aria-label={`Count cards for ${name(id)}`}
+                onClick={() => setActive(i)}
+              >
+                {totals[i] || "Add +"}
+              </button>
+            ) : (
+              <strong>{totals[i]}</strong>
+            )}
+          </div>
+        ) : null,
+      )}
+    </div>
+  );
   if (receipt !== null)
     return (
-      <div className="meeting-receipt" role="status">
-        <p className="eyebrow">Recorded</p>
-        <h2>Table {receipt} is saved.</h2>
-        <p>All four results are in tonight’s score sheet.</p>
+      <div className="meeting-receipt">
+        <span className="meeting-check" aria-hidden="true">
+          ✓
+        </span>
+        <p className="eyebrow">Table {receipt} saved</p>
+        <h1 tabIndex={-1} ref={heading}>
+          Nice hand.
+        </h1>
+        <p className="meeting-intro" role="status">
+          Your scores are recorded. Ready for another hand?
+        </p>
+        {scoreRows}
         <div className="meeting-actions">
-          <button
-            type="button"
-            className="meeting-primary"
-            onClick={() => {
-              setReceipt(null);
-              setIds(["", "", "", ""]);
-              setTotals(["", "", "", ""]);
-              setError("");
-              refresh();
-            }}
-          >
+          <button type="button" className="meeting-primary" onClick={reset}>
             Record another table
           </button>
-          <Link href="/leaderboard/">Official leaderboard</Link>
+          <Link className="meeting-text" href="/live/">
+            See the leaderboard
+          </Link>
         </div>
       </div>
     );
   return (
-    <form
-      className="meeting-form score-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void submit();
-      }}
-    >
-      <div className="meeting-lobby">
-        <span>{players.length} players checked in</span>
-        <button type="button" onClick={refresh} disabled={busy}>
-          Refresh players
+    <div className="score-form">
+      {stage !== "pick" && (
+        <button
+          className="meeting-text meeting-back"
+          disabled={locked}
+          type="button"
+          onClick={() => changePhase(stage === "review" ? "score" : "pick")}
+        >
+          ← {stage === "review" ? "Edit totals" : "Change players"}
         </button>
-      </div>
-      {players.length < 4 && !pending && (
-        <p className="meeting-notice">
-          Four players need to check in before you can record a table.{" "}
-          <Link href="/checkin/">Check in a player</Link>.
+      )}
+      <p className="eyebrow">
+        {stage === "pick"
+          ? "Pick your players"
+          : stage === "score"
+            ? "Count your cards"
+            : "Ready to record"}
+      </p>
+      <h1 tabIndex={-1} ref={heading}>
+        {stage === "pick"
+          ? "Who played this hand?"
+          : stage === "score"
+            ? "Cards on the table."
+            : "One last look."}
+      </h1>
+      <p className="meeting-intro">
+        {stage === "pick"
+          ? "Tap the four people who played."
+          : stage === "score"
+            ? "How many points is each player holding? Tap to type or count cards."
+            : "Check everyone’s points against the cards on the table."}
+      </p>
+      {stage === "pick" ? (
+        <>
+          <div className="meeting-seats">
+            {ids.map((id, i) => (
+              <div key={i} className={`meeting-seat ${id ? "filled" : ""}`}>
+                {avatar(id ? name(id) : String(i + 1))}
+                <span>{id ? name(id) : "Open seat"}</span>
+              </div>
+            ))}
+          </div>
+          <div className="meeting-lobby">
+            <strong>Tonight’s players</strong>
+            <span role="status">{ids.filter(Boolean).length} of 4 picked</span>
+            <button
+              type="button"
+              className="meeting-text"
+              onClick={refresh}
+              disabled={busy}
+            >
+              Refresh
+            </button>
+          </div>
+          {players.length < 4 && (
+            <p className="meeting-notice">
+              Four players need to check in first.{" "}
+              <Link href="/checkin/">Check in a player</Link>.
+            </p>
+          )}
+          <div className="player-chips" role="group" aria-label="Table players">
+            {players.map((player) => (
+              <button
+                type="button"
+                key={player.id}
+                disabled={
+                  locked || (!ids.includes(player.id) && ids.every(Boolean))
+                }
+                aria-pressed={ids.includes(player.id)}
+                onClick={() => {
+                  const selected = ids.indexOf(player.id);
+                  const slot = selected === -1 ? ids.indexOf("") : selected;
+                  if (slot < 0) return;
+                  setIds(
+                    ids.map((id, i) =>
+                      i === slot ? (selected === -1 ? player.id : "") : id,
+                    ),
+                  );
+                  setTotals(totals.map((n, i) => (i === slot ? "" : n)));
+                }}
+              >
+                {avatar(player.display)}
+                <span>{player.display}</span>
+                <small aria-hidden="true">
+                  {ids.includes(player.id) ? "✓" : ""}
+                </small>
+              </button>
+            ))}
+          </div>
+          <div className="score-foot">
+            <button
+              className="meeting-primary"
+              type="button"
+              disabled={locked || !ids.every(Boolean)}
+              onClick={() => changePhase("score")}
+            >
+              Count cards →
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          {scoreRows}
+          <div className="score-foot">
+            <div className="score-summary">
+              <span>Table total</span>
+              <strong>
+                {sum} <small>/ 820</small>
+              </strong>
+              <p role="status">{validation || "820 points. You’re all set."}</p>
+            </div>
+            {stage === "score" ? (
+              <button
+                type="button"
+                className="meeting-primary"
+                disabled={locked || Boolean(validation)}
+                onClick={() => changePhase("review")}
+              >
+                Check scores →
+              </button>
+            ) : (
+              <button
+                className="meeting-primary"
+                type="button"
+                disabled={
+                  busy ||
+                  !ready ||
+                  restoreFailed ||
+                  (!pending && Boolean(validation)) ||
+                  Boolean(pending && pending.meetingId !== meeting.meetingId)
+                }
+                onClick={() => void submit()}
+              >
+                {busy
+                  ? "Saving table…"
+                  : pending
+                    ? "Retry this save"
+                    : "Save table"}
+              </button>
+            )}
+          </div>
+        </>
+      )}
+      {draftError && (
+        <p className="quiet" role="status">
+          Your browser cannot keep this draft. Keep this page open while
+          entering scores.
         </p>
       )}
       {pending && (
-        <div className="meeting-notice">
-          <strong>Finish the unconfirmed save first.</strong>
-          <p>
-            The same table and submission ID will be sent again. Its players and
-            totals are locked to prevent a duplicate.
-          </p>
-          {pending.meetingId !== meeting.meetingId && (
-            <p>
-              This save belongs to a previous meeting. Ask an officer to check
-              the Sheet.
-            </p>
-          )}
-        </div>
+        <p className="meeting-notice">
+          Finish the unconfirmed save first. The same table will be sent again
+          to prevent a duplicate.
+          {pending.meetingId !== meeting.meetingId &&
+            " This save belongs to a previous meeting; ask an officer to check it."}
+        </p>
       )}
-      <fieldset disabled={busy || Boolean(pending) || !ready || restoreFailed}>
-        <legend className="sr-only">Four player results</legend>
-        <h2>Who played this table?</h2>
-        <p className="quiet">
-          Pick four players. Tap a selected name to remove it.
-        </p>
-        <div className="player-chips" role="group" aria-label="Table players">
-          {players.map((player) => (
-            <button
-              type="button"
-              key={player.id}
-              aria-pressed={ids.includes(player.id)}
-              disabled={!ids.includes(player.id) && ids.every(Boolean)}
-              onClick={() => {
-                const selected = ids.indexOf(player.id);
-                const slot = selected === -1 ? ids.indexOf("") : selected;
-                if (slot === -1) return;
-                setIds((previous) =>
-                  previous.map((id, i) =>
-                    i === slot ? (selected === -1 ? player.id : "") : id,
-                  ),
-                );
-                setTotals((previous) =>
-                  previous.map((total, i) => (i === slot ? "" : total)),
-                );
-              }}
-            >
-              {player.display}
-            </button>
-          ))}
-        </div>
-        <p className="quiet" role="status">
-          {ids.filter(Boolean).length} of 4 selected
-        </p>
-        <div className="score-seats">
-          {ids.map((id, index) =>
-            id ? (
-              <div className="score-seat" key={id}>
-                <h2>
-                  {players.find((player) => player.id === id)?.display ||
-                    `Player ${id}`}
-                </h2>
-                <label htmlFor={`total-${index}`}>Ending card total</label>
-                <div className="score-total">
-                  <input
-                    id={`total-${index}`}
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={820}
-                    step={1}
-                    required
-                    value={totals[index]}
-                    onChange={(event) =>
-                      setTotals((previous) =>
-                        previous.map((value, i) =>
-                          i === index ? event.target.value : value,
-                        ),
-                      )
-                    }
-                  />
-                  <span>
-                    Net{" "}
-                    <strong>
-                      {totals[index].trim() &&
-                      Number.isFinite(seats[index].total)
-                        ? `${seats[index].total >= 205 ? "+" : ""}${seats[index].total - 205}`
-                        : "?"}
-                    </strong>
-                  </span>
-                </div>
-                <CardCalculator
-                  seat={index + 1}
-                  apply={(value) =>
-                    setTotals((previous) =>
-                      previous.map((total, i) => (i === index ? value : total)),
-                    )
-                  }
-                />
-              </div>
-            ) : null,
-          )}
-        </div>
-      </fieldset>
-      <div className="score-summary" role="status">
-        <span>Table total</span>
-        <strong>
-          {sum} <small>/ 820</small>
-        </strong>
-        <p>{validation || "Balanced. This table is ready to save."}</p>
-      </div>
       {error && (
         <p className="meeting-error" role="alert">
           {error}
         </p>
       )}
-      <button
-        className="meeting-primary"
-        type="submit"
-        disabled={
-          busy ||
-          !ready ||
-          restoreFailed ||
-          (!pending && Boolean(validation)) ||
-          Boolean(pending && pending.meetingId !== meeting.meetingId)
-        }
-      >
-        {busy ? "Saving table…" : pending ? "Retry this save" : "Save table"}
-      </button>
       {(pending || restoreFailed) && !busy && (
         <details className="meeting-recovery">
           <summary>An officer has checked this save</summary>
           <p>
-            Only start over after an officer confirms in the Sheet whether this
-            table was recorded. Starting over gives the next submission a new
-            ID.
+            Only start over after an officer confirms whether this table was
+            recorded.
           </p>
           <button
             type="button"
@@ -370,22 +566,26 @@ function ScoreForm({
               sessionStorage.removeItem(PENDING_STORAGE);
               setPending(null);
               setRestoreFailed(false);
-              setIds(["", "", "", ""]);
-              setTotals(["", "", "", ""]);
-              setError("");
+              reset();
             }}
           >
             Officer checked; start a new table
           </button>
         </details>
       )}
-      <p className="quiet">
-        Record each table once. For corrections after saving, ask an officer.
-      </p>
-      <p>
-        <Link href="/checkin/">Check in someone else</Link>
-      </p>
-    </form>
+      {active !== null && (
+        <CardCalculator
+          key={ids[active]}
+          name={name(ids[active])}
+          initial={totals[active]}
+          close={() => setActive(null)}
+          apply={(value) => {
+            setTotals(totals.map((n, i) => (i === active ? value : n)));
+            setActive(null);
+          }}
+        />
+      )}
+    </div>
   );
 }
 export default function ScoreEntry() {

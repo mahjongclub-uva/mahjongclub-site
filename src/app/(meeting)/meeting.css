@@ -1,243 +1,626 @@
+/* The focused meeting flow shares the site's fonts and tile colors. */
 .meeting-page {
-  position: relative;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: auto;
+  padding: 0 24px 28px;
+  --rule: #d8d0c0;
 }
-.meeting-page .section-wrap {
-  max-width: 50rem;
+.meeting-page h1 {
+  font: 700 clamp(2.8rem, 10vw, 3.7rem)/1.02 var(--display);
+  letter-spacing: -0.015em;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
-.meeting-page .page-title {
-  font-size: clamp(3rem, 9vw, 5rem);
-  line-height: 1;
+.meeting-page h2 {
+  font: 700 2rem/1.1 var(--display);
+  margin: 0;
 }
-.meeting-page .page-intro {
-  max-width: 34rem;
+.meeting-page p {
+  margin: 0;
 }
-.meeting-rehearsal {
-  padding-block: 1rem;
-  margin-block: 0;
-  font-size: 0.88rem;
-  color: var(--gold);
+.meeting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0 14px;
   border-bottom: 1px solid var(--rule);
 }
-.meeting-form {
-  max-width: 32rem;
+.meeting-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.meeting-brand img {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.meeting-brand strong {
+  display: block;
+  font: 700 1.3rem/1.15 var(--display);
+}
+.meeting-brand small {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.meeting-page .meeting-website {
+  font-size: 0.75rem;
+  color: var(--jade);
+  white-space: nowrap;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.meeting-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--jade);
+  padding: 14px 0 26px;
+}
+.meeting-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tile-letter);
+  flex-shrink: 0;
+}
+.meeting-rehearsal {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.meeting-intro {
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+  line-height: 1.6;
+  margin-top: 14px !important;
+}
+.meeting-page .eyebrow {
+  color: var(--tile-letter);
+  margin-bottom: 8px;
+}
+.meeting-accent {
+  color: var(--tile-letter);
+}
+.meeting-page .quiet {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-top: 10px;
 }
 .meeting-form fieldset {
-  padding: 0;
-  margin: 0;
   border: 0;
+  padding: 0;
+  margin: 18px 0 0;
   min-width: 0;
 }
-.meeting-form label {
+.meeting-form label,
+.meeting-calculator label {
   display: block;
+  font-size: 0.85rem;
   font-weight: 600;
-  margin: 1rem 0 0.4rem;
+  margin: 16px 0 8px;
 }
 .meeting-form input,
-.meeting-form select {
+.meeting-calculator input {
   width: 100%;
   min-width: 0;
-  min-height: 48px;
-  padding: 0.75rem;
+  min-height: 54px;
+  border: 1px solid #c4cabc;
+  border-radius: 12px;
+  background: var(--tile-face-hi);
+  padding: 12px 15px;
   font: inherit;
   color: var(--ink);
-  border: 1px solid var(--ink-soft);
-  border-radius: 6px;
-  background: var(--tile-face-hi);
 }
-.meeting-form input:disabled,
-.meeting-form select:disabled {
-  opacity: 0.8;
+.meeting-form input::placeholder {
+  color: #686156;
+  opacity: 1;
 }
 .meeting-page button,
-.meeting-primary {
+.meeting-calculator button {
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.meeting-page button:disabled,
+.meeting-calculator button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.meeting-page .meeting-primary,
+.meeting-calculator .meeting-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--jade);
+  color: var(--tile-face-hi);
+  font: 600 0.97rem/1.4 var(--body);
+  padding: 12px 18px;
+  text-decoration: none;
+  text-align: center;
+}
+.meeting-form .meeting-page .meeting-primary,
+.meeting-calculator .meeting-primary {
+  margin-top: 22px;
+}
+.meeting-page .meeting-text,
+.meeting-calculator .meeting-text {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 0.65rem 1.1rem;
-  border: 1px solid var(--jade);
-  border-radius: 6px;
-  font: 600 1rem var(--body);
-  line-height: 1.4;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
   color: var(--jade);
-  background: var(--tile-face-hi);
-  cursor: pointer;
-  text-align: center;
-}
-.meeting-page button:disabled {
-  opacity: 0.65;
-  cursor: default;
-}
-.meeting-page .meeting-primary {
-  color: var(--tile-face-hi);
-  background: var(--jade);
+  font-size: 0.85rem;
+  font-weight: 600;
   text-decoration: none;
 }
-.meeting-form > .meeting-primary,
-.meeting-form fieldset > .meeting-primary {
-  width: 100%;
-  margin-top: 1rem;
+.meeting-back {
+  margin-bottom: 20px;
 }
 .meeting-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 1.25rem;
+  display: grid;
+  gap: 12px;
+  margin-top: 30px;
 }
-.meeting-session,
+.meeting-quiet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.meeting-page .meeting-notice {
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--tile-letter);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+.meeting-notice h2 {
+  margin-bottom: 12px;
+}
+.meeting-notice p + p {
+  margin-top: 8px;
+}
+.meeting-error {
+  color: var(--tile-letter);
+  font-size: 0.83rem;
+  margin: 12px 0 !important;
+}
+.meeting-check {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  margin: 28px 0;
+  background: var(--tile-face-hi);
+  border: 1px solid #d6c8ae;
+  border-bottom: 4px solid #cabda5;
+  border-radius: 16px;
+  transform: rotate(-5deg);
+  color: var(--jade);
+  font-size: 2rem;
+}
+.meeting-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--rule);
+  border-bottom: 3px solid #cabda5;
+  border-radius: 9px;
+  background: var(--tile-face-hi);
+  color: var(--jade);
+  font: 700 1.3rem var(--display);
+  flex-shrink: 0;
+}
+.meeting-tiles {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  height: 136px;
+  align-items: center;
+  margin: 16px 0 10px;
+}
+.meeting-tiles > span {
+  width: 88px;
+  height: 124px;
+  filter: drop-shadow(0 5px 3px #5d4b2520);
+  transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
+}
+.meeting-tiles > span:first-child {
+  --tilt: -16deg;
+  --lift: 8px;
+  margin-right: -8px;
+}
+.meeting-tiles > span:nth-child(2) {
+  --tilt: 3deg;
+  --lift: -7px;
+}
+.meeting-tiles > span:last-child {
+  --tilt: 18deg;
+  --lift: 10px;
+  margin-left: -8px;
+}
+.meeting-seats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 28px 0;
+}
+.meeting-seat {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  min-height: 100px;
+  border: 1px dashed var(--rule);
+  border-radius: 14px;
+  font-size: 0.73rem;
+  text-align: center;
+  padding: 6px;
+  overflow-wrap: anywhere;
+}
+.meeting-seat.filled {
+  border-style: solid;
+  border-bottom: 3px solid #cabda5;
+  background: var(--tile-face-hi);
+}
 .meeting-lobby {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  color: var(--ink-soft);
-  font-size: 0.9rem;
+  gap: 8px;
+  font-size: 0.8rem;
+  margin: 24px 0 12px;
+  flex-wrap: wrap;
 }
-.meeting-session {
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 0.75rem;
-}
-.meeting-session button,
-.meeting-lobby button {
-  background: transparent;
-  font-size: 0.88rem;
-  padding-inline: 0.75rem;
-}
-.meeting-notice {
-  padding: 1.25rem;
-  border: 1px solid var(--rule);
-  border-left: 4px solid var(--jade);
-  border-radius: 4px;
-  margin: 1rem 0;
-}
-.meeting-notice h2 {
-  margin-top: 0;
-  font-size: 1.8rem;
-}
-.meeting-notice p:last-child {
-  margin-bottom: 0;
-}
-.meeting-error {
-  color: var(--tile-letter);
-  font-weight: 600;
-}
-.meeting-receipt {
-  padding-block: 1rem;
-}
-.meeting-receipt h2 {
-  font-size: clamp(2rem, 7vw, 3rem);
-  line-height: 1.15;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.score-form {
-  max-width: none;
-}
-.score-seats {
+.player-chips {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 10px;
 }
-.score-seat {
-  padding: 1.25rem;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  background: #fffdf670;
-}
-.score-seat h2 {
-  margin: 0;
-  font: 700 1.6rem var(--display);
-}
-.score-total {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+.player-chips button {
+  display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-.score-total > span {
-  white-space: nowrap;
+  gap: 9px;
+  min-width: 0;
+  min-height: 62px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--tile-face-hi);
+  color: var(--ink);
+  text-align: left;
   font-size: 0.9rem;
+}
+.player-chips button > span:nth-child(2) {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.player-chips small {
+  margin-left: auto;
+  color: var(--tile-letter);
+}
+.player-chips [aria-pressed="true"] {
+  border-color: var(--jade);
+  background: #f4f1e5;
+}
+.score-rows {
+  margin-top: 28px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--tile-face-hi);
+  overflow: hidden;
+}
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+.score-row + .score-row {
+  border-top: 1px solid var(--rule);
+}
+.score-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.score-name small {
+  display: block;
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  margin-top: 3px;
+}
+.total-button {
+  min-width: 72px;
+  min-height: 48px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: #f5f0e5;
+  color: var(--jade);
+  padding: 8px 12px;
+  font-variant-numeric: tabular-nums;
+}
+.score-foot {
+  position: sticky;
+  bottom: 0;
+  padding: 16px 0 calc(18px + env(safe-area-inset-bottom));
+  margin-top: 26px;
+  background: var(--paper);
+  z-index: 1;
+}
+.score-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.83rem;
+  margin-bottom: 14px;
+}
+.score-summary strong {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+.score-summary small {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.score-summary p {
+  width: 100%;
+  font-size: 0.77rem;
   color: var(--ink-soft);
 }
-.score-total strong {
-  display: inline-block;
-  min-width: 2.5rem;
-  color: var(--ink);
-}
-.card-calculator {
-  margin-top: 1rem;
+.meeting-recovery {
+  margin-top: 16px;
 }
 .meeting-page summary {
   min-height: 44px;
-  padding-block: 0.65rem;
-  color: var(--jade);
   cursor: pointer;
-  font-weight: 600;
+  color: var(--jade);
+  padding: 12px 0;
 }
-.player-chips {
+/* Native dialogs open and close immediately; animating the container broke modal dismissal in rehearsal. */
+.meeting-calculator {
+  position: fixed;
+  inset: auto 0 0;
+  margin: 0 auto;
+  width: min(100%, 480px);
+  max-width: none;
+  max-height: 94dvh;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  border-radius: 26px 26px 0 0;
+  padding: 22px 24px calc(24px + env(safe-area-inset-bottom));
+  background: var(--tile-face-hi);
+  color: var(--ink);
+  font-family: var(--body);
+}
+.meeting-calculator::backdrop {
+  background: #18261d66;
+}
+.calculator-head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-.meeting-page .player-chips button {
-  border-radius: 999px;
+.calculator-head h2 {
+  font: 700 2rem var(--display);
+  margin: 0;
 }
-.meeting-page .player-chips button[aria-pressed="true"] {
-  background: var(--jade);
-  color: var(--tile-face-hi);
+.calculator-head .eyebrow {
+  margin: 0;
+  color: var(--tile-letter);
+}
+.calculator-head button {
+  min-width: 44px;
+  font-size: 1.5rem !important;
+}
+.meeting-calculator input {
+  font-size: 2.6rem;
+  font-weight: 600;
 }
 .card-keypad {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: 8px;
+  margin-top: 18px;
 }
-.meeting-page .card-keypad button {
-  flex-direction: column;
-  padding: 0.5rem 0.25rem;
-  min-height: 64px;
+.card-keypad button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-height: 60px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--tile-face-hi);
+  color: var(--jade);
+  padding: 8px 3px;
 }
 .card-keypad small {
-  font-size: 0.75rem;
-  font-weight: 400;
-}
-.score-summary {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.3rem 1rem;
-  align-items: baseline;
-  border-block: 1px solid var(--rule);
-  padding-block: 1rem;
-  margin-top: 1.5rem;
-}
-.score-summary > strong {
-  font: 700 2.5rem var(--display);
-}
-.score-summary small {
+  font-size: 0.65rem;
   color: var(--ink-soft);
-  font-size: 1.2rem;
 }
-.score-summary p {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.9rem;
+.card-keypad strong {
+  font-size: 1.1rem;
 }
-.meeting-recovery {
-  margin-top: 1rem;
+.meeting-calculator .quiet {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
 }
-@media (max-width: 560px) {
-  .meeting-page .section-wrap {
-    padding-inline: 1.25rem;
+.meeting-page :focus-visible,
+.meeting-calculator :focus-visible {
+  outline: 3px solid #8b5924;
+  outline-offset: 4px;
+}
+@keyframes meeting-blink {
+  50% {
+    opacity: 0.35;
   }
-  .score-seats {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
+}
+@keyframes tile-stamp {
+  from {
+    opacity: 0.4;
+    transform: translateY(9px) rotate(-6deg) scale(0.86);
   }
-  .score-seat {
-    padding: 1rem;
+  to {
+    opacity: 1;
+    transform: none;
   }
-  .meeting-actions > * {
-    flex: 1 1 auto;
+}
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translateY(12px) rotate(0deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-live-dot {
+    animation: meeting-blink 1.6s ease-in-out infinite;
+  }
+  .meeting-seat.filled {
+    animation: tile-stamp 280ms ease-out;
+  }
+  .meeting-tiles > span {
+    animation: deal 360ms ease-out backwards;
+  }
+  .meeting-tiles > span:nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .meeting-tiles > span:last-child {
+    animation-delay: 90ms;
+  }
+  .meeting-page button:active:not(:disabled),
+  .meeting-calculator button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+@media (min-width: 700px) {
+  .meeting-calculator {
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 24px;
+    border-bottom: 1px solid var(--rule);
+    max-height: 92dvh;
+  }
+}
+@media (max-width: 374px) {
+  .meeting-page {
+    padding-inline: 18px;
+  }
+  .meeting-brand strong {
+    font-size: 1.1rem;
+  }
+  .meeting-brand small {
+    font-size: 0.62rem;
+  }
+  .meeting-brand img {
+    width: 30px;
+    height: 30px;
+  }
+  .meeting-page .meeting-website {
+    font-size: 0.69rem;
+  }
+  .player-chips button {
+    padding: 8px;
+    gap: 6px;
+  }
+  .player-chips .meeting-avatar {
+    width: 28px;
+    height: 32px;
+  }
+  .score-row {
+    padding: 12px;
+    gap: 8px;
+  }
+}
+
+.meeting-tiles svg {
+  width: 100%;
+  height: 100%;
+}
+.live-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 20px 0 !important;
+}
+.live-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+  border-block: 1px solid var(--rule);
+}
+.live-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 80px;
+  padding: 14px 0;
+}
+.live-list li + li {
+  border-top: 1px solid var(--rule);
+}
+.live-rank {
+  width: 24px;
+  font: 700 1.6rem var(--display);
+  color: var(--ink-soft);
+}
+.live-points {
+  font: 700 1.7rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.live-change {
+  min-width: 42px;
+  text-align: right;
+  color: var(--jade);
+  font-size: 0.78rem;
+}
+.live-change.down {
+  color: var(--tile-letter);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .live-list li {
+    animation: live-settle 280ms ease-out;
+  }
+}
+
+@keyframes live-settle {
+  from {
+    opacity: 0.4;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

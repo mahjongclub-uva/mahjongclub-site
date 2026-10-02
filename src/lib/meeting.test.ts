@@ -4,6 +4,9 @@ import {
   CARD_VALUES,
   cardTotal,
   getMeeting,
+  getResults,
+  draftSchema,
+  isMeetingPage,
   pendingSchema,
   postMeeting,
   rememberedCode,
@@ -95,4 +98,59 @@ test("Apps Script transport uses plain-text POST and validates application statu
   assert.equal(requests[1].init.referrerPolicy, "no-referrer");
   assert.deepEqual(requests[1].init.headers, { "Content-Type": "text/plain" });
   assert.equal(JSON.parse(requests[1].init.body as string).k, "CODE");
+});
+
+test("live results reject duplicate tables and invalid totals; drafts only store valid opaque seats", async (t) => {
+  let body = {
+    status: 200,
+    meetingId: "m1",
+    date: "2026-10-02",
+    tables: [
+      {
+        table: 1,
+        seats: seats.map((seat) => ({
+          ...seat,
+          display: seat.id,
+          net: seat.total - 205,
+        })),
+      },
+    ],
+  };
+  t.mock.method(globalThis, "fetch", async () => Response.json(body));
+  assert.equal(
+    (await getResults("https://example.test/exec", "CODE")).tables.length,
+    1,
+  );
+  body = { ...body, tables: [body.tables[0], body.tables[0]] };
+  await assert.rejects(getResults("https://example.test/exec", "CODE"));
+  body = {
+    ...body,
+    tables: [
+      {
+        ...body.tables[0],
+        seats: body.tables[0].seats.map((seat, i) => ({
+          ...seat,
+          total: seat.total + (i === 0 ? 1 : 0),
+        })),
+      },
+    ],
+  };
+  await assert.rejects(getResults("https://example.test/exec", "CODE"));
+  assert.ok(
+    draftSchema.safeParse({
+      meetingId: "m1",
+      ids: players.map((p) => p.id),
+      totals: seats.map((s) => String(s.total)),
+    }).success,
+  );
+  assert.equal(
+    draftSchema.safeParse({
+      meetingId: "m1",
+      ids: ["full name", "", "", ""],
+      totals: ["", "", "", ""],
+    }).success,
+    false,
+  );
+  assert.ok(isMeetingPage("/live/"));
+  assert.equal(isMeetingPage("//outside.example"), false);
 });
