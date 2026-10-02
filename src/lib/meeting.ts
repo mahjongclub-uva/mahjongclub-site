@@ -42,24 +42,7 @@ export const pendingSchema = z.object({
     )
     .length(4),
 });
-export const CODE_EVENT = "club-meeting-access";
-export const CODE_STORAGE = "club-meeting-code";
 export const PENDING_STORAGE = "club-pending-table";
-
-export function rememberedCode(raw: string | null, now = Date.now()): string {
-  try {
-    const value = JSON.parse(raw || "null");
-    return value &&
-      typeof value.code === "string" &&
-      Number.isFinite(value.savedAt) &&
-      now >= value.savedAt &&
-      now - value.savedAt < 12 * 3600000
-      ? value.code
-      : "";
-  } catch {
-    return "";
-  }
-}
 
 export function tableError(seats: Seat[], players: Player[]): string | null {
   if (
@@ -106,12 +89,10 @@ async function readResponse(url: string, init: RequestInit = {}) {
 }
 export async function getMeeting(
   url: string,
-  code: string,
   signal?: AbortSignal,
 ): Promise<Meeting> {
   const target = new URL(url);
   target.searchParams.set("r", "meeting");
-  if (code) target.searchParams.set("k", code);
   const { body, reply } = await readResponse(target.href, {
     signal,
     cache: "no-store",
@@ -122,11 +103,11 @@ export async function getMeeting(
     );
   return meetingSchema.parse(body);
 }
-export async function postMeeting(url: string, code: string, data: object) {
+export async function postMeeting(url: string, data: object) {
   const { reply } = await readResponse(url, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ ...data, k: code }),
+    body: JSON.stringify(data),
   });
   return reply;
 }
@@ -152,7 +133,6 @@ export function isMeetingPage(path: string) {
 export function rememberMeetingPage(path: string) {
   try {
     sessionStorage.setItem(RETURN_STORAGE, path);
-    window.dispatchEvent(new Event(CODE_EVENT));
   } catch {
     /* Navigation still works without storage. */
   }
@@ -195,12 +175,10 @@ const resultsSchema = z.object({
 export type Results = z.infer<typeof resultsSchema>;
 export async function getResults(
   url: string,
-  code: string,
   signal?: AbortSignal,
 ): Promise<Results> {
   const target = new URL(url);
   target.searchParams.set("r", "results");
-  target.searchParams.set("k", code);
   const { body, reply } = await readResponse(target.href, {
     signal,
     cache: "no-store",

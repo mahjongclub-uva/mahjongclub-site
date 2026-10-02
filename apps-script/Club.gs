@@ -26,20 +26,13 @@ function settings() {
 function validateSettings(value) {
   if (
     !value ||
-    typeof value.code !== "string" ||
-    !/^[A-Z0-9]+(?:-[A-Z0-9]+)*$/.test(value.code) ||
-    value.code.length < 8 ||
-    value.code.length > 64 ||
     typeof value.calendarId !== "string" ||
     !value.calendarId ||
     !Array.isArray(value.semesters) ||
     !value.semesters.length ||
     !Array.isArray(value.publishedPlayers)
   )
-    fail(
-      400,
-      "Settings need a semester code, calendarId, semesters and publishedPlayers.",
-    );
+    fail(400, "Settings need calendarId, semesters and publishedPlayers.");
   for (const key of ["checkinMinutesBefore", "scoreMinutesAfter"]) {
     if (!Number.isInteger(value[key]) || value[key] < 0 || value[key] > 1440)
       fail(400, "Meeting margins must be whole minutes from 0 to 1440.");
@@ -204,9 +197,7 @@ function updateMeeting() {
   return meeting;
 }
 
-function requireMeeting(request, checkin) {
-  if (request.k !== settings().code)
-    fail(401, "The semester code is incorrect.");
+function requireMeeting(checkin) {
   const meeting = updateMeeting();
   const state = meetingWindow(meeting, Date.now());
   if (!(checkin ? state.checkinsOpen : state.open))
@@ -542,15 +533,14 @@ function doGet(event) {
           date: meeting?.date || null,
           semester: meeting?.semester || null,
         };
-        if (state.open && request.k === settings().code)
+        if (state.open)
           response.players = checkedPlayers(
             meeting,
             rosterLayout(sheet("Roster").getDataRange().getValues()),
           ).map(publicPlayer);
         return response;
       }
-      if (request.r === "results")
-        return results(requireMeeting(request, false));
+      if (request.r === "results") return results(requireMeeting(false));
       fail(404, "Unknown resource.");
     }),
   );
@@ -571,7 +561,7 @@ function doPost(event) {
     if (!["checkins", "players", "results"].includes(request.r))
       fail(404, "Unknown resource.");
     return withLock(() => {
-      const meeting = requireMeeting(request, request.r !== "results");
+      const meeting = requireMeeting(request.r !== "results");
       return request.r === "results"
         ? submitResult(request, meeting)
         : checkIn(request, meeting);
@@ -613,7 +603,6 @@ function clubSettings() {
 function clubReadSettings() {
   return (
     JSON.parse(properties().getProperty("settings") || "null") || {
-      code: "",
       calendarId: "",
       checkinMinutesBefore: 30,
       scoreMinutesAfter: 60,

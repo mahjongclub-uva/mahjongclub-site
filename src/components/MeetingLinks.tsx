@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  CODE_EVENT,
-  CODE_STORAGE,
   RETURN_STORAGE,
   getMeeting,
-  rememberedCode,
   isMeetingPage,
   type Meeting,
 } from "@/lib/meeting";
@@ -28,9 +25,7 @@ export default function MeetingLinks() {
       controller?.abort();
       controller = new AbortController();
       try {
-        let code = "";
         try {
-          code = rememberedCode(sessionStorage.getItem(CODE_STORAGE));
           const saved = sessionStorage.getItem(RETURN_STORAGE);
           setTarget(saved && isMeetingPage(saved) ? saved : "/checkin/");
         } catch {
@@ -38,7 +33,6 @@ export default function MeetingLinks() {
         }
         const next = await getMeeting(
           MEETING_SERVICE_URL,
-          code,
           AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
         );
         if (current === revision) setMeeting(next);
@@ -47,13 +41,11 @@ export default function MeetingLinks() {
       }
     }
     void load();
-    window.addEventListener(CODE_EVENT, load);
     const timer = setInterval(load, 60000);
     return () => {
       revision++;
       controller?.abort();
       clearInterval(timer);
-      window.removeEventListener(CODE_EVENT, load);
     };
   }, [pathname]);
   if (!meeting?.open || !meeting.date) return null;

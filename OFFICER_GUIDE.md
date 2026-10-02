@@ -72,7 +72,7 @@ Keep recording production meetings as before until the rehearsal passes.
 3. Add `apps-script/Settings.html` as an HTML file named `Settings`.
 4. In **Project Settings**, enable the manifest editor and replace `appsscript.json` with `apps-script/appsscript.json`.
 5. Save, run `onOpen`, and return to the workbook.
-6. Open **Club > Settings** and enter the calendar ID, a new uppercase semester code, semester dates, and the exact Attendance and Points Tracking tab names.
+6. Open **Club > Settings** and enter the calendar ID, semester dates, and the exact Attendance and Points Tracking tab names.
 7. Run **Club > Set up** and grant the requested permissions as the account that will own the timer and deployment.
 8. Deploy a new **Web app**, executing as yourself with access for **Anyone**, and save its `/exec` URL privately.
 
@@ -132,19 +132,19 @@ Also try one unscheduled date and one newcomer.
 Every response is JSON with a numeric `status`; read that field even when transport status is 200.
 Send POST bodies as `text/plain` to avoid a browser preflight.
 
-| Request                                                                  | Fields and response                                                                                                        |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET ?r=meeting`                                                         | Public `open`, `checkinsOpen`, `meetingId`, `date`, `semester`; add `k` to get the checked-in lobby during an open meeting |
-| `GET ?r=results&k=...`                                                   | Tonight's tables, opaque ids, short names, totals and nets; cached for 30 seconds                                          |
-| `POST {r:"checkins", k, computingId}`                                    | Returning-player check-in; 404 means the name registration form is needed                                                  |
-| `POST {r:"players", k, computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                      |
-| `POST {r:"players", k, computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                                  |
-| `POST {r:"results", k, meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                         |
+| Request                                                               | Fields and response                                                                                                  |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `GET ?r=meeting`                                                      | Public `open`, `checkinsOpen`, `meetingId`, `date`, `semester`; includes the checked-in lobby during an open meeting |
+| `GET ?r=results`                                                      | Tonight's tables, opaque ids, short names, totals and nets; cached for 30 seconds                                    |
+| `POST {r:"checkins", computingId}`                                    | Returning-player check-in; 404 means the name registration form is needed                                            |
+| `POST {r:"players", computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                |
+| `POST {r:"players", computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                            |
+| `POST {r:"results", meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                   |
 
 Use one random submission ID per table and retain it until the receipt arrives.
 Receipts reserve a Table N block using its heading cell note before writing, so a retry after a write failure uses the same block.
 Do not remove those notes during corrections.
-Try a repeated submission, changed totals with the same ID, repeated player, fractional total, incorrect sum, unchecked player, wrong code, stale meeting and closed meeting.
+Try a repeated submission, changed totals with the same ID, repeated player, fractional total, incorrect sum, unchecked player, stale meeting and closed meeting.
 None of the rejected cases should fill another table.
 Check the request from a phone browser as well as locally, since local tests cannot verify Google's deployment, redirects or cross-origin behavior.
 Opted-out players use an anonymous `Player pNNN` label in the lobby and results.
@@ -152,17 +152,20 @@ Full names and computing IDs are never included in responses.
 
 ## Meeting pages
 
-The unlisted pages are `/checkin/` and `/score/`.
+The unlisted pages are `/checkin/`, `/score/`, and `/live/`.
 They are excluded from the public navigation and sitemap and marked noindex.
 The endpoint and rehearsal notice are configured by `MEETING_SERVICE_URL` and `MEETING_REHEARSAL` in `src/lib/site.ts`.
 Keep rehearsal mode on until the live workbook installation and a real phone test pass.
 Use fake names and computing IDs with the current endpoint.
 
-A table QR link uses `/checkin/?k=<semester-code>`.
-The page removes the code from the address bar after reading it and remembers only the code in session storage for up to 12 hours.
-It does not store computing IDs or full names.
-After a valid code is accepted, a "Tonight’s meeting" row offers Check in and Record a table across the site while the meeting is open.
-Players can visit the Guide or homepage and return through that row without scanning again.
+A table QR links directly to `/checkin/`; no meeting code is required.
+The same check-in and score pages are available from the website while a meeting is open.
+Anyone with the URL can check in and submit a valid table during that window, including remotely.
+Computing IDs identify roster entries but are not a sign-in or proof of attendance.
+The site does not store computing IDs or full names.
+The floating meeting link shows the date and returns players to their score draft after visiting the Guide or homepage.
+Existing QR links containing an old `k` parameter still work; that parameter is ignored.
+Deploy the updated Apps Script backend before the code-free website; the old backend still requires a code.
 Players without a computing ID still check in through an officer in the Sheet.
 
 The score page lists only tonight's checked-in short names, prevents repeated players, and requires four whole ending totals summing to 820.
@@ -172,7 +175,8 @@ Before sending a table, the page stores its opaque player IDs, totals, meeting I
 If the response is lost or the page reloads, retry the same save; the players and totals stay locked until a receipt arrives.
 If an unconfirmed save belongs to an earlier meeting, an officer must check the Sheet before the submitter starts over.
 Corrections to confirmed results are officer edits in the Sheet.
-The receipt links to the official leaderboard until the provisional `/live` page is added in step 4.
+The receipt links to `/live/`, which adds tonight’s scores to the official season snapshot and shows rank movement.
+The regular leaderboard remains the official snapshot until the publishing pipeline updates it.
 
 If the site is unavailable, an officer records attendance and results directly in the Sheet.
 

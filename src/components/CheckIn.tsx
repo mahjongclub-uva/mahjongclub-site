@@ -14,11 +14,9 @@ import {
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
 function CheckInForm({
-  code,
   meeting,
   refresh,
 }: {
-  code: string;
   meeting: Meeting;
   refresh: () => void;
 }) {
@@ -41,7 +39,7 @@ function CheckInForm({
     setBusy(true);
     setError("");
     try {
-      const reply = await postMeeting(MEETING_SERVICE_URL, code, {
+      const reply = await postMeeting(MEETING_SERVICE_URL, {
         r: register ? "players" : "checkins",
         computingId: computingId.trim(),
         ...(register ? { fullName: fullName.trim(), ...choice } : {}),
@@ -56,7 +54,7 @@ function CheckInForm({
       }
       if (reply.status >= 400) {
         setError(reply.message || "Ask an officer to check your attendance.");
-        if ([401, 423].includes(reply.status)) refresh();
+        if (reply.status === 423) refresh();
         return;
       }
       if (!reply.player)
@@ -252,10 +250,9 @@ function CheckInForm({
 export default function CheckIn() {
   return (
     <MeetingAccess>
-      {(code, meeting, refresh) => (
+      {(meeting, refresh) => (
         <CheckInForm
           key={meeting.meetingId}
-          code={code}
           meeting={meeting}
           refresh={refresh}
         />

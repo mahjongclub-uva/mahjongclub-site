@@ -165,7 +165,6 @@ function harness() {
   }
   const now = Date.UTC(2026, 8, 30, 22);
   const config = {
-    code: "PLUM-BAMBOO",
     calendarId: "fake",
     checkinMinutesBefore: 30,
     scoreMinutesAfter: 60,
@@ -297,16 +296,15 @@ function harness() {
       JSON.parse(
         context.doPost({
           postData: {
-            contents: JSON.stringify({ k: config.code, ...request }),
+            contents: JSON.stringify(request),
           },
         }),
       ),
-    get: (request) =>
-      JSON.parse(context.doGet({ parameter: { k: config.code, ...request } })),
+    get: (request) => JSON.parse(context.doGet({ parameter: request })),
   };
 }
 
-test("a meeting accepts check-ins and saves one result, preserving summaries", () => {
+test("an open meeting accepts code-free check-ins and results, preserving summaries", () => {
   const h = harness();
   const summaries = h.tabs.Points.grid.map((row) => row.slice(6));
   const formulas = { ...h.tabs.Points.formulas };
@@ -327,6 +325,7 @@ test("a meeting accepts check-ins and saves one result, preserving summaries", (
   );
   for (const [key, formula] of Object.entries(formulas))
     assert.equal(h.tabs.Points.formulas[key], formula);
+  assert.equal(h.get({ r: "meeting" }).players.length, 6);
   const response = h.get({ r: "results" });
   assert.equal(response.tables.length, 1);
   assert.equal(response.tables[0].seats[3].display, "Player p004");
@@ -395,7 +394,7 @@ test("signup claims history, limits suggestions to published players, and insert
   );
 });
 
-test("closed meetings, wrong codes, stale meetings and invalid totals write nothing", () => {
+test("closed meetings, stale meetings and invalid totals write nothing", () => {
   const h = harness();
   const snapshot = JSON.stringify(h.tabs.Points.grid);
   const seats = ["p001", "p002", "p003", "p004"].map((id) => ({
@@ -409,7 +408,6 @@ test("closed meetings, wrong codes, stale meetings and invalid totals write noth
     seats,
   };
   for (const changes of [
-    { k: "wrong" },
     { meetingId: "yesterday" },
     { seats: [seats[0], seats[0], seats[2], seats[3]] },
     { seats: seats.map((seat) => ({ ...seat, total: 204 })) },
@@ -422,7 +420,7 @@ test("closed meetings, wrong codes, stale meetings and invalid totals write noth
   assert.equal(h.post(request).status, 423);
   assert.equal(h.post({ r: "checkins", computingId: "a1" }).status, 423);
   assert.equal(JSON.stringify(h.tabs.Points.grid), snapshot);
-  assert.equal(h.get({ r: "meeting", k: "wrong" }).players, undefined);
+  assert.equal(h.get({ r: "meeting" }).players, undefined);
 });
 
 test("name derivation matches migration, and layout changes fail before writing", () => {

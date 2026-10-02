@@ -14,11 +14,9 @@ import type { Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
 function LiveTable({
-  code,
   meeting,
   semester,
 }: {
-  code: string;
   meeting: Meeting;
   semester: Semester;
 }) {
@@ -37,7 +35,6 @@ function LiveTable({
       try {
         const next = await getResults(
           MEETING_SERVICE_URL,
-          code,
           AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
         );
         if (stopped || current !== request) return;
@@ -58,7 +55,7 @@ function LiveTable({
       controller?.abort();
       clearInterval(timer);
     };
-  }, [code, meeting.meetingId, meeting.date, revision]);
+  }, [meeting.meetingId, meeting.date, revision]);
   const matching =
     meeting.semester === semester.id && semester.scoring_rule === "season-net";
   const rows = liveStandings(
@@ -196,10 +193,9 @@ function LiveTable({
 export default function LiveStandings({ semester }: { semester: Semester }) {
   return (
     <MeetingAccess>
-      {(code, meeting) => (
+      {(meeting) => (
         <LiveTable
           key={meeting.meetingId}
-          code={code}
           meeting={meeting}
           semester={semester}
         />

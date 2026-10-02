@@ -175,11 +175,9 @@ function CardCalculator({
 }
 
 function ScoreForm({
-  code,
   meeting,
   refresh,
 }: {
-  code: string;
   meeting: Meeting;
   refresh: () => void;
 }) {
@@ -296,7 +294,7 @@ function ScoreForm({
     setBusy(true);
     setError("");
     try {
-      const reply = await postMeeting(MEETING_SERVICE_URL, code, submission);
+      const reply = await postMeeting(MEETING_SERVICE_URL, submission);
       if (reply.status >= 400) {
         setError(
           reply.message ||
@@ -306,7 +304,7 @@ function ScoreForm({
           sessionStorage.removeItem(PENDING_STORAGE);
           setPending(null);
         }
-        if ([401, 423].includes(reply.status)) refresh();
+        if (reply.status === 423) refresh();
         return;
       }
       if (![200, 201].includes(reply.status) || !reply.table)
@@ -591,10 +589,9 @@ function ScoreForm({
 export default function ScoreEntry() {
   return (
     <MeetingAccess>
-      {(code, meeting, refresh) => (
+      {(meeting, refresh) => (
         <ScoreForm
           key={meeting.meetingId}
-          code={code}
           meeting={meeting}
           refresh={refresh}
         />
