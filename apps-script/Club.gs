@@ -151,11 +151,16 @@ function startMeeting(id, start, end) {
   return meeting;
 }
 
+// Cached so a room full of phones costs one Calendar read per five minutes;
+// a meeting can therefore open up to five minutes into its check-in window.
 function calendarMeetings(now) {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get("calendar");
+  if (cached) return JSON.parse(cached);
   const config = settings();
   const calendar = CalendarApp.getCalendarById(config.calendarId);
   if (!calendar) fail(503, "The configured calendar is not accessible.");
-  return calendar
+  const events = calendar
     .getEvents(
       new Date(now - (config.scoreMinutesAfter + 1440) * 60000),
       new Date(now + config.checkinMinutesBefore * 60000),
@@ -167,7 +172,14 @@ function calendarMeetings(now) {
           event.getStartTime().getTime() -
             config.checkinMinutesBefore * 60000 &&
         now < event.getEndTime().getTime() + config.scoreMinutesAfter * 60000,
-    );
+    )
+    .map((event) => ({
+      id: event.getId() + ":" + event.getStartTime().getTime(),
+      start: event.getStartTime().getTime(),
+      end: event.getEndTime().getTime(),
+    }));
+  cache.put("calendar", JSON.stringify(events), 300);
+  return events;
 }
 
 function updateMeeting() {
@@ -183,18 +195,21 @@ function updateMeeting() {
     fail(503, "Calendar meetings overlap. An officer must correct them.");
   if (events.length === 1) {
     const event = events[0];
-    const id = event.getId() + ":" + event.getStartTime().getTime();
     if (
-      properties().getProperty("closedCalendarEvent") !== id &&
-      meeting?.id !== id
+      properties().getProperty("closedCalendarEvent") !== event.id &&
+      meeting?.id !== event.id
     )
-      meeting = startMeeting(
-        id,
-        event.getStartTime().getTime(),
-        event.getEndTime().getTime(),
-      );
+      meeting = startMeeting(event.id, event.start, event.end);
   }
   return meeting;
+}
+
+// Reads skip the lock while a meeting is open; only opening or closing takes it.
+function currentMeeting() {
+  const meeting = readMeeting();
+  return meetingWindow(meeting, Date.now()).open
+    ? meeting
+    : withLock(updateMeeting);
 }
 
 function requireMeeting(checkin) {
@@ -520,30 +535,32 @@ function respond(action) {
 }
 
 function doGet(event) {
-  return respond(() =>
-    withLock(() => {
-      const request = event.parameter || {};
-      if (request.r === "meeting") {
-        const meeting = updateMeeting();
-        const state = meetingWindow(meeting, Date.now());
-        const response = {
-          status: 200,
-          ...state,
-          meetingId: meeting?.id || null,
-          date: meeting?.date || null,
-          semester: meeting?.semester || null,
-        };
-        if (state.open)
-          response.players = checkedPlayers(
-            meeting,
-            rosterLayout(sheet("Roster").getDataRange().getValues()),
-          ).map(publicPlayer);
-        return response;
-      }
-      if (request.r === "results") return results(requireMeeting(false));
-      fail(404, "Unknown resource.");
-    }),
-  );
+  return respond(() => {
+    const request = event.parameter || {};
+    const meeting = currentMeeting();
+    if (request.r === "meeting") {
+      const state = meetingWindow(meeting, Date.now());
+      const response = {
+        status: 200,
+        ...state,
+        meetingId: meeting?.id || null,
+        date: meeting?.date || null,
+        semester: meeting?.semester || null,
+      };
+      if (state.open)
+        response.players = checkedPlayers(
+          meeting,
+          rosterLayout(sheet("Roster").getDataRange().getValues()),
+        ).map(publicPlayer);
+      return response;
+    }
+    if (request.r === "results") {
+      if (!meetingWindow(meeting, Date.now()).open)
+        fail(423, "The meeting is closed.");
+      return results(meeting);
+    }
+    fail(404, "Unknown resource.");
+  });
 }
 
 function doPost(event) {
@@ -651,19 +668,13 @@ function clubSetup() {
         );
         pointsLayout(sheet(semester.pointsTab).getDataRange().getValues());
       });
-      const triggers = ScriptApp.getProjectTriggers().filter(
-        (trigger) => trigger.getHandlerFunction() === "clubTick",
-      );
-      if (!triggers.length)
-        ScriptApp.newTrigger("clubTick").timeBased().everyMinutes(1).create();
-      triggers.slice(1).forEach((trigger) => ScriptApp.deleteTrigger(trigger));
-      return "Set up complete for this account. The calendar timer runs every minute.";
+      // Meetings open when someone visits, so remove the old every-minute timer.
+      ScriptApp.getProjectTriggers()
+        .filter((trigger) => trigger.getHandlerFunction() === "clubTick")
+        .forEach((trigger) => ScriptApp.deleteTrigger(trigger));
+      return "Set up complete. Meetings open from the calendar when the first person visits.";
     }),
   );
-}
-
-function clubTick() {
-  withLock(updateMeeting);
 }
 
 function clubOpen() {
@@ -694,10 +705,7 @@ function clubClose() {
       else {
         const events = calendarMeetings(Date.now());
         if (events.length === 1)
-          properties().setProperty(
-            "closedCalendarEvent",
-            events[0].getId() + ":" + events[0].getStartTime().getTime(),
-          );
+          properties().setProperty("closedCalendarEvent", events[0].id);
       }
       return "Meeting closed. Automatic score publishing is added in build step 5.";
     }),

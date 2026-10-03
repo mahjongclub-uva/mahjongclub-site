@@ -73,13 +73,14 @@ Keep recording production meetings as before until the rehearsal passes.
 4. In **Project Settings**, enable the manifest editor and replace `appsscript.json` with `apps-script/appsscript.json`.
 5. Save, run `onOpen`, and return to the workbook.
 6. Open **Club > Settings** and enter the calendar ID, semester dates, and the exact Attendance and Points Tracking tab names.
-7. Run **Club > Set up** and grant the requested permissions as the account that will own the timer and deployment.
+7. Run **Club > Set up** and grant the requested permissions as the account that will own the deployment.
 8. Deploy a new **Web app**, executing as yourself with access for **Anyone**, and save its `/exec` URL privately.
 
 Set the workbook timezone to America/New_York.
-The timer checks the calendar every minute and treats every timed event as a meeting; all-day events are ignored.
+There is no timer. A meeting opens when the first person visits during its window, and may open up to five minutes late because the calendar is checked at most every five minutes. Every timed event is a meeting; all-day events are ignored.
+The website's meeting banner follows `data/meetings.json`, so a meeting opened with **Open now** works from the QR or `/checkin/` link but shows no banner.
 Overlapping meeting windows are refused.
-Set up is safe to repeat for the same account and preserves unrelated timers.
+Set up is safe to repeat. It removes the every-minute `clubTick` timer that earlier versions created and leaves other timers alone.
 The script stays bound to the workbook, while Set up stores the workbook ID so web requests can open it explicitly.
 
 The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onward, checkbox cells, and at least one member row with a `# Meets` formula.
@@ -124,7 +125,7 @@ Current opt-outs and claimed rows are excluded even if they appear in an older s
 
 Use a new private workbook with fake names and the layouts above, including blank rows with checkboxes and empty tables with Net formulas.
 Use a test calendar with an event for the rehearsal date.
-Run Set up twice and confirm there is only one `clubTick` timer for your account.
+Run Set up and confirm no `clubTick` timer remains for your account.
 Test calendar opening, the check-in cutoff, the score grace period, and Close now.
 Confirm the exact row, checkbox, formula and table cells after each write, including that G onward stayed unchanged.
 Also try one unscheduled date and one newcomer.

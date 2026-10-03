@@ -11,9 +11,24 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { formatDate } from "@/lib/format";
+import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 import styles from "./MeetingLinks.module.css";
 
-export default function MeetingLinks() {
+// Matches the backend's default check-in and score margins. Outside these
+// windows the banner never contacts the meeting service.
+function nearMeeting(schedule: ScheduledMeeting[], now: number) {
+  return schedule.some(
+    (m) =>
+      now >= Date.parse(m.start) - 30 * 60000 &&
+      now < Date.parse(m.end ?? m.start) + 60 * 60000,
+  );
+}
+
+export default function MeetingLinks({
+  schedule,
+}: {
+  schedule: ScheduledMeeting[];
+}) {
   const pathname = usePathname();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [target, setTarget] = useState("/checkin/");
@@ -31,6 +46,10 @@ export default function MeetingLinks() {
         } catch {
           /* Public meeting state is still available without storage. */
         }
+        if (!nearMeeting(schedule, Date.now())) {
+          if (current === revision) setMeeting(null);
+          return;
+        }
         const next = await getMeeting(
           MEETING_SERVICE_URL,
           AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
@@ -47,7 +66,7 @@ export default function MeetingLinks() {
       controller?.abort();
       clearInterval(timer);
     };
-  }, [pathname]);
+  }, [pathname, schedule]);
   if (!meeting?.open || !meeting.date) return null;
   const href =
     !meeting.checkinsOpen && target === "/checkin/" ? "/score/" : target;

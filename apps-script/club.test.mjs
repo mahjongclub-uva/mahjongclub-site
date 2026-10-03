@@ -487,15 +487,15 @@ test("calendar windows open once, close check-in before scores, and respect Clos
   assert.equal(h.get({ r: "meeting" }).checkinsOpen, false);
   h.context.clubClose();
   assert.equal(h.get({ r: "meeting" }).open, false);
-  h.context.clubTick();
   assert.equal(JSON.parse(h.store.meeting).closed, true);
 });
 
 test("Set up is repeatable, and malformed settings do not replace valid settings", () => {
   const h = harness();
+  h.triggers.push({ getHandlerFunction: () => "clubTick" });
   h.context.clubSetup();
   h.context.clubSetup();
-  assert.equal(h.triggers.length, 1);
+  assert.equal(h.triggers.length, 0);
   h.store.meeting = "null";
   const previous = h.store.settings;
   assert.throws(() =>

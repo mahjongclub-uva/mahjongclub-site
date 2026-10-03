@@ -7,6 +7,7 @@ import SiteChrome from "@/components/SiteChrome";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
+import { getMeetings } from "@/lib/data";
 import "./globals.css";
 
 const display = Barlow_Condensed({
@@ -54,7 +55,7 @@ export default function RootLayout({
             <>
               <AmbientTiles />
               <Nav />
-              <MeetingLinks />
+              <MeetingLinks schedule={getMeetings()} />
             </>
           }
           footer={<Footer />}

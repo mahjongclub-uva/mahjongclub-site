@@ -119,18 +119,20 @@ export function getCurrentSemester(): Semester {
  * build time, the only moment a static export has.
  */
 export function getNextMeeting(): Meeting | null {
-  const path = join(DATA_DIR, "meetings.json");
-  if (!existsSync(path)) return null;
+  const now = Date.now();
+  return (
+    getMeetings().find((m) => new Date(m.end ?? m.start).getTime() > now) ??
+    null
+  );
+}
 
-  const data = parseOrDie(
+/** Every meeting in data/meetings.json, or none if the file is missing. */
+export function getMeetings(): Meeting[] {
+  const path = join(DATA_DIR, "meetings.json");
+  if (!existsSync(path)) return [];
+  return parseOrDie(
     meetingsSchema,
     readJson(path, "data/meetings.json"),
     "data/meetings.json",
-  );
-
-  const now = Date.now();
-  return (
-    data.meetings.find((m) => new Date(m.end ?? m.start).getTime() > now) ??
-    null
-  );
+  ).meetings;
 }
