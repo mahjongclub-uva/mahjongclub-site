@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,6 +12,7 @@ import {
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
+import { usePoll } from "@/lib/usePoll";
 import styles from "./MeetingLinks.module.css";
 
 // Matches the backend's default check-in and score margins. Outside these
@@ -32,41 +33,23 @@ export default function MeetingLinks({
   const pathname = usePathname();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [target, setTarget] = useState("/checkin/");
-  useEffect(() => {
-    let revision = 0;
-    let controller: AbortController;
-    async function load() {
-      const current = ++revision;
-      controller?.abort();
-      controller = new AbortController();
+  usePoll(
+    async (signal) => {
       try {
-        try {
-          const saved = sessionStorage.getItem(RETURN_STORAGE);
-          setTarget(saved && isMeetingPage(saved) ? saved : "/checkin/");
-        } catch {
-          /* Public meeting state is still available without storage. */
-        }
-        if (!nearMeeting(schedule, Date.now())) {
-          if (current === revision) setMeeting(null);
-          return;
-        }
-        const next = await getMeeting(
-          MEETING_SERVICE_URL,
-          AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
-        );
-        if (current === revision) setMeeting(next);
+        const saved = sessionStorage.getItem(RETURN_STORAGE);
+        setTarget(saved && isMeetingPage(saved) ? saved : "/checkin/");
       } catch {
-        if (current === revision) setMeeting(null);
+        /* Public meeting state is still available without storage. */
       }
-    }
-    void load();
-    const timer = setInterval(load, 60000);
-    return () => {
-      revision++;
-      controller?.abort();
-      clearInterval(timer);
-    };
-  }, [pathname, schedule]);
+      if (!nearMeeting(schedule, Date.now())) return setMeeting(null);
+      const next = await getMeeting(MEETING_SERVICE_URL, signal).catch(
+        () => null,
+      );
+      if (!signal.aborted) setMeeting(next);
+    },
+    60000,
+    [pathname, schedule],
+  );
   if (!meeting?.open || !meeting.date) return null;
   const href =
     !meeting.checkinsOpen && target === "/checkin/" ? "/score/" : target;

@@ -1,8 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  CARD_VALUES,
-  cardTotal,
   getMeeting,
   getResults,
   draftSchema,
@@ -34,11 +32,7 @@ test("only four distinct checked-in players with whole balanced totals can submi
     assert.ok(tableError(invalid, players));
 });
 
-test("cards reproduce a 205 starting stack and pending saves retain their identity", () => {
-  assert.equal(
-    cardTotal(CARD_VALUES.map((value) => (value === 50 ? 3 : 1))),
-    205,
-  );
+test("pending saves retain their identity", () => {
   assert.ok(
     pendingSchema.safeParse({
       r: "results",
@@ -83,8 +77,8 @@ test("Apps Script transport uses plain-text POST and validates application statu
   assert.equal("k" in JSON.parse(requests[1].init.body as string), false);
 });
 
-test("live results reject duplicate tables and invalid totals; drafts only store valid opaque seats", async (t) => {
-  let body = {
+test("live results parse; drafts only store valid opaque seats", async (t) => {
+  const body = {
     status: 200,
     meetingId: "m1",
     date: "2026-10-02",
@@ -104,21 +98,6 @@ test("live results reject duplicate tables and invalid totals; drafts only store
     (await getResults("https://example.test/exec")).tables.length,
     1,
   );
-  body = { ...body, tables: [body.tables[0], body.tables[0]] };
-  await assert.rejects(getResults("https://example.test/exec"));
-  body = {
-    ...body,
-    tables: [
-      {
-        ...body.tables[0],
-        seats: body.tables[0].seats.map((seat, i) => ({
-          ...seat,
-          total: seat.total + (i === 0 ? 1 : 0),
-        })),
-      },
-    ],
-  };
-  await assert.rejects(getResults("https://example.test/exec"));
   assert.ok(
     draftSchema.safeParse({
       meetingId: "m1",

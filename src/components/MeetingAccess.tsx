@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { getMeeting, requestError, type Meeting } from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDate } from "@/lib/format";
+import { usePoll } from "@/lib/usePoll";
 
 export default function MeetingAccess({
   children,
@@ -14,35 +15,20 @@ export default function MeetingAccess({
 }) {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [error, setError] = useState("");
-  const [revision, setRevision] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    let controller: AbortController;
-    async function load() {
-      controller = new AbortController();
+  const refresh = usePoll(
+    async (signal) => {
       try {
-        const next = await getMeeting(
-          MEETING_SERVICE_URL,
-          AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
-        );
-        if (cancelled) return;
+        const next = await getMeeting(MEETING_SERVICE_URL, signal);
+        if (signal.aborted) return;
         setMeeting(next);
         setError("");
       } catch (failure) {
-        if (!cancelled) setError(requestError(failure));
+        if (!signal.aborted) setError(requestError(failure));
       }
-    }
-    void load();
-    const timer = setInterval(load, 60000);
-    return () => {
-      cancelled = true;
-      controller?.abort();
-      clearInterval(timer);
-    };
-  }, [revision]);
-
-  const refresh = () => setRevision((value) => value + 1);
+    },
+    60000,
+    [],
+  );
   return (
     <div className="meeting-access">
       <header className="meeting-header">

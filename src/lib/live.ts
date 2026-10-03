@@ -13,7 +13,6 @@ export type LiveStanding = {
 export function liveStandings(
   semester: Semester,
   results: Results | null,
-  includeTonight = true,
 ): LiveStanding[] {
   const rows = new Map(
     semester.standings.map((player) => [
@@ -29,7 +28,6 @@ export function liveStandings(
     ]),
   );
   if (
-    !includeTonight ||
     !results ||
     (semester.last_session && results.date <= semester.last_session)
   )
@@ -37,8 +35,7 @@ export function liveStandings(
   const withheld = new Set<string>();
   for (const table of results.tables)
     for (const seat of table.seats) {
-      // The service masks opted-out players with this exact display name.
-      if (seat.display === `Player ${seat.id}`) {
+      if (seat.optOut) {
         withheld.add(seat.id);
         continue;
       }

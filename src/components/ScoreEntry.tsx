@@ -7,7 +7,6 @@ import {
   CARD_VALUES,
   PENDING_STORAGE,
   DRAFT_STORAGE,
-  cardTotal,
   draftSchema,
   pendingSchema,
   postMeeting,
@@ -36,9 +35,11 @@ function CardCalculator({
   const [cards, setCards] = useState<number[]>([]);
   const total = value.trim() === "" ? NaN : Number(value);
   const valid = Number.isSafeInteger(total) && total >= 0 && total <= 820;
-  const counts = CARD_VALUES.map(
-    (card) => cards.filter((n) => n === card).length,
-  );
+  const count = (card: number) => cards.filter((n) => n === card).length;
+  const tap = (next: number[]) => {
+    setCards(next);
+    setValue(String(base + next.reduce((a, b) => a + b, 0)));
+  };
   useEffect(() => {
     const element = dialog.current!;
     element.showModal();
@@ -93,31 +94,18 @@ function CardCalculator({
         }}
       />
       <div className="card-keypad">
-        {CARD_VALUES.map((card, i) => (
+        {CARD_VALUES.map((card) => (
           <button
             type="button"
             key={card}
             disabled={!valid || total + card > 820}
             aria-label={`${card === 50 ? "Face card" : card === 1 ? "Ace" : card}, ${card} points`}
-            onClick={() => {
-              const next = [...cards, card];
-              setCards(next);
-              setValue(
-                String(
-                  base +
-                    cardTotal(
-                      CARD_VALUES.map(
-                        (n) => next.filter((c) => c === n).length,
-                      ),
-                    ),
-                ),
-              );
-            }}
+            onClick={() => tap([...cards, card])}
           >
             <strong>
               {card === 50 ? "J / Q / K" : card === 1 ? "A" : card}
             </strong>
-            <small>{counts[i] ? `× ${counts[i]}` : `${card} pts`}</small>
+            <small>{count(card) ? `× ${count(card)}` : `${card} pts`}</small>
           </button>
         ))}
       </div>
@@ -126,18 +114,7 @@ function CardCalculator({
           className="meeting-text"
           type="button"
           disabled={!cards.length}
-          onClick={() => {
-            const next = cards.slice(0, -1);
-            setCards(next);
-            setValue(
-              String(
-                base +
-                  cardTotal(
-                    CARD_VALUES.map((n) => next.filter((c) => c === n).length),
-                  ),
-              ),
-            );
-          }}
+          onClick={() => tap(cards.slice(0, -1))}
         >
           Undo last card
         </button>
@@ -276,12 +253,6 @@ function ScoreForm({
       submissionId: crypto.randomUUID(),
       seats,
     };
-    if (submission.meetingId !== meeting.meetingId) {
-      setError(
-        "This unconfirmed save belongs to another meeting. Ask an officer to check its table in the Sheet.",
-      );
-      return;
-    }
     try {
       sessionStorage.setItem(PENDING_STORAGE, JSON.stringify(submission));
     } catch {

@@ -329,6 +329,7 @@ test("an open meeting accepts code-free check-ins and results, preserving summar
   const response = h.get({ r: "results" });
   assert.equal(response.tables.length, 1);
   assert.equal(response.tables[0].seats[3].display, "Player p004");
+  assert.equal(response.tables[0].seats[3].optOut, true);
   assert.equal(JSON.stringify(response).includes("Dogwood"), false);
   request.seats[0].total = 206;
   request.seats[1].total = 204;

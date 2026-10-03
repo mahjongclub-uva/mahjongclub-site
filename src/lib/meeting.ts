@@ -65,19 +65,15 @@ export function tableError(seats: Seat[], players: Player[]): string | null {
 }
 
 export const CARD_VALUES = [50, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-export function cardTotal(counts: number[]): number {
-  return counts.reduce(
-    (total, count, index) => total + count * CARD_VALUES[index],
-    0,
-  );
-}
 
 async function readResponse(url: string, init: RequestInit = {}) {
   const response = await fetch(url, {
     ...init,
     credentials: "omit",
     referrerPolicy: "no-referrer",
-    signal: init.signal ?? AbortSignal.timeout(25000),
+    signal: AbortSignal.any(
+      [init.signal, AbortSignal.timeout(25000)].filter((s) => s != null),
+    ),
   });
   if (!response.ok)
     throw new Error(
@@ -141,36 +137,20 @@ const resultsSchema = z.object({
   status: z.literal(200),
   meetingId: z.string(),
   date: z.iso.date(),
-  tables: z
-    .array(
-      z.object({
-        table: z.number().int().positive(),
-        seats: z
-          .array(
-            playerSchema.extend({
-              total: z.number().int().min(0).max(820),
-              net: z.number().int(),
-            }),
-          )
-          .length(4),
-      }),
-    )
-    .superRefine((tables, ctx) => {
-      const numbers = new Set<number>();
-      for (const table of tables) {
-        if (
-          numbers.has(table.table) ||
-          new Set(table.seats.map((s) => s.id)).size !== 4 ||
-          table.seats.reduce((n, s) => n + s.total, 0) !== 820 ||
-          table.seats.some((s) => s.net !== s.total - 205)
+  tables: z.array(
+    z.object({
+      table: z.number().int().positive(),
+      seats: z
+        .array(
+          playerSchema.extend({
+            optOut: z.boolean().optional(),
+            total: z.number().int().min(0).max(820),
+            net: z.number().int(),
+          }),
         )
-          ctx.addIssue({
-            code: "custom",
-            message: "An officer needs to recheck tonight’s results.",
-          });
-        numbers.add(table.table);
-      }
+        .length(4),
     }),
+  ),
 });
 export type Results = z.infer<typeof resultsSchema>;
 export async function getResults(

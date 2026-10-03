@@ -51,7 +51,13 @@ test("live scores use season nets, dense ties, qualification and official rank m
           { id: "p001", display: "A.", total: 195, net: -10 },
           { id: "p002", display: "B.", total: 205, net: 0 },
           { id: "p003", display: "C.", total: 220, net: 15 },
-          { id: "p004", display: "Player p004", total: 200, net: -5 },
+          {
+            id: "p004",
+            display: "Player p004",
+            optOut: true,
+            total: 200,
+            net: -5,
+          },
         ],
       },
     ],
@@ -64,10 +70,6 @@ test("live scores use season nets, dense ties, qualification and official rank m
       ["p001", 205, 2, 1],
       ["p002", 205, 2, 2],
     ],
-  );
-  assert.deepEqual(
-    liveStandings(semester, results, false).map((p) => p.points),
-    [215, 205],
   );
   assert.deepEqual(
     liveStandings({ ...semester, last_session: results.date }, results).map(

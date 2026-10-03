@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
@@ -13,6 +13,8 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
+const CHECKED_IN = "club-checked-in";
+
 function CheckInForm({
   meeting,
   refresh,
@@ -24,13 +26,28 @@ function CheckInForm({
   const [fullName, setFullName] = useState("");
   const [register, setRegister] = useState(false);
   const [suggestions, setSuggestions] = useState<Player[]>([]);
-  const [player, setPlayer] = useState<Player | null>(null);
+  // Survives a reload so the confirmation doesn't vanish; scoped to this meeting.
+  const [player, setPlayerState] = useState<Player | null>(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(CHECKED_IN) || "null");
+      return saved?.meetingId === meeting.meetingId ? saved.player : null;
+    } catch {
+      return null;
+    }
+  });
+  function setPlayer(next: Player | null) {
+    setPlayerState(next);
+    try {
+      sessionStorage.setItem(
+        CHECKED_IN,
+        JSON.stringify(next && { meetingId: meeting.meetingId, player: next }),
+      );
+    } catch {
+      /* The confirmation still shows until the page reloads. */
+    }
+  }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const nameInput = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (register) nameInput.current?.focus();
-  }, [register]);
 
   async function submit(
     choice: { matchId?: string; createNew?: boolean } = {},
@@ -185,7 +202,7 @@ function CheckInForm({
             <label htmlFor="full-name">Full name</label>
             <input
               id="full-name"
-              ref={nameInput}
+              autoFocus
               value={fullName}
               onChange={(event) => {
                 setFullName(event.target.value);

@@ -497,7 +497,7 @@ function results(meeting) {
           net !== total - 205
         )
           fail(503, "An officer must recheck Table " + block.number + ".");
-        return { ...publicPlayer(player), total, net };
+        return { ...publicPlayer(player), optOut: player.optOut, total, net };
       }),
     }));
   tables.forEach((table) =>
