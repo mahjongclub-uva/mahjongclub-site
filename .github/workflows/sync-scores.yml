@@ -131,9 +131,23 @@ jobs:
           git push --force origin "$BRANCH"
 
           cat > "$RUNNER_TEMP/score-update.md" <<'EOF'
-          Generated public leaderboard data from the private score Sheet.
+          ## Intent
 
-          Review the proposed display names and results in **Files changed** before merging. Merging publishes the update through the existing GitHub Pages workflow.
+          Update the public leaderboard from the private score Sheet.
+
+          ## What Changed
+
+          Regenerated the public semester results and metadata.
+
+          ## Risk
+
+          Merging publishes the proposed display names and results through GitHub Pages.
+          Review Files changed before merging.
+
+          ## Test/Validation
+
+          The score importer, Node tests, and production build passed before this proposal was created or updated.
+          The required Checks workflow is also requested on this branch.
           EOF
 
           if [ -n "$pr" ]; then

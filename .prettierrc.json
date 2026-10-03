@@ -1,1 +1,5 @@
-{}
+{
+  "overrides": [
+    { "files": "apps-script/*.gs", "options": { "parser": "babel" } }
+  ]
+}

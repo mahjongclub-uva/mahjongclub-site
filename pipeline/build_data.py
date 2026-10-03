@@ -7,9 +7,10 @@ Turns the club's score sheet into the JSON the website reads.
 Reads the Points Tracking tab, checks every table adds up, works out the
 standings, and writes data/meta.json and data/semesters/*.json.
 
-Never writes to the sheet (read-only), and never publishes a legal name
-(those live in pipeline/roster.local.json, not committed; only short display
-names like "Eddie Z." reach the website).
+Never writes to the sheet (read-only), and never publishes a legal name.
+Legal names live only in the workbook's Roster tab (or, for the Excel
+fallback, pipeline/roster.local.json, not committed); only short display
+names like "Eddie Z." reach the website.
 
 If a table's points don't add up, this stops with an error naming the table
 and writes nothing, so the site keeps showing the last good (stale but
@@ -119,8 +120,10 @@ def read_excel_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
     return grid
 
 
-def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str]:
-    """Read columns B:E from one private Google Sheet tab using local OAuth."""
+def read_sheets_grid(
+    spreadsheet_id: str, tab: str, columns: str = "B:E"
+) -> dict[tuple[int, int], str]:
+    """Read some columns of one private Google Sheet tab using local OAuth."""
     try:
         from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
@@ -159,7 +162,7 @@ def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str
             .values()
             .get(
                 spreadsheetId=spreadsheet_id,
-                range=f"'{tab}'!B:E",
+                range=f"'{tab}'!{columns}",
                 valueRenderOption="UNFORMATTED_VALUE",
                 dateTimeRenderOption="SERIAL_NUMBER",
             )
@@ -169,11 +172,12 @@ def read_sheets_grid(spreadsheet_id: str, tab: str) -> dict[tuple[int, int], str
     except Exception as error:
         die(f"could not read the configured private spreadsheet ({type(error).__name__}); check access, spreadsheet ID, and tab name")
 
+    first_column = cell_ref(columns.split(":")[0] + "1")[1]
     grid: dict[tuple[int, int], str] = {}
     for row_number, row in enumerate(result.get("values", []), start=1):
         for offset, value in enumerate(row):
             if value not in (None, ""):
-                grid[row_number, offset + 2] = str(value)
+                grid[row_number, offset + first_column] = str(value)
     return grid
 
 
@@ -328,6 +332,52 @@ def default_display(name: str) -> str:
     if len(parts) == 1:
         return parts[0]
     return f"{parts[0]} {parts[-1][0]}."
+
+
+# The Roster tab in the score workbook replaces roster.local.json when reading
+# from Google Sheets. Row 1 is this header; full_name is spelled exactly as in
+# Points Tracking. The pipeline only reads it: new rows come from check-in
+# sign-up or pipeline/migrate_roster.py.
+ROSTER_TAB = "Roster"
+ROSTER_COLUMNS = ["player_id", "computing_id", "full_name", "display", "opt_out"]
+
+
+def roster_from_grid(grid: dict[tuple[int, int], str]) -> dict[str, dict]:
+    header = [grid.get((1, column), "") for column in range(1, len(ROSTER_COLUMNS) + 1)]
+    if header != ROSTER_COLUMNS:
+        die(f"the {ROSTER_TAB} tab's first row must be: {', '.join(ROSTER_COLUMNS)}")
+    last_row = max((row for row, _ in grid), default=1)
+    roster: dict[str, dict] = {}
+    for row in range(2, last_row + 1):
+        player_id, _, name, display, opt_out = (
+            grid.get((row, column), "").strip() for column in range(1, 6)
+        )
+        if not name:
+            continue
+        if not re.fullmatch(r"p\d{3,}", player_id) or not display:
+            die(f"{ROSTER_TAB} row {row} needs a player_id like p014 and a display name")
+        if name in roster:
+            die(f"{ROSTER_TAB} row {row} repeats a full name already listed above")
+        roster[name] = {
+            "id": player_id,
+            "display": display,
+            "opt_out": opt_out.lower() in {"true", "1", "yes"},
+        }
+    ids = [entry["id"] for entry in roster.values()]
+    if len(set(ids)) != len(ids):
+        die(f"the {ROSTER_TAB} tab uses a player_id twice")
+    return roster
+
+
+def read_roster_tab(spreadsheet_id: str, names: list[str]) -> dict[str, dict]:
+    roster = roster_from_grid(read_sheets_grid(spreadsheet_id, ROSTER_TAB, "A:E"))
+    missing = [name for name in names if name not in roster]
+    if missing:
+        die(
+            f"the {ROSTER_TAB} tab is missing {len(missing)} player(s) who appear in "
+            "Points Tracking; add them (python3 pipeline/migrate_roster.py) and rerun"
+        )
+    return roster
 
 
 def load_roster(names: list[str]) -> dict[str, dict]:
@@ -534,7 +584,11 @@ def main() -> None:
     check_tables(tables)
 
     names = sorted({name for table in tables for name, _, _ in table.seats})
-    roster = load_roster(names)
+    roster = (
+        read_roster_tab(spreadsheet_id, names)
+        if args.source == "sheets"
+        else load_roster(names)
+    )
 
     standings, unranked = aggregate(
         tables, roster, config["min_tables"], config.get("scoring_rule")

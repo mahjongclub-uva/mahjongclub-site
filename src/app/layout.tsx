@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Barlow_Condensed, Public_Sans } from "next/font/google";
 import AmbientTiles from "@/components/AmbientTiles";
 import Nav from "@/components/Nav";
+import MeetingLinks from "@/components/MeetingLinks";
+import SiteChrome from "@/components/SiteChrome";
 import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
+import { getMeetings } from "@/lib/data";
 import "./globals.css";
 
 const display = Barlow_Condensed({
@@ -47,10 +50,18 @@ export default function RootLayout({
 
         {/* Tile gradients, declared once for every tile on every page. */}
         <TileArtDefs />
-        <AmbientTiles />
-        <Nav />
-        {children}
-        <Footer />
+        <SiteChrome
+          navigation={
+            <>
+              <AmbientTiles />
+              <Nav />
+              <MeetingLinks schedule={getMeetings()} />
+            </>
+          }
+          footer={<Footer />}
+        >
+          {children}
+        </SiteChrome>
       </body>
     </html>
   );

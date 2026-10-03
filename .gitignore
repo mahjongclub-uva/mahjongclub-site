@@ -52,6 +52,7 @@ __pycache__/
 *.md
 !README.md
 !OFFICER_GUIDE.md
+!.github/PULL_REQUEST_TEMPLATE.md
 
 # Local screenshots from visual review.
 /output/

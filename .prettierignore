@@ -11,3 +11,9 @@ src/app/globals.css
 
 .next/
 package-lock.json
+
+# Local tool state, ignored by Git.
+.impeccable/
+
+# Local design prototype, excluded from Git.
+docs/specs/demo/

@@ -18,7 +18,7 @@ Before committing, run what CI runs:
 ```bash
 npm run lint
 npm test
-npm run test:site-content
+npm run test:pipeline
 npm run photos:check
 npm run build
 ```
