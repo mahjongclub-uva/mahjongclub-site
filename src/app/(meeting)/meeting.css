@@ -151,7 +151,7 @@
   text-decoration: none;
   text-align: center;
 }
-.meeting-form .meeting-page .meeting-primary,
+.meeting-form .meeting-primary,
 .meeting-calculator .meeting-primary {
   margin-top: 22px;
 }
@@ -161,9 +161,10 @@
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 8px 0;
-  border: 0;
-  background: none;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
   color: var(--jade);
   font-size: 0.85rem;
   font-weight: 600;
@@ -181,7 +182,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .meeting-page .meeting-notice {
   padding: 16px;
@@ -318,7 +320,12 @@
 }
 .player-chips [aria-pressed="true"] {
   border-color: var(--jade);
-  background: #f4f1e5;
+  background: var(--jade);
+  color: var(--tile-face-hi);
+  box-shadow: 0 3px 0 #203d30;
+}
+.player-chips [aria-pressed="true"] small {
+  color: inherit;
 }
 .score-rows {
   margin-top: 28px;
@@ -475,6 +482,34 @@
   outline: 3px solid #8b5924;
   outline-offset: 4px;
 }
+/* Text actions stay compact, with the same clear feedback as the tile controls. */
+.meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
+.meeting-calculator .meeting-text:is(:focus-visible, :active),
+.meeting-page .meeting-website:is(:focus-visible, :active) {
+  background: var(--jade);
+  color: var(--tile-face-hi);
+}
+.meeting-page .meeting-website {
+  padding: 8px;
+  border-radius: 8px;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .meeting-page .meeting-text:hover:not(:disabled),
+  .meeting-calculator .meeting-text:hover:not(:disabled),
+  .meeting-page .meeting-website:hover {
+    background: var(--jade);
+    color: var(--tile-face-hi);
+    box-shadow: 0 3px 0 #203d30;
+  }
+  .player-chips button:hover:not(:disabled),
+  .total-button:hover:not(:disabled),
+  .card-keypad button:hover:not(:disabled) {
+    border-color: var(--jade);
+    box-shadow: 0 3px 0 #203d30;
+  }
+}
 @keyframes meeting-blink {
   50% {
     opacity: 0.35;
@@ -501,6 +536,22 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-text,
+  .meeting-calculator .meeting-text,
+  .meeting-page .meeting-website,
+  .player-chips button,
+  .total-button,
+  .card-keypad button {
+    transition:
+      background-color 120ms ease-out,
+      color 120ms ease-out,
+      border-color 120ms ease-out,
+      box-shadow 120ms ease-out,
+      transform 120ms ease-out;
+  }
+  .meeting-page a:active {
+    transform: scale(0.97);
+  }
   .meeting-live-dot {
     animation: meeting-blink 1.6s ease-in-out infinite;
   }

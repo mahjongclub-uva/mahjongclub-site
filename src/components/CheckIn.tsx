@@ -81,15 +81,17 @@ function CheckInForm({
         </span>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
         <p>
-          You’re ready to play. After a hand, one person enters everyone’s card
-          totals.
+          You’re ready to play. When your table finishes playing, one person
+          records everyone’s final card totals.
         </p>
         <div className="meeting-actions">
           <Link className="meeting-primary" href="/score/">
             Record a table
           </Link>
           <div className="meeting-quiet-actions">
-            <Link href="/live/">Leaderboard</Link>
+            <Link className="meeting-text" href="/live/">
+              Leaderboard
+            </Link>
             <button
               className="meeting-text"
               type="button"

@@ -372,10 +372,10 @@ function ScoreForm({
         </span>
         <p className="eyebrow">Table {receipt} saved</p>
         <h1 tabIndex={-1} ref={heading}>
-          Nice hand.
+          Table recorded.
         </h1>
         <p className="meeting-intro" role="status">
-          Your scores are recorded. Ready for another hand?
+          Everyone’s final totals are saved.
         </p>
         {scoreRows}
         <div className="meeting-actions">
@@ -409,16 +409,16 @@ function ScoreForm({
       </p>
       <h1 tabIndex={-1} ref={heading}>
         {stage === "pick"
-          ? "Who played this hand?"
+          ? "Who played at this table?"
           : stage === "score"
             ? "Cards on the table."
             : "One last look."}
       </h1>
       <p className="meeting-intro">
         {stage === "pick"
-          ? "Tap the four people who played."
+          ? "Choose the four people at your table."
           : stage === "score"
-            ? "How many points is each player holding? Tap to type or count cards."
+            ? "After your table’s last game, enter each player’s final card total."
             : "Check everyone’s points against the cards on the table."}
       </p>
       {stage === "pick" ? (

@@ -72,7 +72,7 @@ function LiveTable({
       <h1>The night is moving.</h1>
       <p className="meeting-intro">
         {matching
-          ? "Season scores, with tonight’s hands added as they’re recorded."
+          ? "Season scores, with tonight’s tables added as they’re recorded."
           : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
@@ -151,7 +151,7 @@ function LiveTable({
       {!rows.length && results && (
         <p className="meeting-notice">
           {includeTonight && matching && !alreadyCounted
-            ? "The first recorded hand gets things moving. Check back after your table plays."
+            ? "The first recorded table gets things moving. Check back after your table plays."
             : "No official scores have been recorded yet."}
         </p>
       )}
