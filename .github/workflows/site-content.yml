@@ -82,7 +82,7 @@ jobs:
           gh pr close "${{ steps.change.outputs.pr }}" --delete-branch \
             --comment "The Sheet matches the site again, so this proposal is no longer needed."
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
         with:
           node-version: 22

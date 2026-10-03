@@ -93,7 +93,7 @@ jobs:
         run: rm -f pipeline/roster.local.json "$GOOGLE_APPLICATION_CREDENTIALS"
 
       # The bot's pull request gets no checks of its own, so check the data here.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.config.outputs.ready == 'true'
         with:
           node-version: 22
