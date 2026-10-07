@@ -797,3 +797,79 @@
     animation: live-settle 220ms ease-out;
   }
 }
+
+/* Card details and balance feedback make counting tangible. */
+.card-keypad button {
+  position: relative;
+  border-bottom-width: 3px;
+  border-radius: 6px;
+}
+.card-keypad button::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: #b34a39;
+}
+.card-keypad button[data-counted="true"] {
+  background: #e9f0f5;
+  border-color: #8daecb;
+  color: #244f77;
+}
+.card-keypad .card-count {
+  color: #244f77;
+  font-weight: 700;
+}
+.score-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #ded8cc;
+  margin-bottom: 14px;
+}
+.score-progress-track > span {
+  display: block;
+  height: 100%;
+  background: #285b87;
+  transform-origin: left;
+}
+.score-progress[data-balanced="true"] .score-progress-track > span {
+  background: var(--jade);
+}
+.score-summary[data-balanced="true"] strong,
+.score-summary[data-balanced="true"] p {
+  color: var(--jade);
+}
+@keyframes count-bump {
+  from {
+    transform: translateY(3px) scale(0.9);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes score-highlight {
+  from {
+    background-color: #f3dfb6;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card-count {
+    animation: count-bump 180ms ease-out;
+  }
+  .score-progress-track > span {
+    transition: transform 220ms ease-out;
+  }
+  .score-summary[data-balanced="true"] strong {
+    animation: count-bump 220ms ease-out;
+  }
+  .live-points-changed {
+    animation: score-highlight 1000ms ease-out;
+  }
+}

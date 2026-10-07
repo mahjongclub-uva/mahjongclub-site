@@ -98,6 +98,7 @@ function CardCalculator({
           <button
             type="button"
             key={card}
+            data-counted={count(card) > 0}
             disabled={!valid || total + card > 820}
             aria-label={`${card === 50 ? "Face card" : card === 1 ? "Ace" : card}, ${card} points`}
             onClick={() => tap([...cards, card])}
@@ -105,7 +106,12 @@ function CardCalculator({
             <strong>
               {card === 50 ? "J / Q / K" : card === 1 ? "A" : card}
             </strong>
-            <small>{count(card) ? `× ${count(card)}` : `${card} pts`}</small>
+            <small
+              key={count(card)}
+              className={count(card) ? "card-count" : undefined}
+            >
+              {count(card) ? `× ${count(card)}` : `${card} pts`}
+            </small>
           </button>
         ))}
       </div>
@@ -385,18 +391,21 @@ function ScoreForm({
             ? "Cards on the table."
             : "One last look."}
       </h1>
-      <p className="meeting-intro">
-        {stage === "pick"
-          ? "Choose the four people at your table."
-          : stage === "score"
-            ? "After your table’s last game, enter each player’s final card total."
-            : "Check everyone’s points against the cards on the table."}
-      </p>
+      {stage !== "pick" && (
+        <p className="meeting-intro">
+          {stage === "score"
+            ? "Enter final card totals after your last game."
+            : "Check these totals with your table."}
+        </p>
+      )}
       {stage === "pick" ? (
         <>
           <div className="meeting-seats">
             {ids.map((id, i) => (
-              <div key={i} className={`meeting-seat ${id ? "filled" : ""}`}>
+              <div
+                key={`${i}-${id}`}
+                className={`meeting-seat ${id ? "filled" : ""}`}
+              >
                 {avatar(id ? name(id) : String(i + 1))}
                 <span>{id ? name(id) : "Open seat"}</span>
               </div>
@@ -464,12 +473,29 @@ function ScoreForm({
         <>
           {scoreRows}
           <div className="score-foot">
-            <div className="score-summary">
+            <div className="score-progress" data-balanced={!validation}>
+              <div
+                role="progressbar"
+                aria-label="Table points"
+                aria-valuemin={0}
+                aria-valuemax={820}
+                aria-valuenow={Math.min(820, Math.max(0, sum))}
+                aria-valuetext={`${sum} of 820 points${sum > 820 ? ", over total" : ""}`}
+                className="score-progress-track"
+              >
+                <span
+                  style={{
+                    transform: `scaleX(${Math.min(1, Math.max(0, sum / 820))})`,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="score-summary" data-balanced={!validation}>
               <span>Table total</span>
               <strong>
                 {sum} <small>/ 820</small>
               </strong>
-              <p role="status">{validation || "820 points. You’re all set."}</p>
+              <p role="status">{validation || "✓ Balanced. Ready to save."}</p>
             </div>
             {stage === "score" ? (
               <button

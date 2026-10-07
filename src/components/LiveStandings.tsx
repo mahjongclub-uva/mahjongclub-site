@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
@@ -25,6 +25,8 @@ function LiveTable({
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(true);
   const [updatedAt, setUpdatedAt] = useState("");
+  const previousPoints = useRef<Map<string, number> | null>(null);
+  const [scoreChanges, setScoreChanges] = useState<Record<string, number>>({});
   const retry = usePoll(
     async (signal) => {
       setUpdating(true);
@@ -35,6 +37,29 @@ function LiveTable({
           throw new Error(
             "The meeting changed. Return to check-in to refresh it.",
           );
+        const nextRows = liveStandings(
+          semester,
+          meeting.semester === semester.id &&
+            semester.scoring_rule === "season-net"
+            ? next
+            : null,
+        );
+        const previous = previousPoints.current;
+        if (previous) {
+          const changed = nextRows.filter(
+            (row) => previous.get(row.id) !== row.points,
+          );
+          if (changed.length)
+            setScoreChanges((counts) => {
+              const updated = { ...counts };
+              for (const row of changed)
+                updated[row.id] = (updated[row.id] || 0) + 1;
+              return updated;
+            });
+        }
+        previousPoints.current = new Map(
+          nextRows.map((row) => [row.id, row.points]),
+        );
         setResults(next);
         setError("");
         setUpdatedAt(
@@ -74,7 +99,7 @@ function LiveTable({
           : matching && !alreadyCounted
             ? error
               ? "Last received scores · Update delayed"
-              : "Tonight included · Not final yet"
+              : "Awaiting review"
             : "Official standings"}
         {results && (
           <span>
@@ -82,6 +107,7 @@ function LiveTable({
             {results.tables.length === 1 ? "table" : "tables"} tonight
           </span>
         )}
+        {results && <span>· Updated {updatedAt}</span>}
       </p>
       {error && (
         <div className="meeting-notice" role="alert">
@@ -98,7 +124,6 @@ function LiveTable({
           </button>
         </div>
       )}
-      {results && <p className="quiet">Last updated at {updatedAt}.</p>}
       <ol className="live-list" aria-label="Live season standings">
         {rows.map((row) => {
           const change = row.before === null ? null : row.before - row.rank;
@@ -114,7 +139,10 @@ function LiveTable({
                   season
                 </small>
               </span>
-              <strong className="live-points">
+              <strong
+                key={scoreChanges[row.id] || 0}
+                className={`live-points${scoreChanges[row.id] ? " live-points-changed" : ""}`}
+              >
                 {row.points}
                 <span className="sr-only"> points</span>
               </strong>
@@ -165,9 +193,7 @@ function LiveTable({
           </Link>
         </div>
       </div>
-      <p className="quiet">
-        Refreshes about every 30 seconds. Scores await officer review.
-      </p>
+      <p className="quiet">Refreshes about every 30 seconds.</p>
     </section>
   );
 }
