@@ -31,7 +31,7 @@
   background: #e3ecdc;
 }
 .lesson button:focus-visible {
-  outline: 3px solid var(--control-focus);
+  outline: 3px solid var(--jade);
   outline-offset: 3px;
 }
 .lesson button:disabled {

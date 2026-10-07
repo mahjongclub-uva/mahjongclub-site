@@ -41,7 +41,6 @@ svg {
   --control-radius: 10px;
   --control-depth: 4px;
   --control-press: 3px;
-  --control-focus: var(--jade);
   --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   /* The header's three beats. Read by the wordmark and by the tagline that
      follows it — which is why they live at the root rather than on .wordmark:
@@ -2132,7 +2131,7 @@ body > main { flex: 1 0 auto; }
   border-radius: var(--control-radius);
 }
 .action-link:focus-visible {
-  outline: 3px solid var(--control-focus);
+  outline: 3px solid var(--jade);
   outline-offset: 3px;
 }
 
@@ -2152,9 +2151,9 @@ button { -webkit-user-select: none; user-select: none; }
 :is(.guide-page, .about-page) .section-title,
 .leaderboard-page .scoring-note h2 { font: 700 clamp(2.1rem, 4vw, 3rem) / 1.08 var(--display); letter-spacing: -0.02em; margin-bottom: 1.5rem; }
 :is(.guide-page, .about-page) .section-title::after { display: none; }
-:is(.guide-page, .about-page) .action-link { border-radius: var(--control-radius); min-height: 44px; font: 600 0.9rem var(--sans); }
+:is(.guide-page, .about-page) .action-link { min-height: 44px; font: 600 0.9rem var(--sans); }
 
-.about-page .page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display); letter-spacing: -0.025em; }
+.about-page .page-title { line-height: 1.08; }
 
 .home-page .rolling-heading { overflow: clip; }
 
