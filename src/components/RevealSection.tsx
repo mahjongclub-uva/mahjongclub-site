@@ -56,7 +56,7 @@ export default function RevealSection({
 
       const top = headingElement.getBoundingClientRect().top;
       const progress =
-        (window.innerHeight * 0.9 - top) / (window.innerHeight * 0.5);
+        (window.innerHeight * 0.9 - top) / (window.innerHeight * 0.3);
 
       // Finish the reveal once there is no scrolling left to do. The formula
       // above assumes the heading keeps rising, but on a tall viewport the

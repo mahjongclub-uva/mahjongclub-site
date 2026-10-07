@@ -38,6 +38,10 @@ svg {
 /* 2. Tokens =============================================================== */
 
 :root {
+  --control-radius: 10px;
+  --control-depth: 4px;
+  --control-press: 3px;
+  --control-focus: var(--jade);
   --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   /* The header's three beats. Read by the wordmark and by the tagline that
      follows it — which is why they live at the root rather than on .wordmark:
@@ -1093,6 +1097,7 @@ body {
 .hero-stage[data-scene="waiting"] .tile { animation: none; }
 .hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
 
+
 .guide-head { padding-top: 2.5rem; }
 .guide-index { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; }
 .guide-index a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; font-size: var(--text-sm); }
@@ -1359,13 +1364,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   color: var(--jade);
 }
 
-.tile-group-note {
-  margin: var(--space-1) 0 var(--space-3);
-  max-width: 54ch;
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
-}
-
 .tile-row {
   margin: 0;
   padding: 0;
@@ -1515,7 +1513,9 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .tagline { font-size: clamp(1.15rem, 2vw, 1.4rem); margin-inline: auto; }
 .hero-scene { pointer-events: auto; }
 /* The name is visible in the initial HTML, including while WebGL loads. */
-.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 1; }
+/* Hidden until the 3D scene draws, by request: the <h1>'s aria-label still
+   names the club, and a failed or slow scene falls back to flat tiles. */
+.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 0; }
 .home-page .section { padding-block: clamp(3rem, 7vw, 6rem); }
 .home-page .section-title { font-size: clamp(2.6rem, 5.5vw, 4.7rem); letter-spacing: -0.045em; max-width: 14ch; }
 .home-page .section-title::after { display: none; }
@@ -1573,13 +1573,9 @@ body {
     linear-gradient(104deg, transparent 0 7%, #48674605 7.2% 8.1%, transparent 8.3% 91%, #48674606 91.2% 92%, transparent 92.2%);
   background-attachment: fixed;
 }
-.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 0; }
 .hero-stage .wordmark-tiles { transition: none; }
 .hero-stage[data-scene="fallback"] .tile,
 .hero-stage[data-scene="fallback"] .tile-scene { animation: none; }
-@media (prefers-reduced-motion: reduce) {
-  .hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 1; }
-}
 
 /* Club photography replaces the interactive tile display. */
 .club-photos { margin-top: -7rem; min-width: 0; }
@@ -1622,7 +1618,7 @@ body {
      past the final glyph's ink, and the clip-path below trims to the border
      box, so at full reveal the question mark was still losing its right edge.
      The padding gives the glyph its space back. */
-  padding-right: 0.06em;
+  padding: 0.08em 0.06em 0.16em 0;
   clip-path: inset(0 calc((1 - var(--progress, 1)) * 100%) 0 0);
 }
 /* No overflow clipping here. The dot travels 0..100% of a box that is already
@@ -1685,7 +1681,6 @@ body {
 .guide-page .tile-set { display: grid; gap: 2.5rem; }
 .guide-page .tile-group { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 0.75rem 2rem; margin: 0; padding-top: 2rem; border-top: 1px solid var(--rule); }
 .guide-page .tile-group h3 { grid-column: 1; font-size: 0.85rem; }
-.guide-page .tile-group-note { grid-column: 1; margin: 0; }
 .guide-page .tile-group > .tile-row { grid-column: 2; grid-row: 1 / 3; align-self: center; }
 .guide-page .tile-key { margin-top: 3rem; grid-template-columns: repeat(3, 1fr); }
 .guide-page .set-tile-body { filter: none; }
@@ -1722,7 +1717,6 @@ body {
 @media (max-width: 900px) {
   .guide-page .tile-group { grid-template-columns: 1fr; }
   .guide-page .tile-group > .tile-row { grid-column: 1; grid-row: auto; }
-  .guide-page .tile-group-note { max-width: 48ch; }
 }
 @media (max-width: 767px) {
   .club-photos { margin-top: 0; }
@@ -2113,4 +2107,108 @@ body > main { flex: 1 0 auto; }
 @keyframes leader-settle {
   from { transform: translateY(-14px) rotate(9deg); }
   to { transform: translateY(0) rotate(0); }
+}
+
+@media (max-width: 767px) {
+  .back-to-top {
+    position: static;
+    padding-block: 1rem;
+  }
+  .back-to-top a {
+    animation: none;
+  }
+}
+
+/* Shared physical controls; the table keeps its own contextual colors. */
+.action-link {
+  border-width: 2px;
+  border-radius: var(--control-radius);
+}
+.action-link:focus-visible {
+  outline: 3px solid var(--control-focus);
+  outline-offset: 3px;
+}
+
+/* One bold typographic voice, with the tiles carrying the detail. */
+.page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1 var(--display); letter-spacing: -0.025em; }
+.section-title { font-weight: 700; line-height: 1.05; }
+.page-intro { max-width: 48ch; }
+.guide-detail { margin-block: 1rem; }
+.guide-detail p { max-width: 65ch; }
+@media (max-width: 767px) {
+  .guide-index ol { gap: 0.5rem; }
+  .guide-index li:not(:last-child)::after { display: none; }
+}
+
+.home-page .rolling-heading { overflow: clip; }
+
+.home-page .hero-meeting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.5rem;
+}
+.home-page .hero-meeting .next-meeting {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.home-page .hero-meeting .next-meeting p { margin: 0; }
+.home-page .hero-meeting .next-meeting-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.85rem;
+}
+.home-page .hero-meeting .next-meeting-when { font: 700 1rem var(--body); }
+.home-page .hero-meeting .next-meeting-detail { font-size: 0.9rem; }
+.hero-meeting > a { padding-block: 0.7rem; text-decoration: underline; font-size: 0.85rem; }
+
+.special-hand-link { display: inline-flex; flex-direction: column; gap: 0.25rem; padding-block: 0.75rem; }
+.special-hand-link strong { font: 700 1.5rem var(--display); }
+.special-hand-link span { font-size: 0.85rem; text-decoration: underline; }
+
+/* No grey flash on tap, and no text selection from quick taps on controls;
+   :active and :focus-visible states carry the feedback instead. */
+a, button, summary { -webkit-tap-highlight-color: transparent; }
+button { -webkit-user-select: none; user-select: none; }
+
+/* Shared reading-page hierarchy. Homepage and tabletop controls keep their own styles. */
+:is(.guide-page, .about-page) { --content: 68rem; }
+:is(.guide-page, .about-page) .section-wrap { max-width: 68rem; }
+:is(.guide-page, .about-page) .section-title,
+.leaderboard-page .scoring-note h2 { font: 700 clamp(2.1rem, 4vw, 3rem) / 1.08 var(--display); letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+:is(.guide-page, .about-page) .section-title::after { display: none; }
+:is(.guide-page, .about-page) .action-link { border-radius: var(--control-radius); min-height: 44px; font: 600 0.9rem var(--sans); }
+
+.about-page .page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display); letter-spacing: -0.025em; }
+
+/* Keep leaderboard reference text in one comfortable, centered reading column. */
+.leaderboard-page .search-panel,
+.leaderboard-page .scoring-note {
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 3vw, 2rem);
+}
+.leaderboard-page .search-panel .section-title {
+  margin-bottom: 0.75rem;
+}
+.leaderboard-page .player-search {
+  padding-bottom: 1rem;
+}
+.leaderboard-page .player-search + .section {
+  padding-top: 1.5rem;
+}
+.leaderboard-page .scoring-note {
+  margin-block: 0 1.5rem;
+  font-size: 1rem;
+}
+.leaderboard-page .scoring-note h2 {
+  text-transform: none;
 }

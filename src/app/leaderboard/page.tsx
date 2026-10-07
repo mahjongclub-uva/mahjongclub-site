@@ -134,11 +134,18 @@ export default function Leaderboard() {
         unranked={semester.unranked}
         seasonNet={seasonNet}
       />
+
       <section className="section">
         <div className="section-wrap">
           {/* After the table, not before: most visitors just want a name and a number. */}
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
+            <p>
+              Points are playing cards: face cards are worth 50, ace to ten are
+              face value. Everyone sits down at a table with {SEASON_START}.
+              When someone wins a hand, they collect cards from the table, and
+              flowers add to the winnings.
+            </p>
             <p>
               {seasonNet
                 ? `Everyone starts at ${SEASON_START} points. Each table’s net result moves your season score up or down. `
