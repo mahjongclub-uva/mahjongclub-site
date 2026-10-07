@@ -32,10 +32,8 @@ export default function Guide() {
         <div className={styles.heroCopy}>
           <h1>Learn your first hand.</h1>
           <p>
-            This is one of the ways to play Mahjong. No need to memorize this
-            before you join us: we provide the sets and explain the rules as we
-            play. Get to know a few tiles, try a hand, and ask questions as you
-            go.
+            This is one of many ways to play Mahjong. No need to memorize it: we
+            bring the sets and teach as we play.
           </p>
         </div>
       </header>
@@ -49,7 +47,7 @@ export default function Guide() {
         <a href="#hand">
           <IconTrophy aria-hidden="true" />
           <span>
-            Sets<small>The goal</small>
+            The goal<small>Five sets and a pair</small>
           </span>
         </a>
         <a href="#turn">
