@@ -110,7 +110,9 @@ function CardCalculator({
               key={count(card)}
               className={count(card) ? "card-count" : undefined}
             >
-              {count(card) ? `× ${count(card)}` : `${card} ${card === 1 ? "pt" : "pts"}`}
+              {count(card)
+                ? `× ${count(card)}`
+                : `${card} ${card === 1 ? "pt" : "pts"}`}
             </small>
           </button>
         ))}

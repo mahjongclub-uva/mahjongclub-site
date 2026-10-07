@@ -201,9 +201,7 @@ function CheckInForm({
                 maxLength={120}
                 required
               />
-              <p className="quiet">
-                Your name and ID stay private.
-              </p>
+              <p className="quiet">Your name and ID stay private.</p>
             </>
           )}
         </div>
@@ -244,11 +242,7 @@ function CheckInForm({
           </div>
         ) : (
           <button type="submit" className="meeting-primary">
-            {busy
-              ? "Checking in…"
-              : register
-                ? "Join & check in"
-                : "Check in"}
+            {busy ? "Checking in…" : register ? "Join & check in" : "Check in"}
           </button>
         )}
       </fieldset>
