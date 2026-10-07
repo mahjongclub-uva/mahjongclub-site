@@ -336,6 +336,44 @@ test("an open meeting accepts code-free check-ins and results, preserving summar
   assert.equal(h.post(request).status, 409);
 });
 
+test("results fill existing table templates and stop without changes when full", () => {
+  const h = harness();
+  const request = {
+    r: "results",
+    meetingId: h.meeting.id,
+    seats: ["p001", "p002", "p003", "p004"].map((id, index) => ({
+      id,
+      total: [255, 205, 185, 175][index],
+    })),
+  };
+  for (let number = 1; number <= 3; number++) {
+    const submission = {
+      ...request,
+      submissionId: `template-test-000${number}`,
+    };
+    const saved = h.post(submission);
+    assert.equal(saved.status, 201);
+    assert.equal(saved.table, number);
+    assert.equal(h.post(submission).status, 200);
+    const row = (number - 1) * 7 + 2;
+    assert.deepEqual(
+      h.tabs.Points.grid.slice(row, row + 4).map((seat) => seat.slice(1, 4)),
+      [
+        ["Alex Amber", 255, 50],
+        ["Blair Birch", 205, 0],
+        ["Casey Cedar", 185, -20],
+        ["Drew Dogwood", 175, -30],
+      ],
+    );
+  }
+  const before = JSON.stringify(h.tabs.Points);
+  const full = h.post({ ...request, submissionId: "template-test-0004" });
+  assert.equal(full.status, 503);
+  assert.match(full.message, /No empty Table N template/);
+  assert.equal(JSON.stringify(h.tabs.Points), before);
+  assert.equal(h.get({ r: "results" }).tables.length, 3);
+});
+
 test("an interrupted result write retries into its reserved table", () => {
   const h = harness();
   const request = {

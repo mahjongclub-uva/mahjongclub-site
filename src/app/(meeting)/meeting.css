@@ -731,21 +731,42 @@
   }
 }
 
-/* A small tabletop keeps the check-in welcoming without another screen. */
-.meeting-form .meeting-tiles {
-  position: relative;
-  isolation: isolate;
+/* Color comes from the tiles and actions, leaving the paper uncluttered. */
+.meeting-form h1 {
+  color: #244f77;
 }
-.meeting-form .meeting-tiles::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  width: 230px;
-  height: 76px;
-  bottom: 6px;
-  border-radius: 50%;
-  background: var(--jade);
-  box-shadow: 0 4px 0 #203d30;
+.meeting-form .meeting-tiles {
+  margin-block: 28px 22px;
+}
+.meeting-form .meeting-tiles > span:first-child {
+  --tile-side: #8daecb;
+}
+.meeting-form .meeting-tiles > span:nth-child(2) {
+  --tile-side: #d9af75;
+}
+.meeting-form .meeting-primary {
+  background: #285b87;
+  box-shadow: 0 4px 0 #193e60;
+}
+.meeting-form .meeting-primary:hover:not(:disabled) {
+  background: #214b70;
+}
+.meeting-form .meeting-primary:active:not(:disabled) {
+  box-shadow: 0 1px 0 #193e60;
+}
+.meeting-form input:focus-visible {
+  outline-color: #285b87;
+  border-color: #285b87;
+}
+.meeting-receipt .meeting-check {
+  background: #f3dfb6;
+  color: #244f77;
+  border-color: #d9af75;
+}
+.meeting-receipt > p:not(.eyebrow) {
+  margin-top: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
 }
 .meeting-form[data-register="true"] .meeting-tiles {
   height: 88px;
@@ -755,14 +776,10 @@
   width: 55px;
   height: 78px;
 }
-.meeting-form[data-register="true"] .meeting-tiles::before {
-  width: 170px;
-  height: 45px;
-}
 .meeting-matches {
   margin-top: 22px;
   padding: 18px 0 0;
-  border-top: 2px solid var(--jade);
+  border-top: 2px solid #d9af75;
 }
 .meeting-matches .meeting-actions {
   margin-top: 14px;

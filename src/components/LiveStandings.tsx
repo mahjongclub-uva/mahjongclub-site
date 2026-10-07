@@ -63,7 +63,7 @@ function LiveTable({
       <h1>Live standings</h1>
       <p className="meeting-intro">
         {matching
-          ? "Season scores, with tonight’s tables added as they’re recorded."
+          ? "Season scores + tonight’s tables."
           : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
@@ -166,8 +166,7 @@ function LiveTable({
         </div>
       </div>
       <p className="quiet">
-        Updates about every 30 seconds. An officer checks tonight’s scores
-        before they become official.
+        Refreshes about every 30 seconds. Scores await officer review.
       </p>
     </section>
   );

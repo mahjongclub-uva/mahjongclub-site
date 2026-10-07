@@ -101,10 +101,7 @@ function CheckInForm({
           ✓
         </span>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
-        <p>
-          You’re ready to play. When your table finishes playing, one person
-          records everyone’s final card totals.
-        </p>
+        <p>After playing, one person records your table’s scores.</p>
         <div className="meeting-actions">
           <Link className="meeting-primary" href="/score/">
             Record a table
@@ -153,7 +150,6 @@ function CheckInForm({
       }}
     >
       <h1>Grab a seat.</h1>
-      <p className="meeting-intro">Check in, find your table, and play.</p>
       <div className="meeting-tiles" aria-hidden="true">
         {(
           [
@@ -186,15 +182,11 @@ function CheckInForm({
             pattern="[A-Za-z][A-Za-z0-9]*"
             maxLength={32}
             required
-            aria-describedby="id-help"
           />
-          <p className="quiet" id="id-help">
-            Just the ID, for example abc1de. No @virginia.edu.
-          </p>
           {register && (
             <>
               <p className="quiet" role="status">
-                We couldn’t find that ID. Add your name to check in.
+                First time? Add your name.
               </p>
               <label htmlFor="full-name">Full name</label>
               <input
@@ -210,8 +202,7 @@ function CheckInForm({
                 required
               />
               <p className="quiet">
-                Your full name and computing ID stay in the club’s private
-                records.
+                Your name and ID stay private.
               </p>
             </>
           )}
@@ -228,7 +219,7 @@ function CheckInForm({
                 ? `Are you ${suggestions[0].display}?`
                 : "Is one of these you?"}
             </h2>
-            <p className="quiet">Confirm your name to keep your past scores.</p>
+            <p className="quiet">Keep your past scores.</p>
             <div className="meeting-actions">
               {suggestions.map((suggestion) => (
                 <button
@@ -247,7 +238,7 @@ function CheckInForm({
                 className="meeting-text"
                 onClick={() => void submit({ createNew: true })}
               >
-                No, check me in as new
+                No, I’m new
               </button>
             </div>
           </div>
@@ -256,7 +247,7 @@ function CheckInForm({
             {busy
               ? "Checking in…"
               : register
-                ? "Sign up and check in"
+                ? "Join & check in"
                 : "Check in"}
           </button>
         )}
@@ -284,9 +275,9 @@ function CheckInForm({
         </button>
       )}
       <Link className="meeting-text" href="/live/">
-        See the leaderboard ↗
+        Leaderboard ↗
       </Link>
-      <p className="quiet">No computing ID? Ask an officer to check you in.</p>
+      <p className="quiet">No UVA ID? Ask an officer.</p>
     </form>
   );
 }
