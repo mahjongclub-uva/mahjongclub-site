@@ -148,7 +148,7 @@ function CardCalculator({
           disabled={!valid}
           onClick={() => apply(value)}
         >
-          {valid ? `Use ${total} points` : "Enter a valid total"}
+          {valid ? `Confirm ${total} points` : "Enter a valid total"}
         </button>
       </div>
     </dialog>
