@@ -1,0 +1,1512 @@
+.lesson {
+  margin-top: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--tile-face);
+}
+.lesson h3 {
+  margin: 0;
+  font: 600 clamp(1.6rem, 3vw, 2.2rem) var(--display);
+}
+.lesson h4 {
+  margin: 0;
+  font: 600 1.3rem var(--display);
+}
+.lesson p {
+  max-width: 68ch;
+}
+.lesson button {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 2px solid #537665;
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: #fffcf5;
+  font: 600 0.9rem var(--sans);
+  cursor: pointer;
+}
+.lesson button:hover:not(:disabled),
+.lesson button[aria-pressed="true"] {
+  background: #e3ecdc;
+}
+.lesson button:focus-visible {
+  outline: 3px solid var(--control-focus);
+  outline-offset: 3px;
+}
+.lesson button:disabled {
+  cursor: default;
+}
+.gameBadge {
+  font: 500 0.75rem var(--sans);
+  color: var(--ink-soft);
+}
+.progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0 0 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.progress li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+.progress li > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+}
+.progress li[aria-current] {
+  color: var(--ink);
+  font-weight: 700;
+}
+.progress li[aria-current] > span:first-child,
+.progress li[data-complete="true"] > span:first-child {
+  background: #285643;
+  color: #fff8e8;
+  border-color: #285643;
+}
+.gamePrompt {
+  min-height: 80px;
+}
+.gamePrompt p {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.gameBoard {
+  position: relative;
+  isolation: isolate;
+  height: 490px;
+  overflow: hidden;
+  border: 8px solid #a77a52;
+  border-radius: 28px;
+  background: radial-gradient(ellipse at 45% 35%, #346b55, #173f33);
+  box-shadow:
+    inset 0 0 0 2px #e0b78660,
+    inset 0 12px 30px #0b251d55,
+    0 5px 0 #6d5139,
+    0 12px 20px #24352b18;
+  color: #fff9e9;
+}
+.feltMark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font:
+    700 10rem var(--font-han),
+    serif;
+  opacity: 0.035;
+  pointer-events: none;
+}
+.overhead {
+  position: absolute;
+  width: min(100%, 470px);
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.lesson .seat {
+  position: absolute;
+  width: 64%;
+  padding: 0.6rem 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff9e9;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.lesson .seat:hover:not(:disabled) {
+  background: #ffffff15;
+  border-color: #f4da9a90;
+}
+.lesson .seat[data-active="true"] {
+  background: #e6c88918;
+  border-color: #e6c889;
+  box-shadow: 0 0 16px #e6c88918;
+}
+.seat0 {
+  bottom: 5%;
+  left: 18%;
+}
+.seat2 {
+  top: 5%;
+  left: 18%;
+}
+.seat1 {
+  right: -24%;
+  top: 43%;
+  transform: rotate(-90deg);
+}
+.seat3 {
+  left: -24%;
+  top: 43%;
+  transform: rotate(90deg);
+}
+.miniWall {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+}
+.miniWall i {
+  flex: 1;
+  min-width: 0;
+  height: 23px;
+  border: 1px solid #8bc5f1;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
+  box-shadow:
+    inset 0 1px 0 #c7e9ff80,
+    0 1px 0 #eee4cc,
+    0 4px 0 #1c669a,
+    0 5px 0 #eee4cc,
+    0 7px 0 #174f7b,
+    0 9px 3px #08291f50;
+}
+.tableCenter {
+  position: absolute;
+  inset: 31% 23%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.lesson .diceButton {
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  border-radius: 14px;
+}
+.lesson .diceButton:hover:not(:disabled) {
+  background: #ffffff15;
+}
+.dice {
+  display: flex;
+  gap: 14px;
+}
+.dice > span {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  border: 1px solid #f5ecd5;
+  background: #fff9e9;
+  color: #943b30;
+  font: 3rem/1 sans-serif;
+  box-shadow:
+    0 5px 0 #c2b79c,
+    0 9px 12px #06251d66;
+  transform: rotate(-7deg);
+}
+.dice > span:last-child {
+  transform: rotate(9deg);
+}
+.countLabel {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  background: #f1dfa9;
+  color: #173f33;
+  font-weight: 750;
+}
+.wallCloseup {
+  position: relative;
+  min-height: 490px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.wallCaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+.wallCaption > span:first-child {
+  font-weight: 700;
+  color: #f1dfa9;
+  font-size: 1rem;
+}
+.direction {
+  text-align: right;
+  font-size: 0.8rem;
+  margin: 2rem 0 0.5rem;
+  color: #eee5c6;
+}
+.direction strong {
+  margin-left: 0.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+.stacks {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  direction: rtl;
+  gap: 12px 3px;
+  padding: 18px 0;
+}
+.lesson .stacks button {
+  position: relative;
+  min-width: 0;
+  padding: 3px 0;
+  direction: ltr;
+  color: #fff5d8;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stackTile {
+  display: block;
+  width: 34px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border: 1px solid #8bc5f1;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
+  box-shadow:
+    inset 1px 1px 0 #c7e9ff70,
+    inset -1px -1px 0 #17578760,
+    0 1px 0 #eee4cc,
+    0 4px 0 #1c669a,
+    0 5px 0 #eee4cc,
+    0 8px 0 #174f7b,
+    0 11px 4px #08291f50;
+}
+.lesson .stacks button:hover:not(:disabled) {
+  background: #ffffff16;
+}
+.lesson .stacks button[data-break="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -1px;
+  border-left: 3px dashed #e6c889;
+}
+.lesson .stacks button[data-next="true"] {
+  background: #e6c88920;
+  border-color: #e6c889;
+}
+.stacks button[data-drawn="true"] .stackTile {
+  opacity: 0;
+  transform: translateY(50px) rotate(8deg);
+}
+.rack {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 0.5rem;
+  border-bottom: 9px solid #bd8b58;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(0deg, #082d2270, transparent);
+  font-size: 0.75rem;
+}
+.rack > div {
+  display: grid;
+  grid-template-columns: repeat(4, 36px);
+  gap: 8px;
+}
+.rackSlot {
+  display: block;
+  width: 36px;
+  height: 52px;
+  border: 1px dashed #eeeecc40;
+  border-radius: 4px;
+}
+.rackSlot[data-filled="true"] {
+  border-color: transparent;
+}
+.rackSlot .stackTile {
+  margin: 0;
+  height: 48px;
+  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
+  box-shadow:
+    inset 0 1px 0 #c7e9ff70,
+    0 1px 0 #eee4cc,
+    0 4px 0 #1c669a,
+    0 6px 3px #08291f50;
+}
+.success {
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: #f1dfa9;
+}
+.gameControls {
+  position: relative;
+  padding-top: 1.2rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.actions button:disabled {
+  opacity: 0.6;
+}
+.actions button[aria-pressed="true"] {
+  opacity: 1;
+}
+.feedback {
+  min-height: 2.8em;
+  margin: 0.8rem 0;
+  font-size: 0.9rem;
+}
+.hint {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.5rem 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+.hint button {
+  flex-shrink: 0;
+}
+.lesson .replay {
+  margin-top: 0.5rem;
+}
+.rules {
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.rules summary {
+  cursor: pointer;
+  padding: 0.3rem 0;
+}
+.rules p {
+  line-height: 1.7;
+}
+.callScene {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 6px solid #a77a52;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at top, #346b55, #173f33);
+  color: #fff9e9;
+  box-shadow: 0 4px 0 #6d5139;
+}
+.callScene > div {
+  min-height: 160px;
+}
+.callScene p {
+  margin-top: 0;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lesson button {
+    transition:
+      background 0.18s,
+      box-shadow 0.18s;
+  }
+  .miniWall i {
+    animation: buildWall 0.45s backwards cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dice[data-rolled="true"] > span {
+    animation: rollDice 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dice[data-rolled="true"] > span:last-child {
+    animation-delay: 0.08s;
+  }
+  .countLabel,
+  .success {
+    animation: arrive 0.4s ease-out;
+  }
+  .stacks button {
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      background 0.2s;
+  }
+  .stackTile {
+    transition:
+      transform 0.5s ease,
+      opacity 0.4s ease;
+  }
+  .stacks button:hover:not(:disabled) .stackTile {
+    transform: translateY(-6px);
+  }
+  .stacks button[data-next="true"] .stackTile {
+    animation: inviteDraw 1.5s ease-in-out 3;
+  }
+
+  .meld li:last-child {
+    animation: takeTile 0.5s backwards cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+@keyframes buildWall {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes rollDice {
+  from {
+    opacity: 0.2;
+    transform: translateY(-35px) rotate(-170deg) scale(0.7);
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes inviteDraw {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes takeTile {
+  from {
+    opacity: 0;
+    transform: translateY(-70px) rotate(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+@media (max-width: 580px) {
+  .gameHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .progress {
+    gap: 0.25rem;
+  }
+  .progress li {
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+  }
+  .gamePrompt {
+    min-height: 118px;
+  }
+  .gameBoard {
+    height: 380px;
+    border-width: 5px;
+    border-radius: 20px;
+  }
+  .overhead {
+    height: auto;
+    aspect-ratio: 1;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .lesson .seat {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.1rem;
+  }
+  .miniWall {
+    gap: 1px;
+  }
+  .miniWall i {
+    height: 17px;
+  }
+  .dice {
+    gap: 9px;
+  }
+  .dice > span {
+    width: 38px;
+    height: 38px;
+    font-size: 2.3rem;
+  }
+  .tableCenter {
+    gap: 0.6rem;
+    font-size: 0.75rem;
+  }
+  .countLabel {
+    padding: 0.25rem;
+  }
+  .wallCloseup {
+    padding: 1rem 0.5rem;
+  }
+  .wallCaption {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .direction {
+    margin: 1rem 0 0.3rem;
+    font-size: 0.7rem;
+  }
+  .rack {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .rack > span:first-child {
+    flex-basis: 100%;
+  }
+  .hint {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  .callScene {
+    padding: 1rem;
+    grid-template-columns: 1fr;
+  }
+  .callScene > div {
+    min-height: 130px;
+  }
+}
+
+.wallCloseup .direction {
+  max-width: none;
+  width: 100%;
+}
+.rackSlot .stackTile {
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 580px) {
+  .wallCloseup .direction {
+    margin-top: 0.6rem;
+  }
+  .wallCloseup .stacks {
+    padding-top: 10px;
+    padding-bottom: 12px;
+  }
+  .wallCloseup .rack {
+    padding-block: 0.5rem;
+  }
+}
+
+.lesson .dealNext {
+  align-self: center;
+  margin: 0.5rem 0 1rem;
+  background: #f1dfa9;
+  border-color: #f1dfa9;
+  color: #173f33;
+  box-shadow: 0 4px 0 #a89156;
+  white-space: normal;
+}
+.lesson .dealNext:hover:not(:disabled) {
+  background: #fff0c7;
+}
+.nextPlayer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f1dfa9;
+  color: #173f33;
+  font-size: 0.75rem;
+}
+.nextPlayer strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+}
+@media (max-width: 760px) {
+  .rack > div {
+    grid-template-columns: repeat(4, 36px);
+    row-gap: 10px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dealNext,
+  .nextPlayer {
+    animation: nextActionIn 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+@keyframes nextActionIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wallCloseup {
+    animation: approachWall 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center 35%;
+  }
+  .wallCloseup[data-stage="break"] .stackTile {
+    animation: settleStack 0.45s backwards cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wallCloseup[data-stage="break"] .direction {
+    animation: countDirection 1.3s ease-in-out 2;
+  }
+  .stacks button[data-break="true"] {
+    animation: markBreak 0.8s ease-out 2;
+  }
+}
+@keyframes approachWall {
+  from {
+    opacity: 0;
+    transform: perspective(800px) rotateX(12deg) scale(0.86) translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0deg) scale(1) translateY(0);
+  }
+}
+@keyframes settleStack {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+@keyframes countDirection {
+  50% {
+    transform: translateX(-8px);
+  }
+}
+@keyframes markBreak {
+  50% {
+    border-left-color: #fff9e9;
+    filter: drop-shadow(-3px 0 4px #f5d37b);
+  }
+}
+
+/* Raised controls act; flat controls offer help or restart the round. */
+.lesson button:where(:not(.seat):not(.diceButton):not(.stacks button)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  box-shadow: 0 var(--control-depth) 0 #b6aa96;
+}
+.lesson .primaryButton {
+  background: #285643;
+  color: #fff9e9;
+  border-color: #285643;
+  box-shadow: 0 var(--control-depth) 0 #143b2d;
+}
+.lesson .primaryButton:hover:not(:disabled),
+.lesson .primaryButton[aria-pressed="true"] {
+  background: #1b4332;
+}
+.lesson .helpButton,
+.lesson .replay {
+  background: transparent;
+  border-color: transparent;
+  color: #285643;
+  box-shadow: none;
+}
+.lesson .helpButton:hover:not(:disabled),
+.lesson .replay:hover:not(:disabled) {
+  background: #e3ecdc;
+  border-color: #9aad9c;
+}
+.lesson
+  button:disabled:not(.seat):not(.diceButton):not(.turnChoice):not(
+    .turnWall
+  ):not(.stacks button):not(.callButton[aria-pressed="true"]) {
+  opacity: 0.65;
+  box-shadow: none;
+}
+.lesson .diceButton[data-ready="true"] {
+  display: grid;
+  justify-items: center;
+  gap: 1.1rem;
+  padding: 1.2rem 1.4rem 0.8rem;
+  border: 1px solid #f1dfa980;
+  border-bottom-width: 4px;
+  border-radius: 20px;
+  background: #163c30;
+  box-shadow:
+    0 var(--control-depth) 0 #0e2b22,
+    inset 0 1px 0 #fff5d81a;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.lesson .diceButton[data-ready="true"]:hover {
+  background: #214c3c;
+  border-color: #f1dfa9;
+}
+.rollLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #fff9e9;
+}
+.lesson .diceButton:focus-visible {
+  outline-color: #fff0b7;
+  outline-offset: 6px;
+}
+.lesson .diceButton[data-ready="true"]:active {
+  translate: 0 var(--control-press);
+  box-shadow: 0 2px 0 #0e2b22;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lesson button:not(:disabled) {
+    transition:
+      background 0.18s,
+      box-shadow 0.18s,
+      transform 0.15s;
+  }
+  .lesson
+    button:not(.seat):not(.diceButton):not(.stacks button):active:not(
+      :disabled
+    ) {
+    transform: translateY(var(--control-press));
+    box-shadow: none;
+  }
+  .diceButton[data-ready="true"] .dice > span {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .diceButton[data-ready="true"]:hover .dice > span,
+  .diceButton[data-ready="true"]:focus-visible .dice > span {
+    transform: translateY(-5px) rotate(-14deg);
+  }
+  .diceButton[data-ready="true"]:hover .dice > span:last-child,
+  .diceButton[data-ready="true"]:focus-visible .dice > span:last-child {
+    transform: translateY(-5px) rotate(15deg);
+  }
+}
+@media (max-width: 580px) {
+  .lesson .diceButton[data-ready="true"] {
+    padding: 0.8rem 0.9rem 0.6rem;
+    gap: 0.8rem;
+    border-radius: 16px;
+  }
+  .rollLabel {
+    font-size: 0.8rem;
+  }
+}
+
+/* Gold marks the current action; blue identifies the tiles you can handle. */
+.gamePrompt h3 {
+  color: #8c3b30;
+  font-size: 1.5rem;
+}
+.gamePrompt p {
+  color: #293e34;
+  font-size: 1rem;
+}
+.lesson .seat > span:first-child {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: #163c30;
+}
+.lesson .seat[data-active="true"] > span:first-child {
+  color: #173f33;
+  background: #f1dfa9;
+}
+.tableCenter > strong {
+  font-size: 1.05rem;
+  color: #fff9e9;
+}
+.stackTile {
+  position: relative;
+}
+.stackTile::after {
+  content: "";
+  position: absolute;
+  inset: 5px 4px;
+  border: 1px solid #a9dbfa70;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 #155b8e40;
+}
+.lesson .stacks button[data-next="true"] > span:last-child {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #173f33;
+  background: #f1dfa9;
+}
+.wallCaption {
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+}
+.rollReminder {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #fff0c7;
+  border-radius: 10px;
+  background: #f1dfa9;
+  color: #173f33;
+  box-shadow: 0 3px 0 #a89156;
+  font-variant-numeric: tabular-nums;
+}
+.rollReminder > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.rollReminder strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+.rollReminder > span:last-child {
+  font-size: 0.75rem;
+}
+.direction {
+  color: #f1dfa9;
+  font-weight: 600;
+}
+.rack > span {
+  font-weight: 700;
+  color: #fff9e9;
+}
+.rack > span:last-child {
+  color: #f1dfa9;
+  font-size: 1rem;
+}
+.gameControls .feedback {
+  font-weight: 600;
+  color: #293e34;
+}
+@media (max-width: 580px) {
+  .gamePrompt h3 {
+    font-size: 1.3rem;
+  }
+  .gamePrompt p {
+    font-size: 0.9rem;
+  }
+}
+
+.gameBoard[data-closeup="true"] {
+  height: auto;
+}
+.stacks .stackTile {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 17 / 24;
+}
+.wallOverview,
+.countControls {
+  display: none;
+}
+.breakControls {
+  text-align: center;
+}
+.lesson .stacks button[aria-pressed="true"] {
+  background: #f1dfa926;
+  border-color: #f1dfa9;
+}
+@media (max-width: 1000px) {
+  .wallOverview {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 3px;
+    margin: 0.75rem 0 1.5rem;
+  }
+  .wallOverview i {
+    flex: 1;
+    height: 24px;
+    border-radius: 2px;
+    background: #65afe9;
+    box-shadow:
+      0 3px 0 #f0e7d0,
+      0 5px 0 #256ca5;
+  }
+  .wallOverview i[data-selected="true"] {
+    outline: 2px solid #f1dfa9;
+    outline-offset: 2px;
+    transform: translateY(-4px);
+  }
+  .wallOverview i[data-break="true"] {
+    border-left: 2px solid #f1dfa9;
+  }
+  .wallOverview i[data-drawn="true"] {
+    opacity: 0.2;
+  }
+  .stacks {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .stacks button[data-near="false"] {
+    display: none;
+  }
+  .countControls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .lesson .countControls button {
+    min-width: 0;
+    white-space: normal;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  .countControls > span {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}
+
+.callScene .callAnnouncement {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  min-height: 138px;
+}
+.callBubble {
+  position: relative;
+  min-width: 170px;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid #173f33;
+  border-radius: 45% 45% 40% 15%;
+  background: #fff4cf;
+  color: #173f33;
+  box-shadow: 5px 6px 0 #09281f;
+  text-align: center;
+  transform: rotate(-4deg);
+}
+.callBubble strong {
+  display: block;
+  font: 800 1.7rem var(--display);
+}
+.callBubble strong[lang="zh"] {
+  font:
+    800 3.5rem / 1.1 var(--font-han),
+    serif;
+}
+.callBubble > span {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.callBubble[data-call="Pung"] {
+  background: #ffe1c9;
+  color: #873a2e;
+}
+.callBubble[data-call="Chow"] {
+  background: #d6ecff;
+  color: #204f7a;
+  transform: rotate(4deg);
+}
+.callActions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.lesson .callButton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem 0.35rem;
+  border: 2px solid #466a57;
+  border-radius: var(--control-radius);
+  background: #fff6dc;
+  color: #254f3a;
+  box-shadow: 0 var(--control-depth) 0 #466a57;
+  white-space: normal;
+}
+.lesson .callButton[data-call="Pung"] {
+  background: #ffe1c9;
+  color: #873a2e;
+  border-color: #873a2e;
+  box-shadow: 0 var(--control-depth) 0 #873a2e;
+}
+.lesson .callButton[data-call="Chow"] {
+  background: #d6ecff;
+  color: #204f7a;
+  border-color: #204f7a;
+  box-shadow: 0 var(--control-depth) 0 #204f7a;
+}
+.callCharacter {
+  font:
+    800 2.1rem / 1.2 var(--font-han),
+    serif;
+}
+.callButton strong {
+  font-size: 1.05rem;
+}
+.callButton > span:last-child {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.lesson .callActions .callButton[aria-pressed="true"]:disabled {
+  opacity: 1;
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lesson .callButton {
+    transition:
+      transform 150ms ease-out,
+      box-shadow 150ms ease-out;
+  }
+  .lesson .callButton:hover:not(:disabled) {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  .lesson .callButton:active:not(:disabled) {
+    transform: translateY(var(--control-press));
+    box-shadow: 0 1px 0 currentColor;
+  }
+  .callBubble[data-react="true"] {
+    animation: callPop 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+@keyframes callPop {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  55% {
+    opacity: 1;
+    scale: 1.15;
+  }
+  78% {
+    scale: 0.95;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+@media (max-width: 580px) {
+  .callScene {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 0.75rem;
+    padding: 1rem 0.6rem;
+  }
+  .callScene > div {
+    min-width: 0;
+    min-height: 105px;
+  }
+  .callScene .callAnnouncement {
+    min-height: 138px;
+  }
+  .callScene p {
+    font-size: 0.75rem;
+  }
+  .callScene :global(.tile-row) {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  .callScene :global(.set-tile) {
+    width: 34px;
+  }
+  .callActions {
+    gap: 0.5rem;
+  }
+}
+
+/* Keep secondary help quiet and the next action unmistakable. */
+.hint {
+  min-height: 0;
+}
+.hint > span:empty {
+  display: none;
+}
+.feedback:empty {
+  display: none;
+}
+.wallCloseup {
+  min-height: 370px;
+}
+.wallCloseup[data-stage="break"] .rack {
+  display: none;
+}
+.lesson .breakControls .dealNext,
+.lesson .wallCloseup > .dealNext {
+  min-width: 180px;
+  margin-top: 1rem;
+}
+.lesson[data-input="keyboard"] *,
+.lesson[data-input="keyboard"] *::before,
+.lesson[data-input="keyboard"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+@media (max-width: 1000px) {
+  .countControls {
+    grid-template-columns: 44px 1fr 44px;
+    max-width: 190px;
+    margin: 0.5rem auto 0;
+    gap: 0.75rem;
+  }
+  .countControls > span {
+    font-size: 0.9rem;
+  }
+  .lesson .countControls button {
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+    border-color: #d9e9df80;
+    color: #fff9e9;
+  }
+  .wallOverview {
+    margin-bottom: 0.75rem;
+  }
+}
+@media (max-width: 580px) {
+  .gameBadge {
+    display: none;
+  }
+  .progress {
+    margin: 0 0 1rem;
+    padding-bottom: 0.75rem;
+  }
+  .progress li:not([aria-current]) .progressLabel {
+    display: none;
+  }
+  .progress li {
+    font-size: 0.8rem;
+  }
+  .gamePrompt {
+    min-height: 85px;
+  }
+  .gamePrompt p {
+    font-size: 0.85rem;
+  }
+  .wallCloseup {
+    padding: 1rem 0.65rem;
+  }
+  .wallCaption > span:first-child {
+    font-size: 0.85rem;
+  }
+  .rollReminder > span:last-child {
+    display: none;
+  }
+  .rollReminder {
+    padding: 0.45rem 0.6rem;
+  }
+  .direction {
+    font-size: 0.7rem;
+  }
+  .callButton > span:last-child {
+    display: none;
+  }
+  .callScene .callAnnouncement {
+    min-height: 115px;
+  }
+}
+
+.turnStatus {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+.turnStatus > span {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.turnTable {
+  margin-block: 1rem 1.5rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 6px solid #a77a52;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at top, #346b55, #173f33);
+  color: #fff9e9;
+  box-shadow: 0 4px 0 #6d5139;
+}
+.turnTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  min-height: 140px;
+}
+.turnTable p {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+.turnTable small {
+  color: #d9e9df;
+}
+.turnWall {
+  display: flex;
+  gap: 5px;
+}
+.turnWall .stackTile {
+  width: 25px;
+  height: 36px;
+  margin: 0;
+  box-shadow:
+    inset 1px 1px 0 #c7e9ff70,
+    0 1px 0 #eee4cc,
+    0 3px 0 #1c669a,
+    0 5px 3px #08291f50;
+}
+.turnTable :global(.tile-row) {
+  flex-wrap: nowrap;
+}
+.turnTable :global(.set-tile) {
+  width: clamp(32px, 8vw, 58px);
+}
+.turnNote {
+  min-height: 2.5em;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .turnDraw li:nth-child(3) {
+    animation: takeTile 280ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  }
+}
+
+.turnTable .turnHand {
+  gap: 6px;
+}
+.turnHand > li {
+  width: clamp(44px, 8vw, 58px);
+  flex-shrink: 0;
+}
+.lesson .turnChoice {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+}
+.lesson .turnChoice svg {
+  position: static;
+  width: 100%;
+  height: auto;
+}
+.lesson .turnChoice[data-hint="true"] {
+  outline: 1px solid #f1dfa975;
+  outline-offset: 3px;
+}
+.turnTable .discardHint {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: #d9e9df;
+}
+@media (max-width: 380px) {
+  .turnTable {
+    padding-inline: 0.4rem;
+  }
+  .turnTable .turnHand {
+    gap: 3px;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .lesson .turnChoice:hover:not(:disabled) {
+    transform: translateY(-3px);
+  }
+}
+
+/* The wall itself is the draw control, so the turn is played on the table. */
+.lesson .turnWall {
+  gap: 5px;
+  min-height: 44px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.lesson .turnWall:disabled {
+  cursor: default;
+}
+.tapCue {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #f1dfa9;
+}
+.discardSlot {
+  width: fit-content;
+  min-width: clamp(44px, 8vw, 58px);
+  min-height: 64px;
+  border: 2px dashed #ffffff40;
+  border-radius: 6px;
+}
+.discardSlot:has(li) {
+  border-color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lesson .turnWall:not(:disabled) .stackTile:last-child {
+    animation: inviteDraw 1.5s ease-in-out infinite;
+  }
+  .discardSlot li {
+    animation: takeTile 280ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  }
+}
+
+.claimFinish {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-block: 1rem 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #28564330;
+  border-radius: 12px;
+  background: #e4ebdf;
+}
+.lesson .claimTile {
+  display: block;
+  flex: 0 0 60px;
+  width: 60px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+}
+.lesson .claimTile:hover {
+  background: transparent;
+}
+.claimTile svg {
+  width: 100%;
+  height: auto;
+}
+.claimInstruction strong {
+  color: #285643;
+  font-size: 1rem;
+}
+.claimInstruction p {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.claimFinish[data-discarded="true"] {
+  background: #f1eee5;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .claimTile {
+    transition: transform 180ms ease-out;
+  }
+  .claimTile:active {
+    transform: translateY(3px);
+  }
+  .claimFinish[data-discarded="true"] .claimTile {
+    animation: arrive 250ms ease-out;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  button.claimTile:hover {
+    transform: translateY(-3px);
+  }
+}
+@media (max-width: 560px) {
+  .claimFinish {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .lesson .claimTile {
+    flex-basis: 52px;
+    width: 52px;
+  }
+}
+
+/* Keep the mobile table and its close-up proportional to the available width. */
+@media (max-width: 580px) {
+  .gameBoard:not([data-closeup="true"]) {
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .seat1 {
+    right: -17%;
+  }
+  .seat3 {
+    left: -17%;
+  }
+  .miniWall i {
+    border-radius: 1px;
+    box-shadow:
+      inset 0 1px 0 #c7e9ff70,
+      0 1px 0 #eee4cc,
+      0 3px 0 #174f7b;
+  }
+  .wallCloseup {
+    min-height: 0;
+    padding: 1rem 0.75rem;
+  }
+  .wallOverview {
+    gap: 2px;
+    margin-bottom: 1rem;
+  }
+  .wallOverview i {
+    height: 18px;
+    background: #2888c6;
+    box-shadow:
+      0 1px 0 #eee4cc,
+      0 3px 0 #174f7b;
+  }
+  .stacks {
+    gap: 4px;
+  }
+  .stacks .stackTile {
+    width: min(42px, calc(100% - 6px));
+    margin-bottom: 10px;
+  }
+  .stackTile::after {
+    inset: 4px 3px;
+    box-shadow: none;
+  }
+  .lesson .countControls button {
+    justify-self: center;
+    width: 44px;
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .wallCaption {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .wallCaption > span:first-child {
+    font-size: 0.75rem;
+  }
+  .rollReminder {
+    padding: 0.4rem 0.5rem;
+  }
+  .rollReminder strong {
+    font-size: 1.6rem;
+  }
+}
