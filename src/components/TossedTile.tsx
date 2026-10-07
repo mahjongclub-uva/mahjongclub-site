@@ -28,7 +28,7 @@ export default function TossedTile({
     : ["var(--tile-body)", "var(--tile-side)"];
   const rect = (i: number, fill: string, extra = {}) => (
     <rect
-      key={i}
+      key={`${i}-${fill}`}
       x={1 + (dx * i) / STEPS}
       y={1 + (dy * i) / STEPS}
       width={W}
