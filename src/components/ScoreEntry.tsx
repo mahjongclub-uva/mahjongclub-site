@@ -141,18 +141,16 @@ function CardCalculator({
           Enter a whole number from 0 to 820.
         </p>
       )}
-      <button
-        type="button"
-        className="meeting-primary"
-        disabled={!valid}
-        onClick={() => apply(value)}
-      >
-        Use {valid ? total : "these"} points
-      </button>
-      <p className="quiet">
-        Everyone starts with 205 points. Together, your cards must add up to
-        820.
-      </p>
+      <div className="calculator-footer">
+        <button
+          type="button"
+          className="meeting-primary"
+          disabled={!valid}
+          onClick={() => apply(value)}
+        >
+          Use {valid ? total : "these"} points
+        </button>
+      </div>
     </dialog>
   );
 }
@@ -379,10 +377,10 @@ function ScoreForm({
       )}
       <p className="eyebrow">
         {stage === "pick"
-          ? "Pick your players"
+          ? "1 of 3 · Players"
           : stage === "score"
-            ? "Count your cards"
-            : "Ready to record"}
+            ? "2 of 3 · Card totals"
+            : "3 of 3 · Review"}
       </p>
       <h1 tabIndex={-1} ref={heading}>
         {stage === "pick"
@@ -406,8 +404,33 @@ function ScoreForm({
                 key={`${i}-${id}`}
                 className={`meeting-seat ${id ? "filled" : ""}`}
               >
-                {avatar(id ? name(id) : String(i + 1))}
-                <span>{id ? name(id) : "Open seat"}</span>
+                {id ? (
+                  <button
+                    type="button"
+                    className="meeting-seat-button"
+                    aria-label={`Remove ${name(id)} from table`}
+                    disabled={locked}
+                    onClick={() => {
+                      setIds(
+                        ids.map((value, index) => (index === i ? "" : value)),
+                      );
+                      setTotals(
+                        totals.map((value, index) =>
+                          index === i ? "" : value,
+                        ),
+                      );
+                    }}
+                  >
+                    {avatar(name(id))}
+                    <span>{name(id)}</span>
+                    <small aria-hidden="true">Remove ×</small>
+                  </button>
+                ) : (
+                  <>
+                    {avatar(String(i + 1))}
+                    <span>Open seat</span>
+                  </>
+                )}
               </div>
             ))}
           </div>

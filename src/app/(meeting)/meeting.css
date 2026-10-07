@@ -733,20 +733,10 @@
 
 /* Color comes from the tiles and actions, leaving the paper uncluttered. */
 .meeting-form h1 {
-  color: #244f77;
+  color: var(--jade);
 }
 .meeting-form .meeting-tiles {
   margin-block: 28px 22px;
-}
-.meeting-form .meeting-primary {
-  background: #285b87;
-  box-shadow: 0 4px 0 #193e60;
-}
-.meeting-form .meeting-primary:hover:not(:disabled) {
-  background: #214b70;
-}
-.meeting-form .meeting-primary:active:not(:disabled) {
-  box-shadow: 0 1px 0 #193e60;
 }
 .meeting-form input:focus-visible {
   outline-color: #285b87;
@@ -803,16 +793,6 @@
   position: relative;
   border-bottom-width: 3px;
   border-radius: 6px;
-}
-.card-keypad button::before {
-  content: "";
-  position: absolute;
-  top: 7px;
-  left: 7px;
-  width: 5px;
-  height: 5px;
-  transform: rotate(45deg);
-  background: #b34a39;
 }
 .card-keypad button[data-counted="true"] {
   background: #e9f0f5;
@@ -871,5 +851,70 @@
   }
   .live-points-changed {
     animation: score-highlight 1000ms ease-out;
+  }
+}
+
+/* Touch controls share a physical press without disabling page zoom or text selection. */
+.meeting-page button,
+.meeting-calculator button,
+.meeting-page .meeting-primary {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.meeting-page .meeting-primary,
+.meeting-calculator .meeting-primary {
+  box-shadow: 0 4px 0 #203d30;
+}
+.meeting-page .meeting-primary:active:not(:disabled),
+.meeting-calculator .meeting-primary:active:not(:disabled) {
+  box-shadow: 0 1px 0 #203d30;
+  background: #203d30;
+}
+.meeting-seat-button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: inherit !important;
+}
+.meeting-seat-button small {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+.meeting-calculator {
+  overscroll-behavior: contain;
+}
+.calculator-footer {
+  position: sticky;
+  bottom: calc(-24px - env(safe-area-inset-bottom));
+  padding: 12px 0 calc(16px + env(safe-area-inset-bottom));
+  margin-bottom: calc(-24px - env(safe-area-inset-bottom));
+  background: var(--tile-face-hi);
+}
+.calculator-footer .meeting-primary {
+  margin-top: 0;
+}
+.meeting-form input {
+  font-size: max(16px, 1rem);
+}
+@media (max-width: 480px) {
+  .score-form h1 {
+    font-size: clamp(2.35rem, 9vw, 2.9rem);
+  }
+  .meeting-seats {
+    gap: 6px;
+    margin-block: 22px;
+  }
+  .meeting-seat {
+    padding: 5px 3px;
+  }
+  .meeting-calculator {
+    padding-inline: 20px;
   }
 }
