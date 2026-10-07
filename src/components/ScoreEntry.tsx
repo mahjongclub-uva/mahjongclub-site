@@ -77,7 +77,7 @@ function CardCalculator({
           ×
         </button>
       </div>
-      <p className="quiet">Enter points, or tap the cards you’re holding.</p>
+      <p className="quiet">Enter a total, or add cards below.</p>
       <label htmlFor="card-total">Card total</label>
       <input
         id="card-total"
@@ -98,14 +98,22 @@ function CardCalculator({
           <button
             type="button"
             key={card}
+            data-counted={count(card) > 0}
             disabled={!valid || total + card > 820}
-            aria-label={`${card === 50 ? "Face card" : card === 1 ? "Ace" : card}, ${card} points`}
+            aria-label={`${card === 50 ? "J / Q / K" : card === 1 ? "A (Ace)" : card}, add ${card} ${card === 1 ? "point" : "points"}`}
             onClick={() => tap([...cards, card])}
           >
             <strong>
               {card === 50 ? "J / Q / K" : card === 1 ? "A" : card}
             </strong>
-            <small>{count(card) ? `× ${count(card)}` : `${card} pts`}</small>
+            <small
+              key={count(card)}
+              className={count(card) ? "card-count" : undefined}
+            >
+              {count(card)
+                ? `× ${count(card)}`
+                : `${card} ${card === 1 ? "pt" : "pts"}`}
+            </small>
           </button>
         ))}
       </div>
@@ -127,7 +135,7 @@ function CardCalculator({
             setValue("0");
           }}
         >
-          Clear cards
+          Reset total
         </button>
       </div>
       {!valid && (
@@ -135,18 +143,16 @@ function CardCalculator({
           Enter a whole number from 0 to 820.
         </p>
       )}
-      <button
-        type="button"
-        className="meeting-primary"
-        disabled={!valid}
-        onClick={() => apply(value)}
-      >
-        Use {valid ? total : "these"} points
-      </button>
-      <p className="quiet">
-        Everyone starts with 205 points. Together, your cards must add up to
-        820.
-      </p>
+      <div className="calculator-footer">
+        <button
+          type="button"
+          className="meeting-primary"
+          disabled={!valid}
+          onClick={() => apply(value)}
+        >
+          {valid ? `Confirm ${total} points` : "Enter a valid total"}
+        </button>
+      </div>
     </dialog>
   );
 }
@@ -170,6 +176,11 @@ function ScoreForm({
   const [draftError, setDraftError] = useState(false);
   const [receipt, setReceipt] = useState<number | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const calculatorTrigger = useRef<HTMLButtonElement | null>(null);
+  function closeCalculator() {
+    setActive(null);
+    requestAnimationFrame(() => calculatorTrigger.current?.focus());
+  }
   const players = meeting.players || [];
   const seats = ids.map((id, i) => ({
     id,
@@ -323,7 +334,10 @@ function ScoreForm({
                 className="total-button"
                 disabled={locked}
                 aria-label={`Count cards for ${name(id)}`}
-                onClick={() => setActive(i)}
+                onClick={(event) => {
+                  calculatorTrigger.current = event.currentTarget;
+                  setActive(i);
+                }}
               >
                 {totals[i] || "Add +"}
               </button>
@@ -373,10 +387,10 @@ function ScoreForm({
       )}
       <p className="eyebrow">
         {stage === "pick"
-          ? "Pick your players"
+          ? "1 of 3 · Players"
           : stage === "score"
-            ? "Count your cards"
-            : "Ready to record"}
+            ? "2 of 3 · Card totals"
+            : "3 of 3 · Review"}
       </p>
       <h1 tabIndex={-1} ref={heading}>
         {stage === "pick"
@@ -385,20 +399,48 @@ function ScoreForm({
             ? "Cards on the table."
             : "One last look."}
       </h1>
-      <p className="meeting-intro">
-        {stage === "pick"
-          ? "Choose the four people at your table."
-          : stage === "score"
-            ? "After your table’s last game, enter each player’s final card total."
-            : "Check everyone’s points against the cards on the table."}
-      </p>
+      {stage !== "pick" && (
+        <p className="meeting-intro">
+          {stage === "score"
+            ? "Enter final card totals after your last game."
+            : "Check these totals with your table."}
+        </p>
+      )}
       {stage === "pick" ? (
         <>
           <div className="meeting-seats">
             {ids.map((id, i) => (
-              <div key={i} className={`meeting-seat ${id ? "filled" : ""}`}>
-                {avatar(id ? name(id) : String(i + 1))}
-                <span>{id ? name(id) : "Open seat"}</span>
+              <div
+                key={`${i}-${id}`}
+                className={`meeting-seat ${id ? "filled" : ""}`}
+              >
+                {id ? (
+                  <button
+                    type="button"
+                    className="meeting-seat-button"
+                    aria-label={`Remove ${name(id)} from table`}
+                    disabled={locked}
+                    onClick={() => {
+                      setIds(
+                        ids.map((value, index) => (index === i ? "" : value)),
+                      );
+                      setTotals(
+                        totals.map((value, index) =>
+                          index === i ? "" : value,
+                        ),
+                      );
+                    }}
+                  >
+                    {avatar(name(id))}
+                    <span>{name(id)}</span>
+                    <small aria-hidden="true">Remove ×</small>
+                  </button>
+                ) : (
+                  <>
+                    {avatar(String(i + 1))}
+                    <span>Open seat</span>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -464,12 +506,29 @@ function ScoreForm({
         <>
           {scoreRows}
           <div className="score-foot">
-            <div className="score-summary">
+            <div className="score-progress" data-balanced={!validation}>
+              <div
+                role="progressbar"
+                aria-label="Table points"
+                aria-valuemin={0}
+                aria-valuemax={820}
+                aria-valuenow={Math.min(820, Math.max(0, sum))}
+                aria-valuetext={`${sum} of 820 points${sum > 820 ? ", over total" : ""}`}
+                className="score-progress-track"
+              >
+                <span
+                  style={{
+                    transform: `scaleX(${Math.min(1, Math.max(0, sum / 820))})`,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="score-summary" data-balanced={!validation}>
               <span>Table total</span>
               <strong>
                 {sum} <small>/ 820</small>
               </strong>
-              <p role="status">{validation || "820 points. You’re all set."}</p>
+              <p role="status">{validation || "✓ Balanced. Ready to save."}</p>
             </div>
             {stage === "score" ? (
               <button
@@ -547,10 +606,10 @@ function ScoreForm({
           key={ids[active]}
           name={name(ids[active])}
           initial={totals[active]}
-          close={() => setActive(null)}
+          close={closeCalculator}
           apply={(value) => {
             setTotals(totals.map((n, i) => (i === active ? value : n)));
-            setActive(null);
+            closeCalculator();
           }}
         />
       )}

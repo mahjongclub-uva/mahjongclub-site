@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
@@ -23,8 +23,13 @@ function LiveTable({
 }) {
   const [results, setResults] = useState<Results | null>(null);
   const [error, setError] = useState("");
+  const [updating, setUpdating] = useState(true);
+  const [updatedAt, setUpdatedAt] = useState("");
+  const previousPoints = useRef<Map<string, number> | null>(null);
+  const [scoreChanges, setScoreChanges] = useState<Record<string, number>>({});
   const retry = usePoll(
     async (signal) => {
+      setUpdating(true);
       try {
         const next = await getResults(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
@@ -32,10 +37,41 @@ function LiveTable({
           throw new Error(
             "The meeting changed. Return to check-in to refresh it.",
           );
+        const nextRows = liveStandings(
+          semester,
+          meeting.semester === semester.id &&
+            semester.scoring_rule === "season-net"
+            ? next
+            : null,
+        );
+        const previous = previousPoints.current;
+        if (previous) {
+          const changed = nextRows.filter(
+            (row) => previous.get(row.id) !== row.points,
+          );
+          if (changed.length)
+            setScoreChanges((counts) => {
+              const updated = { ...counts };
+              for (const row of changed)
+                updated[row.id] = (updated[row.id] || 0) + 1;
+              return updated;
+            });
+        }
+        previousPoints.current = new Map(
+          nextRows.map((row) => [row.id, row.points]),
+        );
         setResults(next);
         setError("");
+        setUpdatedAt(
+          new Date().toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+        );
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
+      } finally {
+        if (!signal.aborted) setUpdating(false);
       }
     },
     30000,
@@ -49,38 +85,44 @@ function LiveTable({
   );
   return (
     <section>
-      <p className="eyebrow">Around the tables</p>
-      <h1>The night is moving.</h1>
+      <h1>Live standings</h1>
       <p className="meeting-intro">
         {matching
-          ? "Season scores, with tonight’s tables added as they’re recorded."
+          ? "Season scores + tonight’s tables."
           : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
-        {matching && !alreadyCounted
-          ? "Tonight included · Not final yet"
-          : "Official standings"}
+        {!results && matching
+          ? error
+            ? "Season scores only"
+            : "Loading tonight’s scores…"
+          : matching && !alreadyCounted
+            ? error
+              ? "Last received scores · Update delayed"
+              : "Awaiting review"
+            : "Official standings"}
         {results && (
           <span>
             · {results.tables.length}{" "}
             {results.tables.length === 1 ? "table" : "tables"} tonight
           </span>
         )}
+        {results && <span>· Updated {updatedAt}</span>}
       </p>
       {error && (
         <div className="meeting-notice" role="alert">
           <p>
             {error} {results && "Showing the last scores received."}
           </p>
-          <button className="meeting-text" type="button" onClick={retry}>
-            Retry update
+          <button
+            className="meeting-secondary"
+            type="button"
+            onClick={retry}
+            disabled={updating}
+          >
+            {updating ? "Updating…" : "Retry update"}
           </button>
         </div>
-      )}
-      {!results && !error && (
-        <p className="quiet" role="status">
-          Fetching tonight’s scores…
-        </p>
       )}
       <ol className="live-list" aria-label="Live season standings">
         {rows.map((row) => {
@@ -90,9 +132,6 @@ function LiveTable({
               <span className="live-rank" aria-label={`Rank ${row.rank}`}>
                 {row.rank}
               </span>
-              <span className="meeting-avatar" aria-hidden="true">
-                {row.display[0]}
-              </span>
               <span className="score-name">
                 {row.display}
                 <small>
@@ -100,7 +139,13 @@ function LiveTable({
                   season
                 </small>
               </span>
-              <strong className="live-points">{row.points}</strong>
+              <strong
+                key={scoreChanges[row.id] || 0}
+                className={`live-points${scoreChanges[row.id] ? " live-points-changed" : ""}`}
+              >
+                {row.points}
+                <span className="sr-only"> points</span>
+              </strong>
               <span
                 className={`live-change ${change !== null && change < 0 ? "down" : ""}`}
                 aria-label={
@@ -114,7 +159,7 @@ function LiveTable({
                 }
               >
                 {change === null
-                  ? "NEW"
+                  ? "New"
                   : change > 0
                     ? `↑ ${change}`
                     : change < 0
@@ -148,10 +193,7 @@ function LiveTable({
           </Link>
         </div>
       </div>
-      <p className="quiet">
-        Updates about every 30 seconds. An officer checks tonight’s scores
-        before they become official.
-      </p>
+      <p className="quiet">Refreshes about every 30 seconds.</p>
     </section>
   );
 }

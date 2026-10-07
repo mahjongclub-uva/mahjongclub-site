@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
@@ -26,6 +26,10 @@ function CheckInForm({
   const [fullName, setFullName] = useState("");
   const [register, setRegister] = useState(false);
   const [suggestions, setSuggestions] = useState<Player[]>([]);
+  const matchHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (suggestions.length) matchHeading.current?.focus();
+  }, [suggestions]);
   // Survives a reload so the confirmation doesn't vanish; scoped to this meeting.
   const [player, setPlayerState] = useState<Player | null>(() => {
     try {
@@ -97,10 +101,7 @@ function CheckInForm({
           ✓
         </span>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
-        <p>
-          You’re ready to play. When your table finishes playing, one person
-          records everyone’s final card totals.
-        </p>
+        <p>After playing, one person records your table’s scores.</p>
         <div className="meeting-actions">
           <Link className="meeting-primary" href="/score/">
             Record a table
@@ -127,120 +128,112 @@ function CheckInForm({
     );
   if (!meeting.checkinsOpen)
     return (
-      <div className="meeting-notice">
-        <h2>Check-in has closed</h2>
+      <div className="meeting-closed">
+        <h1>Check-in has closed</h1>
         <p>
           Scores are still open for players already checked in. If you missed
           check-in, ask an officer.
         </p>
-        <Link href="/score/">Record a table</Link>
+        <Link className="meeting-secondary" href="/score/">
+          Record a table
+        </Link>
       </div>
     );
   return (
     <form
       className="meeting-form"
+      data-register={register}
+      data-busy={busy}
       onSubmit={(event) => {
         event.preventDefault();
-        void submit();
+        if (!suggestions.length) void submit();
       }}
     >
-      {!register && !suggestions.length && (
-        <>
-          <h1>
-            Grab a <span className="meeting-accent">seat.</span>
-          </h1>
-          <p className="meeting-intro">Check in, find your table, and play.</p>
-          <div className="meeting-tiles" aria-hidden="true">
-            {(
-              [
-                { suit: "dots", rank: 2 },
-                { suit: "characters", rank: 1 },
-                { suit: "bamboo", rank: 3 },
-              ] as const
-            ).map(({ suit, rank }) => (
-              <span key={suit}>
-                <TileFace index={rank}>
-                  <SuitFace suit={suit} rank={rank} />
-                </TileFace>
-              </span>
-            ))}
-          </div>
-        </>
-      )}
-      {register && !suggestions.length && (
-        <>
-          <h1>What’s your name?</h1>
-          <p className="meeting-intro">
-            Tell us once. If you’ve played before, we’ll keep your past scores
-            together.
-          </p>
-        </>
-      )}
+      <h1>Grab a seat.</h1>
+      <div className="meeting-tiles" aria-hidden="true">
+        {(
+          [
+            { suit: "dots", rank: 2 },
+            { suit: "characters", rank: 1 },
+            { suit: "bamboo", rank: 3 },
+          ] as const
+        ).map(({ suit, rank }) => (
+          <span key={suit}>
+            <TileFace index={rank}>
+              <SuitFace suit={suit} rank={rank} />
+            </TileFace>
+          </span>
+        ))}
+      </div>
       <fieldset disabled={busy}>
         <legend className="sr-only">Player check-in</legend>
-        <label htmlFor="computing-id">UVA computing ID</label>
-        <input
-          id="computing-id"
-          value={computingId}
-          onChange={(event) => {
-            setComputingId(event.target.value);
-            setSuggestions([]);
-          }}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          pattern="[A-Za-z][A-Za-z0-9]*"
-          maxLength={32}
-          required
-          aria-describedby="id-help"
-        />
-        <p className="quiet" id="id-help">
-          Just the ID, for example abc1de. No @virginia.edu.
-        </p>
-        {register && (
-          <>
-            <label htmlFor="full-name">Full name</label>
-            <input
-              id="full-name"
-              autoFocus
-              value={fullName}
-              onChange={(event) => {
-                setFullName(event.target.value);
-                setSuggestions([]);
-              }}
-              autoComplete="off"
-              maxLength={120}
-              required
-            />
-            <p className="quiet">
-              Your full name and computing ID stay in the club’s private Sheet.
-            </p>
-          </>
-        )}
+        <div>
+          <label htmlFor="computing-id">UVA computing ID</label>
+          <input
+            id="computing-id"
+            value={computingId}
+            onChange={(event) => {
+              setComputingId(event.target.value);
+              setSuggestions([]);
+            }}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            pattern="[A-Za-z][A-Za-z0-9]*"
+            maxLength={32}
+            required
+          />
+          {register && (
+            <>
+              <p className="quiet" role="status">
+                First time? Add your name.
+              </p>
+              <label htmlFor="full-name">Full name</label>
+              <input
+                id="full-name"
+                autoFocus
+                value={fullName}
+                onChange={(event) => {
+                  setFullName(event.target.value);
+                  setSuggestions([]);
+                }}
+                autoComplete="name"
+                maxLength={120}
+                required
+              />
+              <p className="quiet">Your name and ID stay private.</p>
+            </>
+          )}
+        </div>
         {error && (
           <p className="meeting-error" role="alert">
             {error}
           </p>
         )}
         {suggestions.length > 0 ? (
-          <div className="meeting-notice">
-            <h2>Is one of these you?</h2>
-            <p>
-              There’s a similar name on the leaderboard. Choose it to keep your
-              past scores.
-            </p>
+          <div className="meeting-matches">
+            <h2 ref={matchHeading} tabIndex={-1}>
+              {suggestions.length === 1
+                ? `Are you ${suggestions[0].display}?`
+                : "Is one of these you?"}
+            </h2>
+            <p className="quiet">Keep your past scores.</p>
             <div className="meeting-actions">
               {suggestions.map((suggestion) => (
                 <button
                   type="button"
+                  className="meeting-secondary"
                   key={suggestion.id}
                   onClick={() => void submit({ matchId: suggestion.id })}
                 >
-                  Yes, {suggestion.display}
+                  {suggestions.length === 1
+                    ? "Yes, that’s me"
+                    : suggestion.display}
                 </button>
               ))}
               <button
                 type="button"
+                className="meeting-text"
                 onClick={() => void submit({ createNew: true })}
               >
                 No, I’m new
@@ -249,20 +242,36 @@ function CheckInForm({
           </div>
         ) : (
           <button type="submit" className="meeting-primary">
-            {busy
-              ? "Checking in…"
-              : register
-                ? "Sign up and check in"
-                : "Check in"}
+            {busy ? "Checking in…" : register ? "Join & check in" : "Check in"}
           </button>
         )}
       </fieldset>
+      {busy && suggestions.length > 0 && (
+        <p className="quiet" role="status">
+          Checking you in…
+        </p>
+      )}
+      {register && (
+        <button
+          className="meeting-text"
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setRegister(false);
+            setSuggestions([]);
+            setError("");
+            requestAnimationFrame(() =>
+              document.getElementById("computing-id")?.focus(),
+            );
+          }}
+        >
+          Use a different ID
+        </button>
+      )}
       <Link className="meeting-text" href="/live/">
-        See the leaderboard ↗
+        Leaderboard ↗
       </Link>
-      <p className="quiet">
-        No computing ID? An officer can check you in from the Sheet.
-      </p>
+      <p className="quiet">No UVA ID? Ask an officer.</p>
     </form>
   );
 }

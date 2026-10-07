@@ -510,11 +510,6 @@
     box-shadow: 0 3px 0 #203d30;
   }
 }
-@keyframes meeting-blink {
-  50% {
-    opacity: 0.35;
-  }
-}
 @keyframes tile-stamp {
   from {
     opacity: 0.4;
@@ -551,9 +546,6 @@
   }
   .meeting-page a:active {
     transform: scale(0.97);
-  }
-  .meeting-live-dot {
-    animation: meeting-blink 1.6s ease-in-out infinite;
   }
   .meeting-seat.filled {
     animation: tile-stamp 280ms ease-out;
@@ -618,6 +610,7 @@
 }
 .live-summary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   font-size: 0.78rem;
@@ -673,5 +666,255 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Quiet supporting states, with the same touch targets as the main form. */
+.meeting-page .meeting-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--jade);
+  border-radius: 8px;
+  background: var(--tile-face-hi);
+  color: var(--jade);
+  font: 600 0.95rem var(--body);
+  text-decoration: none;
+  text-align: center;
+}
+.meeting-notice .meeting-secondary {
+  margin-top: 12px;
+}
+.meeting-notice .meeting-actions .meeting-secondary {
+  margin-top: 0;
+}
+.meeting-closed {
+  padding-block: 32px;
+}
+.meeting-closed > p:not(.quiet) {
+  margin-block: 18px 24px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.meeting-closed > .meeting-text {
+  margin-top: 16px;
+}
+.meeting-page .meeting-secondary:disabled {
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .meeting-page .meeting-secondary:hover:not(:disabled),
+  .meeting-page .meeting-primary:hover:not(:disabled) {
+    background: #203d30;
+    color: var(--tile-face-hi);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-primary,
+  .meeting-page .meeting-secondary {
+    transition:
+      background-color 150ms ease-out,
+      color 150ms ease-out;
+  }
+  .meeting-check {
+    animation: tile-stamp 280ms ease-out;
+  }
+}
+@media (max-width: 374px) {
+  .live-list li {
+    gap: 8px;
+  }
+  .live-change {
+    min-width: 32px;
+  }
+}
+
+/* Color comes from the tiles and actions, leaving the paper uncluttered. */
+.meeting-form h1 {
+  color: var(--jade);
+}
+.meeting-form .meeting-tiles {
+  margin-block: 28px 22px;
+}
+.meeting-form input:focus-visible {
+  outline-color: #285b87;
+  border-color: #285b87;
+}
+.meeting-receipt .meeting-check {
+  background: #f3dfb6;
+  color: #244f77;
+  border-color: #d9af75;
+}
+.meeting-receipt > p:not(.eyebrow) {
+  margin-top: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.meeting-form[data-register="true"] .meeting-tiles {
+  height: 88px;
+  margin-block: 12px;
+}
+.meeting-form[data-register="true"] .meeting-tiles > span {
+  width: 55px;
+  height: 78px;
+}
+.meeting-matches {
+  margin-top: 22px;
+  padding: 18px 0 0;
+  border-top: 2px solid #d9af75;
+}
+.meeting-matches .meeting-actions {
+  margin-top: 14px;
+  gap: 4px;
+}
+.meeting-matches h2 {
+  font-size: 1.75rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-form .meeting-tiles > span {
+    transition: transform 220ms ease-out;
+  }
+  .meeting-form:focus-within .meeting-tiles > span {
+    transform: rotate(var(--tilt, 0deg))
+      translateY(calc(var(--lift, 0px) - 5px));
+  }
+  .meeting-form[data-busy="true"] .meeting-tiles > span {
+    transform: rotate(0deg) translateY(0);
+  }
+  .meeting-matches {
+    animation: live-settle 220ms ease-out;
+  }
+}
+
+/* Card details and balance feedback make counting tangible. */
+.card-keypad button {
+  position: relative;
+  border-bottom-width: 3px;
+  border-radius: 6px;
+}
+.card-keypad button[data-counted="true"] {
+  background: #e9f0f5;
+  border-color: #8daecb;
+  color: #244f77;
+}
+.card-keypad .card-count {
+  color: #244f77;
+  font-weight: 700;
+}
+.score-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #ded8cc;
+  margin-bottom: 14px;
+}
+.score-progress-track > span {
+  display: block;
+  height: 100%;
+  background: #285b87;
+  transform-origin: left;
+}
+.score-progress[data-balanced="true"] .score-progress-track > span {
+  background: var(--jade);
+}
+.score-summary[data-balanced="true"] strong,
+.score-summary[data-balanced="true"] p {
+  color: var(--jade);
+}
+@keyframes count-bump {
+  from {
+    transform: translateY(3px) scale(0.9);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes score-highlight {
+  from {
+    background-color: #f3dfb6;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card-count {
+    animation: count-bump 180ms ease-out;
+  }
+  .score-progress-track > span {
+    transition: transform 220ms ease-out;
+  }
+  .score-summary[data-balanced="true"] strong {
+    animation: count-bump 220ms ease-out;
+  }
+  .live-points-changed {
+    animation: score-highlight 1000ms ease-out;
+  }
+}
+
+/* Touch controls share a physical press without disabling page zoom or text selection. */
+.meeting-page button,
+.meeting-calculator button,
+.meeting-page .meeting-primary {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.meeting-page .meeting-primary,
+.meeting-calculator .meeting-primary {
+  box-shadow: 0 4px 0 #203d30;
+}
+.meeting-page .meeting-primary:active:not(:disabled),
+.meeting-calculator .meeting-primary:active:not(:disabled) {
+  box-shadow: 0 1px 0 #203d30;
+  background: #203d30;
+}
+.meeting-seat-button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: inherit !important;
+}
+.meeting-seat-button small {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+.meeting-calculator {
+  overscroll-behavior: contain;
+}
+.calculator-footer {
+  position: sticky;
+  bottom: calc(-24px - env(safe-area-inset-bottom));
+  padding: 12px 0 calc(16px + env(safe-area-inset-bottom));
+  margin-bottom: calc(-24px - env(safe-area-inset-bottom));
+  background: var(--tile-face-hi);
+}
+.calculator-footer .meeting-primary {
+  margin-top: 0;
+}
+.meeting-form input {
+  font-size: max(16px, 1rem);
+}
+@media (max-width: 480px) {
+  .score-form h1 {
+    font-size: clamp(2.35rem, 9vw, 2.9rem);
+  }
+  .meeting-seats {
+    gap: 6px;
+    margin-block: 22px;
+  }
+  .meeting-seat {
+    padding: 5px 3px;
+  }
+  .meeting-calculator {
+    padding-inline: 20px;
   }
 }
