@@ -57,16 +57,18 @@ export default function Leaderboard() {
     <main className="leaderboard-page">
       <header className="page-head">
         <div className="section-wrap">
-          <p className="eyebrow">{semester.label}</p>
           <h1 className="page-title">Leaderboard</h1>
-          {semester.last_session && (
-            <p className="leaderboard-meta">
-              Updated{" "}
-              <time dateTime={semester.last_session}>
-                {formatDate(semester.last_session)}
-              </time>
-            </p>
-          )}
+          <p className="leaderboard-meta">
+            {semester.label}
+            {semester.last_session && (
+              <>
+                {" · Updated "}
+                <time dateTime={semester.last_session}>
+                  {formatDate(semester.last_session)}
+                </time>
+              </>
+            )}
+          </p>
         </div>
       </header>
 
@@ -112,7 +114,7 @@ export default function Leaderboard() {
                               ? SEASON_START + player.total_net
                               : player.total_gain
                           }
-                          delay={i * 70 + 150}
+                          delay={i * 40 + 100}
                         />
                       </b>
                       <span className="sr-only">points</span>
@@ -134,14 +136,21 @@ export default function Leaderboard() {
         unranked={semester.unranked}
         seasonNet={seasonNet}
       />
+
       <section className="section">
         <div className="section-wrap">
           {/* After the table, not before: most visitors just want a name and a number. */}
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
             <p>
+              Points are playing cards: face cards are worth 50, ace to ten are
+              face value. Everyone sits down at a table with {SEASON_START}.
+              When someone wins a hand, they collect cards from the table, and
+              flowers add to the winnings.
+            </p>
+            <p>
               {seasonNet
-                ? `Everyone starts at ${SEASON_START} points. Each table’s net result moves your season score up or down. `
+                ? `Your season score starts at ${SEASON_START} too, and each table’s net result moves it up or down. `
                 : "The board adds up only your winning tables; losses don’t subtract from your total. "}
               Play {semester.min_tables_to_rank}{" "}
               {semester.min_tables_to_rank === 1 ? "table" : "tables"} to be
