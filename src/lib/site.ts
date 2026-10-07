@@ -42,6 +42,10 @@ export const LOGO: string | null = "/logo.webp";
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
 export const INSTAGRAM: string | null = siteContent.instagram || null;
 
+/** The club's Instagram post showing a special hand, linked from the guide. Null hides the link. */
+export const SPECIAL_HAND_POST: string | null =
+  "https://www.instagram.com/p/DPKzhk_DOrP/?img_index=1";
+
 /** GroupMe invite URL. Keep null until there's a current link, otherwise the Contact page sends people to an expired or guessed group. */
 export const GROUPME_URL: string | null = siteContent.groupme_url || null;
 

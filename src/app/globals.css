@@ -860,29 +860,11 @@ main {
 
 /* Guide and club information ------------------------------------------- */
 
-.tile-key {
-  margin: 0;
-  display: grid;
-  gap: var(--space-4);
-}
-
-.tile-key div {
-  padding-inline-start: var(--space-3);
-  border-inline-start: 5px solid var(--tile-back);
-}
-
-.tile-key dt,
 .turn-flow strong,
 .social-list strong {
   font-family: var(--display);
   font-size: var(--text-lg);
   font-weight: 600;
-}
-
-.tile-key dd {
-  margin: var(--space-1) 0 0;
-  max-width: var(--measure);
-  color: var(--ink-soft);
 }
 
 .guide-prose p:first-child::first-letter {
@@ -1101,8 +1083,6 @@ body {
 .guide-index { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; }
 .guide-index a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; font-size: var(--text-sm); }
 .guide-prose p:first-child::first-letter { font: inherit; color: inherit; }
-.tile-key { margin-top: 1.5rem; }
-.tile-key div { border-inline-start-width: 3px; }
 .club-notes { margin-top: 2rem; }
 .footer { margin-top: 2rem; }
 .footer-inner { padding-block: 2rem; }
@@ -1361,13 +1341,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--jade);
-}
-
-.tile-group-note {
-  margin: var(--space-1) 0 var(--space-3);
-  max-width: 54ch;
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
 }
 
 .tile-row {
@@ -1686,9 +1659,7 @@ body {
 .guide-page .tile-set { display: grid; gap: 2.5rem; }
 .guide-page .tile-group { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 0.75rem 2rem; margin: 0; padding-top: 2rem; border-top: 1px solid var(--rule); }
 .guide-page .tile-group h3 { grid-column: 1; font-size: 0.85rem; }
-.guide-page .tile-group-note { grid-column: 1; margin: 0; }
 .guide-page .tile-group > .tile-row { grid-column: 2; grid-row: 1 / 3; align-self: center; }
-.guide-page .tile-key { margin-top: 3rem; grid-template-columns: repeat(3, 1fr); }
 .guide-page .set-tile-body { filter: none; }
 .guide-tile { width: 100%; height: 100%; }
 .winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; background: #e6ede0; }
@@ -1723,14 +1694,12 @@ body {
 @media (max-width: 900px) {
   .guide-page .tile-group { grid-template-columns: 1fr; }
   .guide-page .tile-group > .tile-row { grid-column: 1; grid-row: auto; }
-  .guide-page .tile-group-note { max-width: 48ch; }
 }
 @media (max-width: 767px) {
   .club-photos { margin-top: 0; }
   .home-page .section:has(#follow) .section-wrap { grid-template-columns: 1fr; gap: 1rem; }
   .home-page #follow { max-width: 20ch; }
   .home-page .ig { padding: 0; gap: 1rem; }
-  .guide-page .tile-key { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
   /* Same size as the other homepage headings; it still fits beside its dot. */
@@ -2157,3 +2126,7 @@ button { -webkit-user-select: none; user-select: none; }
 .about-page .page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display); letter-spacing: -0.025em; }
 
 .home-page .rolling-heading { overflow: clip; }
+
+.special-hand-link { display: inline-flex; flex-direction: column; gap: 0.25rem; padding-block: 0.75rem; }
+.special-hand-link strong { font: 700 1.5rem var(--display); }
+.special-hand-link span { font-size: 0.85rem; text-decoration: underline; }

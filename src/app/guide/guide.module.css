@@ -1,0 +1,342 @@
+.page {
+  --content: 68rem;
+}
+.hero {
+  margin-top: 2rem;
+}
+.heroCopy {
+  padding-block: 3rem 1rem;
+}
+.heroCopy h1 {
+  margin: 0;
+  font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display);
+  letter-spacing: -0.025em;
+}
+.heroCopy > p {
+  margin: 1.5rem 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.lessonNav {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: min(calc(100% - 4rem), 68rem);
+  margin: 1.5rem auto 0;
+  padding: 0.3rem;
+  /* A floating paper bar that stays in reach on a long page. Translucent so
+     the page reads as scrolling beneath it rather than being cut off. */
+  position: sticky;
+  top: 0.5rem;
+  z-index: 2;
+  border-radius: 14px;
+  background: rgb(246 242 233 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow:
+    0 2px 3px -1px rgb(0 0 0 / 0.1),
+    0 1px 0 rgb(25 28 33 / 0.02),
+    0 0 0 1px rgb(25 28 33 / 0.08);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .lessonNav {
+    background: #f6f2e9;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+.page :global(.section-title) {
+  scroll-margin-top: 6rem;
+}
+.lessonNav a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 52px;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  font: 600 1.3rem / 1.1 var(--display);
+}
+.lessonNav svg {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  color: var(--jade);
+  stroke-width: 1.6;
+}
+.lessonNav small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--ink-soft);
+  font: 400 0.72rem / 1.3 var(--sans);
+}
+.page :global(.section) {
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+.page :global(.section-title) {
+  margin-bottom: 1.5rem;
+  font: 700 clamp(2.1rem, 4vw, 3rem) / 1.08 var(--display);
+  letter-spacing: -0.02em;
+}
+.page :global(.section-title)::after {
+  display: none;
+}
+/* The games are drawn for a phone; past that they keep a table-sized
+   width instead of stretching the felt into empty space. */
+.playSurface {
+  max-width: 46rem;
+}
+.playSurface > div {
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.callRules {
+  margin-block: 1.5rem;
+  padding-block: 0.5rem;
+}
+.page :global(.tile-group) {
+  padding-top: 1.5rem;
+  gap: 0.5rem 2rem;
+}
+.page :global(.tile-group h3) {
+  font: 600 1.6rem var(--display);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.page :global(.tile-set) {
+  gap: 1.5rem;
+}
+.lessonNav a:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 5px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lessonNav a:hover {
+    background: #dde6d9;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lessonNav a {
+    transition: background 150ms ease;
+  }
+}
+@media (max-width: 900px) {
+  .lessonNav small {
+    display: none;
+  }
+  .lessonNav a {
+    gap: 0.4rem;
+    font-size: 1.15rem;
+  }
+}
+@media (max-width: 700px) {
+  .hero {
+    margin-top: 1rem;
+  }
+  .heroCopy {
+    padding-block: 1.7rem 0.5rem;
+  }
+  .heroCopy > p {
+    margin: 1rem 0 1.2rem;
+    font-size: 0.9rem;
+  }
+  .lessonNav {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    width: calc(100% - 2rem);
+    gap: 0;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0;
+  }
+  .lessonNav a {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.25rem 0.1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.1;
+  }
+  .lessonNav svg {
+    display: none;
+  }
+  .page :global(.section-title) {
+    scroll-margin-top: 4.75rem;
+  }
+  .page :global(.section) {
+    padding-block: 1.5rem;
+  }
+}
+
+.callExamples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+.callExamples h3 {
+  margin: 0 0 0.6rem;
+  font: 600 1.4rem var(--display);
+}
+.callExamples :global(.set-tile) {
+  width: clamp(30px, 7vw, 46px);
+}
+.callExamples :global(.tile-row) {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.callExamples p,
+.callNote {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.callExamples p {
+  margin: 0.65rem 0 0;
+}
+.callNote {
+  max-width: 62ch;
+  margin: 1.25rem 0 0;
+  color: var(--ink-soft);
+}
+.callNote + .callNote {
+  margin-top: 0.5rem;
+}
+.nextLesson {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: fit-content;
+  min-height: 48px;
+  margin-top: 0.5rem;
+  padding-block: 0.5rem;
+  color: var(--jade);
+  font-weight: 600;
+  text-decoration: none;
+}
+.nextLesson:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .callExamples {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .callExamples > div {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    column-gap: 1rem;
+    align-items: center;
+  }
+  .callExamples h3 {
+    grid-column: 2;
+    margin-bottom: 0.25rem;
+  }
+  .callExamples :global(.tile-row) {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    margin: 0;
+  }
+  .callExamples :global(.set-tile) {
+    width: 32px;
+  }
+  .callExamples p {
+    grid-column: 2;
+    margin: 0;
+  }
+}
+
+/* Reference material stays on the page; physical surfaces belong to the games. */
+.page :global(.winning-hand) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.page :global(.winning-hand figcaption) {
+  text-align: left;
+}
+.page :global(.call-guide) {
+  margin-block: 1.5rem 0;
+}
+.page :global(.call-guide > div) {
+  border: 0;
+  padding: 0;
+}
+.page :global(.call-guide dt) {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.page :global(.call-guide dt .call-character) {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.goldExample {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin: 1.5rem 0 2rem;
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--rule);
+}
+.goldTiles {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+.goldTiles :global(.tile-row) {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+.goldTiles :global(.set-tile) {
+  width: 64px;
+}
+.goldTiles :global(.set-tile-body) {
+  display: block;
+  filter: drop-shadow(0 3px 2px #254a3526);
+  transform: none;
+}
+.goldTiles :global(.guide-tile) {
+  display: block;
+  height: auto;
+}
+.goldPlus {
+  display: grid;
+  place-items: center;
+  height: 88px;
+  color: var(--ink-soft);
+  font-size: 1.5rem;
+}
+.goldTile {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  color: #78561f;
+  font: 700 0.8rem var(--sans);
+}
+.goldTile :global(.tile-row) {
+  --tile-face: #fff3cf;
+  --tile-side: #c39a48;
+}
+.goldExample figcaption {
+  max-width: 38ch;
+}
+.goldExample strong {
+  font: 700 1.7rem var(--display);
+}
+.goldExample p {
+  margin: 0.5rem 0 0;
+  color: var(--ink-soft);
+}
+@media (max-width: 700px) {
+  .goldExample {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
