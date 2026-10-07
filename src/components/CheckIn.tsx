@@ -145,47 +145,33 @@ function CheckInForm({
   return (
     <form
       className="meeting-form"
+      data-register={register}
+      data-busy={busy}
       onSubmit={(event) => {
         event.preventDefault();
-        void submit();
+        if (!suggestions.length) void submit();
       }}
     >
-      {!register && !suggestions.length && (
-        <>
-          <h1>Grab a seat.</h1>
-          <p className="meeting-intro">Check in, find your table, and play.</p>
-          <div className="meeting-tiles" aria-hidden="true">
-            {(
-              [
-                { suit: "dots", rank: 2 },
-                { suit: "characters", rank: 1 },
-                { suit: "bamboo", rank: 3 },
-              ] as const
-            ).map(({ suit, rank }) => (
-              <span key={suit}>
-                <TileFace index={rank}>
-                  <SuitFace suit={suit} rank={rank} />
-                </TileFace>
-              </span>
-            ))}
-          </div>
-        </>
-      )}
-      {register && (
-        <>
-          <h1 ref={matchHeading} tabIndex={-1}>
-            {suggestions.length ? "Have we met?" : "What’s your name?"}
-          </h1>
-          <p className="meeting-intro">
-            {suggestions.length
-              ? "Choose your name to keep your past scores, or join as a new player."
-              : "We couldn’t find that computing ID. Add your name so we can check whether you’ve played with us before."}
-          </p>
-        </>
-      )}
+      <h1>Grab a seat.</h1>
+      <p className="meeting-intro">Check in, find your table, and play.</p>
+      <div className="meeting-tiles" aria-hidden="true">
+        {(
+          [
+            { suit: "dots", rank: 2 },
+            { suit: "characters", rank: 1 },
+            { suit: "bamboo", rank: 3 },
+          ] as const
+        ).map(({ suit, rank }) => (
+          <span key={suit}>
+            <TileFace index={rank}>
+              <SuitFace suit={suit} rank={rank} />
+            </TileFace>
+          </span>
+        ))}
+      </div>
       <fieldset disabled={busy}>
         <legend className="sr-only">Player check-in</legend>
-        <div hidden={suggestions.length > 0}>
+        <div>
           <label htmlFor="computing-id">UVA computing ID</label>
           <input
             id="computing-id"
@@ -207,6 +193,9 @@ function CheckInForm({
           </p>
           {register && (
             <>
+              <p className="quiet" role="status">
+                We couldn’t find that ID. Add your name to check in.
+              </p>
               <label htmlFor="full-name">Full name</label>
               <input
                 id="full-name"
@@ -234,6 +223,12 @@ function CheckInForm({
         )}
         {suggestions.length > 0 ? (
           <div className="meeting-matches">
+            <h2 ref={matchHeading} tabIndex={-1}>
+              {suggestions.length === 1
+                ? `Are you ${suggestions[0].display}?`
+                : "Is one of these you?"}
+            </h2>
+            <p className="quiet">Confirm your name to keep your past scores.</p>
             <div className="meeting-actions">
               {suggestions.map((suggestion) => (
                 <button
@@ -242,7 +237,9 @@ function CheckInForm({
                   key={suggestion.id}
                   onClick={() => void submit({ matchId: suggestion.id })}
                 >
-                  Yes, {suggestion.display}
+                  {suggestions.length === 1
+                    ? "Yes, that’s me"
+                    : suggestion.display}
                 </button>
               ))}
               <button
@@ -250,7 +247,7 @@ function CheckInForm({
                 className="meeting-text"
                 onClick={() => void submit({ createNew: true })}
               >
-                No, I’m new
+                No, check me in as new
               </button>
             </div>
           </div>

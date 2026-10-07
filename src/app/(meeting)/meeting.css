@@ -730,3 +730,59 @@
     min-width: 32px;
   }
 }
+
+/* A small tabletop keeps the check-in welcoming without another screen. */
+.meeting-form .meeting-tiles {
+  position: relative;
+  isolation: isolate;
+}
+.meeting-form .meeting-tiles::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 230px;
+  height: 76px;
+  bottom: 6px;
+  border-radius: 50%;
+  background: var(--jade);
+  box-shadow: 0 4px 0 #203d30;
+}
+.meeting-form[data-register="true"] .meeting-tiles {
+  height: 88px;
+  margin-block: 12px;
+}
+.meeting-form[data-register="true"] .meeting-tiles > span {
+  width: 55px;
+  height: 78px;
+}
+.meeting-form[data-register="true"] .meeting-tiles::before {
+  width: 170px;
+  height: 45px;
+}
+.meeting-matches {
+  margin-top: 22px;
+  padding: 18px 0 0;
+  border-top: 2px solid var(--jade);
+}
+.meeting-matches .meeting-actions {
+  margin-top: 14px;
+  gap: 4px;
+}
+.meeting-matches h2 {
+  font-size: 1.75rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-form .meeting-tiles > span {
+    transition: transform 220ms ease-out;
+  }
+  .meeting-form:focus-within .meeting-tiles > span {
+    transform: rotate(var(--tilt, 0deg))
+      translateY(calc(var(--lift, 0px) - 5px));
+  }
+  .meeting-form[data-busy="true"] .meeting-tiles > span {
+    transform: rotate(0deg) translateY(0);
+  }
+  .meeting-matches {
+    animation: live-settle 220ms ease-out;
+  }
+}
