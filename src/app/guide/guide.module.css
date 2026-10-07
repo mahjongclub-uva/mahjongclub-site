@@ -340,3 +340,18 @@
     gap: 1rem;
   }
 }
+
+/* On wide screens the standalone paragraphs share one reading width and
+   size, and no line ends on a lone word. Phones keep their own sizes. */
+@media (min-width: 701px) {
+  .heroCopy > p,
+  .callNote,
+  .page :global(.guide-note),
+  .page :global(.guide-call-intro) {
+    max-width: 65ch;
+    font-size: 1rem;
+  }
+  .page :is(p, dd) {
+    text-wrap: pretty;
+  }
+}
