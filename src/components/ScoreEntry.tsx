@@ -77,7 +77,7 @@ function CardCalculator({
           ×
         </button>
       </div>
-      <p className="quiet">Enter points, or tap the cards you’re holding.</p>
+      <p className="quiet">Enter a total, or add cards below.</p>
       <label htmlFor="card-total">Card total</label>
       <input
         id="card-total"
@@ -100,7 +100,7 @@ function CardCalculator({
             key={card}
             data-counted={count(card) > 0}
             disabled={!valid || total + card > 820}
-            aria-label={`${card === 50 ? "Face card" : card === 1 ? "Ace" : card}, ${card} points`}
+            aria-label={`${card === 50 ? "J / Q / K" : card === 1 ? "A (Ace)" : card}, add ${card} ${card === 1 ? "point" : "points"}`}
             onClick={() => tap([...cards, card])}
           >
             <strong>
@@ -110,7 +110,7 @@ function CardCalculator({
               key={count(card)}
               className={count(card) ? "card-count" : undefined}
             >
-              {count(card) ? `× ${count(card)}` : `${card} pts`}
+              {count(card) ? `× ${count(card)}` : `${card} ${card === 1 ? "pt" : "pts"}`}
             </small>
           </button>
         ))}
@@ -133,7 +133,7 @@ function CardCalculator({
             setValue("0");
           }}
         >
-          Clear cards
+          Reset total
         </button>
       </div>
       {!valid && (
@@ -148,7 +148,7 @@ function CardCalculator({
           disabled={!valid}
           onClick={() => apply(value)}
         >
-          Use {valid ? total : "these"} points
+          {valid ? `Use ${total} points` : "Enter a valid total"}
         </button>
       </div>
     </dialog>
@@ -174,6 +174,11 @@ function ScoreForm({
   const [draftError, setDraftError] = useState(false);
   const [receipt, setReceipt] = useState<number | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const calculatorTrigger = useRef<HTMLButtonElement | null>(null);
+  function closeCalculator() {
+    setActive(null);
+    requestAnimationFrame(() => calculatorTrigger.current?.focus());
+  }
   const players = meeting.players || [];
   const seats = ids.map((id, i) => ({
     id,
@@ -327,7 +332,10 @@ function ScoreForm({
                 className="total-button"
                 disabled={locked}
                 aria-label={`Count cards for ${name(id)}`}
-                onClick={() => setActive(i)}
+                onClick={(event) => {
+                  calculatorTrigger.current = event.currentTarget;
+                  setActive(i);
+                }}
               >
                 {totals[i] || "Add +"}
               </button>
@@ -596,10 +604,10 @@ function ScoreForm({
           key={ids[active]}
           name={name(ids[active])}
           initial={totals[active]}
-          close={() => setActive(null)}
+          close={closeCalculator}
           apply={(value) => {
             setTotals(totals.map((n, i) => (i === active ? value : n)));
-            setActive(null);
+            closeCalculator();
           }}
         />
       )}
