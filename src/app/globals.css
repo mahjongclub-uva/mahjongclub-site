@@ -1518,8 +1518,9 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .wordmark-sub { font-size: clamp(1rem, 2vw, 1.4rem); letter-spacing: 0.22em; margin-top: 1.8rem; }
 .home-page .tagline { font-size: clamp(1.15rem, 2vw, 1.4rem); margin-inline: auto; }
 .hero-scene { pointer-events: auto; }
-/* The name is visible in the initial HTML, including while WebGL loads. */
-.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 1; }
+/* Hidden until the 3D scene draws, by request: the <h1>'s aria-label still
+   names the club, and a failed or slow scene falls back to flat tiles. */
+.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 0; }
 .home-page .section { padding-block: clamp(3rem, 7vw, 6rem); }
 .home-page .section-title { font-size: clamp(2.6rem, 5.5vw, 4.7rem); letter-spacing: -0.045em; max-width: 14ch; }
 .home-page .section-title::after { display: none; }
@@ -1577,13 +1578,9 @@ body {
     linear-gradient(104deg, transparent 0 7%, #48674605 7.2% 8.1%, transparent 8.3% 91%, #48674606 91.2% 92%, transparent 92.2%);
   background-attachment: fixed;
 }
-.hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 0; }
 .hero-stage .wordmark-tiles { transition: none; }
 .hero-stage[data-scene="fallback"] .tile,
 .hero-stage[data-scene="fallback"] .tile-scene { animation: none; }
-@media (prefers-reduced-motion: reduce) {
-  .hero-stage[data-scene="waiting"] .wordmark-tiles { opacity: 1; }
-}
 
 /* Club photography replaces the interactive tile display. */
 .club-photos { margin-top: -7rem; min-width: 0; }
@@ -1626,7 +1623,7 @@ body {
      past the final glyph's ink, and the clip-path below trims to the border
      box, so at full reveal the question mark was still losing its right edge.
      The padding gives the glyph its space back. */
-  padding-right: 0.06em;
+  padding: 0.08em 0.06em 0.16em 0;
   clip-path: inset(0 calc((1 - var(--progress, 1)) * 100%) 0 0);
 }
 /* No overflow clipping here. The dot travels 0..100% of a box that is already
@@ -2158,3 +2155,5 @@ button { -webkit-user-select: none; user-select: none; }
 :is(.guide-page, .about-page) .action-link { border-radius: var(--control-radius); min-height: 44px; font: 600 0.9rem var(--sans); }
 
 .about-page .page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display); letter-spacing: -0.025em; }
+
+.home-page .rolling-heading { overflow: clip; }
