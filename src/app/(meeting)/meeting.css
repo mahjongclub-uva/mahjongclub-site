@@ -510,11 +510,6 @@
     box-shadow: 0 3px 0 #203d30;
   }
 }
-@keyframes meeting-blink {
-  50% {
-    opacity: 0.35;
-  }
-}
 @keyframes tile-stamp {
   from {
     opacity: 0.4;
@@ -551,9 +546,6 @@
   }
   .meeting-page a:active {
     transform: scale(0.97);
-  }
-  .meeting-live-dot {
-    animation: meeting-blink 1.6s ease-in-out infinite;
   }
   .meeting-seat.filled {
     animation: tile-stamp 280ms ease-out;
@@ -618,6 +610,7 @@
 }
 .live-summary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   font-size: 0.78rem;
@@ -673,5 +666,67 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Quiet supporting states, with the same touch targets as the main form. */
+.meeting-page .meeting-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--jade);
+  border-radius: 8px;
+  background: var(--tile-face-hi);
+  color: var(--jade);
+  font: 600 0.95rem var(--body);
+  text-decoration: none;
+  text-align: center;
+}
+.meeting-notice .meeting-secondary {
+  margin-top: 12px;
+}
+.meeting-notice .meeting-actions .meeting-secondary {
+  margin-top: 0;
+}
+.meeting-closed {
+  padding-block: 32px;
+}
+.meeting-closed > p:not(.quiet) {
+  margin-block: 18px 24px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.meeting-closed > .meeting-text {
+  margin-top: 16px;
+}
+.meeting-page .meeting-secondary:disabled {
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .meeting-page .meeting-secondary:hover:not(:disabled),
+  .meeting-page .meeting-primary:hover:not(:disabled) {
+    background: #203d30;
+    color: var(--tile-face-hi);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-primary,
+  .meeting-page .meeting-secondary {
+    transition:
+      background-color 150ms ease-out,
+      color 150ms ease-out;
+  }
+  .meeting-check {
+    animation: tile-stamp 280ms ease-out;
+  }
+}
+@media (max-width: 374px) {
+  .live-list li {
+    gap: 8px;
+  }
+  .live-change {
+    min-width: 32px;
   }
 }

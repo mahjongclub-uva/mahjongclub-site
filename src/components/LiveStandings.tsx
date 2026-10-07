@@ -23,8 +23,11 @@ function LiveTable({
 }) {
   const [results, setResults] = useState<Results | null>(null);
   const [error, setError] = useState("");
+  const [updating, setUpdating] = useState(true);
+  const [updatedAt, setUpdatedAt] = useState("");
   const retry = usePoll(
     async (signal) => {
+      setUpdating(true);
       try {
         const next = await getResults(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
@@ -34,8 +37,16 @@ function LiveTable({
           );
         setResults(next);
         setError("");
+        setUpdatedAt(
+          new Date().toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+        );
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
+      } finally {
+        if (!signal.aborted) setUpdating(false);
       }
     },
     30000,
@@ -49,17 +60,22 @@ function LiveTable({
   );
   return (
     <section>
-      <p className="eyebrow">Around the tables</p>
-      <h1>The night is moving.</h1>
+      <h1>Live standings</h1>
       <p className="meeting-intro">
         {matching
           ? "Season scores, with tonight’s tables added as they’re recorded."
           : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
-        {matching && !alreadyCounted
-          ? "Tonight included · Not final yet"
-          : "Official standings"}
+        {!results && matching
+          ? error
+            ? "Season scores only"
+            : "Loading tonight’s scores…"
+          : matching && !alreadyCounted
+            ? error
+              ? "Last received scores · Update delayed"
+              : "Tonight included · Not final yet"
+            : "Official standings"}
         {results && (
           <span>
             · {results.tables.length}{" "}
@@ -72,16 +88,17 @@ function LiveTable({
           <p>
             {error} {results && "Showing the last scores received."}
           </p>
-          <button className="meeting-text" type="button" onClick={retry}>
-            Retry update
+          <button
+            className="meeting-secondary"
+            type="button"
+            onClick={retry}
+            disabled={updating}
+          >
+            {updating ? "Updating…" : "Retry update"}
           </button>
         </div>
       )}
-      {!results && !error && (
-        <p className="quiet" role="status">
-          Fetching tonight’s scores…
-        </p>
-      )}
+      {results && <p className="quiet">Last updated at {updatedAt}.</p>}
       <ol className="live-list" aria-label="Live season standings">
         {rows.map((row) => {
           const change = row.before === null ? null : row.before - row.rank;
@@ -90,9 +107,6 @@ function LiveTable({
               <span className="live-rank" aria-label={`Rank ${row.rank}`}>
                 {row.rank}
               </span>
-              <span className="meeting-avatar" aria-hidden="true">
-                {row.display[0]}
-              </span>
               <span className="score-name">
                 {row.display}
                 <small>
@@ -100,7 +114,10 @@ function LiveTable({
                   season
                 </small>
               </span>
-              <strong className="live-points">{row.points}</strong>
+              <strong className="live-points">
+                {row.points}
+                <span className="sr-only"> points</span>
+              </strong>
               <span
                 className={`live-change ${change !== null && change < 0 ? "down" : ""}`}
                 aria-label={
@@ -114,7 +131,7 @@ function LiveTable({
                 }
               >
                 {change === null
-                  ? "NEW"
+                  ? "New"
                   : change > 0
                     ? `↑ ${change}`
                     : change < 0

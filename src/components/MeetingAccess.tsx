@@ -15,15 +15,26 @@ export default function MeetingAccess({
 }) {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [error, setError] = useState("");
+  const [checking, setChecking] = useState(true);
+  const [checkedAt, setCheckedAt] = useState("");
   const refresh = usePoll(
     async (signal) => {
+      setChecking(true);
       try {
         const next = await getMeeting(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
         setMeeting(next);
         setError("");
+        setCheckedAt(
+          new Date().toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+        );
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
+      } finally {
+        if (!signal.aborted) setChecking(false);
       }
     },
     60000,
@@ -58,23 +69,41 @@ export default function MeetingAccess({
       {error && (
         <div className="meeting-notice" role="alert">
           <p>{error}</p>
-          <button type="button" onClick={refresh}>
-            Retry connection
+          <button
+            className="meeting-secondary"
+            type="button"
+            onClick={refresh}
+            disabled={checking}
+          >
+            {checking ? "Connecting…" : "Retry connection"}
           </button>
-          <p>An officer can record attendance and scores in the Sheet.</p>
+          <p>An officer can help with attendance and scores.</p>
         </div>
       )}
       {!meeting && !error && <p role="status">Checking tonight’s meeting…</p>}
       {meeting && !meeting.open && (
-        <div className="meeting-notice">
-          <h2>No meeting is open</h2>
+        <div className="meeting-closed">
+          <h1>See you at the table.</h1>
           <p>
-            Check-in and scores are available during a club meeting. Ask an
-            officer if you’re at a table now.
+            Check-in opens during club meetings. Already here? Ask an officer to
+            open it.
           </p>
-          <button type="button" onClick={refresh}>
-            Check again
+          <button
+            className="meeting-secondary"
+            type="button"
+            onClick={refresh}
+            disabled={checking}
+          >
+            {checking ? "Checking…" : "Check again"}
           </button>
+          <p className="quiet" role="status">
+            {checking
+              ? "Checking for an open meeting…"
+              : `Last checked at ${checkedAt}.`}
+          </p>
+          <Link className="meeting-text" href="/">
+            Back to the club
+          </Link>
         </div>
       )}
       {meeting?.open && meeting.players && children(meeting, refresh)}
