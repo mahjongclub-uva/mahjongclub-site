@@ -738,12 +738,6 @@
 .meeting-form .meeting-tiles {
   margin-block: 28px 22px;
 }
-.meeting-form .meeting-tiles > span:first-child {
-  --tile-side: #8daecb;
-}
-.meeting-form .meeting-tiles > span:nth-child(2) {
-  --tile-side: #d9af75;
-}
 .meeting-form .meeting-primary {
   background: #285b87;
   box-shadow: 0 4px 0 #193e60;
