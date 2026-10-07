@@ -38,6 +38,10 @@ svg {
 /* 2. Tokens =============================================================== */
 
 :root {
+  --control-radius: 10px;
+  --control-depth: 4px;
+  --control-press: 3px;
+  --control-focus: var(--jade);
   --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   /* The header's three beats. Read by the wordmark and by the tagline that
      follows it — which is why they live at the root rather than on .wordmark:
@@ -2114,3 +2118,43 @@ body > main { flex: 1 0 auto; }
   from { transform: translateY(-14px) rotate(9deg); }
   to { transform: translateY(0) rotate(0); }
 }
+
+@media (max-width: 767px) {
+  .back-to-top {
+    position: static;
+    padding-block: 1rem;
+  }
+  .back-to-top a {
+    animation: none;
+  }
+}
+
+/* Shared physical controls; the table keeps its own contextual colors. */
+.action-link {
+  border-width: 2px;
+  border-radius: var(--control-radius);
+}
+.action-link:focus-visible {
+  outline: 3px solid var(--control-focus);
+  outline-offset: 3px;
+}
+
+/* One bold typographic voice, with the tiles carrying the detail. */
+.page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1 var(--display); letter-spacing: -0.025em; }
+.section-title { font-weight: 700; line-height: 1.05; }
+.page-intro { max-width: 48ch; }
+
+/* No grey flash on tap, and no text selection from quick taps on controls;
+   :active and :focus-visible states carry the feedback instead. */
+a, button, summary { -webkit-tap-highlight-color: transparent; }
+button { -webkit-user-select: none; user-select: none; }
+
+/* Shared reading-page hierarchy. Homepage and tabletop controls keep their own styles. */
+:is(.guide-page, .about-page) { --content: 68rem; }
+:is(.guide-page, .about-page) .section-wrap { max-width: 68rem; }
+:is(.guide-page, .about-page) .section-title,
+.leaderboard-page .scoring-note h2 { font: 700 clamp(2.1rem, 4vw, 3rem) / 1.08 var(--display); letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+:is(.guide-page, .about-page) .section-title::after { display: none; }
+:is(.guide-page, .about-page) .action-link { border-radius: var(--control-radius); min-height: 44px; font: 600 0.9rem var(--sans); }
+
+.about-page .page-title { font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display); letter-spacing: -0.025em; }
