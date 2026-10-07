@@ -78,11 +78,6 @@
 .gamePrompt {
   min-height: 80px;
 }
-.gamePrompt p {
-  margin: 0.5rem 0 1rem;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-}
 .gameBoard {
   position: relative;
   isolation: isolate;
@@ -223,29 +218,10 @@
   color: #173f33;
   font-weight: 750;
 }
-.wallCloseup {
-  position: relative;
-  min-height: 490px;
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-}
-.wallCaption {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-}
 .wallCaption > span:first-child {
   font-weight: 700;
   color: #f1dfa9;
   font-size: 1rem;
-}
-.direction {
-  text-align: right;
-  font-size: 0.8rem;
-  margin: 2rem 0 0.5rem;
-  color: #eee5c6;
 }
 .direction strong {
   margin-left: 0.5rem;
@@ -271,23 +247,6 @@
   font-size: 0.85rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-.stackTile {
-  display: block;
-  width: 34px;
-  height: 48px;
-  margin: 0 auto 12px;
-  border: 1px solid #8bc5f1;
-  border-radius: 4px;
-  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
-  box-shadow:
-    inset 1px 1px 0 #c7e9ff70,
-    inset -1px -1px 0 #17578760,
-    0 1px 0 #eee4cc,
-    0 4px 0 #1c669a,
-    0 5px 0 #eee4cc,
-    0 8px 0 #174f7b,
-    0 11px 4px #08291f50;
 }
 .lesson .stacks button:hover:not(:disabled) {
   background: #ffffff16;
@@ -333,22 +292,6 @@
 .rackSlot[data-filled="true"] {
   border-color: transparent;
 }
-.rackSlot .stackTile {
-  margin: 0;
-  height: 48px;
-  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
-  box-shadow:
-    inset 0 1px 0 #c7e9ff70,
-    0 1px 0 #eee4cc,
-    0 4px 0 #1c669a,
-    0 6px 3px #08291f50;
-}
-.success {
-  text-align: center;
-  margin-top: 1rem;
-  font-weight: 600;
-  color: #f1dfa9;
-}
 .gameControls {
   position: relative;
   padding-top: 1.2rem;
@@ -368,15 +311,6 @@
   min-height: 2.8em;
   margin: 0.8rem 0;
   font-size: 0.9rem;
-}
-.hint {
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin: 0.5rem 0;
-  color: var(--ink-soft);
-  font-size: 0.8rem;
 }
 .hint button {
   flex-shrink: 0;
@@ -432,8 +366,7 @@
   .dice[data-rolled="true"] > span:last-child {
     animation-delay: 0.08s;
   }
-  .countLabel,
-  .success {
+  .countLabel {
     animation: arrive 0.4s ease-out;
   }
   .stacks button {
@@ -501,110 +434,22 @@
     transform: translateY(0) rotate(0);
   }
 }
-@media (max-width: 580px) {
-  .gameHeader {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .progress {
-    gap: 0.25rem;
-  }
-  .progress li {
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.65rem;
-  }
-  .gamePrompt {
-    min-height: 118px;
-  }
-  .gameBoard {
-    height: 380px;
-    border-width: 5px;
-    border-radius: 20px;
-  }
-  .overhead {
-    height: auto;
-    aspect-ratio: 1;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-  .lesson .seat {
-    font-size: 0.65rem;
-    padding: 0.3rem 0.1rem;
-  }
-  .miniWall {
-    gap: 1px;
-  }
-  .miniWall i {
-    height: 17px;
-  }
-  .dice {
-    gap: 9px;
-  }
-  .dice > span {
-    width: 38px;
-    height: 38px;
-    font-size: 2.3rem;
-  }
-  .tableCenter {
-    gap: 0.6rem;
-    font-size: 0.75rem;
-  }
-  .countLabel {
-    padding: 0.25rem;
-  }
-  .wallCloseup {
-    padding: 1rem 0.5rem;
-  }
-  .wallCaption {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-  .direction {
-    margin: 1rem 0 0.3rem;
-    font-size: 0.7rem;
-  }
-  .rack {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .rack > span:first-child {
-    flex-basis: 100%;
-  }
-  .hint {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-  }
-  .callScene {
-    padding: 1rem;
-    grid-template-columns: 1fr;
-  }
-  .callScene > div {
-    min-height: 130px;
-  }
-}
 
 .wallCloseup .direction {
   max-width: none;
   width: 100%;
 }
 .rackSlot .stackTile {
+  margin: 0;
+  height: 48px;
+  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
+  box-shadow:
+    inset 0 1px 0 #c7e9ff70,
+    0 1px 0 #eee4cc,
+    0 4px 0 #1c669a,
+    0 6px 3px #08291f50;
   position: relative;
   z-index: 2;
-}
-@media (max-width: 580px) {
-  .wallCloseup .direction {
-    margin-top: 0.6rem;
-  }
-  .wallCloseup .stacks {
-    padding-top: 10px;
-    padding-bottom: 12px;
-  }
-  .wallCloseup .rack {
-    padding-block: 0.5rem;
-  }
 }
 
 .lesson .dealNext {
@@ -805,16 +650,6 @@
     transform: translateY(-5px) rotate(15deg);
   }
 }
-@media (max-width: 580px) {
-  .lesson .diceButton[data-ready="true"] {
-    padding: 0.8rem 0.9rem 0.6rem;
-    gap: 0.8rem;
-    border-radius: 16px;
-  }
-  .rollLabel {
-    font-size: 0.8rem;
-  }
-}
 
 /* Gold marks the current action; blue identifies the tiles you can handle. */
 .gamePrompt h3 {
@@ -822,6 +657,7 @@
   font-size: 1.5rem;
 }
 .gamePrompt p {
+  margin: 0.5rem 0 1rem;
   color: #293e34;
   font-size: 1rem;
 }
@@ -840,6 +676,21 @@
   color: #fff9e9;
 }
 .stackTile {
+  display: block;
+  width: 34px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border: 1px solid #8bc5f1;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #379bdb 0%, #217fbe 55%, #19679e 100%);
+  box-shadow:
+    inset 1px 1px 0 #c7e9ff70,
+    inset -1px -1px 0 #17578760,
+    0 1px 0 #eee4cc,
+    0 4px 0 #1c669a,
+    0 5px 0 #eee4cc,
+    0 8px 0 #174f7b,
+    0 11px 4px #08291f50;
   position: relative;
 }
 .stackTile::after {
@@ -859,6 +710,10 @@
   background: #f1dfa9;
 }
 .wallCaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.85rem;
   flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
@@ -891,6 +746,9 @@
   font-size: 0.75rem;
 }
 .direction {
+  text-align: right;
+  font-size: 0.8rem;
+  margin: 2rem 0 0.5rem;
   color: #f1dfa9;
   font-weight: 600;
 }
@@ -905,14 +763,6 @@
 .gameControls .feedback {
   font-weight: 600;
   color: #293e34;
-}
-@media (max-width: 580px) {
-  .gamePrompt h3 {
-    font-size: 1.3rem;
-  }
-  .gamePrompt p {
-    font-size: 0.9rem;
-  }
 }
 
 .gameBoard[data-closeup="true"] {
@@ -933,56 +783,6 @@
 .lesson .stacks button[aria-pressed="true"] {
   background: #f1dfa926;
   border-color: #f1dfa9;
-}
-@media (max-width: 1000px) {
-  .wallOverview {
-    display: flex;
-    flex-direction: row-reverse;
-    gap: 3px;
-    margin: 0.75rem 0 1.5rem;
-  }
-  .wallOverview i {
-    flex: 1;
-    height: 24px;
-    border-radius: 2px;
-    background: #65afe9;
-    box-shadow:
-      0 3px 0 #f0e7d0,
-      0 5px 0 #256ca5;
-  }
-  .wallOverview i[data-selected="true"] {
-    outline: 2px solid #f1dfa9;
-    outline-offset: 2px;
-    transform: translateY(-4px);
-  }
-  .wallOverview i[data-break="true"] {
-    border-left: 2px solid #f1dfa9;
-  }
-  .wallOverview i[data-drawn="true"] {
-    opacity: 0.2;
-  }
-  .stacks {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-  .stacks button[data-near="false"] {
-    display: none;
-  }
-  .countControls {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .lesson .countControls button {
-    min-width: 0;
-    white-space: normal;
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-  .countControls > span {
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
 }
 
 .callScene .callAnnouncement {
@@ -1108,36 +908,14 @@
   }
 }
 
-@media (max-width: 580px) {
-  .callScene {
-    grid-template-columns: 1fr 1.4fr;
-    gap: 0.75rem;
-    padding: 1rem 0.6rem;
-  }
-  .callScene > div {
-    min-width: 0;
-    min-height: 105px;
-  }
-  .callScene .callAnnouncement {
-    min-height: 138px;
-  }
-  .callScene p {
-    font-size: 0.75rem;
-  }
-  .callScene :global(.tile-row) {
-    gap: 3px;
-    flex-wrap: nowrap;
-  }
-  .callScene :global(.set-tile) {
-    width: 34px;
-  }
-  .callActions {
-    gap: 0.5rem;
-  }
-}
-
 /* Keep secondary help quiet and the next action unmistakable. */
 .hint {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.5rem 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
   min-height: 0;
 }
 .hint > span:empty {
@@ -1147,6 +925,10 @@
   display: none;
 }
 .wallCloseup {
+  position: relative;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
   min-height: 370px;
 }
 .wallCloseup[data-stage="break"] .rack {
@@ -1164,16 +946,49 @@
   transition: none !important;
 }
 @media (max-width: 1000px) {
+  .wallOverview i {
+    flex: 1;
+    height: 24px;
+    border-radius: 2px;
+    background: #65afe9;
+    box-shadow:
+      0 3px 0 #f0e7d0,
+      0 5px 0 #256ca5;
+  }
+  .wallOverview i[data-selected="true"] {
+    outline: 2px solid #f1dfa9;
+    outline-offset: 2px;
+    transform: translateY(-4px);
+  }
+  .wallOverview i[data-break="true"] {
+    border-left: 2px solid #f1dfa9;
+  }
+  .wallOverview i[data-drawn="true"] {
+    opacity: 0.2;
+  }
+  .stacks {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .stacks button[data-near="false"] {
+    display: none;
+  }
+
   .countControls {
+    display: grid;
+    align-items: center;
     grid-template-columns: 44px 1fr 44px;
     max-width: 190px;
     margin: 0.5rem auto 0;
     gap: 0.75rem;
   }
   .countControls > span {
+    white-space: nowrap;
     font-size: 0.9rem;
   }
   .lesson .countControls button {
+    min-width: 0;
+    white-space: normal;
+    font-size: 0.75rem;
     padding: 0;
     box-shadow: none;
     background: transparent;
@@ -1181,49 +996,11 @@
     color: #fff9e9;
   }
   .wallOverview {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 3px;
+    margin: 0.75rem 0 1.5rem;
     margin-bottom: 0.75rem;
-  }
-}
-@media (max-width: 580px) {
-  .gameBadge {
-    display: none;
-  }
-  .progress {
-    margin: 0 0 1rem;
-    padding-bottom: 0.75rem;
-  }
-  .progress li:not([aria-current]) .progressLabel {
-    display: none;
-  }
-  .progress li {
-    font-size: 0.8rem;
-  }
-  .gamePrompt {
-    min-height: 85px;
-  }
-  .gamePrompt p {
-    font-size: 0.85rem;
-  }
-  .wallCloseup {
-    padding: 1rem 0.65rem;
-  }
-  .wallCaption > span:first-child {
-    font-size: 0.85rem;
-  }
-  .rollReminder > span:last-child {
-    display: none;
-  }
-  .rollReminder {
-    padding: 0.45rem 0.6rem;
-  }
-  .direction {
-    font-size: 0.7rem;
-  }
-  .callButton > span:last-child {
-    display: none;
-  }
-  .callScene .callAnnouncement {
-    min-height: 115px;
   }
 }
 
@@ -1444,7 +1221,137 @@
 }
 
 /* Keep the mobile table and its close-up proportional to the available width. */
+
 @media (max-width: 580px) {
+  .gameBoard {
+    height: 380px;
+    border-width: 5px;
+    border-radius: 20px;
+  }
+  .overhead {
+    height: auto;
+    aspect-ratio: 1;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .lesson .seat {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.1rem;
+  }
+  .miniWall {
+    gap: 1px;
+  }
+  .dice {
+    gap: 9px;
+  }
+  .dice > span {
+    width: 38px;
+    height: 38px;
+    font-size: 2.3rem;
+  }
+  .tableCenter {
+    gap: 0.6rem;
+    font-size: 0.75rem;
+  }
+  .countLabel {
+    padding: 0.25rem;
+  }
+  .rack {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .rack > span:first-child {
+    flex-basis: 100%;
+  }
+  .hint {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .wallCloseup .direction {
+    margin-top: 0.6rem;
+  }
+  .wallCloseup .stacks {
+    padding-top: 10px;
+    padding-bottom: 12px;
+  }
+  .wallCloseup .rack {
+    padding-block: 0.5rem;
+  }
+
+  .lesson .diceButton[data-ready="true"] {
+    padding: 0.8rem 0.9rem 0.6rem;
+    gap: 0.8rem;
+    border-radius: 16px;
+  }
+  .rollLabel {
+    font-size: 0.8rem;
+  }
+
+  .gamePrompt h3 {
+    font-size: 1.3rem;
+  }
+
+  .callScene {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 0.75rem;
+    padding: 1rem 0.6rem;
+  }
+  .callScene > div {
+    min-width: 0;
+    min-height: 105px;
+  }
+  .callScene p {
+    font-size: 0.75rem;
+  }
+  .callScene :global(.tile-row) {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  .callScene :global(.set-tile) {
+    width: 34px;
+  }
+  .callActions {
+    gap: 0.5rem;
+  }
+
+  .gameBadge {
+    display: none;
+  }
+  .progress {
+    gap: 0.25rem;
+    margin: 0 0 1rem;
+    padding-bottom: 0.75rem;
+  }
+  .progress li:not([aria-current]) .progressLabel {
+    display: none;
+  }
+  .progress li {
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+  }
+  .gamePrompt {
+    min-height: 85px;
+  }
+  .gamePrompt p {
+    font-size: 0.85rem;
+  }
+  .rollReminder > span:last-child {
+    display: none;
+  }
+  .direction {
+    margin: 1rem 0 0.3rem;
+    font-size: 0.7rem;
+  }
+  .callButton > span:last-child {
+    display: none;
+  }
+  .callScene .callAnnouncement {
+    min-height: 115px;
+  }
+
   .gameBoard:not([data-closeup="true"]) {
     height: auto;
     aspect-ratio: 1;
@@ -1456,6 +1363,7 @@
     left: -17%;
   }
   .miniWall i {
+    height: 17px;
     border-radius: 1px;
     box-shadow:
       inset 0 1px 0 #c7e9ff70,
@@ -1493,10 +1401,9 @@
     width: 44px;
     padding: 0.4rem;
   }
-}
 
-@media (max-width: 580px) {
   .wallCaption {
+    gap: 0.3rem;
     flex-wrap: nowrap;
     align-items: center;
   }
