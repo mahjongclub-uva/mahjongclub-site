@@ -2092,7 +2092,9 @@ body > main { flex: 1 0 auto; }
    rather than showing the final number and snapping back to 0. Without
    JavaScript the scripting query fails and the number simply shows. */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .count:not([data-counted]) { visibility: hidden; }
+  /* Hidden so the count can start from 0, but never for long: on a slow
+     connection the real number shows at 600ms and CountUp leaves it be. */
+  .count:not([data-counted]) { visibility: hidden; animation: count-fallback 0s 600ms forwards; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .rank-front, .rank-back { transition: transform 360ms var(--rank-ease); }
@@ -2104,6 +2106,9 @@ body > main { flex: 1 0 auto; }
 /* Reduced motion still shows the order, as a fade without movement. */
 @media (prefers-reduced-motion: reduce) {
   .standing { animation: standing-fade 300ms ease-out calc(var(--i, 0) * 70ms) backwards; }
+}
+@keyframes count-fallback {
+  to { visibility: visible; }
 }
 @keyframes standing-fade {
   from { opacity: 0; }

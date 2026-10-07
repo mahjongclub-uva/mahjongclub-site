@@ -22,13 +22,16 @@ export default function CountUp({
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
+    // Already showing (JS arrived after the CSS fallback, or motion is
+    // reduced): leave the real number alone rather than resetting it to 0.
+    const shown = getComputedStyle(element).visibility === "visible";
     element.dataset.counted = "";
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (shown) return;
 
     const start = performance.now() + delay;
     let frame = 0;
     const tick = (now: number) => {
-      const t = Math.min(1, Math.max(0, (now - start) / 1200));
+      const t = Math.min(1, Math.max(0, (now - start) / 600));
       element.textContent = String(Math.round(value * (1 - (1 - t) ** 3)));
       if (t < 1) frame = requestAnimationFrame(tick);
     };
@@ -36,6 +39,8 @@ export default function CountUp({
     return () => {
       cancelAnimationFrame(frame);
       element.textContent = String(value);
+      // A remount (or Strict Mode's rerun) must judge visibility afresh.
+      delete element.dataset.counted;
     };
   }, [value, delay]);
 
