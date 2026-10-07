@@ -64,9 +64,7 @@ export function WallPractice() {
   const [playing, setPlaying] = useState(false);
   const [taken, setTaken] = useState(0);
   const [selectedStack, setSelectedStack] = useState(1);
-  const focusedStack = useRef<HTMLButtonElement>(null);
   const [feedback, setFeedback] = useState("");
-  const nextStack = useRef<HTMLButtonElement>(null);
   const rack = useRef<HTMLDivElement>(null);
   const flightFrom = useRef<DOMRect | null>(null);
   const total = dice[0] + dice[1];
@@ -127,7 +125,7 @@ export function WallPractice() {
     setCount(1);
     setFeedback("");
   }
-  function chooseStack(n: number, button: HTMLButtonElement) {
+  function chooseStack(n: number) {
     if (stage === "break") {
       if (n !== total) {
         setFeedback(
@@ -142,9 +140,10 @@ export function WallPractice() {
         setFeedback("Start just beyond the gap and keep moving left.");
         return;
       }
-      flightFrom.current = button
-        .querySelector("span")!
-        .getBoundingClientRect();
+      flightFrom.current =
+        rack.current?.parentElement
+          ?.querySelector(`[aria-label="Stack ${n}"] span`)
+          ?.getBoundingClientRect() ?? null;
       setTaken(taken + 1);
       if (taken === 1) {
         setStage("done");
@@ -319,10 +318,6 @@ export function WallPractice() {
                 <button
                   type="button"
                   key={n}
-                  ref={(node) => {
-                    if (n === total + taken + 1) nextStack.current = node;
-                    if (n === focus) focusedStack.current = node;
-                  }}
                   aria-label={`Stack ${n}`}
                   aria-pressed={
                     stage === "break" ? n === selectedStack : undefined
@@ -334,11 +329,11 @@ export function WallPractice() {
                   data-break={stage !== "break" && n === total}
                   data-next={stage === "draw" && n === total + taken + 1}
                   data-drawn={n > total && n <= total + taken}
-                  onClick={(event) => {
+                  onClick={() => {
                     if (stage === "break") {
                       setSelectedStack(n);
                       setFeedback("");
-                    } else chooseStack(n, event.currentTarget);
+                    } else chooseStack(n);
                   }}
                 >
                   <span
@@ -380,10 +375,7 @@ export function WallPractice() {
                 <button
                   type="button"
                   className={styles.dealNext}
-                  onClick={() => {
-                    if (focusedStack.current)
-                      chooseStack(selectedStack, focusedStack.current);
-                  }}
+                  onClick={() => chooseStack(selectedStack)}
                 >
                   Break it here
                 </button>
@@ -393,10 +385,7 @@ export function WallPractice() {
               <button
                 type="button"
                 className={styles.dealNext}
-                onClick={() => {
-                  if (nextStack.current)
-                    chooseStack(total + taken + 1, nextStack.current);
-                }}
+                onClick={() => chooseStack(total + taken + 1)}
               >
                 <IconArrowRight size={20} aria-hidden="true" />
                 Grab stack {taken + 1} of 2
