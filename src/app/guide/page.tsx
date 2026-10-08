@@ -47,13 +47,13 @@ export default function Guide() {
         <a href="#hand">
           <IconTrophy aria-hidden="true" />
           <span>
-            The goal<small>Five sets and a pair</small>
+            Goal<small>Five sets and a pair</small>
           </span>
         </a>
         <a href="#turn">
           <IconHandClick aria-hidden="true" />
           <span>
-            Your turn<small>Draw and discard</small>
+            Turn<small>Draw and discard</small>
           </span>
         </a>
         <a href="#calls">
@@ -71,7 +71,7 @@ export default function Guide() {
         <a href="#setup">
           <IconStack2 aria-hidden="true" />
           <span>
-            Set up<small>Break the wall</small>
+            Setup<small>Break the wall</small>
           </span>
         </a>
       </nav>
