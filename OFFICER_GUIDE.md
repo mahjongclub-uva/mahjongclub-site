@@ -60,14 +60,13 @@ The website-copy Sheet remains separate and continues to create its own review p
 
 ## Meeting check-in backend
 
-The backend is ready for a rehearsal on a disposable workbook with fake names.
-The check-in and score entry pages are connected to the fake-name rehearsal workbook.
-Automatic score publishing is not enabled yet.
-Keep recording production meetings as before until the rehearsal passes.
+The check-in and score entry pages write to the Fall 2026 score workbook, starting with the October 9 meeting.
+Automatic score publishing is not enabled yet: the public leaderboard updates when scores are synced, and `/live/` shows the night's provisional standings in the meantime.
+If the pages misbehave during a meeting, record attendance and tables in the Sheet as before.
 
 ### Install and configure
 
-1. In the rehearsal workbook, open **Extensions > Apps Script**.
+1. In the score workbook, open **Extensions > Apps Script**.
 2. Add the code from `apps-script/Rules.gs` and `apps-script/Club.gs` as script files named `Rules` and `Club`.
 3. Add `apps-script/Settings.html` as an HTML file named `Settings`.
 4. In **Project Settings**, enable the manifest editor and replace `appsscript.json` with `apps-script/appsscript.json`.
@@ -156,8 +155,7 @@ Full names and computing IDs are never included in responses.
 The unlisted pages are `/checkin/`, `/score/`, and `/live/`.
 They are excluded from the public navigation and sitemap and marked noindex.
 The endpoint and rehearsal notice are configured by `MEETING_SERVICE_URL` and `MEETING_REHEARSAL` in `src/lib/site.ts`.
-Keep rehearsal mode on until the live workbook installation and a real phone test pass.
-Use fake names and computing IDs with the current endpoint.
+Rehearsal mode adds a "fake names only" banner and keeps live standings apart from the real season; turn it on only when the URL points at a test workbook.
 
 A table QR links directly to `/checkin/`; no meeting code is required.
 The same check-in and score pages are available from the website while a meeting is open.

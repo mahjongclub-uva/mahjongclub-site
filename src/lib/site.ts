@@ -29,10 +29,10 @@ export const TAGLINE = siteContent.tagline;
 export const CALENDAR_ID: string | null =
   "c2b93807305215ee07bdbd6d1c045e8f58588b299afa24dd14fa981830eb3c2a@group.calendar.google.com";
 
-/** Rehearsal workbook only. Replace after the live installation is verified. */
+/** The meeting web app bound to the Fall 2026 score workbook. A redeploy under a new owner changes this URL. */
 export const MEETING_SERVICE_URL =
-  "https://script.google.com/macros/s/AKfycby8GIl0tG4WE2Mq_TCCl7NkLy1-gEvXiXXqGryLH-e7fJeY1j5GMUch2iKfa10lZXm6/exec";
-export const MEETING_REHEARSAL = true;
+  "https://script.google.com/macros/s/AKfycbyR65Y9hTIuNgd46MGFxnFyD9UYLNjNcbF8zMdllFc96qxSb2GPs9hGmUQvSNNvIjpicg/exec";
+export const MEETING_REHEARSAL = false;
 
 /** Logo, shown circular above the wordmark. Put the file in public/ and set
  * the path, e.g. "/logo.png"; a centered square image works best. Leave null
