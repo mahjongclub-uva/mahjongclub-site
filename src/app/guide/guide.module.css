@@ -1,6 +1,3 @@
-.page {
-  --content: 68rem;
-}
 .hero {
   margin-top: 2rem;
 }
@@ -75,14 +72,6 @@
 }
 .page :global(.section) {
   padding-block: clamp(1.5rem, 3vw, 2.5rem);
-}
-.page :global(.section-title) {
-  margin-bottom: 1.5rem;
-  font: 700 clamp(2.1rem, 4vw, 3rem) / 1.08 var(--display);
-  letter-spacing: -0.02em;
-}
-.page :global(.section-title)::after {
-  display: none;
 }
 /* The games are drawn for a phone; past that they keep a table-sized
    width instead of stretching the felt into empty space. */
