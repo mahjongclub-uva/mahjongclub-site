@@ -32,7 +32,7 @@ function emphasizeStyles(copy: string, styles: RegExp) {
 
 export default function About() {
   return (
-    <main className="about-page" id="about-top">
+    <main className="about-page">
       <header className="page-head">
         <div className="section-wrap">
           <p className="eyebrow">About</p>
@@ -177,7 +177,7 @@ export default function About() {
           </ol>
         </div>
       </section>
-      <BackToTop target="about-top" />
+      <BackToTop />
     </main>
   );
 }

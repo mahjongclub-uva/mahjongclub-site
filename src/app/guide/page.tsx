@@ -27,7 +27,7 @@ export const metadata = {
 
 export default function Guide() {
   return (
-    <main className={`guide-page ${styles.page}`} id="guide-top">
+    <main className={`guide-page ${styles.page}`}>
       <header className={`section-wrap ${styles.hero}`}>
         <div className={styles.heroCopy}>
           <h1>Learn your first hand.</h1>
@@ -247,7 +247,7 @@ export default function Guide() {
         </div>
       </Section>
 
-      <BackToTop target="guide-top" />
+      <BackToTop />
     </main>
   );
 }
