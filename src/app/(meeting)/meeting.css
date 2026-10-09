@@ -697,6 +697,10 @@
   color: var(--ink-soft);
   line-height: 1.6;
 }
+/* Text links under the form start clear of the primary button's raised edge. */
+.meeting-form > .meeting-text {
+  margin-block-start: 14px;
+}
 .meeting-closed > .meeting-text {
   margin-top: 16px;
 }
