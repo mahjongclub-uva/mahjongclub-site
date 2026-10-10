@@ -2,8 +2,10 @@ name: Propose score update
 
 on:
   schedule:
-    # Saturday 8:17am Eastern, the morning after the Friday meeting.
-    - cron: "17 12 * * 6"
+    # Friday 9:05pm Eastern (01:05 UTC Saturday) while daylight time lasts;
+    # after the clocks change on Nov 1 this fires at 8:05pm EST. GitHub cron is
+    # UTC-only, so move it to "5 2 * * 6" then if 9pm matters.
+    - cron: "5 1 * * 6"
   workflow_dispatch:
 
 permissions:
