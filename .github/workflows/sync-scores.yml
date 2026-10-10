@@ -2,10 +2,13 @@ name: Propose score update
 
 on:
   schedule:
-    # Friday 9:05pm Eastern (01:05 UTC Saturday) while daylight time lasts;
-    # after the clocks change on Nov 1 this fires at 8:05pm EST. GitHub cron is
-    # UTC-only, so move it to "5 2 * * 6" then if 9pm matters.
+    # Friday 9:05pm Eastern, half an hour after scoring closes. GitHub cron is
+    # UTC-only, so both candidates are scheduled: 01:05 UTC is 9:05pm in
+    # daylight time and 02:05 UTC is 9:05pm in standard time. The first step
+    # skips whichever one is not 9pm in Eastern time, so it never needs editing
+    # when the clocks change.
     - cron: "5 1 * * 6"
+    - cron: "5 2 * * 6"
   workflow_dispatch:
 
 permissions:
@@ -41,6 +44,13 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
         run: |
           ready=true
+          # Scheduled runs go only from the 9pm Eastern slot; Run workflow
+          # always goes.
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(TZ=America/New_York date +%H)" != "21" ]; then
+            echo "Not 9pm in Eastern time; the other scheduled slot handles this week."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ "$SCORES_SYNC_ENABLED" != "true" ]; then
             echo "Score sync is not enabled."
             ready=false
