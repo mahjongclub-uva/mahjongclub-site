@@ -4,8 +4,10 @@ function properties() {
 
 function withLock(action) {
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000))
-    fail(503, "Another write is finishing. Please retry.");
+  const waiting = Date.now();
+  const locked = lock.tryLock(10000);
+  if (timing) timing.lockMs = Date.now() - waiting;
+  if (!locked) fail(503, "Another write is finishing. Please retry.");
   try {
     return action();
   } finally {
@@ -785,7 +787,20 @@ function roomAction(request, meeting) {
   fail(404, "Unknown table action.");
 }
 
+// One line per request in the Apps Script Executions log: which kind of
+// request, its status, how long it took and how long it waited for the
+// lock. It never includes names, computing IDs or scores; it is how a
+// meeting's real response times are measured.
+let timing = null;
+function label(request) {
+  const word = (value) =>
+    typeof value === "string" ? value.replace(/[^a-z]/gi, "").slice(0, 12) : "";
+  return [word(request.r), word(request.action)].filter(Boolean).join(" ");
+}
+
 function respond(action) {
+  timing = { request: "", lockMs: 0 };
+  const started = Date.now();
   let response;
   try {
     response = action();
@@ -798,6 +813,14 @@ function respond(action) {
     };
     if (!error.status) console.error(error.stack);
   }
+  console.log(
+    JSON.stringify({
+      request: timing.request,
+      status: response.status,
+      ms: Date.now() - started,
+      lockMs: timing.lockMs,
+    }),
+  );
   return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(
     ContentService.MimeType.JSON,
   );
@@ -806,6 +829,7 @@ function respond(action) {
 function doGet(event) {
   return respond(() => {
     const request = event.parameter || {};
+    timing.request = "GET " + label(request);
     const meeting = currentMeeting();
     if (request.r === "meeting") {
       const state = meetingWindow(meeting, Date.now());
@@ -852,6 +876,7 @@ function doPost(event) {
     }
     if (!request || typeof request !== "object" || Array.isArray(request))
       fail(400, "Invalid request body.");
+    timing.request = "POST " + label(request);
     if (!["checkins", "players", "results", "rooms"].includes(request.r))
       fail(404, "Unknown resource.");
     return withLock(() => {

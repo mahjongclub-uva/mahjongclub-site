@@ -163,6 +163,8 @@ The workbook has no per-game rows. Games live in Script Properties (one key per 
 | Table ended while away    | The final receipt shows, with "Find another table"                                                                 |
 | Another phone saved first | The entry is cleared with a note if it was the same game, or kept with a warning if different                      |
 
+After a meeting, **Extensions → Apps Script → Executions** shows one log line per request, such as `{"request":"POST rooms hand","status":200,"ms":840,"lockMs":12}`: its kind, outcome, duration and time spent waiting for the write lock. These lines never include names, IDs or scores. They are the measurements for deciding whether the meeting backend needs to move off Apps Script.
+
 To rehearse without touching the real workbook, run the in-memory harness used in `apps-script/club.test.mjs` behind a local server, never the live URL.
 
 ## Deploys

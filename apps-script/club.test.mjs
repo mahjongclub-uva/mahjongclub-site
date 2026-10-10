@@ -204,9 +204,10 @@ function harness() {
   const cache = new Map();
   const events = [];
   const triggers = [];
+  const logs = [];
   const context = vm.createContext({
     Date,
-    console: { error() {} },
+    console: { error() {}, log: (line) => logs.push(JSON.parse(line)) },
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => store[key] || null,
@@ -293,6 +294,7 @@ function harness() {
     config,
     events,
     triggers,
+    logs,
     now,
     interruptWrite: () => {
       failWrite = true;
@@ -848,4 +850,26 @@ test("officers can end a stuck table from the Club menu, saving its games", () =
   assert.equal(t.table().ended.by, "An officer");
   h.context.clubEndTable();
   assert.match(alerts[1], /Nobody is seated/);
+});
+
+test("each request logs its kind, status and timing, never who sent it", () => {
+  const h = harness();
+  assert.equal(h.post({ r: "checkins", computingId: "a1" }).status, 200);
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  h.get({ r: "rooms" });
+  const lines = h.logs.map((line) => line.request);
+  assert.ok(lines.includes("POST checkins"));
+  assert.ok(lines.includes("POST rooms hand"));
+  assert.ok(lines.includes("GET rooms"));
+  for (const line of h.logs) {
+    assert.deepEqual(Object.keys(line).sort(), [
+      "lockMs",
+      "ms",
+      "request",
+      "status",
+    ]);
+    assert.equal(typeof line.ms, "number");
+  }
+  assert.equal(JSON.stringify(h.logs).match(/a1|p001|Alex|Amber/), null);
 });
