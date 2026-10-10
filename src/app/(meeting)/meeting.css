@@ -263,6 +263,8 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 28px 0;
+  padding: 0;
+  list-style: none;
 }
 .meeting-seat {
   display: grid;
@@ -329,6 +331,8 @@
 }
 .score-rows {
   margin-top: 28px;
+  padding: 0;
+  list-style: none;
   border: 1px solid var(--rule);
   border-radius: 18px;
   background: var(--tile-face-hi);
@@ -357,16 +361,6 @@
   font-size: 0.75rem;
   margin-top: 3px;
 }
-.total-button {
-  min-width: 72px;
-  min-height: 48px;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  background: #f5f0e5;
-  color: var(--jade);
-  padding: 8px 12px;
-  font-variant-numeric: tabular-nums;
-}
 .score-foot {
   position: sticky;
   bottom: 0;
@@ -374,28 +368,6 @@
   margin-top: 26px;
   background: var(--paper);
   z-index: 1;
-}
-.score-summary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 0.83rem;
-  margin-bottom: 14px;
-}
-.score-summary strong {
-  font-size: 1.2rem;
-  font-variant-numeric: tabular-nums;
-}
-.score-summary small {
-  color: var(--ink-soft);
-  font-weight: 400;
-}
-.score-summary p {
-  width: 100%;
-  font-size: 0.77rem;
-  color: var(--ink-soft);
 }
 .meeting-recovery {
   margin-top: 16px;
@@ -444,34 +416,6 @@
   min-width: 44px;
   font-size: 1.5rem !important;
 }
-.meeting-calculator input {
-  font-size: 2.6rem;
-  font-weight: 600;
-}
-.card-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 18px;
-}
-.card-keypad button {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 2px;
-  min-height: 60px;
-  border: 1px solid var(--rule);
-  background: var(--tile-face-hi);
-  color: var(--jade);
-  padding: 8px 3px;
-}
-.card-keypad small {
-  font-size: 0.65rem;
-  color: var(--ink-soft);
-}
-.card-keypad strong {
-  font-size: 1.1rem;
-}
 .meeting-calculator .quiet {
   font-size: 0.75rem;
   color: var(--ink-soft);
@@ -502,9 +446,7 @@
     color: var(--tile-face-hi);
     box-shadow: 0 3px 0 #203d30;
   }
-  .player-chips button:hover:not(:disabled),
-  .total-button:hover:not(:disabled),
-  .card-keypad button:hover:not(:disabled) {
+  .player-chips button:hover:not(:disabled) {
     border-color: var(--jade);
     box-shadow: 0 3px 0 #203d30;
   }
@@ -533,9 +475,7 @@
   .meeting-page .meeting-text,
   .meeting-calculator .meeting-text,
   .meeting-page .meeting-website,
-  .player-chips button,
-  .total-button,
-  .card-keypad button {
+  .player-chips button {
     transition:
       background-color 120ms ease-out,
       color 120ms ease-out,
@@ -791,49 +731,6 @@
   }
 }
 
-/* Card details and balance feedback make counting tangible. */
-.card-keypad button {
-  position: relative;
-  border-bottom-width: 3px;
-  border-radius: 6px;
-}
-.card-keypad button[data-counted="true"] {
-  background: #e9f0f5;
-  border-color: #8daecb;
-  color: #244f77;
-}
-.card-keypad .card-count {
-  color: #244f77;
-  font-weight: 700;
-}
-.score-progress-track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 3px;
-  background: #ded8cc;
-  margin-bottom: 14px;
-}
-.score-progress-track > span {
-  display: block;
-  height: 100%;
-  background: #285b87;
-  transform-origin: left;
-}
-.score-progress[data-balanced="true"] .score-progress-track > span {
-  background: var(--jade);
-}
-.score-summary[data-balanced="true"] strong,
-.score-summary[data-balanced="true"] p {
-  color: var(--jade);
-}
-@keyframes count-bump {
-  from {
-    transform: translateY(3px) scale(0.9);
-  }
-  to {
-    transform: none;
-  }
-}
 @keyframes score-highlight {
   from {
     background-color: #f3dfb6;
@@ -843,15 +740,6 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .card-count {
-    animation: count-bump 180ms ease-out;
-  }
-  .score-progress-track > span {
-    transition: transform 220ms ease-out;
-  }
-  .score-summary[data-balanced="true"] strong {
-    animation: count-bump 220ms ease-out;
-  }
   .live-points-changed {
     animation: score-highlight 1000ms ease-out;
   }
@@ -919,5 +807,357 @@
   }
   .meeting-calculator {
     padding-inline: 20px;
+  }
+}
+
+/* Recording a table: steps, signed totals, a live balance and a card counter. */
+.meeting-page {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --short: oklch(0.45 0.09 245);
+  --over: var(--tile-letter);
+}
+.score-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  margin-block: 0 22px;
+}
+.score-steps li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.score-steps li:not(:first-child)::before,
+.score-steps li:not(:first-child)::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 13px;
+  inset-inline: -50% 50%;
+  block-size: 2px;
+  background: var(--rule);
+}
+.score-steps li:not(:first-child)::after {
+  background: var(--jade);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.score-steps li:is([data-done="true"], [aria-current="step"])::after {
+  transform: none;
+}
+.score-step-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 2px solid var(--rule);
+  border-radius: 50%;
+  background: var(--paper);
+  font-weight: 700;
+}
+.score-steps [aria-current="step"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.score-steps [aria-current="step"] .score-step-dot,
+.score-steps [data-done="true"] .score-step-dot {
+  border-color: var(--jade);
+  background: var(--jade);
+  color: var(--tile-face-hi);
+}
+.score-form > h1:focus-visible {
+  outline-offset: 6px;
+}
+.score-row.editing {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+}
+.score-row.editing .total-field {
+  grid-column: 2;
+}
+.score-name {
+  display: grid;
+  gap: 4px;
+}
+.score-net {
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: oklch(0.93 0.01 85);
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.score-net[data-sign="1"] {
+  background: color-mix(in oklch, var(--jade) 14%, var(--tile-face-hi));
+  color: var(--jade);
+}
+.score-net[data-sign="-1"] {
+  background: color-mix(in oklch, var(--tile-letter) 12%, var(--tile-face-hi));
+  color: var(--tile-letter);
+}
+.score-net:empty {
+  display: none;
+}
+.score-final {
+  margin-inline-start: auto;
+  font: 700 1.6rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.total-field {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+  gap: 6px;
+}
+.total-field button {
+  display: grid;
+  place-items: center;
+  min-block-size: 50px;
+  border: 1px solid var(--rule);
+  border-block-end-width: 3px;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--jade);
+}
+.total-field .sign-toggle[aria-pressed="true"] {
+  border-color: var(--tile-letter);
+  background: color-mix(in oklch, var(--tile-letter) 12%, var(--tile-face-hi));
+  color: var(--tile-letter);
+}
+.meeting-page .total-field input {
+  min-block-size: 50px;
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+  font: 700 1.45rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.score-balance {
+  --tone: var(--ink-soft);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 12px;
+  margin-block-end: 14px;
+}
+.score-balance[data-state="short"] {
+  --tone: var(--short);
+}
+.score-balance:is([data-state="over"], [data-state="invalid"]) {
+  --tone: var(--over);
+}
+.score-balance[data-state="ok"] {
+  --tone: var(--jade);
+}
+.score-balance .score-progress-track {
+  grid-column: 1 / -1;
+  block-size: 8px;
+  overflow: clip;
+  border-radius: 4px;
+  background: oklch(0.89 0.015 85);
+  margin-block-end: 10px;
+}
+.score-progress-track > span {
+  display: block;
+  block-size: 100%;
+  background: var(--tone);
+  transform: scaleX(var(--fill));
+  transform-origin: left;
+}
+.score-sum {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.score-sum strong {
+  display: inline-block;
+  font: 700 1.5rem var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--tone);
+}
+.score-balance-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tone);
+  text-align: end;
+}
+.score-receipt .score-rows {
+  margin-block-start: 24px;
+}
+
+/* The card counter: one row per card value, typed or stepped. */
+.card-counter {
+  list-style: none;
+  padding: 0;
+  margin-block: 14px 0;
+}
+.card-counter li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "face stepper subtotal"
+    "worth stepper subtotal";
+  align-items: center;
+  column-gap: 12px;
+  padding-block: 6px;
+}
+.card-counter li + li {
+  border-block-start: 1px solid var(--rule);
+}
+.card-face {
+  grid-area: face;
+  justify-self: start;
+  min-inline-size: 40px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  border-block-end-width: 3px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--jade);
+  font: 700 1rem var(--display);
+  text-align: center;
+  white-space: nowrap;
+}
+.card-counter li[data-counted="true"] .card-face {
+  border-color: var(--short);
+  background: color-mix(in oklch, var(--short) 10%, var(--tile-face-hi));
+  color: var(--short);
+}
+.card-worth {
+  grid-area: worth;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+.card-stepper {
+  grid-area: stepper;
+  display: grid;
+  grid-template-columns: 44px 56px 44px;
+  gap: 4px;
+  justify-self: start;
+}
+.card-stepper button {
+  display: grid;
+  place-items: center;
+  min-block-size: 44px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--jade);
+}
+.meeting-calculator .card-stepper input {
+  min-block-size: 44px;
+  padding: 4px;
+  border-radius: 10px;
+  text-align: center;
+  font: 700 max(16px, 1.05rem) var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.card-subtotal {
+  grid-area: subtotal;
+  min-inline-size: 36px;
+  text-align: end;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--short);
+}
+.calculator-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  margin-block-end: 6px;
+}
+.calculator-sum span:first-child {
+  margin-inline-end: auto;
+}
+.calculator-sum strong {
+  display: inline-block;
+  font: 700 2.2rem var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.calculator-footer .meeting-quiet-actions {
+  margin-block: 2px 8px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .total-field button:hover:not(:disabled),
+  .card-stepper button:hover:not(:disabled) {
+    border-color: var(--jade);
+  }
+}
+
+@keyframes score-pop {
+  from {
+    transform: translateY(2px);
+  }
+}
+@keyframes score-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .score-steps li::after {
+    transition: transform 280ms var(--ease-in-out);
+  }
+  .score-step-dot {
+    transition:
+      background-color 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      color 200ms var(--ease-out);
+  }
+  .score-progress-track > span {
+    transition:
+      transform 260ms var(--ease-out),
+      background-color 200ms ease;
+  }
+  .score-net,
+  .score-sum strong,
+  .card-subtotal,
+  .calculator-sum strong {
+    animation: score-pop 180ms var(--ease-out);
+  }
+  .score-form[data-stage] .score-rows > li,
+  .score-receipt .score-rows > li {
+    animation: score-row-in 260ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+  .score-form .score-row.editing:nth-child(2) {
+    --i: 1;
+  }
+  .score-form .score-row.editing:nth-child(3) {
+    --i: 2;
+  }
+  .score-form .score-row.editing:nth-child(4) {
+    --i: 3;
+  }
+  .total-field button,
+  .card-stepper button {
+    transition:
+      border-color 120ms ease,
+      background-color 120ms ease,
+      transform 120ms var(--ease-out);
+  }
+}
+@media (max-width: 374px) {
+  .card-counter li {
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+  .card-stepper {
+    grid-template-columns: 44px 48px 44px;
   }
 }
