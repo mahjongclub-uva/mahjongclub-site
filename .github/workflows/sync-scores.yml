@@ -5,8 +5,10 @@ on:
     # Friday 9:05pm Eastern, half an hour after scoring closes. GitHub cron is
     # UTC-only, so both candidates are scheduled: 01:05 UTC is 9:05pm in
     # daylight time and 02:05 UTC is 9:05pm in standard time. The first step
-    # skips whichever one is not 9pm in Eastern time, so it never needs editing
-    # when the clocks change.
+    # skips a run that starts outside 9pm-10pm Eastern, so it never needs
+    # editing when the clocks change, and a slot GitHub starts up to an hour
+    # late still runs. In daylight time both slots pass; the second finds
+    # nothing new and exits.
     - cron: "5 1 * * 6"
     - cron: "5 2 * * 6"
   workflow_dispatch:
@@ -46,8 +48,9 @@ jobs:
           ready=true
           # Scheduled runs go only from the 9pm Eastern slot; Run workflow
           # always goes.
-          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(TZ=America/New_York date +%H)" != "21" ]; then
-            echo "Not 9pm in Eastern time; the other scheduled slot handles this week."
+          hour="$(TZ=America/New_York date +%H)"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$hour" != "21" ] && [ "$hour" != "22" ]; then
+            echo "Not 9pm or 10pm in Eastern time; the other scheduled slot handles this week."
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
