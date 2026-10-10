@@ -4,6 +4,13 @@ const playerSchema = z.object({
   id: z.string().regex(/^p\d{3,}$/),
   display: z.string().min(1),
 });
+const savedResultSchema = z.object({
+  table: z.number().int().positive(),
+  at: z.number(),
+  hands: z.number().int(),
+  totals: z.array(playerSchema.extend({ total: z.number().int() })),
+});
+export type SavedResult = z.infer<typeof savedResultSchema>;
 const roomSchema = z.object({
   table: z.number().int().positive(),
   seats: z.array(playerSchema).max(4),
@@ -17,6 +24,8 @@ const roomSchema = z.object({
   totals: z.array(
     z.object({ id: playerSchema.shape.id, total: z.number().int() }),
   ),
+  // The table's last save, so every seated phone can show it.
+  saved: savedResultSchema.nullable().optional(),
 });
 export type Room = z.infer<typeof roomSchema>;
 const replySchema = z.object({
@@ -80,13 +89,17 @@ export function tableError(seats: Seat[], players: Player[]): string | null {
 
 export const CARD_VALUES = [50, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
-async function readResponse(url: string, init: RequestInit = {}) {
+async function readResponse(
+  url: string,
+  init: RequestInit = {},
+  timeout = 25000,
+) {
   const response = await fetch(url, {
     ...init,
     credentials: "omit",
     referrerPolicy: "no-referrer",
     signal: AbortSignal.any(
-      [init.signal, AbortSignal.timeout(25000)].filter((s) => s != null),
+      [init.signal, AbortSignal.timeout(timeout)].filter((s) => s != null),
     ),
   });
   if (!response.ok)
@@ -116,10 +129,12 @@ export async function getMeeting(
 export async function getRooms(url: string, signal?: AbortSignal) {
   const target = new URL(url);
   target.searchParams.set("r", "rooms");
-  const { reply } = await readResponse(target.href, {
-    signal,
-    cache: "no-store",
-  });
+  // Short, so one hung request cannot freeze a table's view for long.
+  const { reply } = await readResponse(
+    target.href,
+    { signal, cache: "no-store" },
+    10000,
+  );
   if (reply.status !== 200 || !reply.rooms)
     throw new Error(reply.message || "Could not load the tables.");
   return reply.rooms;
@@ -155,6 +170,44 @@ export function savedPlayer(meeting: Meeting): Player | null {
       : null;
   } catch {
     return null;
+  }
+}
+// The last result saved from this phone, so a player who leaves a table
+// still sees what was saved after they reach the lobby.
+const LAST_RESULT = "club-last-result";
+export function lastResult(
+  meeting: Meeting,
+  playerId: string,
+): SavedResult | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_RESULT) || "null");
+    // Scoped to the player too, because phones and the iPad get shared.
+    return saved?.meetingId === meeting.meetingId && saved.playerId === playerId
+      ? savedResultSchema.parse(saved.result)
+      : null;
+  } catch {
+    return null;
+  }
+}
+export function forgetResult() {
+  try {
+    localStorage.removeItem(LAST_RESULT);
+  } catch {
+    /* Nothing was kept. */
+  }
+}
+export function rememberResult(
+  meeting: Meeting,
+  playerId: string,
+  result: SavedResult,
+) {
+  try {
+    localStorage.setItem(
+      LAST_RESULT,
+      JSON.stringify({ meetingId: meeting.meetingId, playerId, result }),
+    );
+  } catch {
+    /* The receipt still shows until the page reloads. */
   }
 }
 export function rememberPlayer(meeting: Meeting, player: Player | null) {

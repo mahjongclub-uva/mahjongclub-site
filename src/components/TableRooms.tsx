@@ -6,14 +6,18 @@ import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
   getRooms,
+  lastResult,
   postMeeting,
   rememberMeetingPage,
   rememberPlayer,
+  rememberResult,
+  forgetResult,
   requestError,
   savedPlayer,
   type Meeting,
   type Player,
   type Room,
+  type SavedResult,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
@@ -24,6 +28,50 @@ const START = 205;
 
 function signed(value: number) {
   return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
+}
+
+/** A saved tally. The scoresheet number is the sheet's own "Table N" block,
+ * which is what an officer looks for; it rarely matches the physical table. */
+function ResultCard({
+  result,
+  title,
+  you,
+}: {
+  result: SavedResult;
+  title: string;
+  you?: string;
+}) {
+  return (
+    <section className="result-card" aria-label={title}>
+      <p className="result-head">
+        <strong>{title}</strong>
+        <span>
+          Scoresheet Table {result.table} ·{" "}
+          {new Date(result.at).toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </span>
+      </p>
+      <ul>
+        {result.totals.map((seat) => (
+          <li key={seat.id} data-you={seat.id === you || undefined}>
+            <span>
+              {seat.display}
+              {seat.id === you && <small> (you)</small>}
+            </span>
+            <span
+              className="score-net"
+              data-sign={Math.sign(seat.total - START)}
+            >
+              {signed(seat.total - START)}
+            </span>
+            <strong>{String(seat.total).replace("-", "−")}</strong>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 /** A phone that didn't check in names its player by computing ID, never by picking from a list. */
@@ -109,10 +157,14 @@ function Lobby({
   rooms,
   busy,
   join,
+  last,
+  you,
 }: {
   rooms: Room[];
   busy: boolean;
   join: (table: number) => void;
+  last: SavedResult | null;
+  you: string;
 }) {
   const taken = new Set(rooms.map((room) => room.table));
   const next = Array.from({ length: MAX_TABLES }, (_, i) => i + 1).find(
@@ -120,6 +172,7 @@ function Lobby({
   );
   return (
     <>
+      {last && <ResultCard result={last} you={you} title="Your last result" />}
       <h1>Pick a table.</h1>
       <p className="meeting-intro">
         Sit down with three others. After each hand, anyone at the table records
@@ -240,6 +293,17 @@ function RoomView({
         Table {room.table} · {hands} {hands === 1 ? "hand" : "hands"} so far
       </p>
       <h1 tabIndex={-1}>Table {room.table}.</h1>
+      {room.saved && (
+        <ResultCard
+          result={room.saved}
+          you={player.id}
+          title={
+            hands
+              ? "Last saved at this table"
+              : `Saved. A fresh tally starts at ${START}.`
+          }
+        />
+      )}
       <ul className="score-rows room-scores" aria-label="Scores at this table">
         {room.seats.map((seat, i) => {
           const total =
@@ -486,24 +550,40 @@ function Tables({
   const [player, setPlayer] = useState(() => savedPlayer(meeting));
   const [rooms, setRooms] = useState<Room[]>(meeting.rooms || []);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  // An error is shown only while the table's last save is the one it was
+  // raised against; a save confirmed by a later refresh supersedes it.
+  const [failure, setFailure] = useState({ text: "", at: 0 as number | null });
   const [notice, setNotice] = useState("");
+  const [last, setLast] = useState(() =>
+    player ? lastResult(meeting, player.id) : null,
+  );
+  // A failed refresh (including the 10 s timeout) is shown instead of a
+  // table that silently stops changing.
+  const [roomsAt, setRoomsAt] = useState(() => Date.now());
+  const [roomsFailed, setRoomsFailed] = useState(false);
   const reload = usePoll(
     async (signal) => {
       try {
         const next = await getRooms(MEETING_SERVICE_URL, signal);
-        if (!signal.aborted) setRooms(next);
+        if (signal.aborted) return;
+        setRooms(next);
+        setRoomsAt(Date.now());
+        setRoomsFailed(false);
       } catch {
-        // The next refresh tries again; actions report their own errors.
+        if (!signal.aborted) setRoomsFailed(true);
       }
     },
     8000,
     [],
   );
+
   useEffect(() => rememberMeetingPage("/tables/"), []);
   const mine = player
     ? rooms.find((room) => room.seats.some((seat) => seat.id === player.id))
     : undefined;
+  const savedAt = mine?.saved?.at ?? null;
+  const setError = (text: string) => setFailure({ text, at: savedAt });
+  const error = failure.at === savedAt ? failure.text : "";
 
   async function act(action: string, extra: Record<string, unknown> = {}) {
     if (busy || !player) return false;
@@ -526,7 +606,11 @@ function Tables({
       if (reply.status === 409 && mine) {
         const fresh = await getRooms(MEETING_SERVICE_URL).catch(() => null);
         const room = fresh?.find((item) => item.table === mine.table);
-        if (fresh) setRooms(fresh);
+        if (fresh) {
+          setRooms(fresh);
+          setRoomsAt(Date.now());
+          setRoomsFailed(false);
+        }
         const newest = room?.hands.at(-1);
         const sent = extra as { winner?: string; each?: number };
         if (action === "hand" && newest && newest.id !== lastHandId) {
@@ -556,13 +640,29 @@ function Tables({
         if (reply.status === 423) refresh();
         return false;
       }
-      if (reply.rooms) setRooms(reply.rooms);
-      if (reply.saved) window.scrollTo({ top: 0 });
-      if (reply.saved)
-        setNotice(
-          `Saved as Table ${reply.saved} in the scoresheet.` +
-            (action === "finish" ? ` A fresh tally starts at ${START}.` : ""),
-        );
+      if (reply.rooms) {
+        setRooms(reply.rooms);
+        setRoomsAt(Date.now());
+        setRoomsFailed(false);
+      }
+      if (reply.saved && mine) {
+        // The server's copy is right even when this retry followed a lost
+        // confirmation; the local rebuild is only a fallback.
+        const result = reply.rooms?.find((room) => room.table === mine.table)
+          ?.saved ?? {
+          table: reply.saved,
+          at: Date.now(),
+          hands: mine.hands.length,
+          totals: mine.seats.map((seat) => ({
+            ...seat,
+            total:
+              mine.totals.find((item) => item.id === seat.id)?.total ?? START,
+          })),
+        };
+        rememberResult(meeting, player.id, result);
+        setLast(result);
+        window.scrollTo({ top: 0 });
+      }
       return true;
     } catch (failure) {
       setError(requestError(failure));
@@ -575,6 +675,21 @@ function Tables({
   if (!player) return <WhoAreYou meeting={meeting} choose={setPlayer} />;
   return (
     <div className="tables-page">
+      {roomsFailed && (
+        <p className="room-stale" role="status">
+          <span>
+            Connection delayed. Last updated{" "}
+            {new Date(roomsAt).toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+            .
+          </span>
+          <button type="button" className="meeting-text" onClick={reload}>
+            Retry
+          </button>
+        </p>
+      )}
       {notice && (
         <p className="room-saved" role="status">
           <IconCheck size={20} stroke={3} aria-hidden="true" />
@@ -595,6 +710,8 @@ function Tables({
           rooms={rooms}
           busy={busy}
           join={(table) => void act("join", { table })}
+          last={last}
+          you={player.id}
         />
       )}
       {error && (
@@ -610,6 +727,8 @@ function Tables({
           disabled={busy || Boolean(mine)}
           onClick={() => {
             rememberPlayer(meeting, null);
+            forgetResult();
+            setLast(null);
             setPlayer(null);
           }}
         >

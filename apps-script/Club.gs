@@ -516,7 +516,8 @@ function results(meeting) {
 // until a table is saved into Points Tracking through submitResult.
 // ponytail: fixed table count; make it an officer setting if the club outgrows it.
 const MAX_TABLES = 12;
-const MAX_HANDS = 100;
+// Keeps a room, with its last save, under the 9 KB Script Properties limit.
+const MAX_HANDS = 60;
 
 // Keyed by meeting too, so a room that failed to save is never overwritten
 // by next meeting's table of the same number.
@@ -557,6 +558,7 @@ function publicRoom(room) {
     seats: room.seats,
     hands: room.hands,
     totals: roomTotals(room),
+    saved: room.saved || null,
   };
 }
 
@@ -570,9 +572,17 @@ function saveRoom(room, meeting) {
     },
     meeting,
   );
+  // Every phone at the table shows this until the next save, so a tally
+  // reset to 205 never looks like lost scores.
   room.saved = {
     lastHandId: room.hands[room.hands.length - 1].id,
     table: saved.table,
+    at: Date.now(),
+    hands: room.hands.length,
+    totals: roomTotals(room).map((seat, i) => ({
+      ...seat,
+      display: room.seats[i].display,
+    })),
   };
   room.hands = [];
   room.tableId = Utilities.getUuid();

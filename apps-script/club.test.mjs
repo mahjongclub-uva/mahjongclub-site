@@ -790,3 +790,22 @@ test("a seated player can free a walked-away player's seat, saving first", () =>
   );
   assert.equal(t.room("p005", "join", { table: 1 }).status, 200);
 });
+
+test("a saved tally stays visible to the whole table with its totals", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p003", 15);
+  t.room("p001", "finish", { lastHandId: t.last() });
+  const saved = h.get({ r: "rooms" }).rooms[0].saved;
+  assert.equal(saved.table, 1);
+  assert.equal(saved.hands, 1);
+  assert.deepEqual(
+    saved.totals.map((seat) => [seat.display, seat.total]),
+    [
+      ["Alex A.", 190],
+      ["Blair B.", 190],
+      ["Casey C.", 250],
+      ["Player p004", 190],
+    ],
+  );
+});

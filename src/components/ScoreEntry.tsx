@@ -9,6 +9,7 @@ import {
   IconPlus,
   IconPlusMinus,
 } from "@tabler/icons-react";
+import { z } from "zod";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
   CARD_VALUES,
@@ -26,6 +27,12 @@ import {
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
 const START = 205;
+// The last confirmed save, so a reload shows the receipt instead of an empty form.
+const RECEIPT_STORAGE = "club-table-receipt";
+const receiptSchema = draftSchema.extend({
+  table: z.number().int().positive(),
+  savedAt: z.string(),
+});
 const TABLE_TOTAL = 820;
 const STEPS = ["Players", "Final totals", "Review"] as const;
 
@@ -283,8 +290,15 @@ function ScoreForm({
             "There is an unconfirmed save. Retry it before recording another table.",
           );
         } else {
+          const kept = receiptSchema.safeParse(
+            JSON.parse(sessionStorage.getItem(RECEIPT_STORAGE) || "null"),
+          );
           const draft = sessionStorage.getItem(DRAFT_STORAGE);
-          if (draft) {
+          if (kept.success && kept.data.meetingId === meeting.meetingId) {
+            setIds(kept.data.ids);
+            setTotals(kept.data.totals);
+            setReceipt({ table: kept.data.table, savedAt: kept.data.savedAt });
+          } else if (draft) {
             const parsed = draftSchema.safeParse(JSON.parse(draft));
             if (parsed.success && parsed.data.meetingId === meeting.meetingId) {
               setIds(parsed.data.ids);
@@ -358,13 +372,27 @@ function ScoreForm({
       sessionStorage.removeItem(PENDING_STORAGE);
       setPending(null);
       // The time this browser received the confirmation, not a server clock.
-      setReceipt({
+      const kept = {
         table: reply.table,
         savedAt: new Date().toLocaleTimeString([], {
           hour: "numeric",
           minute: "2-digit",
         }),
-      });
+      };
+      setReceipt(kept);
+      try {
+        sessionStorage.setItem(
+          RECEIPT_STORAGE,
+          JSON.stringify({
+            meetingId: meeting.meetingId,
+            ids,
+            totals,
+            ...kept,
+          }),
+        );
+      } catch {
+        // The receipt still shows until the page reloads.
+      }
       sessionStorage.removeItem(DRAFT_STORAGE);
       refresh();
     } catch (failure) {
@@ -378,6 +406,7 @@ function ScoreForm({
   }
 
   function reset() {
+    sessionStorage.removeItem(RECEIPT_STORAGE);
     setReceipt(null);
     setIds(["", "", "", ""]);
     setTotals(["", "", "", ""]);
@@ -422,7 +451,7 @@ function ScoreForm({
           <IconCheck size={34} stroke={3} />
         </span>
         <p className="eyebrow">
-          Table {receipt.table} · saved at {receipt.savedAt}
+          Scoresheet Table {receipt.table} · saved at {receipt.savedAt}
         </p>
         <h1 tabIndex={-1} ref={heading}>
           Table recorded.
@@ -432,12 +461,12 @@ function ScoreForm({
         </p>
         {resultRows}
         <div className="meeting-actions">
-          <button type="button" className="meeting-primary" onClick={reset}>
+          <Link className="meeting-primary" href="/live/">
+            See tonight’s standings
+          </Link>
+          <button type="button" className="meeting-text" onClick={reset}>
             Record another table
           </button>
-          <Link className="meeting-text" href="/live/">
-            Tonight’s standings
-          </Link>
         </div>
       </div>
     );
