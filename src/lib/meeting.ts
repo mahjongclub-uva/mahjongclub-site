@@ -226,8 +226,22 @@ export const draftSchema = z.object({
   ids: z.array(z.union([playerSchema.shape.id, z.literal("")])).length(4),
   totals: z.array(z.string().max(17)).length(4),
 });
+// Every meeting page lives under /meeting. The old top-level paths, still
+// printed on QR codes, are forwarding pages.
+export const MEETING_PATHS = {
+  hub: "/meeting/",
+  checkin: "/meeting/checkin/",
+  tables: "/meeting/tables/",
+  table: (table: number) => `/meeting/table/${table}/`,
+  standings: "/meeting/standings/",
+  score: "/meeting/score/",
+} as const;
 export function isMeetingPage(path: string) {
-  return /^\/(checkin|score|tables|live)\/?$/.test(path);
+  return (
+    /^\/meeting(\/(checkin|tables|standings|score|table\/\d{1,2}))?\/?$/.test(
+      path,
+    ) || /^\/(checkin|score|tables|live)\/?$/.test(path)
+  );
 }
 export function rememberMeetingPage(path: string) {
   try {

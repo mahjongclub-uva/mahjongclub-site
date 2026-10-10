@@ -1,6 +1,6 @@
-import TableRooms from "@/components/TableRooms";
+import Forward from "@/components/Forward";
+import { MEETING_PATHS } from "@/lib/meeting";
 
-export const metadata = { title: "Tables - Mahjong Club @ UVA" };
 export default function Page() {
-  return <TableRooms />;
+  return <Forward to={MEETING_PATHS.tables} />;
 }

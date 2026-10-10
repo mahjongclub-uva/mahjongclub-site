@@ -9,6 +9,7 @@ import {
   savedPlayer,
   type Meeting,
   type Results,
+  MEETING_PATHS,
 } from "@/lib/meeting";
 import { liveStandings, tonightStandings } from "@/lib/live";
 import type { Semester } from "@/lib/schema";
@@ -266,12 +267,12 @@ export function LiveTable({
               in again here would count those games twice. */}
           <Link
             className="meeting-primary"
-            href={meeting.rooms ? "/tables/" : "/score/"}
+            href={meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score}
           >
             {meeting.rooms ? "Back to the tables" : "Record a table"}
           </Link>
           <div className="meeting-quiet-actions">
-            <Link className="meeting-text" href="/checkin/">
+            <Link className="meeting-text" href={MEETING_PATHS.checkin}>
               Check in
             </Link>
           </div>

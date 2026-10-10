@@ -8,6 +8,7 @@ import {
   getMeeting,
   isMeetingPage,
   type Meeting,
+  MEETING_PATHS,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { formatDate } from "@/lib/format";
@@ -32,12 +33,14 @@ export default function MeetingLinks({
 }) {
   const pathname = usePathname();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
-  const [target, setTarget] = useState("/checkin/");
+  const [target, setTarget] = useState<string>(MEETING_PATHS.checkin);
   usePoll(
     async (signal) => {
       try {
         const saved = sessionStorage.getItem(RETURN_STORAGE);
-        setTarget(saved && isMeetingPage(saved) ? saved : "/checkin/");
+        setTarget(
+          saved && isMeetingPage(saved) ? saved : MEETING_PATHS.checkin,
+        );
       } catch {
         /* Public meeting state is still available without storage. */
       }
@@ -52,7 +55,9 @@ export default function MeetingLinks({
   );
   if (!meeting?.open || !meeting.date) return null;
   const href =
-    !meeting.checkinsOpen && target === "/checkin/" ? "/score/" : target;
+    !meeting.checkinsOpen && target === MEETING_PATHS.checkin
+      ? MEETING_PATHS.score
+      : target;
   return (
     <Link href={href} className={styles.dock}>
       <span className={styles.dot} aria-hidden="true" />
@@ -68,7 +73,7 @@ export default function MeetingLinks({
         </small>
       </span>
       <b>
-        {target !== "/checkin/"
+        {target !== MEETING_PATHS.checkin
           ? "Back to meeting →"
           : meeting.checkinsOpen
             ? "Check in →"

@@ -1,6 +1,6 @@
-import CheckIn from "@/components/CheckIn";
+import Forward from "@/components/Forward";
+import { MEETING_PATHS } from "@/lib/meeting";
 
-export const metadata = { title: "Check in - Mahjong Club @ UVA" };
 export default function Page() {
-  return <CheckIn />;
+  return <Forward to={MEETING_PATHS.checkin} />;
 }

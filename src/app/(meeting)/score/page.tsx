@@ -1,6 +1,6 @@
-import ScoreEntry from "@/components/ScoreEntry";
+import Forward from "@/components/Forward";
+import { MEETING_PATHS } from "@/lib/meeting";
 
-export const metadata = { title: "Record a table - Mahjong Club @ UVA" };
 export default function Page() {
-  return <ScoreEntry />;
+  return <Forward to={MEETING_PATHS.score} />;
 }

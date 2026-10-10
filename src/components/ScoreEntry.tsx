@@ -23,6 +23,7 @@ import {
   rememberMeetingPage,
   type Meeting,
   type Submission,
+  MEETING_PATHS,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
@@ -316,7 +317,7 @@ function ScoreForm({
           "Could not restore the previous save. Ask an officer to check before submitting another table.",
         );
       }
-      rememberMeetingPage("/score/");
+      rememberMeetingPage(MEETING_PATHS.score);
       setReady(true);
     }
     void restore();
@@ -464,7 +465,7 @@ function ScoreForm({
         </p>
         {resultRows}
         <div className="meeting-actions">
-          <Link className="meeting-primary" href="/live/">
+          <Link className="meeting-primary" href={MEETING_PATHS.standings}>
             See tonight’s standings
           </Link>
           <button type="button" className="meeting-text" onClick={reset}>
@@ -555,15 +556,16 @@ function ScoreForm({
           </div>
           {meeting.rooms && meeting.rooms.length > 0 && (
             <p className="meeting-notice">
-              Playing at a table on <Link href="/tables/">Tables</Link>? Its
-              hands are already saved there. Use this form only for tables
-              played without one.
+              Playing at a table on{" "}
+              <Link href={MEETING_PATHS.tables}>Tables</Link>? Its hands are
+              already saved there. Use this form only for tables played without
+              one.
             </p>
           )}
           {players.length < 4 && (
             <p className="meeting-notice">
               Four players need to check in first.{" "}
-              <Link href="/checkin/">Check in a player</Link>.
+              <Link href={MEETING_PATHS.checkin}>Check in a player</Link>.
             </p>
           )}
           <div className="player-chips" role="group" aria-label="Table players">

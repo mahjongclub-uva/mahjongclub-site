@@ -20,6 +20,7 @@ import {
   type Player,
   type Room,
   type SavedResult,
+  MEETING_PATHS,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
@@ -166,7 +167,7 @@ function WhoAreYou({
           {busy ? "Finding you…" : "Continue"}
         </button>
       </fieldset>
-      <Link className="meeting-text" href="/checkin/">
+      <Link className="meeting-text" href={MEETING_PATHS.checkin}>
         New to the club? Check in first
       </Link>
     </form>
@@ -597,7 +598,7 @@ function Tables({
     [],
   );
 
-  useEffect(() => rememberMeetingPage("/tables/"), []);
+  useEffect(() => rememberMeetingPage(MEETING_PATHS.tables), []);
   const mine = player
     ? rooms.find((room) => room.seats.some((seat) => seat.id === player.id))
     : undefined;
@@ -756,7 +757,7 @@ function Tables({
         </button>
       </p>
       {!mine && (
-        <Link className="meeting-text" href="/score/">
+        <Link className="meeting-text" href={MEETING_PATHS.score}>
           Played without a table? Enter final totals
         </Link>
       )}
@@ -774,7 +775,7 @@ export default function TableRooms() {
           <div className="meeting-closed">
             <h1>Tables aren’t set up yet.</h1>
             <p>Record your table’s final totals instead.</p>
-            <Link className="meeting-secondary" href="/score/">
+            <Link className="meeting-secondary" href={MEETING_PATHS.score}>
               Record a table
             </Link>
           </div>

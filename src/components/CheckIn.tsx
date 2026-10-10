@@ -15,6 +15,7 @@ import {
   requestError,
   type Meeting,
   type Player,
+  MEETING_PATHS,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
@@ -77,7 +78,9 @@ function CheckInForm({
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
       setPlayer(reply.player);
-      rememberMeetingPage(meeting.rooms ? "/tables/" : "/score/");
+      rememberMeetingPage(
+        meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score,
+      );
       setComputingId("");
       setFullName("");
       setSuggestions([]);
@@ -127,19 +130,19 @@ function CheckInForm({
         <div className="meeting-actions">
           <Link
             className="meeting-primary"
-            href={meeting.rooms ? "/tables/" : "/score/"}
+            href={meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score}
           >
             {meeting.rooms ? "Find a table" : "Record a table"}
           </Link>
           <div className="meeting-quiet-actions">
-            <Link className="meeting-text" href="/live/">
+            <Link className="meeting-text" href={MEETING_PATHS.standings}>
               Leaderboard
             </Link>
             <button
               className="meeting-text"
               type="button"
               onClick={() => {
-                rememberMeetingPage("/checkin/");
+                rememberMeetingPage(MEETING_PATHS.checkin);
                 setPlayer(null);
                 setRegister(false);
                 setError("");
@@ -160,7 +163,7 @@ function CheckInForm({
           Scores are still open for players already checked in. If you missed
           check-in, ask an officer.
         </p>
-        <Link className="meeting-secondary" href="/score/">
+        <Link className="meeting-secondary" href={MEETING_PATHS.score}>
           Record a table
         </Link>
       </div>

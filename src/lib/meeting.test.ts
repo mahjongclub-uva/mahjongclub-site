@@ -116,6 +116,9 @@ test("live results parse; drafts only store valid opaque seats", async (t) => {
     false,
   );
   assert.ok(isMeetingPage("/live/"));
+  assert.ok(isMeetingPage("/meeting/"));
+  assert.ok(isMeetingPage("/meeting/table/12/"));
+  assert.equal(isMeetingPage("/meeting/table/x/"), false);
   assert.equal(isMeetingPage("//outside.example"), false);
 });
 

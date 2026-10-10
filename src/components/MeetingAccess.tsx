@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { getMeeting, requestError, type Meeting } from "@/lib/meeting";
+import {
+  getMeeting,
+  requestError,
+  type Meeting,
+  MEETING_PATHS,
+} from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,9 +17,11 @@ import { usePoll } from "@/lib/usePoll";
 // Tables replaces "Record a table" once the backend has table rooms.
 const pages = (rooms: boolean) =>
   [
-    ["/checkin/", "Check in"],
-    rooms ? ["/tables/", "Tables"] : ["/score/", "Record a table"],
-    ["/live/", "Tonight"],
+    [MEETING_PATHS.checkin, "Check in"],
+    rooms
+      ? [MEETING_PATHS.tables, "Tables"]
+      : [MEETING_PATHS.score, "Record a table"],
+    [MEETING_PATHS.standings, "Tonight"],
   ] as const;
 
 export default function MeetingAccess({
