@@ -4,12 +4,29 @@ const playerSchema = z.object({
   id: z.string().regex(/^p\d{3,}$/),
   display: z.string().min(1),
 });
+const roomSchema = z.object({
+  table: z.number().int().positive(),
+  seats: z.array(playerSchema).max(4),
+  hands: z.array(
+    z.object({
+      id: z.string(),
+      winner: playerSchema.shape.id,
+      each: z.number().int().positive(),
+    }),
+  ),
+  totals: z.array(
+    z.object({ id: playerSchema.shape.id, total: z.number().int() }),
+  ),
+});
+export type Room = z.infer<typeof roomSchema>;
 const replySchema = z.object({
   status: z.number().int(),
   message: z.string().optional(),
   player: playerSchema.optional(),
   suggestions: z.array(playerSchema).optional(),
   table: z.number().int().positive().optional(),
+  saved: z.number().int().positive().nullable().optional(),
+  rooms: z.array(roomSchema).optional(),
 });
 const meetingSchema = z.object({
   status: z.literal(200),
@@ -19,6 +36,8 @@ const meetingSchema = z.object({
   date: z.string().nullable(),
   semester: z.string().nullable(),
   players: z.array(playerSchema).optional(),
+  // Absent until the Apps Script with table rooms is deployed.
+  rooms: z.array(roomSchema).optional(),
 });
 export type Player = z.infer<typeof playerSchema>;
 export type Meeting = z.infer<typeof meetingSchema>;
@@ -94,6 +113,17 @@ export async function getMeeting(
     );
   return meetingSchema.parse(body);
 }
+export async function getRooms(url: string, signal?: AbortSignal) {
+  const target = new URL(url);
+  target.searchParams.set("r", "rooms");
+  const { reply } = await readResponse(target.href, {
+    signal,
+    cache: "no-store",
+  });
+  if (reply.status !== 200 || !reply.rooms)
+    throw new Error(reply.message || "Could not load the tables.");
+  return reply.rooms;
+}
 export async function postMeeting(url: string, data: object) {
   const { reply } = await readResponse(url, {
     method: "POST",
@@ -112,6 +142,31 @@ export function requestError(error: unknown): string {
 }
 
 export const RETURN_STORAGE = "club-meeting-return";
+
+// Who checked in on this phone. Survives closing the tab, but only for this
+// meeting and only while the meeting still lists the player as checked in.
+const CHECKED_IN = "club-checked-in";
+export function savedPlayer(meeting: Meeting): Player | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
+    return saved?.meetingId === meeting.meetingId &&
+      meeting.players?.some((p) => p.id === saved.player?.id)
+      ? saved.player
+      : null;
+  } catch {
+    return null;
+  }
+}
+export function rememberPlayer(meeting: Meeting, player: Player | null) {
+  try {
+    localStorage.setItem(
+      CHECKED_IN,
+      JSON.stringify(player && { meetingId: meeting.meetingId, player }),
+    );
+  } catch {
+    /* The page still works until it reloads. */
+  }
+}
 export const DRAFT_STORAGE = "club-table-draft";
 export const draftSchema = z.object({
   meetingId: z.string(),
@@ -119,7 +174,7 @@ export const draftSchema = z.object({
   totals: z.array(z.string().max(17)).length(4),
 });
 export function isMeetingPage(path: string) {
-  return /^\/(checkin|score|live)\/?$/.test(path);
+  return /^\/(checkin|score|tables|live)\/?$/.test(path);
 }
 export function rememberMeetingPage(path: string) {
   try {

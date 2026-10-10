@@ -8,13 +8,13 @@ import MeetingAccess from "@/components/MeetingAccess";
 import {
   postMeeting,
   rememberMeetingPage,
+  rememberPlayer,
+  savedPlayer,
   requestError,
   type Meeting,
   type Player,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
-
-const CHECKED_IN = "club-checked-in";
 
 function CheckInForm({
   meeting,
@@ -31,29 +31,10 @@ function CheckInForm({
   useEffect(() => {
     if (suggestions.length) matchHeading.current?.focus();
   }, [suggestions]);
-  // Survives closing the tab, but only for this meeting and only while the
-  // meeting still lists this player as checked in.
-  const [player, setPlayerState] = useState<Player | null>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
-      return saved?.meetingId === meeting.meetingId &&
-        meeting.players?.some((p) => p.id === saved.player?.id)
-        ? saved.player
-        : null;
-    } catch {
-      return null;
-    }
-  });
+  const [player, setPlayerState] = useState(() => savedPlayer(meeting));
   function setPlayer(next: Player | null) {
     setPlayerState(next);
-    try {
-      localStorage.setItem(
-        CHECKED_IN,
-        JSON.stringify(next && { meetingId: meeting.meetingId, player: next }),
-      );
-    } catch {
-      /* The confirmation still shows until the page reloads. */
-    }
+    rememberPlayer(meeting, next);
   }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -86,7 +67,7 @@ function CheckInForm({
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
       setPlayer(reply.player);
-      rememberMeetingPage("/score/");
+      rememberMeetingPage(meeting.rooms ? "/tables/" : "/score/");
       setComputingId("");
       setFullName("");
       setSuggestions([]);
@@ -110,8 +91,9 @@ function CheckInForm({
         </p>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
         <p>
-          Find a table of four. After your last game, one person records the
-          table’s final totals.
+          {meeting.rooms
+            ? "Join a table of four. After each hand, anyone at the table records who won."
+            : "Find a table of four. After your last game, one person records the table’s final totals."}
         </p>
         {here.length > 0 && (
           <section className="meeting-here" aria-label="Here tonight">
@@ -133,8 +115,11 @@ function CheckInForm({
           </section>
         )}
         <div className="meeting-actions">
-          <Link className="meeting-primary" href="/score/">
-            Record a table
+          <Link
+            className="meeting-primary"
+            href={meeting.rooms ? "/tables/" : "/score/"}
+          >
+            {meeting.rooms ? "Find a table" : "Record a table"}
           </Link>
           <div className="meeting-quiet-actions">
             <Link className="meeting-text" href="/live/">

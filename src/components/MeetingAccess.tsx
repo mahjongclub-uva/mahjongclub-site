@@ -9,11 +9,13 @@ import Image from "next/image";
 import { formatDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 
-const PAGES = [
-  ["/checkin/", "Check in"],
-  ["/score/", "Record a table"],
-  ["/live/", "Tonight"],
-] as const;
+// Tables replaces "Record a table" once the backend has table rooms.
+const pages = (rooms: boolean) =>
+  [
+    ["/checkin/", "Check in"],
+    rooms ? ["/tables/", "Tables"] : ["/score/", "Record a table"],
+    ["/live/", "Tonight"],
+  ] as const;
 
 export default function MeetingAccess({
   children,
@@ -69,7 +71,7 @@ export default function MeetingAccess({
       {meeting?.open && (
         <>
           <nav className="meeting-nav" aria-label="Meeting">
-            {PAGES.map(([href, label]) => (
+            {pages(Boolean(meeting.rooms)).map(([href, label]) => (
               <Link
                 key={href}
                 href={href}
