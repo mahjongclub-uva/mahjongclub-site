@@ -191,10 +191,8 @@
   flex-wrap: wrap;
 }
 .meeting-page .meeting-notice {
-  padding: 16px;
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--tile-letter);
-  border-radius: 12px;
+  padding: 4px 0 4px 14px;
+  border-inline-start: 3px solid var(--tile-letter);
   margin: 16px 0;
 }
 .meeting-notice h2 {
@@ -439,12 +437,13 @@
   outline: 3px solid #8b5924;
   outline-offset: 4px;
 }
-/* Text actions stay compact, with the same clear feedback as the tile controls. */
+/* Text actions stay text: they underline when touched instead of filling. */
 .meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
 .meeting-calculator .meeting-text:is(:focus-visible, :active),
 .meeting-page .meeting-website:is(:focus-visible, :active) {
-  background: var(--jade);
-  color: var(--tile-face-hi);
+  color: var(--ink);
+  text-decoration: underline 2px var(--tile-letter);
+  text-underline-offset: 4px;
 }
 .meeting-page .meeting-website {
   padding: 8px;
@@ -456,9 +455,9 @@
   .meeting-page .meeting-text:hover:not(:disabled),
   .meeting-calculator .meeting-text:hover:not(:disabled),
   .meeting-page .meeting-website:hover {
-    background: var(--jade);
-    color: var(--tile-face-hi);
-    box-shadow: 0 3px 0 #203d30;
+    color: var(--ink);
+    text-decoration: underline 2px var(--tile-letter);
+    text-underline-offset: 4px;
   }
   .player-chips button:hover:not(:disabled) {
     border-color: var(--jade);
@@ -608,11 +607,9 @@
   color: var(--tile-letter);
 }
 .live-list li[data-you] {
-  margin-inline: -10px;
-  padding-inline: 10px;
-  border-radius: 10px;
-  background: var(--tile-face-hi);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--tile-letter);
+  padding-inline-start: 12px;
 }
 .live-you {
   display: grid;
@@ -620,10 +617,8 @@
   align-items: baseline;
   column-gap: 12px;
   margin-block: 18px 6px !important;
-  padding: 14px 16px;
-  border: 2px solid var(--jade);
-  border-radius: 16px;
-  background: var(--tile-face-hi);
+  padding-block: 12px;
+  border-block: 1px solid var(--rule);
 }
 .live-you span:first-child {
   grid-column: 1 / -1;
@@ -725,7 +720,7 @@
 
 /* Color comes from the tiles and actions, leaving the paper uncluttered. */
 .meeting-form h1 {
-  color: var(--jade);
+  color: var(--ink);
 }
 .meeting-form .meeting-tiles {
   margin-block: 28px 22px;
@@ -1215,34 +1210,29 @@
 .meeting-nav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  margin-block-start: 14px;
-  padding: 4px;
-  border-radius: 14px;
-  background: oklch(0.92 0.012 85);
+  margin-block-start: 10px;
+  border-block-end: 1px solid var(--rule);
 }
 .meeting-nav a {
   display: grid;
   place-items: center;
   min-block-size: 44px;
   padding-inline: 4px;
-  border-radius: 10px;
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px;
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-align: center;
   text-decoration: none;
 }
 .meeting-nav a[aria-current="page"] {
-  background: var(--tile-face-hi);
-  color: var(--jade);
-  box-shadow: 0 2px 0 var(--rule);
+  border-block-end-color: var(--tile-letter);
+  color: var(--ink);
 }
 .meeting-headcount {
   margin-inline-start: auto;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--jade) 12%, var(--tile-face-hi));
+  color: var(--ink-soft);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -1293,35 +1283,24 @@
 
 /* Check-in: how the night works, and who is here. */
 .meeting-howto {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
   list-style: none;
   padding: 0;
-  margin-block: 18px 0;
+  margin-block: 16px 0;
+  border-block-start: 1px solid var(--ink);
 }
 .meeting-howto li {
   display: grid;
-  align-content: start;
-  gap: 6px;
-  padding: 10px;
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  background: var(--tile-face-hi);
-  font-size: 0.74rem;
-  line-height: 1.35;
+  grid-template-columns: 28px 1fr;
+  align-items: baseline;
+  padding-block: 8px;
+  border-block-end: 1px solid var(--rule);
+  font-size: 0.9rem;
   color: var(--ink);
 }
 .meeting-howto span {
-  display: grid;
-  place-items: center;
-  inline-size: 22px;
-  block-size: 22px;
-  border-radius: 50%;
-  background: var(--jade);
-  color: var(--tile-face-hi);
+  color: var(--tile-letter);
   font-weight: 700;
-  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
 }
 .meeting-here {
   margin-block-start: 26px;
@@ -1333,35 +1312,25 @@
   font-size: 1.3rem;
 }
 .meeting-here h2 span {
-  padding: 1px 9px;
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--jade) 12%, var(--tile-face-hi));
-  color: var(--jade);
-  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+  font: 600 0.9rem var(--body);
   font-variant-numeric: tabular-nums;
 }
 .meeting-here ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  columns: 2;
+  column-gap: 16px;
   list-style: none;
   padding: 0;
-  margin-block: 12px 0;
+  margin-block: 10px 0;
 }
 .meeting-here li {
-  padding: 5px 10px;
-  border: 1px solid var(--rule);
-  border-block-end-width: 2px;
-  border-radius: 8px;
-  background: var(--tile-face-hi);
-  font-size: 0.8rem;
+  padding-block: 3px;
+  font-size: 0.92rem;
+  break-inside: avoid;
   overflow-wrap: anywhere;
 }
 .meeting-here li[data-you] {
-  border-color: var(--jade);
-  background: var(--jade);
-  color: var(--tile-face-hi);
-  font-weight: 600;
+  font-weight: 700;
 }
 @keyframes chip-in {
   from {
@@ -1395,12 +1364,9 @@
 .leaderboard-view {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
   max-inline-size: 360px;
   margin-block-end: 20px;
-  padding: 4px;
-  border-radius: 14px;
-  background: oklch(0.92 0.012 85);
+  border-block-end: 1px solid var(--rule);
 }
 .leaderboard-view button {
   display: flex;
@@ -1408,17 +1374,17 @@
   justify-content: center;
   gap: 8px;
   min-block-size: 44px;
+  margin-block-end: -1px;
   border: 0;
-  border-radius: 10px;
+  border-block-end: 2px solid transparent;
   background: transparent;
   color: var(--ink-soft);
   font: 600 0.88rem var(--body);
   cursor: pointer;
 }
 .leaderboard-view [aria-pressed="true"] {
-  background: var(--tile-face-hi);
-  color: var(--jade);
-  box-shadow: 0 2px 0 var(--rule);
+  border-block-end-color: var(--tile-letter);
+  color: var(--ink);
 }
 .leaderboard-view button:focus-visible {
   outline: 3px solid #8b5924;
@@ -1443,23 +1409,19 @@
 
 /* Tables: a lobby of open tables, and a room that records hand by hand. */
 .room-list {
-  display: grid;
-  gap: 12px;
   list-style: none;
   padding: 0;
-  margin-block: 24px;
+  margin-block: 20px;
+  border-block-start: 1px solid var(--rule);
 }
 .room-card {
   display: grid;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--rule);
-  border-block-end-width: 3px;
-  border-radius: 16px;
-  background: var(--tile-face-hi);
+  gap: 10px;
+  padding-block: 14px;
+  border-block-end: 1px solid var(--rule);
 }
 .room-card[data-full="true"] {
-  background: oklch(0.95 0.008 85);
+  color: var(--ink-soft);
 }
 .room-head {
   display: flex;
@@ -1469,7 +1431,7 @@
 }
 .room-head strong {
   font: 700 1.5rem var(--display);
-  color: var(--jade);
+  color: var(--ink);
 }
 .room-head span {
   font-size: 0.78rem;
@@ -1477,21 +1439,22 @@
 }
 .room-seats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 .room-seats li {
-  padding: 6px 10px;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  font-size: 0.82rem;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+  font-size: 0.75rem;
+  text-align: center;
   overflow-wrap: anywhere;
 }
 .room-seats li[data-empty="true"] {
-  border-style: dashed;
   color: var(--ink-soft);
 }
 .tables-page > .meeting-primary {
@@ -1509,10 +1472,9 @@
   align-items: center;
   gap: 10px;
   margin-block-end: 18px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: color-mix(in oklch, var(--jade) 12%, var(--tile-face-hi));
-  color: var(--jade);
+  padding: 4px 0 4px 14px;
+  border-inline-start: 3px solid var(--jade);
+  color: var(--ink);
   font-weight: 600;
   font-size: 0.88rem;
 }
@@ -1522,10 +1484,9 @@
   justify-content: space-between;
   gap: 8px;
   margin-block-end: 16px;
-  padding: 6px 6px 6px 14px;
-  border: 1px solid var(--tile-letter);
-  border-radius: 12px;
-  color: var(--tile-letter);
+  padding: 2px 0 2px 14px;
+  border-inline-start: 3px solid var(--tile-letter);
+  color: var(--ink);
   font-size: 0.85rem;
 }
 .result-card {
@@ -1571,65 +1532,9 @@
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
-.room-scores {
-  margin-block-start: 20px;
-}
-.room-open-seat {
-  color: var(--ink-soft);
-}
 .meeting-avatar.empty {
   border-style: dashed;
   color: var(--ink-soft);
-}
-.hand-form,
-.hand-log,
-.room-confirm {
-  margin-block-start: 28px;
-}
-.meeting-page .hand-form h2,
-.meeting-page .hand-log h2,
-.meeting-page .room-confirm h2 {
-  font-size: 1.6rem;
-  margin-block-end: 12px;
-}
-.winner-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.winner-grid button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  min-block-size: 56px;
-  padding: 8px 10px;
-  border: 1px solid var(--rule);
-  border-block-end-width: 3px;
-  border-radius: 12px;
-  background: var(--tile-face-hi);
-  color: var(--ink);
-  text-align: start;
-  font-size: 0.88rem;
-}
-.winner-grid button > span:nth-child(2) {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.winner-grid button svg {
-  margin-inline-start: auto;
-  flex-shrink: 0;
-}
-.winner-grid [aria-pressed="true"] {
-  border-color: var(--jade);
-  background: var(--jade);
-  color: var(--tile-face-hi);
-}
-.hand-form label {
-  display: block;
-  margin-block: 18px 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
 }
 .meeting-page .hand-each {
   inline-size: 100%;
@@ -1646,91 +1551,14 @@
   outline-color: #285b87;
   border-color: #285b87;
 }
-.hand-preview {
-  margin-block: 14px !important;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: oklch(0.93 0.01 85);
-  font-weight: 600;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-}
-.hand-log ol {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border-block: 1px solid var(--rule);
-}
-.hand-log li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding-block: 10px;
-  font-size: 0.85rem;
-}
-.hand-log li + li {
-  border-block-start: 1px solid var(--rule);
-}
-.hand-log li span:first-child {
-  min-inline-size: 58px;
-  color: var(--ink-soft);
-}
-.hand-log .meeting-text {
-  gap: 6px;
-  margin-block-start: 8px;
-}
-.room-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-block-start: 28px;
-}
-.room-confirm {
-  padding: 18px;
-  border: 2px solid #d9af75;
-  border-radius: 16px;
-  background: var(--tile-face-hi);
-}
-.room-confirm p {
-  color: var(--ink-soft);
-  line-height: 1.6;
-}
-.room-confirm .meeting-actions {
-  margin-block-start: 18px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .winner-grid button:hover:not(:disabled, [aria-pressed="true"]) {
-    border-color: var(--jade);
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .room-card {
     animation: score-row-in 260ms var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 50ms);
   }
-  .room-scores .score-row {
-    animation: score-row-in 260ms var(--ease-out) backwards;
-    animation-delay: calc(var(--i, 0) * 50ms);
-  }
-  .room-scores .score-final {
-    animation: score-pop 220ms var(--ease-out);
-  }
-  .winner-grid button {
-    transition:
-      background-color 150ms ease,
-      color 150ms ease,
-      border-color 150ms ease,
-      transform 120ms var(--ease-out);
-  }
-  .room-saved,
-  .room-confirm {
+  .room-saved {
     animation: score-row-in 240ms var(--ease-out);
   }
-}
-.room-scores .score-name small {
-  display: inline;
 }
 
 /* The table: the club's wind tiles around a quiet hairline square. Colour

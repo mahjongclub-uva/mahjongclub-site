@@ -895,13 +895,19 @@ function Lobby({
                     const seat = room.seats.find((item) => item.wind === w);
                     return (
                       <li key={wind} data-empty={!seat}>
-                        <small>{wind}</small> {seat?.display || "Open"}
+                        <span className="seat-tile" aria-hidden="true">
+                          <WindTile wind={w} />
+                        </span>
+                        <span>
+                          <span className="sr-only">{wind}: </span>
+                          {seat?.display || "Open"}
+                        </span>
                       </li>
                     );
                   })}
                 </ul>
                 <Link
-                  className="meeting-secondary"
+                  className="meeting-text"
                   href={MEETING_PATHS.table(room.table)}
                 >
                   {mine?.table === room.table
