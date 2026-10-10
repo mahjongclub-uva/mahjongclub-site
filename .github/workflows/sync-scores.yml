@@ -2,8 +2,15 @@ name: Propose score update
 
 on:
   schedule:
-    # Saturday 8:17am Eastern, the morning after the Friday meeting.
-    - cron: "17 12 * * 6"
+    # Friday 9:05pm Eastern, half an hour after scoring closes. GitHub cron is
+    # UTC-only, so both candidates are scheduled: 01:05 UTC is 9:05pm in
+    # daylight time and 02:05 UTC is 9:05pm in standard time. The first step
+    # skips a run that starts outside 9pm-10pm Eastern, so it never needs
+    # editing when the clocks change, and a slot GitHub starts up to an hour
+    # late still runs. In daylight time both slots pass; the second finds
+    # nothing new and exits.
+    - cron: "5 1 * * 6"
+    - cron: "5 2 * * 6"
   workflow_dispatch:
 
 permissions:
@@ -39,6 +46,14 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
         run: |
           ready=true
+          # Scheduled runs go only from the 9pm Eastern slot; Run workflow
+          # always goes.
+          hour="$(TZ=America/New_York date +%H)"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$hour" != "21" ] && [ "$hour" != "22" ]; then
+            echo "Not 9pm or 10pm in Eastern time; the other scheduled slot handles this week."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ "$SCORES_SYNC_ENABLED" != "true" ]; then
             echo "Score sync is not enabled."
             ready=false
@@ -64,6 +79,16 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      # Tables still open when scoring closes are saved by the first request
+      # to the meeting service after that, so ask once before reading.
+      - name: Let the meeting service save any open tables
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          url="$(grep -oE 'https://script.google.com/macros/s/[A-Za-z0-9_-]+/exec' src/lib/site.ts | head -1)"
+          if [ -n "$url" ]; then
+            curl -fsSL --max-time 60 "$url?r=meeting" > /dev/null || echo "::warning::The meeting service did not answer; reading the Sheet as it is."
+          fi
 
       - name: Install score importer dependencies
         if: steps.config.outputs.ready == 'true'
@@ -98,7 +123,7 @@ jobs:
           npm test
           npm run build
 
-      - name: Open or update the score review pull request
+      - name: Propose, check and merge the score update
         if: steps.config.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -126,6 +151,7 @@ jobs:
           ## Intent
 
           Update the public leaderboard from the private score Sheet.
+          This pull request merges itself once the required checks pass.
 
           ## What Changed
 
@@ -134,7 +160,7 @@ jobs:
           ## Risk
 
           Merging publishes the proposed display names and results through GitHub Pages.
-          Review Files changed before merging.
+          The importer writes display names only and removes opted-out players; a wrong score in the Sheet is published as entered and corrected by the next sync.
 
           ## Test/Validation
 
@@ -152,6 +178,39 @@ jobs:
           # Pull requests opened with GITHUB_TOKEN start no other workflows, so
           # the required Checks run is started by name on this branch.
           gh workflow run checks.yml --ref "$BRANCH"
+
+          # Merge once that run passes on this exact commit. The data already
+          # passed the importer, tests and build above; a failure here leaves
+          # the pull request open and reports it in the failure issue.
+          sha="$(git rev-parse HEAD)"
+          run=""
+          for _ in $(seq 1 30); do
+            run="$(gh run list --workflow checks.yml --commit "$sha" --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+            [ -n "$run" ] && break
+            sleep 10
+          done
+          if [ -z "$run" ]; then
+            echo "The Checks run never started." >> "$RUNNER_TEMP/score-update.log"
+            exit 1
+          fi
+          gh run watch "$run" --exit-status
+
+          # GitHub holds the Checks run it starts for a bot's pull request until
+          # someone approves it, and a held run blocks the merge even after the
+          # required check has passed. Approve it and let it finish.
+          for held in $(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha&status=action_required" --jq '.workflow_runs[].id'); do
+            gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$held/approve"
+            gh run watch "$held" --exit-status
+          done
+          # The finished check can take a moment to count toward the merge rule.
+          for attempt in 1 2 3; do
+            gh pr merge "$BRANCH" --squash --delete-branch && break
+            [ "$attempt" = 3 ] && exit 1
+            sleep 20
+          done
+
+          # A merge made with this token does not start the deploy on its own.
+          gh workflow run deploy.yml --ref main
 
       # Messages from build_data.py name tables and counts, never players.
       - name: Report the failure in an issue

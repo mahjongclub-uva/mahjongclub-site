@@ -78,7 +78,7 @@ The published Sheet is public. Never put the roster, legal names, addresses or p
 
 Scores are counted with playing cards at the table and recorded in the private score workbook. The pipeline turns them into the public leaderboard data. How scoring works is in the [officer guide](OFFICER_GUIDE.md#how-scoring-works).
 
-The automatic Saturday sync (`.github/workflows/sync-scores.yml`) is not switched on yet, so a maintainer updates the leaderboard by hand:
+The automatic Friday-night sync (`.github/workflows/sync-scores.yml`, 9:05pm Eastern) is not switched on yet, so a maintainer updates the leaderboard by hand:
 
 ```bash
 python3 pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id <spreadsheet-id>
