@@ -1214,13 +1214,15 @@ function Tables({
         >
           Not you?
         </button>
-        <button
-          type="button"
-          className="meeting-text"
-          onClick={() => setSheet(true)}
-        >
-          Tonight’s standings
-        </button>
+        {!(table !== undefined && mine?.table === table) && (
+          <button
+            type="button"
+            className="meeting-text"
+            onClick={() => setSheet(true)}
+          >
+            Tonight’s standings
+          </button>
+        )}
       </p>
       {table === undefined && !mine && (
         <Link className="meeting-text" href={MEETING_PATHS.score}>
