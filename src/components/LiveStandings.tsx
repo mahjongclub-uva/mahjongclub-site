@@ -5,13 +5,14 @@ import Link from "next/link";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
   getResults,
+  getRooms,
   requestError,
   savedPlayer,
   type Meeting,
   type Results,
   MEETING_PATHS,
 } from "@/lib/meeting";
-import { liveStandings, tonightStandings } from "@/lib/live";
+import { liveStandings, tonightStandings, tonightTables } from "@/lib/live";
 import type { Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
@@ -42,7 +43,16 @@ export function LiveTable({
     async (signal) => {
       setUpdating(true);
       try {
-        const next = await getResults(MEETING_SERVICE_URL, signal);
+        // With table rooms, one read carries both the rooms and the saved
+        // tables, so games still in play count once and only once.
+        const next: Results = meeting.rooms
+          ? await getRooms(MEETING_SERVICE_URL, signal).then((state) => ({
+              status: 200 as const,
+              meetingId: meeting.meetingId!,
+              date: meeting.date!,
+              tables: tonightTables(state.results, state.rooms),
+            }))
+          : await getResults(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
         if (next.meetingId !== meeting.meetingId || next.date !== meeting.date)
           throw new Error(
@@ -94,7 +104,7 @@ export function LiveTable({
   const alreadyCounted = Boolean(
     results && semester.last_session && results.date <= semester.last_session,
   );
-  const tonight = tonightStandings(results);
+  const tonight = tonightStandings(results?.tables ?? []);
   const mineTonight = me && tonight.find((row) => row.id === me.id);
   const showTonight = !embedded && view === "tonight";
   return (
@@ -122,7 +132,7 @@ export function LiveTable({
       )}
       <p className="meeting-intro">
         {showTonight
-          ? "Each player’s net from tonight’s saved tables. A table still in play counts once it’s saved."
+          ? "Each player’s net tonight. Games at tables still playing are included and stay provisional until an officer publishes them."
           : embedded
             ? "Provisional: tonight’s recorded tables added to the official scores. An officer reviews them before they become official."
             : matching

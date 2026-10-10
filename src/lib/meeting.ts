@@ -4,16 +4,31 @@ const playerSchema = z.object({
   id: z.string().regex(/^p\d{3,}$/),
   display: z.string().min(1),
 });
-const savedResultSchema = z.object({
+// One saved table: a block in Points Tracking.
+const resultTableSchema = z.object({
   table: z.number().int().positive(),
-  at: z.number(),
-  hands: z.number().int(),
-  totals: z.array(playerSchema.extend({ total: z.number().int() })),
+  seats: z
+    .array(
+      playerSchema.extend({
+        optOut: z.boolean().optional(),
+        total: z.number().int(),
+        net: z.number().int(),
+      }),
+    )
+    .length(4),
 });
-export type SavedResult = z.infer<typeof savedResultSchema>;
+export type ResultTable = z.infer<typeof resultTableSchema>;
+// A seat at a physical table: wind 0-3 is East, South, West, North.
+const seatSchema = playerSchema.extend({
+  wind: z.number().int().min(0).max(3),
+  optOut: z.boolean().optional(),
+});
+export const WINDS = ["East", "South", "West", "North"] as const;
 const roomSchema = z.object({
   table: z.number().int().positive(),
-  seats: z.array(playerSchema).max(4),
+  // Which group's session this is; it goes up each time the table is ended.
+  session: z.number().int().positive(),
+  seats: z.array(seatSchema).max(4),
   hands: z.array(
     z.object({
       id: z.string(),
@@ -24,8 +39,18 @@ const roomSchema = z.object({
   totals: z.array(
     z.object({ id: playerSchema.shape.id, total: z.number().int() }),
   ),
-  // The table's last save, so every seated phone can show it.
-  saved: savedResultSchema.nullable().optional(),
+  // The previous session's final summary, kept after its players are released.
+  ended: z
+    .object({
+      session: z.number().int(),
+      lastHandId: z.string().nullable(),
+      sheetTable: z.number().int().positive().nullable(),
+      at: z.number(),
+      by: z.string(),
+      games: z.number().int(),
+      totals: z.array(seatSchema.extend({ total: z.number().int() })),
+    })
+    .nullable(),
 });
 export type Room = z.infer<typeof roomSchema>;
 const replySchema = z.object({
@@ -36,6 +61,8 @@ const replySchema = z.object({
   table: z.number().int().positive().optional(),
   saved: z.number().int().positive().nullable().optional(),
   rooms: z.array(roomSchema).optional(),
+  // Tonight's saved tables, read together with the rooms.
+  results: z.array(resultTableSchema).nullable().optional(),
 });
 const meetingSchema = z.object({
   status: z.literal(200),
@@ -137,7 +164,7 @@ export async function getRooms(url: string, signal?: AbortSignal) {
   );
   if (reply.status !== 200 || !reply.rooms)
     throw new Error(reply.message || "Could not load the tables.");
-  return reply.rooms;
+  return { rooms: reply.rooms, results: reply.results ?? null };
 }
 export async function postMeeting(url: string, data: object) {
   const { reply } = await readResponse(url, {
@@ -161,6 +188,23 @@ export const RETURN_STORAGE = "club-meeting-return";
 // Who checked in on this phone. Survives closing the tab, but only for this
 // meeting and only while the meeting still lists the player as checked in.
 const CHECKED_IN = "club-checked-in";
+// A refresh keeps the player; reopening the browser asks "Continue as …?"
+// first, so a shared phone never acts as the last person by surprise.
+const CONFIRMED = "club-player-confirmed";
+export function playerConfirmed() {
+  try {
+    return sessionStorage.getItem(CONFIRMED) === "1";
+  } catch {
+    return false;
+  }
+}
+export function confirmPlayer() {
+  try {
+    sessionStorage.setItem(CONFIRMED, "1");
+  } catch {
+    /* The question just comes back on the next visit. */
+  }
+}
 export function savedPlayer(meeting: Meeting): Player | null {
   try {
     const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
@@ -172,46 +216,10 @@ export function savedPlayer(meeting: Meeting): Player | null {
     return null;
   }
 }
-// The last result saved from this phone, so a player who leaves a table
-// still sees what was saved after they reach the lobby.
-const LAST_RESULT = "club-last-result";
-export function lastResult(
-  meeting: Meeting,
-  playerId: string,
-): SavedResult | null {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LAST_RESULT) || "null");
-    // Scoped to the player too, because phones and the iPad get shared.
-    return saved?.meetingId === meeting.meetingId && saved.playerId === playerId
-      ? savedResultSchema.parse(saved.result)
-      : null;
-  } catch {
-    return null;
-  }
-}
-export function forgetResult() {
-  try {
-    localStorage.removeItem(LAST_RESULT);
-  } catch {
-    /* Nothing was kept. */
-  }
-}
-export function rememberResult(
-  meeting: Meeting,
-  playerId: string,
-  result: SavedResult,
-) {
-  try {
-    localStorage.setItem(
-      LAST_RESULT,
-      JSON.stringify({ meetingId: meeting.meetingId, playerId, result }),
-    );
-  } catch {
-    /* The receipt still shows until the page reloads. */
-  }
-}
 export function rememberPlayer(meeting: Meeting, player: Player | null) {
   try {
+    if (player) sessionStorage.setItem(CONFIRMED, "1");
+    else sessionStorage.removeItem(CONFIRMED);
     localStorage.setItem(
       CHECKED_IN,
       JSON.stringify(player && { meetingId: meeting.meetingId, player }),
@@ -226,6 +234,9 @@ export const draftSchema = z.object({
   ids: z.array(z.union([playerSchema.shape.id, z.literal("")])).length(4),
   totals: z.array(z.string().max(17)).length(4),
 });
+// Matches MAX_TABLES in apps-script/Club.gs; /meeting/table/N is generated
+// for each.
+export const MAX_TABLES = 12;
 // Every meeting page lives under /meeting. The old top-level paths, still
 // printed on QR codes, are forwarding pages.
 export const MEETING_PATHS = {
@@ -254,20 +265,7 @@ const resultsSchema = z.object({
   status: z.literal(200),
   meetingId: z.string(),
   date: z.iso.date(),
-  tables: z.array(
-    z.object({
-      table: z.number().int().positive(),
-      seats: z
-        .array(
-          playerSchema.extend({
-            optOut: z.boolean().optional(),
-            total: z.number().int(),
-            net: z.number().int(),
-          }),
-        )
-        .length(4),
-    }),
-  ),
+  tables: z.array(resultTableSchema),
 });
 export type Results = z.infer<typeof resultsSchema>;
 export async function getResults(

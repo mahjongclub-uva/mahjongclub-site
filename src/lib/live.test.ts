@@ -130,7 +130,7 @@ test("tonight sums saved nets per player, skips opt-outs, and ranks densely", ()
       },
     ],
   };
-  const rows = tonightStandings(results);
+  const rows = tonightStandings(results.tables);
   assert.deepEqual(
     rows.map((row) => [row.id, row.rank, row.net, row.tables]),
     [
@@ -141,5 +141,5 @@ test("tonight sums saved nets per player, skips opt-outs, and ranks densely", ()
       ["p006", 3, -10, 1],
     ],
   );
-  assert.equal(tonightStandings(null).length, 0);
+  assert.equal(tonightStandings([]).length, 0);
 });

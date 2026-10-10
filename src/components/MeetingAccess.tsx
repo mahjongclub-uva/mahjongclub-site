@@ -83,7 +83,15 @@ export default function MeetingAccess({
                 key={href}
                 href={href}
                 aria-current={
-                  pathname.replace(/\/?$/, "/") === href ? "page" : undefined
+                  // A table's own page belongs under Tables.
+                  pathname
+                    .replace(/\/?$/, "/")
+                    .replace(
+                      /^\/meeting\/table\/\d+\/$/,
+                      MEETING_PATHS.tables,
+                    ) === href
+                    ? "page"
+                    : undefined
                 }
               >
                 {label}

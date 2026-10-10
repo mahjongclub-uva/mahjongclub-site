@@ -595,6 +595,7 @@ function endRoom(room, meeting, by) {
       ...seat,
       display: room.seats[i].display,
       wind: room.seats[i].wind,
+      optOut: room.seats[i].optOut,
     })),
   };
   room.seats = [];
@@ -704,7 +705,7 @@ function roomAction(request, meeting) {
     if (!Number.isSafeInteger(wind) || wind < 0 || wind > 3)
       fail(400, "Choose East, South, West or North.");
     if (taken(wind)) fail(409, WINDS[wind] + " was just taken.");
-    target.seats.push({ ...publicPlayer(player), wind });
+    target.seats.push({ ...publicPlayer(player), optOut: player.optOut, wind });
     writeRoom(target);
     return reply(null);
   }

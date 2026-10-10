@@ -1,4 +1,4 @@
-import type { Results } from "./meeting.ts";
+import type { Results, ResultTable, Room } from "./meeting.ts";
 import { SEASON_START, type Semester } from "./schema.ts";
 
 export type LiveStanding = {
@@ -83,10 +83,32 @@ export type TonightStanding = {
   tables: number;
 };
 
-/** Tonight only: each player's saved nets from this meeting's tables. */
-export function tonightStandings(results: Results | null): TonightStanding[] {
+/**
+ * Tonight's tables: the saved blocks plus, as provisional tables, the games
+ * at tables still playing. Both come from one rooms read, so a table that
+ * was just ended is either still a room or already a block, never both.
+ */
+export function tonightTables(
+  results: ResultTable[] | null,
+  rooms: Room[],
+): ResultTable[] {
+  const playing = rooms
+    .filter((room) => room.hands.length && room.seats.length === 4)
+    .map((room) => ({
+      table: room.table,
+      seats: room.seats.map((seat) => {
+        const total =
+          room.totals.find((item) => item.id === seat.id)?.total ?? 205;
+        return { ...seat, total, net: total - 205 };
+      }),
+    }));
+  return [...(results ?? []), ...playing];
+}
+
+/** Tonight only: each player's nets from tonight's tables. */
+export function tonightStandings(tables: ResultTable[]): TonightStanding[] {
   const rows = new Map<string, TonightStanding>();
-  for (const table of results?.tables ?? [])
+  for (const table of tables)
     for (const seat of table.seats) {
       if (seat.optOut) continue;
       const row = rows.get(seat.id) ?? {
