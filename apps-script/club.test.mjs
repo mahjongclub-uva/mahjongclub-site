@@ -826,3 +826,26 @@ test("a table that cannot save keeps its players and games", () => {
   assert.equal(room.seats.length, 4);
   assert.equal(room.hands.length, 1);
 });
+
+test("officers can end a stuck table from the Club menu, saving its games", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p004", 20);
+  const alerts = [];
+  h.context.SpreadsheetApp.getUi = () => ({
+    alert: (message) => alerts.push(message),
+    prompt: () => ({
+      getSelectedButton: () => "OK",
+      getResponseText: () => " 1 ",
+    }),
+    ButtonSet: { OK_CANCEL: "OK_CANCEL" },
+    Button: { OK: "OK" },
+  });
+  h.context.clubEndTable();
+  assert.match(alerts[0], /1 games were saved as Table 1/);
+  assert.equal(savedTables(h).length, 1);
+  assert.equal(t.table().seats.length, 0);
+  assert.equal(t.table().ended.by, "An officer");
+  h.context.clubEndTable();
+  assert.match(alerts[1], /Nobody is seated/);
+});

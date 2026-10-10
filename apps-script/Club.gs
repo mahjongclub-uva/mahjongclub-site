@@ -875,6 +875,7 @@ function onOpen() {
     .addItem("Close now", "clubClose")
     .addItem("Check in selected member", "clubCheckIn")
     .addItem("Recheck", "clubRecheck")
+    .addItem("End a table…", "clubEndTable")
     .addToUi();
 }
 
@@ -885,6 +886,41 @@ function menuAction(action) {
   } catch (error) {
     SpreadsheetApp.getUi().alert(error.message);
   }
+}
+
+// Officer recovery. Seats live in Script Properties, so editing cells cannot
+// free them; this ends a table exactly as a player's End table would,
+// saving any games first.
+function clubEndTable() {
+  const ui = SpreadsheetApp.getUi();
+  const answer = ui.prompt(
+    "End a table",
+    "Which table (1 to " + MAX_TABLES + ")? Its games are saved first.",
+    ui.ButtonSet.OK_CANCEL,
+  );
+  if (answer.getSelectedButton() !== ui.Button.OK) return;
+  const table = Number(answer.getResponseText().trim());
+  menuAction(() =>
+    withLock(() => {
+      const meeting = readMeeting();
+      const room =
+        meeting && readRooms(meeting.id).find((item) => item.table === table);
+      if (!room || !room.seats.length)
+        return "Nobody is seated at Table " + table + ".";
+      const games = room.hands.length;
+      const saved = endRoom(room, meeting, "An officer");
+      writeRoom(room);
+      return saved
+        ? "Table " +
+            table +
+            " ended. " +
+            games +
+            " games were saved as Table " +
+            saved +
+            " in Points Tracking."
+        : "Table " + table + " ended. It had no games, so nothing was saved.";
+    }),
+  );
 }
 
 function clubSettings() {

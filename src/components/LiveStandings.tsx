@@ -21,7 +21,8 @@ function signed(value: number) {
   return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
 }
 
-/** `embedded` drops the page heading and meeting links, for the leaderboard's tab. */
+/** `embedded` is the public leaderboard's Tonight tab: tonight only, with no
+ * page heading, view switch or meeting links. */
 export function LiveTable({
   meeting,
   semester,
@@ -106,7 +107,7 @@ export function LiveTable({
   );
   const tonight = tonightStandings(results?.tables ?? []);
   const mineTonight = me && tonight.find((row) => row.id === me.id);
-  const showTonight = !embedded && view === "tonight";
+  const showTonight = embedded || view === "tonight";
   return (
     <section>
       {!embedded && (
@@ -133,11 +134,9 @@ export function LiveTable({
       <p className="meeting-intro">
         {showTonight
           ? "Each player’s net tonight. Games at tables still playing are included and stay provisional until an officer publishes them."
-          : embedded
-            ? "Provisional: tonight’s recorded tables added to the official scores. An officer reviews them before they become official."
-            : matching
-              ? "Season scores with tonight’s saved tables added. Provisional until an officer publishes them."
-              : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
+          : matching
+            ? "Season scores with tonight’s saved tables added. Provisional until an officer publishes them."
+            : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
         {!results && matching

@@ -23,7 +23,8 @@ export default function LeaderboardLive({
   children: ReactNode;
 }) {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
-  const [view, setView] = useState<"live" | "official">("live");
+  // The public site opens on the semester; tonight is one tap away.
+  const [view, setView] = useState<"live" | "official">("official");
   usePoll(
     async (signal) => {
       // Like the site's meeting banner, only ask the meeting service near a
@@ -50,18 +51,18 @@ export default function LeaderboardLive({
       <div className="leaderboard-view" role="group" aria-label="Standings">
         <button
           type="button"
+          aria-pressed={view === "official"}
+          onClick={() => setView("official")}
+        >
+          Semester
+        </button>
+        <button
+          type="button"
           aria-pressed={view === "live"}
           onClick={() => setView("live")}
         >
           <span className="meeting-live-dot" aria-hidden="true" />
-          Live · provisional
-        </button>
-        <button
-          type="button"
-          aria-pressed={view === "official"}
-          onClick={() => setView("official")}
-        >
-          Official
+          Tonight
         </button>
       </div>
       {view === "live" ? (
