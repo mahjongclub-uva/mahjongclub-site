@@ -61,7 +61,7 @@ The website-copy Sheet remains separate and continues to create its own review p
 ## Meeting check-in backend
 
 The check-in and score entry pages write to the Fall 2026 score workbook, starting with the October 9 meeting.
-Automatic score publishing is not enabled yet: the public leaderboard updates when scores are synced, and `/live/` shows the night's provisional standings in the meantime.
+Automatic score publishing is not enabled yet: the public leaderboard updates when scores are synced, and `/meeting/standings/` shows the night's provisional standings in the meantime.
 If the pages misbehave during a meeting, record attendance and tables in the Sheet as before.
 
 ### Install and configure
@@ -152,29 +152,35 @@ Full names and computing IDs are never included in responses.
 
 ## Meeting pages
 
-The unlisted pages are `/checkin/`, `/score/`, and `/live/`.
-They are excluded from the public navigation and sitemap and marked noindex.
+The meeting pages live under `/meeting/` and are unlisted, out of the sitemap and marked noindex.
+The QR codes point at `/checkin/`, which forwards there, so printed codes keep working.
 The endpoint and rehearsal notice are configured by `MEETING_SERVICE_URL` and `MEETING_REHEARSAL` in `src/lib/site.ts`.
 Rehearsal mode adds a "fake names only" banner and keeps live standings apart from the real season; turn it on only when the URL points at a test workbook.
 
-A table QR links directly to `/checkin/`; no meeting code is required.
-The same check-in and score pages are available from the website while a meeting is open.
-Anyone with the URL can check in and submit a valid table during that window, including remotely.
+Anyone with the URL can check in during a meeting, including remotely.
 Computing IDs identify roster entries but are not a sign-in or proof of attendance.
 The site does not store computing IDs or full names.
-The floating meeting link shows the date and returns players to their score draft after visiting the Guide or homepage.
-Existing QR links containing an old `k` parameter still work; that parameter is ignored.
-Deploy the updated Apps Script backend before the code-free website; the old backend still requires a code.
 Players without a computing ID still check in through an officer in the Sheet.
 
-The score page lists only tonight's checked-in short names, prevents repeated players, and requires four whole ending totals summing to 820.
-Select four short-name chips, then type ending totals or tap each card in the optional keypad.
-Undo last card and Clear cards correct counting mistakes before applying a total.
-Before sending a table, the page stores its opaque player IDs, totals, meeting ID and random submission ID in session storage.
-If the response is lost or the page reloads, retry the same save; the players and totals stay locked until a receipt arrives.
-If an unconfirmed save belongs to an earlier meeting, an officer must check the Sheet before the submitter starts over.
-Corrections to confirmed results are officer edits in the Sheet.
-The receipt links to `/live/`, which adds tonight’s scores to the official season snapshot and shows rank movement.
+### Tables on the night
+
+Players sit at a numbered table and take the wind seat they are sitting in.
+After each game, any of the four taps who won and what each other player pays; the app works out everyone's change.
+When the group is done, or someone has to leave, one of them taps **End table**.
+That saves the group's four totals as one `Table N` block in Points Tracking and frees all four seats for the next group.
+Ending a table with no games saves nothing.
+If scoring closes with a table still in play, its totals are saved automatically.
+
+- **Add empty Table blocks before the meeting.** Every ended table with games uses one block. If they run out, End table is refused until an officer adds more, and the games stay safe in the meantime.
+- **"Scoresheet Table 8" is the block in the sheet,** not the physical table number. It is what the receipt shows so you can find the row.
+- **A player who walked away:** the rest of the table taps End table. Nobody can join a second table while still seated at one.
+- **Corrections** to saved results are officer edits in the Sheet. A wrong game can be undone at the table until the table ends.
+
+Tables without a phone can still be entered as four final totals at `/meeting/score/`.
+That form requires four checked-in players and totals that add up to 820, and keeps a retry receipt if the connection drops.
+Players seated at a table are marked there, so the same games are not entered twice.
+
+`/meeting/standings/` shows tonight's nets (games at tables still playing are included and marked provisional) and the semester with tonight added.
 The regular leaderboard remains the official snapshot until the publishing pipeline updates it.
 
 If the site is unavailable, an officer records attendance and results directly in the Sheet.

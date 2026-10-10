@@ -512,7 +512,7 @@ function results(meeting) {
   return response;
 }
 
-// Table rooms. See docs/meeting-lifecycle.md for the whole lifecycle.
+// Table rooms. README.md, "How a table works", describes the whole lifecycle.
 // A room is a physical table (its number never changes). The group seated
 // there plays a table session: games ("hands" in code) accumulate in Script
 // Properties, one key per table, until someone ends the table. Ending saves

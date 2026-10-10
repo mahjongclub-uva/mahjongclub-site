@@ -57,7 +57,7 @@ Commit messages and pull request titles use [Conventional Commits](https://www.c
 | Update the leaderboard              | Run the score pipeline and open a pull request ([Scores](#scores)).                                                |
 | Change the logo, calendar or photos | Edit `src/lib/site.ts`. Club details are never typed into components.                                              |
 | Add a photo                         | Put it in `photo-inbox/` and run `npm run photos:prepare` ([Photos](#photos)).                                     |
-| Run check-in at a meeting           | Nothing to do: it opens itself 30 minutes before each calendar event ([Meeting check-in](#meeting-check-in)).      |
+| Run check-in at a meeting           | Nothing to do: it opens itself 30 minutes before each calendar event ([Meeting nights](#meeting-nights)).          |
 | Change the officer list             | Edit it in the public site-copy Sheet, like other wording. Only list someone in the form they agreed to.           |
 
 ## Site wording
@@ -104,13 +104,66 @@ An OAuth app left in Google's Testing status issues tokens that expire after sev
 
 Fall 2025 is test data on an older rule and still reads names from the gitignored `pipeline/roster.local.json`. Leave it alone.
 
-## Meeting check-in
+## Meeting nights
 
-On meeting nights, players scan a QR code linking to [mahjongclubuva.org/checkin/](https://mahjongclubuva.org/checkin/), check in with their computing ID, record each table's card totals at `/score/`, and follow the night at `/live/`. These pages are unlisted and not indexed.
+Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.org/checkin/), which forwards to the meeting pages under `/meeting/`. These pages are unlisted and not indexed.
+
+| Page                  | What it does                                             |
+| --------------------- | -------------------------------------------------------- |
+| `/meeting/`           | Who this phone is, and the next step                     |
+| `/meeting/checkin/`   | Check in by computing ID; new players add a name         |
+| `/meeting/tables/`    | The live lobby of tables in play                         |
+| `/meeting/table/N/`   | One physical table (1 to 12): seats, games, End table    |
+| `/meeting/standings/` | Tonight's standings, and the semester with tonight added |
+| `/meeting/score/`     | Fallback: type a table's four final totals               |
+
+`/checkin/`, `/score/`, `/live/` and `/tables/` are forwarding pages for old links and printed QR codes. Static export has no server redirects, so they use a meta refresh.
 
 - The pages talk to a Google Apps Script web app bound to the score workbook. Its code is in `apps-script/`, and setup is in the [officer guide](OFFICER_GUIDE.md#meeting-check-in-backend).
 - Its URL is `MEETING_SERVICE_URL` in `src/lib/site.ts`. Redeploying the script under a new owner changes the URL, but the QR codes never need reprinting because they point at the site.
 - `MEETING_REHEARSAL` adds a "fake names only" banner for testing against a throwaway workbook. Keep it `false` while the URL points at the real workbook.
+- Until the Apps Script with table rooms is deployed, the meeting response has no `rooms` field, and every page falls back to typed final totals.
+
+### How a table works
+
+- **Meeting session:** everyone checked in tonight, recorded in the Attendance tab.
+- **Physical table:** a numbered table in the room, 1 to 12. Its number never changes.
+- **Table session:** one group's run of games at a physical table, from the first seat taken until someone taps End table. Each session has a number that goes up every time the table is ended.
+- **Game:** one reported win. The winner gains three times what each other player pays, and the other three each pay it, so a game always sums to zero. Everyone starts a session at 205. Code calls games `hands`.
+
+The lifecycle:
+
+1. A checked-in player takes a wind seat (East, South, West or North) at a table. A player belongs to one table at a time; the backend refuses a second.
+2. Once all four seats are taken, any of the four reports a game: winner, what each other player pays, a review of every change, then Save game.
+3. A player can leave alone only while the session has no games. After that, only End table, which affects all four.
+4. End table writes the session's four totals as one `Table N` block in Points Tracking, the same as a typed-totals save. It releases all four players and starts the next session at the same table. A session with no games writes nothing.
+5. When scoring closes, any session with games is saved the same way on the next request.
+
+The workbook has no per-game rows. Games live in Script Properties (one key per table, `room:<meeting>:<table>`) until the table ends. The scoresheet block number ("scoresheet Table 8") is not the physical table number.
+
+### Who owns what
+
+- **The Apps Script owns** check-in, table membership, games and saved results. Every write runs under one script lock.
+- **Each phone keeps only conveniences:** who it is (localStorage, scoped to tonight's meeting), whether that was confirmed this visit (sessionStorage), an unfinished game entry, and pending typed-totals saves.
+- **Concurrency rules:**
+  - Each game carries a random ID, so a retry never counts twice.
+  - Every change sends the last game the phone saw, so a stale screen is refused rather than recorded.
+  - End carries the session number, so a repeated End returns the same save even after everyone was released.
+  - The workbook submission ID for a session is never sent to phones.
+
+### Recovery
+
+| Situation                 | What happens                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Refresh                   | The player and table come back from the server; an unfinished game entry is restored if the table has not moved on |
+| Browser reopened          | "Continue as Name?" before acting as the last player                                                               |
+| Storage cleared           | Entering the computing ID again finds the existing seat; no duplicate player                                       |
+| Connection lost           | The last known table stays visible with "Reconnecting"; Save game and End table wait                               |
+| Reply lost during a save  | The phone checks whether the game landed before offering a retry                                                   |
+| Table ended while away    | The final receipt shows, with "Find another table"                                                                 |
+| Another phone saved first | The entry is cleared with a note if it was the same game, or kept with a warning if different                      |
+
+To rehearse without touching the real workbook, run the in-memory harness used in `apps-script/club.test.mjs` behind a local server, never the live URL.
 
 ## Deploys
 
