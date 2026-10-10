@@ -191,6 +191,14 @@ jobs:
             exit 1
           fi
           gh run watch "$run" --exit-status
+
+          # GitHub holds the Checks run it starts for a bot's pull request until
+          # someone approves it, and a held run blocks the merge even after the
+          # required check has passed. Approve it and let it finish.
+          for held in $(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha&status=action_required" --jq '.workflow_runs[].id'); do
+            gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$held/approve"
+            gh run watch "$held" --exit-status
+          done
           # The finished check can take a moment to count toward the merge rule.
           for attempt in 1 2 3; do
             gh pr merge "$BRANCH" --squash --delete-branch && break
