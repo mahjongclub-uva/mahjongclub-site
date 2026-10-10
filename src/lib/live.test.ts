@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { liveStandings } from "./live.ts";
+import { liveStandings, tonightStandings } from "./live.ts";
 import type { Semester } from "./schema.ts";
 import type { Results } from "./meeting.ts";
 
@@ -95,4 +95,51 @@ test("live scores use season nets, dense ties, qualification and official rank m
     ).some((p) => p.id === "p003"),
     false,
   );
+});
+
+test("tonight sums saved nets per player, skips opt-outs, and ranks densely", () => {
+  const seat = (id: string, net: number, optOut = false) => ({
+    id,
+    display: id.toUpperCase(),
+    optOut,
+    total: 205 + net,
+    net,
+  });
+  const results: Results = {
+    status: 200,
+    meetingId: "m",
+    date: "2026-10-09",
+    tables: [
+      {
+        table: 1,
+        seats: [
+          seat("p001", 30),
+          seat("p002", -10),
+          seat("p003", -10),
+          seat("p004", -10, true),
+        ],
+      },
+      {
+        table: 2,
+        seats: [
+          seat("p001", -20),
+          seat("p002", 40),
+          seat("p005", -10),
+          seat("p006", -10),
+        ],
+      },
+    ],
+  };
+  const rows = tonightStandings(results);
+  assert.deepEqual(
+    rows.map((row) => [row.id, row.rank, row.net, row.tables]),
+    [
+      ["p002", 1, 30, 2],
+      ["p001", 2, 10, 2],
+      ["p003", 3, -10, 1],
+      ["p005", 3, -10, 1],
+      ["p006", 3, -10, 1],
+    ],
+  );
+  assert.equal(tonightStandings(null).length, 0);
 });

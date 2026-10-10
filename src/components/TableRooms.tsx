@@ -5,6 +5,8 @@ import Link from "next/link";
 import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
+  cleanComputingId,
+  computingIdError,
   getRooms,
   lastResult,
   postMeeting,
@@ -87,12 +89,19 @@ function WhoAreYou({
   const [error, setError] = useState("");
   async function submit() {
     if (busy) return;
+    const id = cleanComputingId(computingId);
+    const problem = computingIdError(id);
+    if (problem) {
+      setError(problem);
+      document.getElementById("tables-computing-id")?.focus();
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       const reply = await postMeeting(MEETING_SERVICE_URL, {
         r: "checkins",
-        computingId: computingId.trim(),
+        computingId: id,
       });
       if (reply.status === 404) {
         setError("That ID isn’t in the club yet. Check in first to join.");
@@ -126,6 +135,9 @@ function WhoAreYou({
       <fieldset disabled={busy}>
         <legend className="sr-only">Your player</legend>
         <label htmlFor="tables-computing-id">UVA computing ID</label>
+        <p className="field-hint" id="tables-computing-id-hint">
+          The part before @virginia.edu, for example abc2de.
+        </p>
         <input
           id="tables-computing-id"
           value={computingId}
@@ -133,12 +145,20 @@ function WhoAreYou({
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
-          pattern="[A-Za-z][A-Za-z0-9]*"
-          maxLength={32}
-          required
+          maxLength={40}
+          aria-invalid={Boolean(error)}
+          aria-describedby={
+            error
+              ? "tables-computing-id-error tables-computing-id-hint"
+              : "tables-computing-id-hint"
+          }
         />
         {error && (
-          <p className="meeting-error" role="alert">
+          <p
+            className="meeting-error"
+            id="tables-computing-id-error"
+            role="alert"
+          >
             {error}
           </p>
         )}

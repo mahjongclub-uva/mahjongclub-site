@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  cleanComputingId,
+  computingIdError,
   getMeeting,
   getResults,
   draftSchema,
@@ -167,4 +169,13 @@ test("negative totals survive validation, pending saves, drafts and results", as
     assert.equal(results.tables[0].seats[0].net, -220);
     t.mock.restoreAll();
   }
+});
+
+test("computing IDs accept a pasted UVA email and explain anything else", () => {
+  assert.equal(cleanComputingId("  abc2de@Virginia.edu "), "abc2de");
+  assert.equal(cleanComputingId("abc2de@gmail.com"), "abc2de@gmail.com");
+  assert.equal(computingIdError("abc2de"), null);
+  assert.match(computingIdError("abc2de@gmail.com")!, /before @virginia\.edu/);
+  assert.match(computingIdError("2abc")!, /starts with letters/);
+  assert.match(computingIdError("")!, /Enter/);
 });

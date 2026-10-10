@@ -54,7 +54,7 @@ export default function LeaderboardLive({
           onClick={() => setView("live")}
         >
           <span className="meeting-live-dot" aria-hidden="true" />
-          Tonight · live
+          Live · provisional
         </button>
         <button
           type="button"

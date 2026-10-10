@@ -249,6 +249,9 @@ function ScoreForm({
     requestAnimationFrame(() => calculatorTrigger.current?.focus());
   }
   const players = meeting.players || [];
+  const seatedAt = (id: string) =>
+    meeting.rooms?.find((room) => room.seats.some((seat) => seat.id === id))
+      ?.table;
   const seats = ids.map((id, i) => ({
     id,
     total: /^-?\d+$/.test(totals[i].trim()) ? Number(totals[i]) : NaN,
@@ -550,6 +553,13 @@ function ScoreForm({
               Refresh
             </button>
           </div>
+          {meeting.rooms && meeting.rooms.length > 0 && (
+            <p className="meeting-notice">
+              Playing at a table on <Link href="/tables/">Tables</Link>? Its
+              hands are already saved there. Use this form only for tables
+              played without one.
+            </p>
+          )}
           {players.length < 4 && (
             <p className="meeting-notice">
               Four players need to check in first.{" "}
@@ -578,7 +588,14 @@ function ScoreForm({
                 }}
               >
                 {avatar(player.display)}
-                <span>{player.display}</span>
+                <span>
+                  {player.display}
+                  {seatedAt(player.id) && (
+                    <em className="chip-room">
+                      at Table {seatedAt(player.id)}
+                    </em>
+                  )}
+                </span>
                 <small aria-hidden="true">
                   {ids.includes(player.id) ? <IconCheck size={16} /> : null}
                 </small>
@@ -613,7 +630,6 @@ function ScoreForm({
                       <span
                         className="score-net"
                         data-sign={Math.sign(total - START)}
-                        key={Number.isFinite(total) ? total : "empty"}
                       >
                         {Number.isFinite(total)
                           ? `${signed(total - START)} this table`
@@ -702,7 +718,7 @@ function ScoreForm({
                 <span />
               </div>
               <p className="score-sum">
-                <strong key={sum}>{sum}</strong> <span>/ {TABLE_TOTAL}</span>
+                <strong>{sum}</strong> <span>/ {TABLE_TOTAL}</span>
               </p>
               <p
                 id="table-balance"

@@ -6,6 +6,8 @@ import { IconCheck } from "@tabler/icons-react";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
+  cleanComputingId,
+  computingIdError,
   postMeeting,
   rememberMeetingPage,
   rememberPlayer,
@@ -24,6 +26,7 @@ function CheckInForm({
   refresh: () => void;
 }) {
   const [computingId, setComputingId] = useState("");
+  const [idError, setIdError] = useState("");
   const [fullName, setFullName] = useState("");
   const [register, setRegister] = useState(false);
   const [suggestions, setSuggestions] = useState<Player[]>([]);
@@ -43,12 +46,19 @@ function CheckInForm({
     choice: { matchId?: string; createNew?: boolean } = {},
   ) {
     if (busy) return;
+    const id = cleanComputingId(computingId);
+    const problem = computingIdError(id);
+    setIdError(problem || "");
+    if (problem) {
+      document.getElementById("computing-id")?.focus();
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       const reply = await postMeeting(MEETING_SERVICE_URL, {
         r: register ? "players" : "checkins",
-        computingId: computingId.trim(),
+        computingId: id,
         ...(register ? { fullName: fullName.trim(), ...choice } : {}),
       });
       if (reply.status === 404 && !register) {
@@ -196,20 +206,33 @@ function CheckInForm({
         <legend className="sr-only">Player check-in</legend>
         <div>
           <label htmlFor="computing-id">UVA computing ID</label>
+          <p className="field-hint" id="computing-id-hint">
+            The part before @virginia.edu, for example abc2de.
+          </p>
           <input
             id="computing-id"
             value={computingId}
             onChange={(event) => {
               setComputingId(event.target.value);
               setSuggestions([]);
+              setIdError("");
             }}
             autoComplete="off"
             autoCapitalize="none"
             spellCheck={false}
-            pattern="[A-Za-z][A-Za-z0-9]*"
-            maxLength={32}
-            required
+            maxLength={40}
+            aria-invalid={Boolean(idError)}
+            aria-describedby={
+              idError
+                ? "computing-id-error computing-id-hint"
+                : "computing-id-hint"
+            }
           />
+          {idError && (
+            <p className="meeting-error" id="computing-id-error">
+              {idError}
+            </p>
+          )}
           {register && (
             <>
               <p className="quiet" role="status">
@@ -229,8 +252,9 @@ function CheckInForm({
                 required
               />
               <p className="quiet">
-                Use the name the club already knows you by. Your name and ID
-                stay private.
+                Use the name the club already knows you by. Your full name and
+                computing ID stay private; the leaderboard shows your first name
+                and last initial.
               </p>
             </>
           )}

@@ -270,3 +270,16 @@ export async function getResults(
     throw new Error(reply.message || "Could not load tonight’s scores.");
   return resultsSchema.parse(body);
 }
+
+/** A computing ID as typed, minus a pasted "@virginia.edu". */
+export function cleanComputingId(raw: string) {
+  return raw.trim().replace(/@virginia\.edu$/i, "");
+}
+export function computingIdError(id: string): string | null {
+  if (!id) return "Enter your computing ID.";
+  if (id.includes("@"))
+    return "Use only the part before @virginia.edu, for example abc2de.";
+  if (!/^[a-z][a-z0-9]*$/i.test(id))
+    return "A computing ID starts with letters, then numbers, for example abc2de.";
+  return null;
+}

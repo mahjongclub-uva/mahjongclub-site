@@ -74,3 +74,43 @@ export function liveStandings(
   });
   return sorted;
 }
+
+export type TonightStanding = {
+  id: string;
+  display: string;
+  rank: number;
+  net: number;
+  tables: number;
+};
+
+/** Tonight only: each player's saved nets from this meeting's tables. */
+export function tonightStandings(results: Results | null): TonightStanding[] {
+  const rows = new Map<string, TonightStanding>();
+  for (const table of results?.tables ?? [])
+    for (const seat of table.seats) {
+      if (seat.optOut) continue;
+      const row = rows.get(seat.id) ?? {
+        id: seat.id,
+        display: seat.display,
+        rank: 0,
+        net: 0,
+        tables: 0,
+      };
+      row.net += seat.net;
+      row.tables++;
+      rows.set(seat.id, row);
+    }
+  const sorted = [...rows.values()].sort(
+    (a, b) =>
+      b.net - a.net ||
+      a.tables - b.tables ||
+      a.display.localeCompare(b.display),
+  );
+  sorted.forEach((row, i) => {
+    const prev = sorted[i - 1];
+    row.rank = prev
+      ? prev.rank + Number(prev.net !== row.net || prev.tables !== row.tables)
+      : 1;
+  });
+  return sorted;
+}

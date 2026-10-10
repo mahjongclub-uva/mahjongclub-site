@@ -120,6 +120,11 @@
   font: inherit;
   color: var(--ink);
 }
+.meeting-page .field-hint {
+  margin-block: -4px 8px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
 .meeting-form input::placeholder {
   color: #686156;
   opacity: 1;
@@ -315,6 +320,15 @@
 .player-chips button > span:nth-child(2) {
   min-width: 0;
   overflow-wrap: break-word;
+}
+.chip-room {
+  display: block;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--tile-letter);
+}
+.player-chips [aria-pressed="true"] .chip-room {
+  color: inherit;
 }
 .player-chips small {
   margin-left: auto;
@@ -589,6 +603,41 @@
 }
 .live-change.down {
   color: var(--tile-letter);
+}
+.live-points.down {
+  color: var(--tile-letter);
+}
+.live-list li[data-you] {
+  margin-inline: -10px;
+  padding-inline: 10px;
+  border-radius: 10px;
+  background: var(--tile-face-hi);
+  font-weight: 600;
+}
+.live-you {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 12px;
+  margin-block: 18px 6px !important;
+  padding: 14px 16px;
+  border: 2px solid var(--jade);
+  border-radius: 16px;
+  background: var(--tile-face-hi);
+}
+.live-you span:first-child {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.live-you strong {
+  font: 700 2.2rem var(--display);
+  color: var(--jade);
+  font-variant-numeric: tabular-nums;
+}
+.live-you span:last-child {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
 }
 
 @media (prefers-reduced-motion: no-preference) {
