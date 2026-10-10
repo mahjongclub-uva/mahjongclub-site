@@ -33,14 +33,12 @@ export default function MeetingLinks({
 }) {
   const pathname = usePathname();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
-  const [target, setTarget] = useState<string>(MEETING_PATHS.checkin);
+  const [target, setTarget] = useState<string>(MEETING_PATHS.hub);
   usePoll(
     async (signal) => {
       try {
         const saved = sessionStorage.getItem(RETURN_STORAGE);
-        setTarget(
-          saved && isMeetingPage(saved) ? saved : MEETING_PATHS.checkin,
-        );
+        setTarget(saved && isMeetingPage(saved) ? saved : MEETING_PATHS.hub);
       } catch {
         /* Public meeting state is still available without storage. */
       }
@@ -54,10 +52,8 @@ export default function MeetingLinks({
     [pathname, schedule],
   );
   if (!meeting?.open || !meeting.date) return null;
-  const href =
-    !meeting.checkinsOpen && target === MEETING_PATHS.checkin
-      ? MEETING_PATHS.score
-      : target;
+  // The hub knows where this phone should go next.
+  const href = target;
   return (
     <Link href={href} className={styles.dock}>
       <span className={styles.dot} aria-hidden="true" />
@@ -73,11 +69,11 @@ export default function MeetingLinks({
         </small>
       </span>
       <b>
-        {target !== MEETING_PATHS.checkin
+        {target !== MEETING_PATHS.hub
           ? "Back to meeting →"
           : meeting.checkinsOpen
             ? "Check in →"
-            : "Record a table →"}
+            : "Open meeting →"}
       </b>
     </Link>
   );

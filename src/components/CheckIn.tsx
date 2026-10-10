@@ -5,11 +5,13 @@ import Link from "next/link";
 import { IconCheck } from "@tabler/icons-react";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
+import ContinueAs from "@/components/ContinueAs";
 import {
   cleanComputingId,
   computingIdError,
   postMeeting,
   rememberMeetingPage,
+  playerConfirmed,
   rememberPlayer,
   savedPlayer,
   requestError,
@@ -36,8 +38,14 @@ function CheckInForm({
     if (suggestions.length) matchHeading.current?.focus();
   }, [suggestions]);
   const [player, setPlayerState] = useState(() => savedPlayer(meeting));
+  const [confirmed, setConfirmed] = useState(() => playerConfirmed());
+  const seatedAt = meeting.rooms?.find((room) =>
+    room.seats.some((seat) => seat.id === player?.id),
+  )?.table;
   function setPlayer(next: Player | null) {
     setPlayerState(next);
+    // Checking in, or switching away, is an explicit identity choice.
+    setConfirmed(Boolean(next));
     rememberPlayer(meeting, next);
   }
   const [busy, setBusy] = useState(false);
@@ -92,6 +100,17 @@ function CheckInForm({
     }
   }
 
+  if (player && !confirmed)
+    return (
+      <ContinueAs
+        player={player}
+        yes={() => {
+          rememberPlayer(meeting, player);
+          setConfirmed(true);
+        }}
+        no={() => setPlayer(null)}
+      />
+    );
   if (player) {
     const here = meeting.players || [];
     return (
@@ -104,9 +123,11 @@ function CheckInForm({
         </p>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
         <p>
-          {meeting.rooms
-            ? "Join a table of four. After each hand, anyone at the table records who won."
-            : "Find a table of four. After your last game, one person records the table’s final totals."}
+          {seatedAt
+            ? `You’re seated at Table ${seatedAt}.`
+            : meeting.rooms
+              ? "Sit at a table of four. After each game, anyone at the table records who won."
+              : "Find a table of four. After your last game, one person records the table’s final totals."}
         </p>
         {here.length > 0 && (
           <section className="meeting-here" aria-label="Here tonight">
@@ -130,13 +151,23 @@ function CheckInForm({
         <div className="meeting-actions">
           <Link
             className="meeting-primary"
-            href={meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score}
+            href={
+              seatedAt
+                ? MEETING_PATHS.table(seatedAt)
+                : meeting.rooms
+                  ? MEETING_PATHS.tables
+                  : MEETING_PATHS.score
+            }
           >
-            {meeting.rooms ? "Find a table" : "Record a table"}
+            {seatedAt
+              ? `Return to Table ${seatedAt}`
+              : meeting.rooms
+                ? "Find a table"
+                : "Record a table"}
           </Link>
           <div className="meeting-quiet-actions">
             <Link className="meeting-text" href={MEETING_PATHS.standings}>
-              Leaderboard
+              Tonight’s standings
             </Link>
             <button
               className="meeting-text"
@@ -148,7 +179,7 @@ function CheckInForm({
                 setError("");
               }}
             >
-              Switch player
+              Not {player.display.split(" ")[0]}? Switch player
             </button>
           </div>
         </div>
@@ -184,10 +215,13 @@ function CheckInForm({
           <span aria-hidden="true">1</span>Check in
         </li>
         <li>
-          <span aria-hidden="true">2</span>Play at a table of four
+          <span aria-hidden="true">2</span>Sit at a table of four
         </li>
         <li>
-          <span aria-hidden="true">3</span>One person records the scores
+          <span aria-hidden="true">3</span>
+          {meeting.rooms
+            ? "Record each game at the table"
+            : "One person records the scores"}
         </li>
       </ol>
       <div className="meeting-tiles" aria-hidden="true">

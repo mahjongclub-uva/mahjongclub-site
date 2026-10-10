@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
+import ContinueAs from "@/components/ContinueAs";
 import {
   cleanComputingId,
   computingIdError,
@@ -131,32 +132,6 @@ function WhoAreYou({
         New to the club? Check in first
       </Link>
     </form>
-  );
-}
-
-/** Reopening the browser asks before acting as the last person on this phone. */
-function ContinueAs({
-  player,
-  yes,
-  no,
-}: {
-  player: Player;
-  yes: () => void;
-  no: () => void;
-}) {
-  return (
-    <div className="meeting-form">
-      <h1>Continue as {player.display.split(" ")[0]}?</h1>
-      <p className="meeting-intro">
-        This phone was last used by {player.display}.
-      </p>
-      <button type="button" className="meeting-primary" onClick={yes}>
-        Continue as {player.display}
-      </button>
-      <button type="button" className="meeting-text" onClick={no}>
-        I’m someone else
-      </button>
-    </div>
   );
 }
 
