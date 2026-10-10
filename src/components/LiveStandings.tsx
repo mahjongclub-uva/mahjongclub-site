@@ -14,12 +14,15 @@ import type { Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
 
-function LiveTable({
+/** `embedded` drops the page heading and meeting links, for the leaderboard's tab. */
+export function LiveTable({
   meeting,
   semester,
+  embedded = false,
 }: {
   meeting: Meeting;
   semester: Semester;
+  embedded?: boolean;
 }) {
   const [results, setResults] = useState<Results | null>(null);
   const [error, setError] = useState("");
@@ -85,11 +88,13 @@ function LiveTable({
   );
   return (
     <section>
-      <h1>Live standings</h1>
+      {!embedded && <h1>Live standings</h1>}
       <p className="meeting-intro">
-        {matching
-          ? "Season scores + tonight’s tables."
-          : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
+        {embedded
+          ? "Provisional: tonight’s recorded tables added to the official scores. An officer reviews them before they become official."
+          : matching
+            ? "Season scores + tonight’s tables."
+            : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
       </p>
       <p className="live-summary" role="status">
         {!results && matching
@@ -183,16 +188,18 @@ function LiveTable({
           updated.
         </p>
       )}
-      <div className="meeting-actions">
-        <Link className="meeting-primary" href="/score/">
-          Record a table
-        </Link>
-        <div className="meeting-quiet-actions">
-          <Link className="meeting-text" href="/checkin/">
-            Check in
+      {!embedded && (
+        <div className="meeting-actions">
+          <Link className="meeting-primary" href="/score/">
+            Record a table
           </Link>
+          <div className="meeting-quiet-actions">
+            <Link className="meeting-text" href="/checkin/">
+              Check in
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
       <p className="quiet">Refreshes about every 30 seconds.</p>
     </section>
   );

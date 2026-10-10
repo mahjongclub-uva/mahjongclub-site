@@ -17,7 +17,7 @@ import styles from "./MeetingLinks.module.css";
 
 // Matches the backend's default check-in and score margins. Outside these
 // windows the banner never contacts the meeting service.
-function nearMeeting(schedule: ScheduledMeeting[], now: number) {
+export function nearMeeting(schedule: ScheduledMeeting[], now: number) {
   return schedule.some(
     (m) =>
       now >= Date.parse(m.start) - 30 * 60000 &&

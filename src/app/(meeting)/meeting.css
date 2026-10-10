@@ -1341,3 +1341,53 @@
     font-size: 0.7rem;
   }
 }
+
+/* The leaderboard's provisional "Tonight" tab, shown only during a meeting. */
+.leaderboard-view {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  max-inline-size: 360px;
+  margin-block-end: 20px;
+  padding: 4px;
+  border-radius: 14px;
+  background: oklch(0.92 0.012 85);
+}
+.leaderboard-view button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: 600 0.88rem var(--body);
+  cursor: pointer;
+}
+.leaderboard-view [aria-pressed="true"] {
+  background: var(--tile-face-hi);
+  color: var(--jade);
+  box-shadow: 0 2px 0 var(--rule);
+}
+.leaderboard-view button:focus-visible {
+  outline: 3px solid #8b5924;
+  outline-offset: 2px;
+}
+.meeting-page.leaderboard-live {
+  max-width: none;
+  min-height: auto;
+  margin: 0;
+  padding: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .leaderboard-view button {
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+  .leaderboard-view button:active {
+    transform: scale(0.97);
+  }
+}
