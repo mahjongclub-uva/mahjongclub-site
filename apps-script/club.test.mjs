@@ -210,8 +210,12 @@ function harness() {
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => store[key] || null,
+        getProperties: () => ({ ...store }),
         setProperty: (key, value) => {
           store[key] = value;
+        },
+        deleteProperty: (key) => {
+          delete store[key];
         },
       }),
     },
@@ -251,6 +255,7 @@ function harness() {
       deleteTrigger: (trigger) => triggers.splice(triggers.indexOf(trigger), 1),
     },
     Utilities: {
+      getUuid: () => crypto.randomUUID(),
       formatDate: (value) => value.toISOString().slice(0, 10),
       parseDate: (value) =>
         vm.runInContext(
@@ -573,4 +578,215 @@ test("negative final totals save, retry, and appear in results", () => {
     );
     assert.equal(response.tables[0].seats[0].net, -220);
   }
+});
+
+function seatedTable(h, ids = ["p001", "p002", "p003", "p004"]) {
+  const room = (playerId, action, extra = {}) =>
+    h.post({ r: "rooms", action, meetingId: h.meeting.id, playerId, ...extra });
+  for (const id of ids)
+    assert.equal(room(id, "join", { table: 1 }).status, 200);
+  let lastHandId = null;
+  const hand = (winner, each, by = "p001", handId = crypto.randomUUID()) => {
+    const reply = room(by, "hand", { winner, each, handId, lastHandId });
+    if (reply.status === 200) lastHandId = handId;
+    return reply;
+  };
+  return { room, hand, last: () => lastHandId };
+}
+
+const savedTables = (h) =>
+  h.context.pointsLayout(h.tabs.Points.grid).filter((block) => !block.empty);
+
+test("a room's hands pay the winner three times each and save as one table", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  assert.equal(t.hand("p003", 10, "p004").status, 200);
+  const totals = h
+    .get({ r: "rooms" })
+    .rooms[0].totals.map((seat) => seat.total);
+  assert.deepEqual(totals, [255, 175, 215, 175]);
+  const finish = t.room("p002", "finish", { lastHandId: t.last() });
+  assert.equal(finish.status, 200);
+  assert.equal(finish.saved, 1);
+  // A retry of the confirmed save returns the same table without a second row.
+  assert.equal(t.room("p002", "finish", { lastHandId: t.last() }).saved, 1);
+  assert.equal(savedTables(h).length, 1);
+  assert.deepEqual(
+    h.get({ r: "results" }).tables[0].seats.map((seat) => seat.total),
+    [255, 175, 215, 175],
+  );
+  const room = h.get({ r: "rooms" }).rooms[0];
+  assert.equal(room.seats.length, 4);
+  assert.equal(room.hands.length, 0);
+});
+
+test("two phones recording one hand count it once, and undo needs the latest view", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  const handId = crypto.randomUUID();
+  assert.equal(t.hand("p001", 20, "p001", handId).status, 200);
+  // The same tap retried is a no-op; another phone's stale copy is refused.
+  assert.equal(
+    t.room("p001", "hand", {
+      winner: "p001",
+      each: 20,
+      handId,
+      lastHandId: null,
+    }).status,
+    200,
+  );
+  assert.equal(
+    t.room("p002", "hand", {
+      winner: "p001",
+      each: 20,
+      handId: crypto.randomUUID(),
+      lastHandId: null,
+    }).status,
+    409,
+  );
+  assert.equal(h.get({ r: "rooms" }).rooms[0].hands.length, 1);
+  assert.equal(t.room("p003", "undo", { lastHandId: null }).status, 409);
+  assert.equal(t.room("p003", "undo", { lastHandId: handId }).status, 200);
+  assert.equal(h.get({ r: "rooms" }).rooms[0].hands.length, 0);
+  for (const [winner, each] of [
+    ["p009", 5],
+    ["p002", 0],
+    ["p002", 1.5],
+  ])
+    assert.equal(
+      t.room("p001", "hand", {
+        winner,
+        each,
+        handId: crypto.randomUUID(),
+        lastHandId: null,
+      }).status,
+      400,
+    );
+});
+
+test("leaving saves the tally so far and opens the seat for a sub", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.room("p005", "join", { table: 1 }).status, 409);
+  t.hand("p002", 15);
+  const leave = t.room("p004", "leave", { lastHandId: t.last() });
+  assert.equal(leave.saved, 1);
+  assert.equal(savedTables(h).length, 1);
+  let room = h.get({ r: "rooms" }).rooms[0];
+  assert.deepEqual(
+    room.seats.map((seat) => seat.id),
+    ["p001", "p002", "p003"],
+  );
+  assert.equal(t.hand("p001", 5).status, 409);
+  assert.equal(t.room("p005", "join", { table: 1 }).status, 200);
+  assert.equal(t.room("p004", "join", { table: 1 }).status, 409);
+  room = h.get({ r: "rooms" }).rooms[0];
+  assert.deepEqual(
+    room.totals.map((seat) => seat.total),
+    [205, 205, 205, 205],
+  );
+  // Leaving an empty tally saves nothing, and the last player closes the room.
+  for (const id of ["p001", "p002", "p003", "p005"])
+    assert.equal(t.room(id, "leave").saved, null);
+  assert.equal(h.get({ r: "rooms" }).rooms.length, 0);
+  assert.equal(savedTables(h).length, 1);
+});
+
+test("players must be checked in, and tables are numbered within the limit", () => {
+  const h = harness();
+  const room = (playerId, extra) =>
+    h.post({
+      r: "rooms",
+      action: "join",
+      meetingId: h.meeting.id,
+      playerId,
+      ...extra,
+    });
+  assert.equal(room("p099", { table: 1 }).status, 409);
+  assert.equal(room("p001", { table: 0 }).status, 400);
+  assert.equal(room("p001", { table: 13 }).status, 400);
+  assert.equal(
+    h.post({
+      r: "rooms",
+      action: "join",
+      meetingId: "old",
+      playerId: "p001",
+      table: 1,
+    }).status,
+    409,
+  );
+});
+
+test("closing the meeting saves every room with hands", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p003", 30);
+  h.context.clubClose();
+  assert.equal(savedTables(h).length, 1);
+  assert.equal(
+    Object.keys(h.store).some((key) => key.startsWith("room:")),
+    false,
+  );
+});
+
+test("a table that cannot save keeps its players and hands", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  for (let n = 1; n <= 3; n++)
+    assert.equal(
+      h.post({
+        r: "results",
+        meetingId: h.meeting.id,
+        submissionId: "fill-template-000" + n,
+        seats: ["p001", "p002", "p003", "p004"].map((id) => ({
+          id,
+          total: 205,
+        })),
+      }).status,
+      201,
+    );
+  t.hand("p001", 10);
+  assert.equal(t.room("p001", "finish", { lastHandId: t.last() }).status, 503);
+  assert.equal(t.room("p004", "leave", { lastHandId: t.last() }).status, 503);
+  const room = h.get({ r: "rooms" }).rooms[0];
+  assert.equal(room.seats.length, 4);
+  assert.equal(room.hands.length, 1);
+});
+
+test("the first request after scoring closes saves rooms with hands", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p002", 25);
+  vm.runInContext(
+    `Date = class extends Date { static now() { return ${h.meeting.closes + 60000}; } }`,
+    h.context,
+  );
+  assert.equal(h.get({ r: "rooms" }).status, 423);
+  assert.equal(savedTables(h).length, 1);
+  assert.equal(
+    Object.keys(h.store).some((key) => key.startsWith("room:")),
+    false,
+  );
+});
+
+test("a seated player can free a walked-away player's seat, saving first", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  assert.equal(
+    t.room("p001", "free", { seat: "p001", lastHandId: t.last() }).status,
+    400,
+  );
+  assert.equal(
+    t.room("p001", "free", { seat: "p004", lastHandId: null }).status,
+    409,
+  );
+  const freed = t.room("p001", "free", { seat: "p004", lastHandId: t.last() });
+  assert.equal(freed.saved, 1);
+  assert.deepEqual(
+    freed.rooms[0].seats.map((seat) => seat.id),
+    ["p001", "p002", "p003"],
+  );
+  assert.equal(t.room("p005", "join", { table: 1 }).status, 200);
 });
