@@ -1241,3 +1241,103 @@
     transition: color 150ms ease;
   }
 }
+
+/* Check-in: how the night works, and who is here. */
+.meeting-howto {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin-block: 18px 0;
+}
+.meeting-howto li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--tile-face-hi);
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.meeting-howto span {
+  display: grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background: var(--jade);
+  color: var(--tile-face-hi);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+.meeting-here {
+  margin-block-start: 26px;
+}
+.meeting-page .meeting-here h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.3rem;
+}
+.meeting-here h2 span {
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--jade) 12%, var(--tile-face-hi));
+  color: var(--jade);
+  font: 700 0.8rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.meeting-here ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin-block: 12px 0;
+}
+.meeting-here li {
+  padding: 5px 10px;
+  border: 1px solid var(--rule);
+  border-block-end-width: 2px;
+  border-radius: 8px;
+  background: var(--tile-face-hi);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.meeting-here li[data-you] {
+  border-color: var(--jade);
+  background: var(--jade);
+  color: var(--tile-face-hi);
+  font-weight: 600;
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-howto li {
+    animation: score-row-in 260ms var(--ease-out) backwards;
+  }
+  .meeting-howto li:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .meeting-howto li:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .meeting-here li {
+    animation: chip-in 240ms var(--ease-out) backwards;
+    animation-delay: calc(200ms + var(--i, 0) * 35ms);
+  }
+}
+@media (max-width: 374px) {
+  .meeting-howto li {
+    padding: 8px;
+    font-size: 0.7rem;
+  }
+}

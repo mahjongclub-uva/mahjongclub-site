@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { IconCheck } from "@tabler/icons-react";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import {
@@ -30,11 +31,15 @@ function CheckInForm({
   useEffect(() => {
     if (suggestions.length) matchHeading.current?.focus();
   }, [suggestions]);
-  // Survives a reload so the confirmation doesn't vanish; scoped to this meeting.
+  // Survives closing the tab, but only for this meeting and only while the
+  // meeting still lists this player as checked in.
   const [player, setPlayerState] = useState<Player | null>(() => {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(CHECKED_IN) || "null");
-      return saved?.meetingId === meeting.meetingId ? saved.player : null;
+      const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
+      return saved?.meetingId === meeting.meetingId &&
+        meeting.players?.some((p) => p.id === saved.player?.id)
+        ? saved.player
+        : null;
     } catch {
       return null;
     }
@@ -42,7 +47,7 @@ function CheckInForm({
   function setPlayer(next: Player | null) {
     setPlayerState(next);
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         CHECKED_IN,
         JSON.stringify(next && { meetingId: meeting.meetingId, player: next }),
       );
@@ -93,15 +98,40 @@ function CheckInForm({
     }
   }
 
-  if (player)
+  if (player) {
+    const here = meeting.players || [];
     return (
-      <div className="meeting-receipt" role="status">
-        <p className="eyebrow">You’re checked in</p>
+      <div className="meeting-receipt">
         <span className="meeting-check" aria-hidden="true">
-          ✓
+          <IconCheck size={34} stroke={3} />
         </span>
+        <p className="eyebrow" role="status">
+          You’re checked in
+        </p>
         <h1>You’re in, {player.display.split(" ")[0]}.</h1>
-        <p>After playing, one person records your table’s scores.</p>
+        <p>
+          Find a table of four. After your last game, one person records the
+          table’s final totals.
+        </p>
+        {here.length > 0 && (
+          <section className="meeting-here" aria-label="Here tonight">
+            <h2>
+              Here tonight <span>{here.length}</span>
+            </h2>
+            <ul>
+              {here.map((p, i) => (
+                <li
+                  key={p.id}
+                  data-you={p.id === player.id || undefined}
+                  style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
+                >
+                  {p.display}
+                  {p.id === player.id && <small> (you)</small>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <div className="meeting-actions">
           <Link className="meeting-primary" href="/score/">
             Record a table
@@ -126,6 +156,7 @@ function CheckInForm({
         </div>
       </div>
     );
+  }
   if (!meeting.checkinsOpen)
     return (
       <div className="meeting-closed">
@@ -150,6 +181,17 @@ function CheckInForm({
       }}
     >
       <h1>Grab a seat.</h1>
+      <ol className="meeting-howto" aria-label="How tonight works">
+        <li>
+          <span aria-hidden="true">1</span>Check in
+        </li>
+        <li>
+          <span aria-hidden="true">2</span>Play at a table of four
+        </li>
+        <li>
+          <span aria-hidden="true">3</span>One person records the scores
+        </li>
+      </ol>
       <div className="meeting-tiles" aria-hidden="true">
         {(
           [
@@ -201,7 +243,10 @@ function CheckInForm({
                 maxLength={120}
                 required
               />
-              <p className="quiet">Your name and ID stay private.</p>
+              <p className="quiet">
+                Use the name the club already knows you by. Your name and ID
+                stay private.
+              </p>
             </>
           )}
         </div>
@@ -268,9 +313,6 @@ function CheckInForm({
           Use a different ID
         </button>
       )}
-      <Link className="meeting-text" href="/live/">
-        Leaderboard ↗
-      </Link>
       <p className="quiet">No UVA ID? Ask an officer.</p>
     </form>
   );
