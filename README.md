@@ -147,7 +147,7 @@ The workbook has no per-game rows. Games live in Script Properties (one key per 
 - **Each phone keeps only conveniences:** who it is (localStorage, scoped to tonight's meeting), whether that was confirmed this visit (sessionStorage), an unfinished game entry, and pending typed-totals saves.
 - **Concurrency rules:**
   - Each game carries a random ID, so a retry never counts twice.
-  - Every change sends the last game the phone saw, so a stale screen is refused rather than recorded.
+  - Every change sends the last game the phone saw, so a stale screen is refused rather than recorded. (Reads take no lock, so a table ended mid-refresh can show twice in one phone's standings for one refresh; saved results are never duplicated.)
   - End carries the session number, so a repeated End returns the same save even after everyone was released.
   - The workbook submission ID for a session is never sent to phones.
 

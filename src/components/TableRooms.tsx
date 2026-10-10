@@ -378,7 +378,7 @@ function GameArea({
     }
     return fresh;
   });
-  const [stale] = useState(() => {
+  const [stale, setStale] = useState(() => {
     try {
       const kept = JSON.parse(localStorage.getItem(GAME_DRAFT) || "null");
       return Boolean(
@@ -413,7 +413,13 @@ function GameArea({
     room.totals.find((item) => item.id === id)?.total ?? START;
   const change = (id: string, winner: string, each: number) =>
     id === winner ? 3 * each : -each;
-  const set = (patch: Partial<Draft>) => setDraft({ ...draft, ...patch });
+  const set = (patch: Partial<Draft>) => {
+    setStale(false);
+    setDraft({ ...draft, ...patch });
+  };
+  // After a refused save, the person has seen what changed; a deliberate
+  // second save is then judged against the table now on screen.
+  const reanchor = useRef(false);
   async function saveGame() {
     // Judged against the table as it was when this entry began, with the
     // game ID fixed at Review so every retry is recognised as the same game.
@@ -421,9 +427,11 @@ function GameArea({
       winner: draft.winner,
       each: amount,
       handId: draft.handId,
-      lastHandId: draft.lastHandId,
+      lastHandId: reanchor.current ? last : draft.lastHandId,
     });
+    reanchor.current = !done;
     if (done) {
+      setStale(false);
       setStep("entry");
       setDraft({ ...draft, winner: "", each: "", handId: "" });
     }

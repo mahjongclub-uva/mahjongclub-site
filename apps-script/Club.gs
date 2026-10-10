@@ -630,8 +630,9 @@ function settleRooms(meeting) {
   }
 }
 
-// Rooms and tonight's saved tables in one read, so a phone never counts a
-// game both in a room and in the table block it was just saved to.
+// Rooms and tonight's saved tables in one read. Reads take no lock, so a
+// table ended mid-read can show twice for one refresh; saved results are
+// never duplicated.
 function roomsState(meeting) {
   let tables = null;
   try {
@@ -675,6 +676,15 @@ function roomAction(request, meeting) {
       hands: [],
       ended: null,
     };
+    // Checked before any branch: one stored bad wind would break every
+    // phone's rooms read, since the site validates seats strictly.
+    if (
+      request.seat !== undefined &&
+      (!Number.isSafeInteger(request.seat) ||
+        request.seat < 0 ||
+        request.seat > 3)
+    )
+      fail(400, "Choose East, South, West or North.");
     const taken = (wind) => target.seats.find((seat) => seat.wind === wind);
     const wind =
       request.seat === undefined
@@ -702,8 +712,6 @@ function roomAction(request, meeting) {
     }
     if (wind === undefined || target.seats.length >= 4)
       fail(409, "Table " + table + " is full.");
-    if (!Number.isSafeInteger(wind) || wind < 0 || wind > 3)
-      fail(400, "Choose East, South, West or North.");
     if (taken(wind)) fail(409, WINDS[wind] + " was just taken.");
     target.seats.push({ ...publicPlayer(player), optOut: player.optOut, wind });
     writeRoom(target);

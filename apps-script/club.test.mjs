@@ -741,6 +741,13 @@ test("seats are winds: a taken wind is refused by name, and seats return in wind
       ["p002", 3],
     ],
   );
+  // A bad wind is refused, even when moving within your own table.
+  for (const seat of [9, "x", null, 1.5])
+    assert.equal(t.room("p002", "join", { table: 1, seat }).status, 400);
+  assert.deepEqual(
+    t.table().seats.map((item) => item.wind),
+    [0, 1, 3],
+  );
   // Moving seats at your own table works until a game is saved.
   assert.equal(t.room("p003", "join", { table: 1, seat: 2 }).status, 200);
   assert.equal(t.room("p004", "join", { table: 1, seat: 1 }).status, 200);
