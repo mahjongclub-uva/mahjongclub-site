@@ -34,7 +34,7 @@ function CardCalculator({
   const [base, setBase] = useState(Number(initial || 0));
   const [cards, setCards] = useState<number[]>([]);
   const total = value.trim() === "" ? NaN : Number(value);
-  const valid = Number.isSafeInteger(total) && total >= 0 && total <= 820;
+  const valid = Number.isSafeInteger(total);
   const count = (card: number) => cards.filter((n) => n === card).length;
   const tap = (next: number[]) => {
     setCards(next);
@@ -77,14 +77,14 @@ function CardCalculator({
           ×
         </button>
       </div>
-      <p className="quiet">Enter a total, or add cards below.</p>
+      <p className="quiet">
+        Enter a total (negative totals are allowed), or add cards below.
+      </p>
       <label htmlFor="card-total">Card total</label>
       <input
         id="card-total"
         type="number"
-        inputMode="numeric"
-        min={0}
-        max={820}
+        inputMode="text"
         step={1}
         value={value}
         onChange={(e) => {
@@ -99,7 +99,7 @@ function CardCalculator({
             type="button"
             key={card}
             data-counted={count(card) > 0}
-            disabled={!valid || total + card > 820}
+            disabled={!valid || !Number.isSafeInteger(total + card)}
             aria-label={`${card === 50 ? "J / Q / K" : card === 1 ? "A (Ace)" : card}, add ${card} ${card === 1 ? "point" : "points"}`}
             onClick={() => tap([...cards, card])}
           >
@@ -140,7 +140,7 @@ function CardCalculator({
       </div>
       {!valid && (
         <p className="meeting-error" role="alert">
-          Enter a whole number from 0 to 820.
+          Enter a whole number. Negative totals are allowed.
         </p>
       )}
       <div className="calculator-footer">

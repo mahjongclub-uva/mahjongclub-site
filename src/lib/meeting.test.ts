@@ -116,3 +116,55 @@ test("live results parse; drafts only store valid opaque seats", async (t) => {
   assert.ok(isMeetingPage("/live/"));
   assert.equal(isMeetingPage("//outside.example"), false);
 });
+
+test("negative totals survive validation, pending saves, drafts and results", async (t) => {
+  for (const totals of [
+    [-15, 425, 205, 205],
+    [-15, 835, 0, 0],
+  ]) {
+    const signedSeats = players.map((player, i) => ({
+      id: player.id,
+      total: totals[i],
+    }));
+    assert.equal(tableError(signedSeats, players), null);
+    assert.ok(
+      pendingSchema.safeParse({
+        r: "results",
+        meetingId: "m1",
+        submissionId: "ea8971ea-bca2-4ac2-8030-856a6a83da56",
+        seats: signedSeats,
+      }).success,
+    );
+    assert.ok(
+      draftSchema.safeParse({
+        meetingId: "m1",
+        ids: players.map((p) => p.id),
+        totals: totals.map(String),
+      }).success,
+    );
+    t.mock.method(globalThis, "fetch", async () =>
+      Response.json({
+        status: 200,
+        meetingId: "m1",
+        date: "2026-10-09",
+        tables: [
+          {
+            table: 1,
+            seats: signedSeats.map((seat) => ({
+              ...seat,
+              display: seat.id,
+              net: seat.total - 205,
+            })),
+          },
+        ],
+      }),
+    );
+    const results = await getResults("https://example.test/exec");
+    assert.deepEqual(
+      results.tables[0].seats.map((seat) => seat.total),
+      totals,
+    );
+    assert.equal(results.tables[0].seats[0].net, -220);
+    t.mock.restoreAll();
+  }
+});

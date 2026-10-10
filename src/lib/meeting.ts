@@ -37,7 +37,7 @@ export const pendingSchema = z.object({
     .array(
       z.object({
         id: playerSchema.shape.id,
-        total: z.number().int().min(0).max(820),
+        total: z.number().int(),
       }),
     )
     .length(4),
@@ -52,13 +52,8 @@ export function tableError(seats: Seat[], players: Player[]): string | null {
     return "Choose four checked-in players.";
   if (new Set(seats.map((seat) => seat.id)).size !== 4)
     return "Choose four different players.";
-  if (
-    seats.some(
-      (seat) =>
-        !Number.isSafeInteger(seat.total) || seat.total < 0 || seat.total > 820,
-    )
-  )
-    return "Enter whole totals from 0 to 820 for all four players.";
+  if (seats.some((seat) => !Number.isSafeInteger(seat.total)))
+    return "Enter whole totals for all four players. Negative totals are allowed.";
   if (seats.reduce((sum, seat) => sum + seat.total, 0) !== 820)
     return "The four totals must add up to 820.";
   return null;
@@ -121,7 +116,7 @@ export const DRAFT_STORAGE = "club-table-draft";
 export const draftSchema = z.object({
   meetingId: z.string(),
   ids: z.array(z.union([playerSchema.shape.id, z.literal("")])).length(4),
-  totals: z.array(z.string().max(4)).length(4),
+  totals: z.array(z.string().max(17)).length(4),
 });
 export function isMeetingPage(path: string) {
   return /^\/(checkin|score|live)\/?$/.test(path);
@@ -144,7 +139,7 @@ const resultsSchema = z.object({
         .array(
           playerSchema.extend({
             optOut: z.boolean().optional(),
-            total: z.number().int().min(0).max(820),
+            total: z.number().int(),
             net: z.number().int(),
           }),
         )

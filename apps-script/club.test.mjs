@@ -545,3 +545,32 @@ test("Set up is repeatable, and malformed settings do not replace valid settings
   );
   assert.equal(h.store.settings, previous);
 });
+
+test("negative final totals save, retry, and appear in results", () => {
+  for (const totals of [
+    [-15, 425, 205, 205],
+    [-15, 835, 0, 0],
+  ]) {
+    const h = harness();
+    for (const computingId of ["a1", "b2", "c3", "d4"])
+      assert.equal(h.post({ r: "checkins", computingId }).status, 200);
+    const request = {
+      r: "results",
+      meetingId: h.meeting.id,
+      submissionId: "negative-total-test-1",
+      seats: ["p001", "p002", "p003", "p004"].map((id, i) => ({
+        id,
+        total: totals[i],
+      })),
+    };
+    assert.equal(h.post(request).status, 201);
+    assert.equal(h.post(request).status, 200);
+    const response = h.get({ r: "results" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(
+      response.tables[0].seats.map((seat) => seat.total),
+      totals,
+    );
+    assert.equal(response.tables[0].seats[0].net, -220);
+  }
+});

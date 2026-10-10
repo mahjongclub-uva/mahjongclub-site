@@ -490,12 +490,7 @@ function results(meeting) {
       table: block.number,
       seats: block.seats.map(([name, total, net]) => {
         const player = players.find((item) => item.name === name);
-        if (
-          !player ||
-          !Number.isSafeInteger(total) ||
-          total < 0 ||
-          net !== total - 205
-        )
+        if (!player || !Number.isSafeInteger(total) || net !== total - 205)
           fail(503, "An officer must recheck Table " + block.number + ".");
         return { ...publicPlayer(player), optOut: player.optOut, total, net };
       }),
