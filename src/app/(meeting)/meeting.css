@@ -1442,134 +1442,6 @@
 }
 
 /* Tables: a lobby of open tables, and a room that records hand by hand. */
-/* The physical table as a square: East at the bottom, then South, West and
-   North counter-clockwise, the same picture on every phone. */
-.wind-square {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
-  grid-template-areas:
-    ". west ."
-    "north table south"
-    ". east .";
-  align-items: center;
-  gap: 8px;
-  margin-block: 22px;
-}
-.wind-table {
-  grid-area: table;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  border: 2px solid var(--jade);
-  border-radius: 14px;
-  background: color-mix(in oklch, var(--jade) 10%, var(--tile-face-hi));
-  color: var(--jade);
-  font: 700 2rem var(--display);
-}
-.wind-seat {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  min-width: 0;
-  text-align: center;
-}
-.wind-seat[data-wind="East"] {
-  grid-area: east;
-}
-.wind-seat[data-wind="South"] {
-  grid-area: south;
-}
-.wind-seat[data-wind="West"] {
-  grid-area: west;
-}
-.wind-seat[data-wind="North"] {
-  grid-area: north;
-}
-.wind-name {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--tile-letter);
-}
-.wind-player {
-  display: grid;
-  gap: 2px;
-  inline-size: 100%;
-  padding: 8px 6px;
-  border: 1px solid var(--rule);
-  border-block-end-width: 3px;
-  border-radius: 10px;
-  background: var(--tile-face-hi);
-  font-size: 0.82rem;
-  overflow-wrap: anywhere;
-}
-.wind-player[data-you] {
-  border-color: var(--jade);
-}
-.wind-player span {
-  font: 700 1.1rem var(--display);
-  font-variant-numeric: tabular-nums;
-}
-.meeting-page .wind-take {
-  inline-size: 100%;
-  min-block-size: 52px;
-  padding: 6px;
-  border: 1.5px dashed var(--jade);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--jade);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-.meeting-page .wind-take:disabled {
-  border-color: var(--rule);
-  color: var(--ink-soft);
-}
-.room-return {
-  display: grid;
-  gap: 10px;
-  margin-block-end: 20px;
-  padding: 14px 16px;
-  border: 2px solid var(--jade);
-  border-radius: 16px;
-  background: var(--tile-face-hi);
-}
-.end-totals {
-  list-style: none;
-  padding: 0;
-  margin-block: 12px;
-}
-.end-totals li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 10px;
-  padding-block: 8px;
-  font-size: 0.9rem;
-}
-.end-totals li + li {
-  border-block-start: 1px solid var(--rule);
-}
-.end-totals strong {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-.game-receipt .meeting-text {
-  margin-block-start: 6px;
-}
-.room-seats small {
-  color: var(--tile-letter);
-  font-weight: 600;
-}
-@media (hover: hover) and (pointer: fine) {
-  .wind-take:hover:not(:disabled) {
-    background: color-mix(in oklch, var(--jade) 8%, transparent);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .wind-player {
-    animation: score-pop 200ms var(--ease-out);
-  }
-}
 .room-list {
   display: grid;
   gap: 12px;
@@ -1657,11 +1529,9 @@
   font-size: 0.85rem;
 }
 .result-card {
-  margin-block: 16px 4px;
-  padding: 14px 16px;
-  border: 2px solid var(--jade);
-  border-radius: 16px;
-  background: var(--tile-face-hi);
+  margin-block: 16px 8px;
+  padding-block: 12px;
+  border-block: 1px solid var(--rule);
 }
 .result-head {
   display: grid;
@@ -1669,7 +1539,7 @@
   margin-block-end: 8px !important;
 }
 .result-head strong {
-  color: var(--jade);
+  color: var(--ink);
 }
 .result-head span {
   font-size: 0.78rem;
@@ -1861,4 +1731,162 @@
 }
 .room-scores .score-name small {
   display: inline;
+}
+
+/* The table: the club's wind tiles around a quiet hairline square. Colour
+   lives on the tiles; changes are signed text, never chips. */
+.table-square {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    ". west ."
+    "north table south"
+    ". east .";
+  align-items: center;
+  justify-items: center;
+  gap: 6px;
+  margin-block: 18px;
+}
+.table-top {
+  grid-area: table;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+.table-top strong {
+  font: 700 2.2rem/1 var(--display);
+  color: var(--ink);
+}
+.meeting-page .seat {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  text-align: center;
+  font: inherit;
+}
+.seat[data-wind="East"] {
+  grid-area: east;
+}
+.seat[data-wind="South"] {
+  grid-area: south;
+}
+.seat[data-wind="West"] {
+  grid-area: west;
+}
+.seat[data-wind="North"] {
+  grid-area: north;
+}
+.seat-tile {
+  inline-size: 46px;
+}
+.seat-tile svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+.seat[data-empty] .seat-tile {
+  opacity: 0.45;
+}
+.seat-name {
+  max-inline-size: 100%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.seat-name small {
+  color: var(--tile-letter);
+  font-weight: 600;
+}
+.seat[data-empty] .seat-name {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+button.seat[data-empty] .seat-name {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.seat-total {
+  font: 700 1.1rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.seat[aria-pressed="true"] .seat-name {
+  text-decoration: underline 2px var(--tile-letter);
+  text-underline-offset: 4px;
+}
+.delta {
+  font-family: var(--body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+.delta[data-sign="1"] {
+  color: var(--jade);
+}
+.delta[data-sign="-1"] {
+  color: var(--tile-letter);
+}
+.table-latest {
+  display: grid;
+  gap: 2px;
+  padding-block: 10px;
+  border-block: 1px solid var(--rule);
+  font-size: 0.88rem;
+}
+.table-latest span + span {
+  color: var(--ink-soft);
+}
+.table-actions {
+  display: grid;
+  gap: 6px;
+  margin-block-start: 14px;
+}
+.table-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.change-rows {
+  list-style: none;
+  padding: 0;
+  margin-block: 10px;
+}
+.change-rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4ch;
+  align-items: baseline;
+  gap: 10px;
+  padding-block: 8px;
+  font-size: 0.9rem;
+}
+.change-rows li + li {
+  border-block-start: 1px solid var(--rule);
+}
+.change-rows strong {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.table-sheet .table-square {
+  margin-block: 8px 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seat-tile {
+    transition: transform 160ms var(--ease-out);
+  }
+  .seat[aria-pressed="true"] .seat-tile {
+    transform: translateY(-6px);
+  }
 }

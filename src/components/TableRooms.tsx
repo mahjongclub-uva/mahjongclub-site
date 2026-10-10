@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
+import { CharacterFace, TileFace } from "@/components/PlayingTile";
+import { BLUE } from "@/components/TileArtwork";
 import {
   cleanComputingId,
   computingIdError,
@@ -167,10 +169,7 @@ function EndedReceipt({
               {seat.display}
               {seat.id === you && <small> (you)</small>}
             </span>
-            <span
-              className="score-net"
-              data-sign={Math.sign(seat.total - START)}
-            >
+            <span className="delta" data-sign={Math.sign(seat.total - START)}>
               {signed(seat.total - START)}
             </span>
             <strong>{minus(seat.total)}</strong>
@@ -181,65 +180,189 @@ function EndedReceipt({
   );
 }
 
+const WIND_GLYPHS = ["東", "南", "西", "北"];
+
+/** A seat's wind as the club's own tile artwork, as on the guide. */
+function WindTile({ wind }: { wind: number }) {
+  return (
+    <TileFace index={WINDS[wind][0]} indexColour={BLUE}>
+      <CharacterFace bottom={WIND_GLYPHS[wind]} ink={BLUE} />
+    </TileFace>
+  );
+}
+
+/** A layer over the table. A native dialog, so focus moves in and comes back. */
+function Sheet({
+  title,
+  close,
+  children,
+}: {
+  title: string;
+  close: () => void;
+  children: React.ReactNode;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const id = useId();
+  useEffect(() => {
+    const element = dialog.current!;
+    element.showModal();
+    return () => element.close();
+  }, []);
+  return (
+    <dialog
+      ref={dialog}
+      className="meeting-calculator table-sheet"
+      aria-labelledby={id}
+      onCancel={(event) => {
+        event.preventDefault();
+        close();
+      }}
+    >
+      <div className="calculator-head">
+        <h2 id={id}>{title}</h2>
+        <button
+          className="meeting-text"
+          type="button"
+          onClick={close}
+          aria-label={`Close ${title}`}
+        >
+          ×
+        </button>
+      </div>
+      {children}
+    </dialog>
+  );
+}
+
 /**
- * The physical table drawn as a square, East at the bottom and the winds
- * going counter-clockwise as they do at a mahjong table. The same picture on
- * every phone, so "East" names one real chair for the whole group.
+ * The physical table as a square of wind tiles, East at the bottom and the
+ * winds going counter-clockwise as at a mahjong table. Every phone draws the
+ * same picture, so a wind names one real chair for the whole group.
  */
-function WindSquare({
+function TableSquare({
   room,
   table,
   you,
   canSit,
   busy,
   sit,
+  tapOwn,
+  pick,
 }: {
   room: Room | undefined;
   table: number;
   you: string;
   canSit: boolean;
   busy: boolean;
-  sit: (wind: number) => void;
+  sit?: (wind: number) => void;
+  tapOwn?: () => void;
+  // In the game sheet, any occupied tile is chosen as the winner.
+  pick?: { winner: string; choose: (id: string) => void };
 }) {
+  const latest = room?.hands.at(-1);
+  const games = room?.hands.length ?? 0;
   return (
     <div
-      className="wind-square"
+      className="table-square"
       role="group"
-      aria-label={`Seats at Table ${table}`}
+      aria-label={pick ? "Who won?" : `Seats at Table ${table}`}
     >
-      <span className="wind-table" aria-hidden="true">
-        {table}
-      </span>
+      <div className="table-top" aria-hidden="true">
+        <strong>{table}</strong>
+        <span>
+          {games ? `${games} ${games === 1 ? "game" : "games"}` : "Table"}
+        </span>
+      </div>
       {WINDS.map((wind, i) => {
         const seat = room?.seats.find((item) => item.wind === i);
-        const total =
-          seat && room?.totals.find((item) => item.id === seat.id)?.total;
-        return (
-          <div className="wind-seat" data-wind={wind} key={wind}>
-            <span className="wind-name">{wind}</span>
-            {seat ? (
-              <span
-                className="wind-player"
-                data-you={seat.id === you || undefined}
-              >
-                <strong>
-                  {seat.display}
-                  {seat.id === you && <small> (you)</small>}
-                </strong>
-                {room!.hands.length > 0 && total !== undefined && (
-                  <span>{minus(total)}</span>
+        const total = seat
+          ? (room!.totals.find((item) => item.id === seat.id)?.total ?? START)
+          : 0;
+        const change =
+          seat && latest
+            ? seat.id === latest.winner
+              ? 3 * latest.each
+              : -latest.each
+            : null;
+        const own = seat?.id === you;
+        const body = (
+          <>
+            <span className="seat-tile">
+              <WindTile wind={i} />
+            </span>
+            <span className="seat-name">
+              {seat ? seat.display : canSit && !pick ? "Take seat" : "Open"}
+              {own && <small> you</small>}
+            </span>
+            {seat && games > 0 && !pick && (
+              <span className="seat-total">
+                {minus(total)}
+                {change !== null && (
+                  <small className="delta" data-sign={Math.sign(change)}>
+                    {" "}
+                    {signed(change)}
+                  </small>
                 )}
               </span>
-            ) : (
-              <button
-                type="button"
-                className="wind-take"
-                disabled={!canSit || busy}
-                onClick={() => sit(i)}
-              >
-                {canSit ? "Take this seat" : "Open"}
-              </button>
             )}
+          </>
+        );
+        const label = `${wind}: ${seat ? seat.display : "open seat"}`;
+        if (pick && seat)
+          return (
+            <button
+              type="button"
+              className="seat"
+              data-wind={wind}
+              key={wind}
+              aria-pressed={pick.winner === seat.id}
+              aria-label={`${seat.display} won`}
+              onClick={() =>
+                pick.choose(pick.winner === seat.id ? "" : seat.id)
+              }
+            >
+              {body}
+            </button>
+          );
+        if (!pick && !seat && canSit)
+          return (
+            <button
+              type="button"
+              className="seat"
+              data-wind={wind}
+              data-empty
+              key={wind}
+              disabled={busy}
+              aria-label={`Take the ${wind} seat`}
+              onClick={() => sit?.(i)}
+            >
+              {body}
+            </button>
+          );
+        if (!pick && own)
+          return (
+            <button
+              type="button"
+              className="seat"
+              data-wind={wind}
+              data-you
+              key={wind}
+              disabled={busy}
+              aria-label={`Your seat, ${wind}. ${games ? "End the table to change groups." : "Tap to leave."}`}
+              onClick={tapOwn}
+            >
+              {body}
+            </button>
+          );
+        return (
+          <div
+            className="seat"
+            data-wind={wind}
+            data-empty={!seat || undefined}
+            key={wind}
+            aria-label={label}
+          >
+            {body}
           </div>
         );
       })}
@@ -257,31 +380,9 @@ function StandingsSheet({
   you: string;
   close: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const element = dialog.current!;
-    element.showModal();
-    return () => element.close();
-  }, []);
   const rows = tonightStandings(tables);
   return (
-    <dialog
-      ref={dialog}
-      className="meeting-calculator standings-sheet"
-      aria-labelledby="standings-title"
-      onCancel={close}
-    >
-      <div className="calculator-head">
-        <h2 id="standings-title">Tonight</h2>
-        <button
-          className="meeting-text"
-          type="button"
-          onClick={close}
-          aria-label="Close standings"
-        >
-          ×
-        </button>
-      </div>
+    <Sheet title="Tonight" close={close}>
       <p className="quiet">
         Each player’s net tonight. Games at tables still playing are included
         and stay provisional until an officer publishes them.
@@ -315,7 +416,7 @@ function StandingsSheet({
           Tonight and semester standings
         </Link>
       </div>
-    </dialog>
+    </Sheet>
   );
 }
 
@@ -329,13 +430,40 @@ type Draft = {
   handId: string;
 };
 
-/** The game entry, review, receipt, history and End table for a seated player. */
-function GameArea({
+/** Plain ruled rows of each player's change, for review and End table. */
+function ChangeRows({
+  room,
+  change,
+}: {
+  room: Room;
+  change: (id: string) => number;
+}) {
+  const total = (id: string) =>
+    room.totals.find((item) => item.id === id)?.total ?? START;
+  return (
+    <ul className="change-rows">
+      {room.seats.map((seat) => (
+        <li key={seat.id}>
+          <span>{seat.display}</span>
+          <span className="delta" data-sign={Math.sign(change(seat.id))}>
+            {signed(change(seat.id))}
+          </span>
+          <strong>{minus(total(seat.id) + change(seat.id))}</strong>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** What a seated player does at the table: one screen, tasks in sheets. */
+function SeatedTable({
   meeting,
   room,
   player,
   busy,
   offline,
+  error,
+  tonight,
   act,
   standings,
 }: {
@@ -344,6 +472,8 @@ function GameArea({
   player: Player;
   busy: boolean;
   offline: boolean;
+  error: string;
+  tonight: number | null;
   act: (action: string, extra?: Record<string, unknown>) => Promise<boolean>;
   standings: () => void;
 }) {
@@ -391,8 +521,8 @@ function GameArea({
       return false;
     }
   });
+  const [layer, setLayer] = useState<null | "game" | "games" | "end">(null);
   const [step, setStep] = useState<"entry" | "review">("entry");
-  const [confirm, setConfirm] = useState<null | "end" | "leave">(null);
   useEffect(() => {
     try {
       if (draft.winner || draft.each)
@@ -409,13 +539,15 @@ function GameArea({
   const winnerSeated = room.seats.some((seat) => seat.id === draft.winner);
   const games = room.hands.length;
   const entering = Boolean(draft.winner || draft.each);
-  const total = (id: string) =>
-    room.totals.find((item) => item.id === id)?.total ?? START;
-  const change = (id: string, winner: string, each: number) =>
+  const gain = (winner: string, each: number) => (id: string) =>
     id === winner ? 3 * each : -each;
   const set = (patch: Partial<Draft>) => {
     setStale(false);
-    setDraft({ ...draft, ...patch });
+    setDraft({
+      ...draft,
+      ...patch,
+      lastHandId: entering ? draft.lastHandId : last,
+    });
   };
   // After a refused save, the person has seen what changed; a deliberate
   // second save is then judged against the table now on screen.
@@ -433,301 +565,271 @@ function GameArea({
     if (done) {
       setStale(false);
       setStep("entry");
+      setLayer(null);
       setDraft({ ...draft, winner: "", each: "", handId: "" });
     }
   }
   const latest = room.hands.at(-1);
+  const mineNow = latest ? gain(latest.winner, latest.each)(player.id) : 0;
   return (
     <>
-      {stale && (
-        <p className="meeting-notice" role="status">
-          Another phone saved a game while you were away, so your unsaved entry
-          was cleared. Check the latest game below and enter yours again if it
-          was a different game.
+      {latest ? (
+        <p className="table-latest" role="status">
+          <span>
+            Game {games}: {name(latest.winner)} won, {latest.each} from each
+          </span>
+          <span>
+            You{" "}
+            <b className="delta" data-sign={Math.sign(mineNow)}>
+              {signed(mineNow)}
+            </b>{" "}
+            this game
+            {tonight !== null && (
+              <>
+                {" · "}
+                <b className="delta" data-sign={Math.sign(tonight)}>
+                  {signed(tonight)}
+                </b>{" "}
+                tonight
+              </>
+            )}
+          </span>
+        </p>
+      ) : (
+        <p className="table-latest">
+          <span>
+            {ready
+              ? "All four seats are taken. Record each game as you finish it."
+              : `Waiting for ${4 - room.seats.length} more ${4 - room.seats.length === 1 ? "player" : "players"}. Tap your tile to leave.`}
+          </span>
         </p>
       )}
-
-      {latest && step === "entry" && !confirm && (
-        <section className="result-card game-receipt" aria-label="Latest game">
-          <p className="result-head">
-            <strong>
-              Game {games} saved · {name(latest.winner)} won
-            </strong>
-            <span>{latest.each} from each player</span>
-          </p>
-          <ul>
-            {room.seats.map((seat) => (
-              <li key={seat.id} data-you={seat.id === player.id || undefined}>
-                <span>
-                  {seat.display}
-                  {seat.id === player.id && <small> (you)</small>}
-                </span>
-                <span
-                  className="score-net"
-                  data-sign={Math.sign(
-                    change(seat.id, latest.winner, latest.each),
-                  )}
-                >
-                  {signed(change(seat.id, latest.winner, latest.each))}
-                </span>
-                <strong>{minus(total(seat.id))}</strong>
-              </li>
-            ))}
-          </ul>
-          <button type="button" className="meeting-text" onClick={standings}>
-            View tonight’s standings
-          </button>
-        </section>
+      {stale && (
+        <p className="quiet" role="status">
+          Another phone saved a game while you were away, so your unsaved entry
+          was cleared.
+        </p>
       )}
+      <div className="table-actions">
+        <button
+          type="button"
+          className="meeting-primary"
+          disabled={!ready}
+          onClick={() => {
+            setStep(winnerSeated && amount ? "review" : "entry");
+            setLayer("game");
+          }}
+        >
+          {entering ? `Continue game ${games + 1}` : `Record game ${games + 1}`}
+        </button>
+        <div className="table-links">
+          {games > 0 && (
+            <button
+              type="button"
+              className="meeting-text"
+              onClick={() => setLayer("games")}
+            >
+              Games ({games})
+            </button>
+          )}
+          <button type="button" className="meeting-text" onClick={standings}>
+            Standings
+          </button>
+          {(games > 0 || ready) && (
+            <button
+              type="button"
+              className="meeting-text"
+              onClick={() => setLayer("end")}
+            >
+              End table
+            </button>
+          )}
+        </div>
+      </div>
 
-      {confirm ? (
-        <section className="room-confirm" aria-labelledby="room-confirm-title">
-          <h2 id="room-confirm-title">
-            {confirm === "end"
-              ? "End this table for all four?"
-              : "Leave this table?"}
-          </h2>
-          {confirm === "end" ? (
+      {layer === "game" && (
+        <Sheet
+          title={step === "review" ? "Check, then save" : `Game ${games + 1}`}
+          close={() => setLayer(null)}
+        >
+          {step === "entry" ? (
             <>
-              <p>
-                {games
-                  ? `This saves ${games} ${games === 1 ? "game" : "games"} to the club’s scoresheet as one table with these totals, then frees all four seats. Table ${room.table} stays open for the next group.`
-                  : `No games were saved, so nothing goes to the scoresheet. All four seats are freed.`}
+              <p className="quiet">Tap the winner’s tile.</p>
+              <TableSquare
+                room={room}
+                table={room.table}
+                you={player.id}
+                canSit={false}
+                busy={busy}
+                pick={{
+                  winner: draft.winner,
+                  choose: (winner) => set({ winner }),
+                }}
+              />
+              <label htmlFor="hand-each">Each other player pays</label>
+              <input
+                id="hand-each"
+                className="hand-each"
+                inputMode="numeric"
+                autoComplete="off"
+                enterKeyHint="done"
+                value={draft.each}
+                aria-describedby="hand-each-hint"
+                onChange={(event) =>
+                  set({
+                    each: event.target.value.replace(/\D/g, "").slice(0, 4),
+                  })
+                }
+              />
+              <p className="quiet" id="hand-each-hint">
+                Include flowers and gold. The winner gains three times this.
               </p>
-              {games > 0 && (
-                <ul className="end-totals">
-                  {room.seats.map((seat) => (
-                    <li key={seat.id}>
-                      <span>{seat.display}</span>
-                      <span
-                        className="score-net"
-                        data-sign={Math.sign(total(seat.id) - START)}
-                      >
-                        {signed(total(seat.id) - START)}
-                      </span>
-                      <strong>{minus(total(seat.id))}</strong>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="calculator-footer">
+                <button
+                  type="button"
+                  className="meeting-primary"
+                  disabled={!winnerSeated || !amount}
+                  onClick={() => {
+                    if (!draft.handId) set({ handId: crypto.randomUUID() });
+                    setStep("review");
+                  }}
+                >
+                  {!winnerSeated
+                    ? "Tap the winner"
+                    : !amount
+                      ? "Enter what each pays"
+                      : "Review game"}
+                </button>
+                {entering && (
+                  <button
+                    type="button"
+                    className="meeting-text"
+                    onClick={() =>
+                      setDraft({ ...draft, winner: "", each: "", handId: "" })
+                    }
+                  >
+                    Clear entry
+                  </button>
+                )}
+              </div>
             </>
           ) : (
-            <p>Your seat opens for someone else.</p>
+            <>
+              <p className="quiet">
+                {name(draft.winner)} won. Each other player pays {amount}.
+              </p>
+              <ChangeRows room={room} change={gain(draft.winner, amount)} />
+              {error && (
+                <p className="meeting-error" role="alert">
+                  {error}
+                </p>
+              )}
+              <div className="calculator-footer">
+                <button
+                  type="button"
+                  className="meeting-primary"
+                  disabled={busy || offline}
+                  onClick={() => void saveGame()}
+                >
+                  {busy
+                    ? "Saving game…"
+                    : offline
+                      ? "Waiting for connection"
+                      : "Save game"}
+                </button>
+                <button
+                  type="button"
+                  className="meeting-text"
+                  disabled={busy}
+                  onClick={() => setStep("entry")}
+                >
+                  Edit
+                </button>
+              </div>
+            </>
           )}
-          <div className="meeting-actions">
+        </Sheet>
+      )}
+
+      {layer === "games" && (
+        <Sheet title="Games at this table" close={() => setLayer(null)}>
+          <ol className="change-rows" reversed>
+            {room.hands
+              .map((hand, i) => ({ hand, number: i + 1 }))
+              .reverse()
+              .map(({ hand, number }) => (
+                <li key={hand.id}>
+                  <span>Game {number}</span>
+                  <span>{name(hand.winner)} won</span>
+                  <strong>{hand.each} each</strong>
+                </li>
+              ))}
+          </ol>
+          {error && (
+            <p className="meeting-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="calculator-footer">
+            <button
+              type="button"
+              className="meeting-secondary"
+              disabled={busy || offline}
+              onClick={() => void act("undo")}
+            >
+              <IconArrowBackUp size={18} aria-hidden="true" /> Undo game {games}
+            </button>
+          </div>
+        </Sheet>
+      )}
+
+      {layer === "end" && (
+        <Sheet title="End this table?" close={() => setLayer(null)}>
+          <p className="quiet">
+            {games
+              ? `It ends for all four players. ${games} ${games === 1 ? "game goes" : "games go"} to the club’s scoresheet as one table with these totals, then every seat is freed. Table ${room.table} stays open for the next group.`
+              : "It ends for all four players. No games were saved, so nothing goes to the scoresheet."}
+          </p>
+          {games > 0 && <ChangeRows room={room} change={() => 0} />}
+          {entering && (
+            <p className="meeting-notice">
+              Someone’s game entry on this phone isn’t saved yet. Save or clear
+              it first.
+            </p>
+          )}
+          {error && (
+            <p className="meeting-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="calculator-footer">
             <button
               type="button"
               className="meeting-primary"
-              disabled={busy || offline}
+              disabled={busy || offline || entering}
               onClick={async () => {
-                const done = await act(
-                  confirm,
-                  confirm === "end"
-                    ? {
-                        table: room.table,
-                        session: room.session,
-                        lastHandId: last,
-                      }
-                    : {},
-                );
-                if (done) setConfirm(null);
+                if (
+                  await act("end", {
+                    table: room.table,
+                    session: room.session,
+                    lastHandId: last,
+                  })
+                )
+                  setLayer(null);
               }}
             >
-              {busy
-                ? "Saving…"
-                : confirm === "end"
-                  ? "End table"
-                  : "Leave table"}
+              {busy ? "Ending…" : "End table"}
             </button>
             <button
               type="button"
               className="meeting-text"
               disabled={busy}
-              onClick={() => setConfirm(null)}
+              onClick={() => setLayer(null)}
             >
               Keep playing
             </button>
           </div>
-        </section>
-      ) : step === "review" ? (
-        <section className="hand-form" aria-labelledby="review-title">
-          <h2 id="review-title">Check, then save</h2>
-          <p className="hand-preview">
-            {name(draft.winner)} won. Each other player pays {amount}.
-          </p>
-          <ul className="end-totals">
-            {room.seats.map((seat) => {
-              const delta = change(seat.id, draft.winner, amount);
-              return (
-                <li key={seat.id}>
-                  <span>{seat.display}</span>
-                  <span className="score-net" data-sign={Math.sign(delta)}>
-                    {signed(delta)}
-                  </span>
-                  <strong>
-                    {minus(total(seat.id))} → {minus(total(seat.id) + delta)}
-                  </strong>
-                </li>
-              );
-            })}
-          </ul>
-          <button
-            type="button"
-            className="meeting-primary"
-            disabled={busy || offline}
-            onClick={() => void saveGame()}
-          >
-            {busy
-              ? "Saving game…"
-              : offline
-                ? "Waiting for connection"
-                : "Save game"}
-          </button>
-          <button
-            type="button"
-            className="meeting-text"
-            disabled={busy}
-            onClick={() => setStep("entry")}
-          >
-            Edit
-          </button>
-        </section>
-      ) : (
-        <>
-          <section className="hand-form" aria-labelledby="hand-title">
-            <h2 id="hand-title">Game {games + 1}: who won?</h2>
-            {!ready && (
-              <p className="meeting-notice" role="status">
-                Waiting for {4 - room.seats.length} more{" "}
-                {4 - room.seats.length === 1 ? "player" : "players"}. Games can
-                be recorded once all four seats are taken.
-              </p>
-            )}
-            <div className="winner-grid" role="group" aria-label="Winner">
-              {room.seats.map((seat) => (
-                <button
-                  type="button"
-                  key={seat.id}
-                  aria-pressed={draft.winner === seat.id}
-                  disabled={!ready || busy}
-                  onClick={() =>
-                    set({
-                      winner: draft.winner === seat.id ? "" : seat.id,
-                      lastHandId: entering ? draft.lastHandId : last,
-                    })
-                  }
-                >
-                  <span className="meeting-avatar" aria-hidden="true">
-                    {WINDS[seat.wind][0]}
-                  </span>
-                  <span>{seat.display}</span>
-                  {draft.winner === seat.id && (
-                    <IconCheck size={18} stroke={3} aria-hidden="true" />
-                  )}
-                </button>
-              ))}
-            </div>
-            <label htmlFor="hand-each">Each other player pays</label>
-            <input
-              id="hand-each"
-              className="hand-each"
-              inputMode="numeric"
-              autoComplete="off"
-              enterKeyHint="done"
-              value={draft.each}
-              disabled={!ready || busy}
-              aria-describedby="hand-each-hint"
-              onChange={(event) =>
-                set({
-                  each: event.target.value.replace(/\D/g, "").slice(0, 4),
-                  lastHandId: entering ? draft.lastHandId : last,
-                })
-              }
-            />
-            <p className="quiet" id="hand-each-hint">
-              Include flowers and gold. The winner gains three times this.
-            </p>
-            <button
-              type="button"
-              className="meeting-primary"
-              disabled={!ready || busy || !winnerSeated || !amount}
-              onClick={() => {
-                if (!draft.handId) set({ handId: crypto.randomUUID() });
-                setStep("review");
-              }}
-            >
-              Review game
-            </button>
-            {entering && (
-              <button
-                type="button"
-                className="meeting-text"
-                disabled={busy}
-                onClick={() =>
-                  setDraft({ ...draft, winner: "", each: "", handId: "" })
-                }
-              >
-                Clear entry
-              </button>
-            )}
-          </section>
-
-          {games > 0 && (
-            <section className="hand-log" aria-labelledby="hand-log-title">
-              <h2 id="hand-log-title">Games at this table</h2>
-              <ol reversed>
-                {room.hands
-                  .map((hand, i) => ({ hand, number: i + 1 }))
-                  .reverse()
-                  .slice(0, 8)
-                  .map(({ hand, number }) => (
-                    <li key={hand.id}>
-                      <span>Game {number}</span>
-                      <strong>{name(hand.winner)}</strong>
-                      <span>won · {hand.each} each</span>
-                    </li>
-                  ))}
-              </ol>
-              <button
-                type="button"
-                className="meeting-text"
-                disabled={busy || offline}
-                onClick={() => void act("undo")}
-              >
-                <IconArrowBackUp size={18} aria-hidden="true" /> Undo game{" "}
-                {games}
-              </button>
-            </section>
-          )}
-
-          <div className="room-actions">
-            {games > 0 || ready ? (
-              <button
-                type="button"
-                className="meeting-secondary"
-                disabled={busy || entering}
-                onClick={() => setConfirm("end")}
-              >
-                End table
-              </button>
-            ) : null}
-            {games === 0 && (
-              <button
-                type="button"
-                className="meeting-text"
-                disabled={busy}
-                onClick={() => setConfirm("leave")}
-              >
-                Leave table
-              </button>
-            )}
-          </div>
-          {entering && (
-            <p className="quiet">
-              Save or clear the game you’re entering before ending the table.
-            </p>
-          )}
-        </>
+        </Sheet>
       )}
     </>
   );
@@ -1042,33 +1144,44 @@ function Tables({
             </p>
           )}
           <h1 tabIndex={-1}>Table {table}.</h1>
-          <p className="meeting-intro">
-            {here
-              ? room!.seats.length === 4
-                ? "All four seats are taken. Record each game as you finish it."
-                : "Tap a free seat to move. Waiting for the others to sit down."
-              : (room?.seats.length ?? 0) >= 4
+          {!here && (
+            <p className="meeting-intro">
+              {(room?.seats.length ?? 0) >= 4
                 ? "This table is full."
                 : mine
                   ? "You can sit here after your own table ends."
-                  : "Take the seat that matches where you’re sitting."}
-          </p>
-          <WindSquare
+                  : "Tap the wind tile where you’re sitting."}
+            </p>
+          )}
+          <TableSquare
             room={room}
             table={table}
             you={player.id}
             canSit={canSit}
             busy={busy || roomsFailed}
             sit={(wind) => void act("join", { table, seat: wind })}
+            tapOwn={() => {
+              if (mine?.hands.length)
+                setError(
+                  "Games are saved at this table. End the table to change groups.",
+                );
+              else void act("leave");
+            }}
           />
           {here && (
-            <GameArea
+            <SeatedTable
               key={`${mine!.table}-${mine!.session}`}
               meeting={meeting}
               room={mine!}
               player={player}
               busy={busy}
               offline={roomsFailed}
+              error={error}
+              tonight={
+                tonightStandings(tonightTables(results, rooms)).find(
+                  (row) => row.id === player.id,
+                )?.net ?? null
+              }
               act={act}
               standings={() => setSheet(true)}
             />
