@@ -165,23 +165,6 @@ function CheckInForm({
                 ? "Find a table"
                 : "Record a table"}
           </Link>
-          <div className="meeting-quiet-actions">
-            <Link className="meeting-text" href={MEETING_PATHS.standings}>
-              Tonight’s standings
-            </Link>
-            <button
-              className="meeting-text"
-              type="button"
-              onClick={() => {
-                rememberMeetingPage(MEETING_PATHS.checkin);
-                setPlayer(null);
-                setRegister(false);
-                setError("");
-              }}
-            >
-              Not {player.display.split(" ")[0]}? Switch player
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -359,7 +342,6 @@ function CheckInForm({
           Use a different ID
         </button>
       )}
-      <p className="quiet">No UVA ID? Ask an officer.</p>
     </form>
   );
 }

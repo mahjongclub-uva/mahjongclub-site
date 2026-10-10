@@ -47,14 +47,6 @@
   color: var(--ink-soft);
   margin-top: 4px;
 }
-.meeting-page .meeting-website {
-  font-size: 0.75rem;
-  color: var(--jade);
-  white-space: nowrap;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
 .meeting-status {
   display: flex;
   align-items: center;
@@ -439,22 +431,14 @@
 }
 /* Text actions stay text: they underline when touched instead of filling. */
 .meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
-.meeting-calculator .meeting-text:is(:focus-visible, :active),
-.meeting-page .meeting-website:is(:focus-visible, :active) {
+.meeting-calculator .meeting-text:is(:focus-visible, :active) {
   color: var(--ink);
   text-decoration: underline 2px var(--tile-letter);
   text-underline-offset: 4px;
 }
-.meeting-page .meeting-website {
-  padding: 8px;
-  border-radius: 8px;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
 @media (hover: hover) and (pointer: fine) {
   .meeting-page .meeting-text:hover:not(:disabled),
-  .meeting-calculator .meeting-text:hover:not(:disabled),
-  .meeting-page .meeting-website:hover {
+  .meeting-calculator .meeting-text:hover:not(:disabled) {
     color: var(--ink);
     text-decoration: underline 2px var(--tile-letter);
     text-underline-offset: 4px;
@@ -487,7 +471,6 @@
 @media (prefers-reduced-motion: no-preference) {
   .meeting-page .meeting-text,
   .meeting-calculator .meeting-text,
-  .meeting-page .meeting-website,
   .player-chips button {
     transition:
       background-color 120ms ease-out,
@@ -538,9 +521,6 @@
   .meeting-brand img {
     width: 30px;
     height: 30px;
-  }
-  .meeting-page .meeting-website {
-    font-size: 0.69rem;
   }
   .player-chips button {
     padding: 8px;
@@ -1205,30 +1185,11 @@
     grid-template-columns: 44px 48px 44px;
   }
 }
-
-/* Meeting navigation, headcount and loading. */
-.meeting-nav {
+/* Meeting navigation {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-block-start: 10px;
   border-block-end: 1px solid var(--rule);
-}
-.meeting-nav a {
-  display: grid;
-  place-items: center;
-  min-block-size: 44px;
-  padding-inline: 4px;
-  border-block-end: 2px solid transparent;
-  margin-block-end: -1px;
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-}
-.meeting-nav a[aria-current="page"] {
-  border-block-end-color: var(--tile-letter);
-  color: var(--ink);
 }
 .meeting-headcount {
   margin-inline-start: auto;
@@ -1261,11 +1222,6 @@
     transform: translateY(-6px);
   }
 }
-@media (hover: hover) and (pointer: fine) {
-  .meeting-nav a:not([aria-current="page"]):hover {
-    color: var(--jade);
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .meeting-loading i {
     animation: tile-wait 900ms var(--ease-in-out) infinite;
@@ -1275,9 +1231,6 @@
   }
   .meeting-loading i:nth-child(3) {
     animation-delay: 240ms;
-  }
-  .meeting-nav a {
-    transition: color 150ms ease;
   }
 }
 
@@ -1459,13 +1412,6 @@
 }
 .tables-page > .meeting-primary {
   margin-block-start: 8px;
-}
-.tables-footer {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-block-start: 28px !important;
 }
 .room-saved {
   display: flex;
@@ -1716,5 +1662,54 @@ button.seat[data-empty] .seat-name {
   }
   .seat[aria-pressed="true"] .seat-tile {
     transform: translateY(-6px);
+  }
+}
+
+/* One Menu button in the header instead of tabs and loose links. */
+.meeting-page .meeting-menu-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 0.88rem var(--body);
+}
+.menu-player {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  padding-block: 4px 12px;
+  border-block-end: 1px solid var(--rule);
+}
+.menu-links {
+  list-style: none;
+  padding: 0;
+  margin-block: 8px;
+}
+.menu-links a {
+  display: flex;
+  align-items: center;
+  min-block-size: 48px;
+  border-block-end: 1px solid var(--rule);
+  color: var(--ink);
+  font: 700 1.15rem var(--display);
+  text-decoration: none;
+}
+.menu-links a[aria-current="page"] {
+  text-decoration: underline 2px var(--tile-letter);
+  text-underline-offset: 5px;
+}
+.menu-quiet a {
+  font: 500 0.92rem var(--body);
+  color: var(--ink-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .menu-links a:hover,
+  .meeting-page .meeting-menu-button:hover {
+    text-decoration: underline 2px var(--tile-letter);
+    text-underline-offset: 5px;
   }
 }

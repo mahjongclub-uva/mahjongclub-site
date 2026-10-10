@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { IconMenu2 } from "@tabler/icons-react";
+import Sheet from "@/components/Sheet";
 import {
   getMeeting,
+  rememberPlayer,
   requestError,
+  savedPlayer,
   type Meeting,
   MEETING_PATHS,
 } from "@/lib/meeting";
@@ -14,15 +18,87 @@ import Image from "next/image";
 import { formatDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 
-// Tables replaces "Record a table" once the backend has table rooms.
-const pages = (rooms: boolean) =>
-  [
-    [MEETING_PATHS.checkin, "Check in"],
-    rooms
-      ? [MEETING_PATHS.tables, "Tables"]
-      : [MEETING_PATHS.score, "Record a table"],
-    [MEETING_PATHS.standings, "Tonight"],
-  ] as const;
+/**
+ * Everything that is not the page's one main action, in one layer: who this
+ * phone is, the other meeting pages, the typed-totals fallback and the club
+ * website. It replaces a row of tabs and the links scattered under each page.
+ */
+function MeetingMenu({
+  meeting,
+  pathname,
+  close,
+}: {
+  meeting: Meeting | null;
+  pathname: string;
+  close: () => void;
+}) {
+  const player = meeting && savedPlayer(meeting);
+  const seatedAt = meeting?.rooms?.find((room) =>
+    room.seats.some((seat) => seat.id === player?.id),
+  )?.table;
+  const here = pathname.replace(/\/?$/, "/");
+  const links: [string, string][] = meeting?.open
+    ? [
+        [MEETING_PATHS.hub, "Tonight’s meeting"],
+        [MEETING_PATHS.checkin, "Check in"],
+        seatedAt
+          ? [MEETING_PATHS.table(seatedAt), `Your table: Table ${seatedAt}`]
+          : meeting.rooms
+            ? [MEETING_PATHS.tables, "Tables"]
+            : [MEETING_PATHS.score, "Record a table"],
+        [MEETING_PATHS.standings, "Tonight’s standings"],
+      ]
+    : [];
+  return (
+    <Sheet title="Menu" close={close}>
+      {player && (
+        <p className="menu-player">
+          <span>
+            Playing as <strong>{player.display}</strong>
+          </span>
+          <button
+            type="button"
+            className="meeting-text"
+            onClick={() => {
+              rememberPlayer(meeting!, null);
+              window.location.assign(MEETING_PATHS.checkin);
+            }}
+          >
+            Not you? Switch player
+          </button>
+        </p>
+      )}
+      {links.length > 0 && (
+        <ul className="menu-links">
+          {links.map(([href, label]) => (
+            <li key={href}>
+              <Link
+                href={href}
+                aria-current={here === href ? "page" : undefined}
+                onClick={close}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      <ul className="menu-links menu-quiet">
+        {meeting?.rooms && (
+          <li>
+            <Link href={MEETING_PATHS.score} onClick={close}>
+              Played without a table? Enter final totals
+            </Link>
+          </li>
+        )}
+        <li>
+          <Link href="/">Club website</Link>
+        </li>
+      </ul>
+      <p className="quiet">No UVA computing ID? An officer can check you in.</p>
+    </Sheet>
+  );
+}
 
 export default function MeetingAccess({
   children,
@@ -33,6 +109,7 @@ export default function MeetingAccess({
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
   const [checkedAt, setCheckedAt] = useState("");
+  const [menu, setMenu] = useState(false);
   const pathname = usePathname();
   const refresh = usePoll(
     async (signal) => {
@@ -71,33 +148,25 @@ export default function MeetingAccess({
             <small>Mahjong Club @ UVA</small>
           </span>
         </div>
-        <Link href="/" className="meeting-website">
-          Club website ↗
-        </Link>
+        <button
+          type="button"
+          className="meeting-menu-button"
+          aria-haspopup="dialog"
+          onClick={() => setMenu(true)}
+        >
+          <IconMenu2 size={20} aria-hidden="true" />
+          Menu
+        </button>
       </header>
+      {menu && (
+        <MeetingMenu
+          meeting={meeting}
+          pathname={pathname}
+          close={() => setMenu(false)}
+        />
+      )}
       {meeting?.open && (
         <>
-          <nav className="meeting-nav" aria-label="Meeting">
-            {pages(Boolean(meeting.rooms)).map(([href, label]) => (
-              <Link
-                key={href}
-                href={href}
-                aria-current={
-                  // A table's own page belongs under Tables.
-                  pathname
-                    .replace(/\/?$/, "/")
-                    .replace(
-                      /^\/meeting\/table\/\d+\/$/,
-                      MEETING_PATHS.tables,
-                    ) === href
-                    ? "page"
-                    : undefined
-                }
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
           <p className="meeting-status">
             <span className="meeting-live-dot" aria-hidden="true" />
             {meeting.checkinsOpen

@@ -62,23 +62,6 @@ function Hub({ meeting }: { meeting: Meeting }) {
       <Link className="meeting-primary" href={next.href}>
         {next.label}
       </Link>
-      <div className="meeting-quiet-actions">
-        <Link className="meeting-text" href={MEETING_PATHS.standings}>
-          Tonight’s standings
-        </Link>
-        {player && (
-          <button
-            type="button"
-            className="meeting-text"
-            onClick={() => {
-              rememberPlayer(meeting, null);
-              setPlayer(null);
-            }}
-          >
-            Not {player.display.split(" ")[0]}?
-          </button>
-        )}
-      </div>
     </div>
   );
 }

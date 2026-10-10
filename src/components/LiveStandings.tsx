@@ -280,14 +280,8 @@ export function LiveTable({
           >
             {meeting.rooms ? "Back to the tables" : "Record a table"}
           </Link>
-          <div className="meeting-quiet-actions">
-            <Link className="meeting-text" href={MEETING_PATHS.checkin}>
-              Check in
-            </Link>
-          </div>
         </div>
       )}
-      <p className="quiet">Refreshes about every 30 seconds.</p>
     </section>
   );
 }

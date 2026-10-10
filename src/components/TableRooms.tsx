@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
+import Sheet from "@/components/Sheet";
 import { CharacterFace, TileFace } from "@/components/PlayingTile";
 import { BLUE } from "@/components/TileArtwork";
 import {
@@ -188,49 +189,6 @@ function WindTile({ wind }: { wind: number }) {
     <TileFace index={WINDS[wind][0]} indexColour={BLUE}>
       <CharacterFace bottom={WIND_GLYPHS[wind]} ink={BLUE} />
     </TileFace>
-  );
-}
-
-/** A layer over the table. A native dialog, so focus moves in and comes back. */
-function Sheet({
-  title,
-  close,
-  children,
-}: {
-  title: string;
-  close: () => void;
-  children: React.ReactNode;
-}) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const id = useId();
-  useEffect(() => {
-    const element = dialog.current!;
-    element.showModal();
-    return () => element.close();
-  }, []);
-  return (
-    <dialog
-      ref={dialog}
-      className="meeting-calculator table-sheet"
-      aria-labelledby={id}
-      onCancel={(event) => {
-        event.preventDefault();
-        close();
-      }}
-    >
-      <div className="calculator-head">
-        <h2 id={id}>{title}</h2>
-        <button
-          className="meeting-text"
-          type="button"
-          onClick={close}
-          aria-label={`Close ${title}`}
-        >
-          ×
-        </button>
-      </div>
-      {children}
-    </dialog>
   );
 }
 
@@ -1206,34 +1164,6 @@ function Tables({
         <p className="meeting-error" role="alert">
           {error}
         </p>
-      )}
-      <p className="quiet tables-footer">
-        Playing as {player.display}{" "}
-        <button
-          type="button"
-          className="meeting-text"
-          disabled={busy || Boolean(mine)}
-          onClick={() => {
-            rememberPlayer(meeting, null);
-            setPlayer(null);
-          }}
-        >
-          Not you?
-        </button>
-        {!(table !== undefined && mine?.table === table) && (
-          <button
-            type="button"
-            className="meeting-text"
-            onClick={() => setSheet(true)}
-          >
-            Tonight’s standings
-          </button>
-        )}
-      </p>
-      {table === undefined && !mine && (
-        <Link className="meeting-text" href={MEETING_PATHS.score}>
-          Played without a table? Enter final totals
-        </Link>
       )}
       {sheet && (
         <StandingsSheet
