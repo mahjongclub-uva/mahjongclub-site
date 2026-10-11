@@ -216,6 +216,8 @@ export function savedPlayer(meeting: Meeting): Player | null {
     return null;
   }
 }
+/** Fired when this phone's player changes, so the header can follow. */
+export const PLAYER_EVENT = "club-player";
 export function rememberPlayer(meeting: Meeting, player: Player | null) {
   try {
     if (player) sessionStorage.setItem(CONFIRMED, "1");
@@ -227,6 +229,7 @@ export function rememberPlayer(meeting: Meeting, player: Player | null) {
   } catch {
     /* The page still works until it reloads. */
   }
+  window.dispatchEvent(new Event(PLAYER_EVENT));
 }
 export const DRAFT_STORAGE = "club-table-draft";
 export const draftSchema = z.object({

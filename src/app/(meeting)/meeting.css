@@ -1,5 +1,6 @@
 /* The focused meeting flow shares the site's fonts and tile colors. */
 .meeting-page {
+  inline-size: 100%;
   max-width: 480px;
   min-height: 100dvh;
   margin: auto;
@@ -19,41 +20,54 @@
 .meeting-page p {
   margin: 0;
 }
+/* One slim line: the club mark (home), tonight's date and headcount, and
+   the player this phone belongs to. */
 .meeting-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 20px 0 14px;
+  gap: 10px;
+  min-block-size: 64px;
+  margin-block-end: 24px;
   border-bottom: 1px solid var(--rule);
 }
 .meeting-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+  display: grid;
+  place-items: center;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  flex-shrink: 0;
 }
 .meeting-brand img {
   border-radius: 50%;
-  flex-shrink: 0;
-}
-.meeting-brand strong {
-  display: block;
-  font: 700 1.3rem/1.15 var(--display);
-}
-.meeting-brand small {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--ink-soft);
-  margin-top: 4px;
 }
 .meeting-status {
-  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: clip;
+  text-overflow: ellipsis;
+}
+.meeting-page .meeting-you {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--jade);
-  padding: 14px 0 26px;
+  gap: 4px;
+  min-inline-size: 0;
+  max-inline-size: 50%;
+  min-block-size: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 0.9rem var(--body);
+  white-space: nowrap;
+}
+.meeting-you span {
+  min-inline-size: 0;
+  overflow: clip;
+  text-overflow: ellipsis;
 }
 .meeting-live-dot {
   width: 8px;
@@ -139,11 +153,11 @@
   justify-content: center;
   width: 100%;
   min-height: 52px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--jade);
-  color: var(--tile-face-hi);
-  font: 600 0.97rem/1.4 var(--body);
+  border: 1px solid var(--tile-rim);
+  border-radius: var(--control-radius);
+  background: linear-gradient(var(--tile-face-hi), var(--tile-face));
+  color: var(--ink);
+  font: 700 1.02rem/1.4 var(--body);
   padding: 12px 18px;
   text-decoration: none;
   text-align: center;
@@ -162,10 +176,12 @@
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: var(--jade);
+  color: var(--ink);
   font-size: 0.85rem;
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline 1px
+    color-mix(in oklch, var(--ink) 30%, transparent);
+  text-underline-offset: 4px;
 }
 .meeting-back {
   margin-bottom: 20px;
@@ -267,17 +283,14 @@
   justify-items: center;
   gap: 8px;
   min-height: 100px;
-  border: 1px dashed var(--rule);
-  border-radius: 14px;
+  border-block-end: 1px solid var(--rule);
   font-size: 0.73rem;
   text-align: center;
   padding: 6px;
   overflow-wrap: anywhere;
 }
 .meeting-seat.filled {
-  border-style: solid;
-  border-bottom: 3px solid #cabda5;
-  background: var(--tile-face-hi);
+  border-block-end-color: var(--ink-soft);
 }
 .meeting-lobby {
   display: flex;
@@ -298,11 +311,11 @@
   align-items: center;
   gap: 9px;
   min-width: 0;
-  min-height: 62px;
-  border: 1px solid var(--rule);
-  border-radius: 14px;
-  padding: 10px 12px;
-  background: var(--tile-face-hi);
+  min-height: 56px;
+  border: 0;
+  border-block-end: 1px solid var(--rule);
+  padding: 8px 4px 8px 10px;
+  background: none;
   color: var(--ink);
   text-align: left;
   font-size: 0.9rem;
@@ -317,30 +330,21 @@
   font-size: 0.72rem;
   color: var(--tile-letter);
 }
-.player-chips [aria-pressed="true"] .chip-room {
-  color: inherit;
-}
 .player-chips small {
   margin-left: auto;
   color: var(--tile-letter);
 }
+/* Picked: a tile-red rule at the edge and a heavier name, like the
+   seated-you rows elsewhere. */
 .player-chips [aria-pressed="true"] {
-  border-color: var(--jade);
-  background: var(--jade);
-  color: var(--tile-face-hi);
-  box-shadow: 0 3px 0 #203d30;
-}
-.player-chips [aria-pressed="true"] small {
-  color: inherit;
+  box-shadow: inset 3px 0 var(--tile-letter);
+  font-weight: 700;
 }
 .score-rows {
   margin-top: 28px;
   padding: 0;
   list-style: none;
-  border: 1px solid var(--rule);
-  border-radius: 18px;
-  background: var(--tile-face-hi);
-  overflow: hidden;
+  border-block: 1px solid var(--rule);
 }
 .score-row {
   display: flex;
@@ -379,10 +383,11 @@
 .meeting-page summary {
   min-height: 44px;
   cursor: pointer;
-  color: var(--jade);
+  color: var(--ink);
   padding: 12px 0;
 }
-/* Native dialogs open and close immediately; animating the container broke modal dismissal in rehearsal. */
+/* Closing stays instant: animating a dialog's exit broke dismissal in
+   rehearsal. Opening rises in; see "Sheets rise" at the end. */
 .meeting-calculator {
   position: fixed;
   inset: auto 0 0;
@@ -393,9 +398,9 @@
   overflow: auto;
   border: 1px solid var(--rule);
   border-bottom: 0;
-  border-radius: 26px 26px 0 0;
+  border-radius: 16px 16px 0 0;
   padding: 22px 24px calc(24px + env(safe-area-inset-bottom));
-  background: var(--tile-face-hi);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--body);
 }
@@ -418,6 +423,7 @@
 }
 .calculator-head button {
   min-width: 44px;
+  text-decoration: none !important;
   font-size: 1.5rem !important;
 }
 .meeting-calculator .quiet {
@@ -444,8 +450,7 @@
     text-underline-offset: 4px;
   }
   .player-chips button:hover:not(:disabled) {
-    border-color: var(--jade);
-    box-shadow: 0 3px 0 #203d30;
+    border-color: var(--ink-soft);
   }
 }
 @keyframes tile-stamp {
@@ -479,7 +484,7 @@
       box-shadow 120ms ease-out,
       transform 120ms ease-out;
   }
-  .meeting-page a:active {
+  .meeting-page a:active:not(.meeting-primary) {
     transform: scale(0.97);
   }
   .meeting-seat.filled {
@@ -494,8 +499,8 @@
   .meeting-tiles > span:last-child {
     animation-delay: 90ms;
   }
-  .meeting-page button:active:not(:disabled),
-  .meeting-calculator button:active:not(:disabled) {
+  .meeting-page button:active:not(:disabled, .meeting-primary),
+  .meeting-calculator button:active:not(:disabled, .meeting-primary) {
     transform: scale(0.97);
   }
 }
@@ -503,7 +508,7 @@
   .meeting-calculator {
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
-    border-radius: 24px;
+    border-radius: 16px;
     border-bottom: 1px solid var(--rule);
     max-height: 92dvh;
   }
@@ -511,16 +516,6 @@
 @media (max-width: 374px) {
   .meeting-page {
     padding-inline: 18px;
-  }
-  .meeting-brand strong {
-    font-size: 1.1rem;
-  }
-  .meeting-brand small {
-    font-size: 0.62rem;
-  }
-  .meeting-brand img {
-    width: 30px;
-    height: 30px;
   }
   .player-chips button {
     padding: 8px;
@@ -607,8 +602,11 @@
 }
 .live-you strong {
   font: 700 2.2rem var(--display);
-  color: var(--jade);
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
+}
+.live-you strong[data-sign="-1"] {
+  color: var(--tile-letter);
 }
 .live-you span:last-child {
   font-size: 0.85rem;
@@ -639,10 +637,11 @@
   justify-content: center;
   min-height: 48px;
   padding: 10px 16px;
-  border: 1px solid var(--jade);
-  border-radius: 8px;
-  background: var(--tile-face-hi);
-  color: var(--jade);
+  gap: 6px;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--control-radius);
+  background: none;
+  color: var(--ink);
   font: 600 0.95rem var(--body);
   text-decoration: none;
   text-align: center;
@@ -672,18 +671,21 @@
   opacity: 0.7;
 }
 @media (hover: hover) and (pointer: fine) {
-  .meeting-page .meeting-secondary:hover:not(:disabled),
-  .meeting-page .meeting-primary:hover:not(:disabled) {
-    background: #203d30;
-    color: var(--tile-face-hi);
+  .meeting-page .meeting-secondary:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
+  .meeting-page .meeting-primary:hover:not(:disabled),
+  .meeting-calculator .meeting-primary:hover:not(:disabled) {
+    background: var(--tile-face-hi);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
   .meeting-page .meeting-primary,
   .meeting-page .meeting-secondary {
     transition:
-      background-color 150ms ease-out,
-      color 150ms ease-out;
+      transform 120ms var(--ease-out),
+      box-shadow 120ms var(--ease-out),
+      border-color 150ms ease;
   }
   .meeting-check {
     animation: tile-stamp 280ms ease-out;
@@ -778,14 +780,27 @@
   user-select: none;
   touch-action: manipulation;
 }
+/* The main action is a tile: an ivory face on a celadon side, pressed down
+   like one. Disabled, it lies flat. */
 .meeting-page .meeting-primary,
 .meeting-calculator .meeting-primary {
-  box-shadow: 0 4px 0 #203d30;
+  box-shadow:
+    0 var(--control-depth) 0 var(--tile-edge),
+    0 calc(var(--control-depth) + 3px) 8px -2px oklch(0.3 0.04 160 / 0.25);
 }
 .meeting-page .meeting-primary:active:not(:disabled),
 .meeting-calculator .meeting-primary:active:not(:disabled) {
-  box-shadow: 0 1px 0 #203d30;
-  background: #203d30;
+  transform: translateY(var(--control-press));
+  box-shadow: 0 calc(var(--control-depth) - var(--control-press)) 0
+    var(--tile-edge);
+}
+.meeting-page .meeting-primary:disabled,
+.meeting-calculator .meeting-primary:disabled {
+  opacity: 1;
+  background: none;
+  border-color: var(--rule);
+  box-shadow: none;
+  color: var(--ink-soft);
 }
 .meeting-seat-button {
   width: 100%;
@@ -810,7 +825,7 @@
   bottom: calc(-24px - env(safe-area-inset-bottom));
   padding: 12px 0 calc(16px + env(safe-area-inset-bottom));
   margin-bottom: calc(-24px - env(safe-area-inset-bottom));
-  background: var(--tile-face-hi);
+  background: var(--paper);
 }
 .calculator-footer .meeting-primary {
   margin-top: 0;
@@ -838,6 +853,7 @@
 .meeting-page {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --short: oklch(0.45 0.09 245);
   --over: var(--tile-letter);
 }
@@ -867,7 +883,7 @@
   background: var(--rule);
 }
 .score-steps li:not(:first-child)::after {
-  background: var(--jade);
+  background: var(--ink);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -881,7 +897,7 @@
   place-items: center;
   inline-size: 28px;
   block-size: 28px;
-  border: 2px solid var(--rule);
+  border: 1px solid var(--rule);
   border-radius: 50%;
   background: var(--paper);
   font-weight: 700;
@@ -890,11 +906,13 @@
   color: var(--ink);
   font-weight: 600;
 }
-.score-steps [aria-current="step"] .score-step-dot,
 .score-steps [data-done="true"] .score-step-dot {
-  border-color: var(--jade);
-  background: var(--jade);
-  color: var(--tile-face-hi);
+  border-color: var(--ink);
+}
+.score-steps [aria-current="step"] .score-step-dot {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 .score-form > h1:focus-visible {
   outline-offset: 6px;
@@ -915,9 +933,6 @@
 }
 .score-net {
   justify-self: start;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: oklch(0.93 0.01 85);
   color: var(--ink-soft);
   font-size: 0.74rem;
   font-weight: 600;
@@ -925,11 +940,9 @@
   white-space: nowrap;
 }
 .score-net[data-sign="1"] {
-  background: color-mix(in oklch, var(--jade) 14%, var(--tile-face-hi));
   color: var(--jade);
 }
 .score-net[data-sign="-1"] {
-  background: color-mix(in oklch, var(--tile-letter) 12%, var(--tile-face-hi));
   color: var(--tile-letter);
 }
 .score-net:empty {
@@ -951,13 +964,12 @@
   min-block-size: 50px;
   border: 1px solid var(--rule);
   border-block-end-width: 3px;
-  border-radius: 10px;
+  border-radius: var(--control-radius);
   background: var(--paper);
-  color: var(--jade);
+  color: var(--ink);
 }
 .total-field .sign-toggle[aria-pressed="true"] {
   border-color: var(--tile-letter);
-  background: color-mix(in oklch, var(--tile-letter) 12%, var(--tile-face-hi));
   color: var(--tile-letter);
 }
 .meeting-page .total-field input {
@@ -983,7 +995,7 @@
   --tone: var(--over);
 }
 .score-balance[data-state="ok"] {
-  --tone: var(--jade);
+  --tone: var(--ink);
 }
 .score-balance .score-progress-track {
   grid-column: 1 / -1;
@@ -1048,7 +1060,7 @@
   border-block-end-width: 3px;
   border-radius: 6px;
   background: var(--paper);
-  color: var(--jade);
+  color: var(--ink);
   font: 700 1rem var(--display);
   text-align: center;
   white-space: nowrap;
@@ -1075,9 +1087,9 @@
   place-items: center;
   min-block-size: 44px;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: var(--control-radius);
   background: var(--paper);
-  color: var(--jade);
+  color: var(--ink);
 }
 .meeting-calculator .card-stepper input {
   min-block-size: 44px;
@@ -1118,7 +1130,7 @@
 @media (hover: hover) and (pointer: fine) {
   .total-field button:hover:not(:disabled),
   .card-stepper button:hover:not(:disabled) {
-    border-color: var(--jade);
+    border-color: var(--ink-soft);
   }
 }
 
@@ -1190,12 +1202,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-block-start: 10px;
   border-block-end: 1px solid var(--rule);
-}
-.meeting-headcount {
-  margin-inline-start: auto;
-  color: var(--ink-soft);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
 }
 .meeting-loading {
   display: grid;
@@ -1419,7 +1425,7 @@
   gap: 10px;
   margin-block-end: 18px;
   padding: 4px 0 4px 14px;
-  border-inline-start: 3px solid var(--jade);
+  border-inline-start: 3px solid var(--ink);
   color: var(--ink);
   font-weight: 600;
   font-size: 0.88rem;
@@ -1479,7 +1485,6 @@
   font-variant-numeric: tabular-nums;
 }
 .meeting-avatar.empty {
-  border-style: dashed;
   color: var(--ink-soft);
 }
 .meeting-page .hand-each {
@@ -1503,6 +1508,12 @@
     animation-delay: calc(var(--i, 0) * 50ms);
   }
   .room-saved {
+    animation: score-row-in 240ms var(--ease-out);
+  }
+  /* A newly saved game: the latest line and each seat's total settle in, so
+     a game saved on another phone reads as a change, not a jump. */
+  .table-latest > span,
+  .seat-total {
     animation: score-row-in 240ms var(--ease-out);
   }
 }
@@ -1665,51 +1676,88 @@ button.seat[data-empty] .seat-name {
   }
 }
 
-/* One Menu button in the header instead of tabs and loose links. */
-.meeting-page .meeting-menu-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-block-size: 44px;
-  padding: 0 4px;
-  border: 0;
-  background: none;
-  color: var(--ink);
-  font: 600 0.88rem var(--body);
-}
-.menu-player {
-  display: grid;
-  justify-items: start;
-  gap: 2px;
-  padding-block: 4px 12px;
-  border-block-end: 1px solid var(--rule);
-}
+/* The player sheet: two ruled rows. */
 .menu-links {
   list-style: none;
   padding: 0;
-  margin-block: 8px;
+  margin-block: 8px 0;
 }
-.menu-links a {
+.menu-links :is(a, button) {
   display: flex;
   align-items: center;
-  min-block-size: 48px;
+  inline-size: 100%;
+  min-block-size: 52px;
+  padding: 0;
+  border: 0;
   border-block-end: 1px solid var(--rule);
+  background: none;
   color: var(--ink);
   font: 700 1.15rem var(--display);
+  text-align: start;
   text-decoration: none;
 }
-.menu-links a[aria-current="page"] {
-  text-decoration: underline 2px var(--tile-letter);
-  text-underline-offset: 5px;
-}
-.menu-quiet a {
+.menu-links li:last-child :is(a, button) {
+  border: 0;
   font: 500 0.92rem var(--body);
   color: var(--ink-soft);
 }
 @media (hover: hover) and (pointer: fine) {
-  .menu-links a:hover,
-  .meeting-page .meeting-menu-button:hover {
+  .menu-links :is(a, button):hover,
+  .meeting-page .meeting-you:hover {
     text-decoration: underline 2px var(--tile-letter);
     text-underline-offset: 5px;
+  }
+}
+
+/* Lobby: the way back to your own table, and the typed-totals fallback. */
+.room-return {
+  display: grid;
+  gap: 12px;
+  margin-block: 18px 8px;
+}
+.meeting-page .lobby-fallback {
+  margin-block-start: 28px;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+.game-rows li {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.game-rows strong {
+  white-space: nowrap;
+}
+
+/* Sheets rise from the bottom edge when they open. Entry only: closing a
+   native dialog stays instant, which kept dismissal reliable. The `translate`
+   property leaves the desktop centring transform alone. */
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-calculator[open] {
+    animation: sheet-rise 280ms var(--ease-drawer);
+  }
+  .meeting-calculator[open]::backdrop {
+    animation: sheet-dim 280ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meeting-calculator[open] {
+    animation: sheet-dim 160ms ease-out;
+  }
+}
+@keyframes sheet-rise {
+  from {
+    translate: 0 100%;
+  }
+}
+@media (min-width: 700px) {
+  @keyframes sheet-rise {
+    from {
+      translate: 0 24px;
+      opacity: 0;
+    }
+  }
+}
+@keyframes sheet-dim {
+  from {
+    opacity: 0;
   }
 }

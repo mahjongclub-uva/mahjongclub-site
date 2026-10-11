@@ -227,7 +227,8 @@ function CheckInForm({
         <div>
           <label htmlFor="computing-id">UVA computing ID</label>
           <p className="field-hint" id="computing-id-hint">
-            The part before @virginia.edu, for example abc2de.
+            The part before @virginia.edu, for example abc2de. No UVA ID? An
+            officer can check you in.
           </p>
           <input
             id="computing-id"

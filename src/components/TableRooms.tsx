@@ -253,7 +253,8 @@ function TableSquare({
               {own && <small> you</small>}
             </span>
             {seat && games > 0 && !pick && (
-              <span className="seat-total">
+              // Keyed by the latest game, so a new game settles in.
+              <span className="seat-total" key={latest?.id}>
                 {minus(total)}
                 {change !== null && (
                   <small className="delta" data-sign={Math.sign(change)}>
@@ -388,25 +389,28 @@ type Draft = {
   handId: string;
 };
 
-/** Plain ruled rows of each player's change, for review and End table. */
+/** Each seat's change and where it leaves them. Without `change`, the
+ * change is the whole table's net so far. */
 function ChangeRows({
   room,
   change,
 }: {
   room: Room;
-  change: (id: string) => number;
+  change?: (id: string) => number;
 }) {
   const total = (id: string) =>
     room.totals.find((item) => item.id === id)?.total ?? START;
+  const delta = (id: string) => (change ? change(id) : total(id) - START);
+  const after = (id: string) => total(id) + (change ? change(id) : 0);
   return (
     <ul className="change-rows">
       {room.seats.map((seat) => (
         <li key={seat.id}>
           <span>{seat.display}</span>
-          <span className="delta" data-sign={Math.sign(change(seat.id))}>
-            {signed(change(seat.id))}
+          <span className="delta" data-sign={Math.sign(delta(seat.id))}>
+            {signed(delta(seat.id))}
           </span>
-          <strong>{minus(total(seat.id) + change(seat.id))}</strong>
+          <strong>{minus(after(seat.id))}</strong>
         </li>
       ))}
     </ul>
@@ -533,10 +537,10 @@ function SeatedTable({
     <>
       {latest ? (
         <p className="table-latest" role="status">
-          <span>
+          <span key={latest.id}>
             Game {games}: {name(latest.winner)} won, {latest.each} from each
           </span>
-          <span>
+          <span key={`you-${latest.id}`}>
             You{" "}
             <b className="delta" data-sign={Math.sign(mineNow)}>
               {signed(mineNow)}
@@ -711,7 +715,7 @@ function SeatedTable({
 
       {layer === "games" && (
         <Sheet title="Games at this table" close={() => setLayer(null)}>
-          <ol className="change-rows" reversed>
+          <ol className="change-rows game-rows" reversed>
             {room.hands
               .map((hand, i) => ({ hand, number: i + 1 }))
               .reverse()
@@ -748,7 +752,7 @@ function SeatedTable({
               ? `It ends for all four players. ${games} ${games === 1 ? "game goes" : "games go"} to the club’s scoresheet as one table with these totals, then every seat is freed. Table ${room.table} stays open for the next group.`
               : "It ends for all four players. No games were saved, so nothing goes to the scoresheet."}
           </p>
-          {games > 0 && <ChangeRows room={room} change={() => 0} />}
+          {games > 0 && <ChangeRows room={room} />}
           {entering && (
             <p className="meeting-notice">
               Someone’s game entry on this phone isn’t saved yet. Save or clear
@@ -811,6 +815,11 @@ function Lobby({
   );
   return (
     <>
+      <h1>Tables tonight.</h1>
+      <p className="meeting-intro">
+        Sit with three others. Anyone at the table records each game: who won
+        and what each other player pays.
+      </p>
       {mine ? (
         <div className="room-return">
           <p>You’re seated at Table {mine.table}.</p>
@@ -826,11 +835,6 @@ function Lobby({
           <EndedReceipt ended={ended.ended} room={ended.table} you={you} />
         )
       )}
-      <h1>Tables tonight.</h1>
-      <p className="meeting-intro">
-        Sit with three others. Anyone at the table records each game: who won
-        and what each other player pays.
-      </p>
       {open.length > 0 ? (
         <ul className="room-list" aria-label="Tables in play">
           {open.map((room, i) => {
@@ -888,6 +892,9 @@ function Lobby({
           Open Table {next}
         </Link>
       )}
+      <Link className="meeting-text lobby-fallback" href={MEETING_PATHS.score}>
+        Played without a table? Enter final totals
+      </Link>
     </>
   );
 }

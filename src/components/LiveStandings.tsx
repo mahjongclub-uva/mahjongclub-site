@@ -174,7 +174,9 @@ export function LiveTable({
       {showTonight && mineTonight && (
         <p className="live-you">
           <span>You tonight</span>
-          <strong>{signed(mineTonight.net)}</strong>
+          <strong data-sign={Math.sign(mineTonight.net)}>
+            {signed(mineTonight.net)}
+          </strong>
           <span>
             #{mineTonight.rank} of {tonight.length} · {mineTonight.tables}{" "}
             {mineTonight.tables === 1 ? "table" : "tables"}

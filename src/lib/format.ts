@@ -8,6 +8,16 @@ export function formatDate(iso: string): string {
   });
 }
 
+/** "2026-09-30" -> "Wed 30 Sept", for the meeting header. */
+export function formatShortDate(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
 /** Pinned rather than read from the environment, since `next build` runs on a
  * GitHub runner in UTC and meeting times must render in the club's zone. */
 const CLUB_TZ = "America/New_York";

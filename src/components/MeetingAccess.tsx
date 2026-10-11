@@ -1,101 +1,56 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { IconMenu2 } from "@tabler/icons-react";
+import { useEffect, useReducer, useState, type ReactNode } from "react";
+import { IconChevronDown } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
 import {
   getMeeting,
+  playerConfirmed,
+  PLAYER_EVENT,
   rememberPlayer,
   requestError,
   savedPlayer,
   type Meeting,
+  type Player,
   MEETING_PATHS,
 } from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { formatDate } from "@/lib/format";
+import { formatShortDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 
-/**
- * Everything that is not the page's one main action, in one layer: who this
- * phone is, the other meeting pages, the typed-totals fallback and the club
- * website. It replaces a row of tabs and the links scattered under each page.
- */
-function MeetingMenu({
+/** Who this phone is playing as, and the two things that belong to them:
+ * tonight's standings and switching player. */
+function PlayerSheet({
   meeting,
-  pathname,
+  player,
   close,
 }: {
-  meeting: Meeting | null;
-  pathname: string;
+  meeting: Meeting;
+  player: Player;
   close: () => void;
 }) {
-  const player = meeting && savedPlayer(meeting);
-  const seatedAt = meeting?.rooms?.find((room) =>
-    room.seats.some((seat) => seat.id === player?.id),
-  )?.table;
-  const here = pathname.replace(/\/?$/, "/");
-  const links: [string, string][] = meeting?.open
-    ? [
-        [MEETING_PATHS.hub, "Tonight’s meeting"],
-        [MEETING_PATHS.checkin, "Check in"],
-        seatedAt
-          ? [MEETING_PATHS.table(seatedAt), `Your table: Table ${seatedAt}`]
-          : meeting.rooms
-            ? [MEETING_PATHS.tables, "Tables"]
-            : [MEETING_PATHS.score, "Record a table"],
-        [MEETING_PATHS.standings, "Tonight’s standings"],
-      ]
-    : [];
   return (
-    <Sheet title="Menu" close={close}>
-      {player && (
-        <p className="menu-player">
-          <span>
-            Playing as <strong>{player.display}</strong>
-          </span>
+    <Sheet title={player.display} close={close}>
+      <ul className="menu-links">
+        <li>
+          <Link href={MEETING_PATHS.standings} onClick={close}>
+            Tonight’s standings
+          </Link>
+        </li>
+        <li>
           <button
             type="button"
-            className="meeting-text"
             onClick={() => {
-              rememberPlayer(meeting!, null);
+              rememberPlayer(meeting, null);
               window.location.assign(MEETING_PATHS.checkin);
             }}
           >
             Not you? Switch player
           </button>
-        </p>
-      )}
-      {links.length > 0 && (
-        <ul className="menu-links">
-          {links.map(([href, label]) => (
-            <li key={href}>
-              <Link
-                href={href}
-                aria-current={here === href ? "page" : undefined}
-                onClick={close}
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      <ul className="menu-links menu-quiet">
-        {meeting?.rooms && (
-          <li>
-            <Link href={MEETING_PATHS.score} onClick={close}>
-              Played without a table? Enter final totals
-            </Link>
-          </li>
-        )}
-        <li>
-          <Link href="/">Club website</Link>
         </li>
       </ul>
-      <p className="quiet">No UVA computing ID? An officer can check you in.</p>
     </Sheet>
   );
 }
@@ -109,8 +64,12 @@ export default function MeetingAccess({
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
   const [checkedAt, setCheckedAt] = useState("");
-  const [menu, setMenu] = useState(false);
-  const pathname = usePathname();
+  const [sheet, setSheet] = useState(false);
+  const [, playerChanged] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    window.addEventListener(PLAYER_EVENT, playerChanged);
+    return () => window.removeEventListener(PLAYER_EVENT, playerChanged);
+  }, []);
   const refresh = usePoll(
     async (signal) => {
       setChecking(true);
@@ -134,51 +93,44 @@ export default function MeetingAccess({
     60000,
     [],
   );
+  // Read on every render; PLAYER_EVENT re-renders when the player changes.
+  // Waits for "Continue as" on a phone reopened in a new session.
+  const player =
+    meeting?.open && playerConfirmed() ? savedPlayer(meeting) : null;
   return (
     <div className="meeting-access">
       <header className="meeting-header">
-        <div className="meeting-brand">
-          {LOGO && <Image src={LOGO} alt="" width={36} height={36} />}
-          <span>
-            <strong>
-              {meeting?.date
-                ? `${formatDate(meeting.date)} - Meeting`
-                : "Mahjong meeting"}
-            </strong>
-            <small>Mahjong Club @ UVA</small>
-          </span>
-        </div>
-        <button
-          type="button"
-          className="meeting-menu-button"
-          aria-haspopup="dialog"
-          onClick={() => setMenu(true)}
-        >
-          <IconMenu2 size={20} aria-hidden="true" />
-          Menu
-        </button>
+        <Link className="meeting-brand" href="/">
+          {LOGO && <Image src={LOGO} alt="" width={32} height={32} />}
+          <span className="sr-only">Mahjong Club @ UVA website</span>
+        </Link>
+        <p className="meeting-status">
+          {meeting?.open && meeting.date
+            ? `${formatShortDate(meeting.date)} · ${
+                meeting.checkinsOpen
+                  ? `${meeting.players?.length ?? 0} here`
+                  : "Scores still open"
+              }`
+            : "Mahjong Club @ UVA"}
+        </p>
+        {player && (
+          <button
+            type="button"
+            className="meeting-you"
+            aria-haspopup="dialog"
+            onClick={() => setSheet(true)}
+          >
+            <span>{player.display}</span>
+            <IconChevronDown size={16} aria-hidden="true" />
+          </button>
+        )}
       </header>
-      {menu && (
-        <MeetingMenu
+      {sheet && meeting && player && (
+        <PlayerSheet
           meeting={meeting}
-          pathname={pathname}
-          close={() => setMenu(false)}
+          player={player}
+          close={() => setSheet(false)}
         />
-      )}
-      {meeting?.open && (
-        <>
-          <p className="meeting-status">
-            <span className="meeting-live-dot" aria-hidden="true" />
-            {meeting.checkinsOpen
-              ? "We’re playing right now!"
-              : "Scores are still open"}
-            {meeting.players && (
-              <span className="meeting-headcount">
-                {meeting.players.length} checked in
-              </span>
-            )}
-          </p>
-        </>
       )}
       {error && (
         <div className="meeting-notice" role="alert">
