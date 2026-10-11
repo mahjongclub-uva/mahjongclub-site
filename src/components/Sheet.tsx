@@ -16,8 +16,14 @@ export default function Sheet({
   const id = useId();
   useEffect(() => {
     const element = dialog.current!;
+    // React removes the dialog before this cleanup runs, so the browser
+    // cannot return focus itself; hand it back to what opened the sheet.
+    const opener = document.activeElement as HTMLElement | null;
     element.showModal();
-    return () => element.close();
+    return () => {
+      element.close();
+      opener?.focus();
+    };
   }, []);
   return (
     <dialog
