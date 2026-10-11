@@ -2,12 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { IconArrowBackUp, IconCheck } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconCheck,
+  IconFlag,
+  IconHistory,
+} from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
 import Sheet from "@/components/Sheet";
-import { CharacterFace, TileFace } from "@/components/PlayingTile";
-import { BLUE } from "@/components/TileArtwork";
+import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
+import { BACKS } from "@/lib/avatar";
 import {
   cleanComputingId,
   computingIdError,
@@ -183,19 +188,39 @@ function EndedReceipt({
 
 const WIND_GLYPHS = ["東", "南", "西", "北"];
 
-/** A seat's wind as the club's own tile artwork, as on the guide. */
-function WindTile({ wind }: { wind: number }) {
+/** The winner's moment: a sticker and a small burst of tiles from their seat. */
+function Cheer({ you }: { you: boolean }) {
   return (
-    <TileFace index={WINDS[wind][0]} indexColour={BLUE}>
-      <CharacterFace bottom={WIND_GLYPHS[wind]} ink={BLUE} />
-    </TileFace>
+    <span className="seat-cheer" aria-hidden="true">
+      <b>{you ? "You won!" : "Winner!"}</b>
+      <span className="seat-burst">
+        {Array.from({ length: 10 }, (_, i) => {
+          const angle = (i / 10) * 2 * Math.PI;
+          const reach = 46 + (i % 3) * 14;
+          return (
+            <i
+              key={i}
+              style={
+                {
+                  "--x": `${Math.round(Math.cos(angle) * reach)}px`,
+                  "--y": `${Math.round(Math.sin(angle) * reach)}px`,
+                  "--spin": `${i % 2 ? 160 : -160}deg`,
+                  "--c": Object.values(BACKS)[i % 5],
+                } as React.CSSProperties
+              }
+            />
+          );
+        })}
+      </span>
+    </span>
   );
 }
 
 /**
- * The physical table as a square of wind tiles, East at the bottom and the
- * winds going counter-clockwise as at a mahjong table. Every phone draws the
- * same picture, so a wind names one real chair for the whole group.
+ * The physical table as a square of seats, East at the bottom and the winds
+ * going counter-clockwise as at a mahjong table. Every phone draws the same
+ * picture, so a wind names one real chair for the whole group; an open chair
+ * shows its wind, a taken one its player's tile.
  */
 function TableSquare({
   room,
@@ -206,6 +231,7 @@ function TableSquare({
   sit,
   tapOwn,
   pick,
+  cheer,
 }: {
   room: Room | undefined;
   table: number;
@@ -216,6 +242,8 @@ function TableSquare({
   tapOwn?: () => void;
   // In the game sheet, any occupied tile is chosen as the winner.
   pick?: { winner: string; choose: (id: string) => void };
+  // The winner of a game that was just saved, while their moment lasts.
+  cheer?: string;
 }) {
   const latest = room?.hands.at(-1);
   const games = room?.hands.length ?? 0;
@@ -246,8 +274,13 @@ function TableSquare({
         const body = (
           <>
             <span className="seat-tile">
-              <WindTile wind={i} />
+              {seat ? (
+                <PlayerTile id={seat.id} />
+              ) : (
+                <EmptyTile glyph={WIND_GLYPHS[i]} />
+              )}
             </span>
+            {seat && !pick && cheer === seat.id && <Cheer you={own} />}
             <span className="seat-name">
               {seat ? seat.display : canSit && !pick ? "Take seat" : "Open"}
               {own && <small> you</small>}
@@ -267,12 +300,14 @@ function TableSquare({
           </>
         );
         const label = `${wind}: ${seat ? seat.display : "open seat"}`;
+        const cheering = (!pick && seat && cheer === seat.id) || undefined;
         if (pick && seat)
           return (
             <button
               type="button"
               className="seat"
               data-wind={wind}
+              data-cheer={cheering}
               key={wind}
               aria-pressed={pick.winner === seat.id}
               aria-label={`${seat.display} won`}
@@ -304,6 +339,7 @@ function TableSquare({
               type="button"
               className="seat"
               data-wind={wind}
+              data-cheer={cheering}
               data-you
               key={wind}
               disabled={busy}
@@ -317,6 +353,7 @@ function TableSquare({
           <div
             className="seat"
             data-wind={wind}
+            data-cheer={cheering}
             data-empty={!seat || undefined}
             key={wind}
             aria-label={label}
@@ -326,56 +363,6 @@ function TableSquare({
         );
       })}
     </div>
-  );
-}
-
-/** Tonight's standings, opened over the table and closed back to it. */
-function StandingsSheet({
-  tables,
-  you,
-  close,
-}: {
-  tables: ResultTable[];
-  you: string;
-  close: () => void;
-}) {
-  const rows = tonightStandings(tables);
-  return (
-    <Sheet title="Tonight" close={close}>
-      <p className="quiet">
-        Each player’s net tonight. Games at tables still playing are included
-        and stay provisional until an officer publishes them.
-      </p>
-      {rows.length ? (
-        <ol className="live-list" aria-label="Tonight’s standings">
-          {rows.map((row) => (
-            <li key={row.id} data-you={row.id === you || undefined}>
-              <span className="live-rank">{row.rank}</span>
-              <span className="score-name">
-                {row.display}
-                {row.id === you && " (you)"}
-                <small>
-                  {row.tables} {row.tables === 1 ? "table" : "tables"} tonight
-                </small>
-              </span>
-              <strong className={`live-points${row.net < 0 ? " down" : ""}`}>
-                {signed(row.net)}
-              </strong>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="meeting-notice">No games saved yet tonight.</p>
-      )}
-      <div className="calculator-footer">
-        <button type="button" className="meeting-primary" onClick={close}>
-          Back to the table
-        </button>
-        <Link className="meeting-text" href={MEETING_PATHS.standings}>
-          Tonight and semester standings
-        </Link>
-      </div>
-    </Sheet>
   );
 }
 
@@ -427,7 +414,6 @@ function SeatedTable({
   error,
   tonight,
   act,
-  standings,
 }: {
   meeting: Meeting;
   room: Room;
@@ -437,7 +423,6 @@ function SeatedTable({
   error: string;
   tonight: number | null;
   act: (action: string, extra?: Record<string, unknown>) => Promise<boolean>;
-  standings: () => void;
 }) {
   const last = room.hands.at(-1)?.id ?? null;
   // One draft per table session and game; anything else is discarded with a note.
@@ -588,21 +573,20 @@ function SeatedTable({
           {games > 0 && (
             <button
               type="button"
-              className="meeting-text"
+              className="meeting-chip"
               onClick={() => setLayer("games")}
             >
-              Games ({games})
+              <IconHistory size={20} aria-hidden="true" />
+              Games <span className="chip-count">{games}</span>
             </button>
           )}
-          <button type="button" className="meeting-text" onClick={standings}>
-            Standings
-          </button>
           {(games > 0 || ready) && (
             <button
               type="button"
-              className="meeting-text"
+              className="meeting-chip"
               onClick={() => setLayer("end")}
             >
+              <IconFlag size={20} aria-hidden="true" />
               End table
             </button>
           )}
@@ -714,16 +698,22 @@ function SeatedTable({
       )}
 
       {layer === "games" && (
-        <Sheet title="Games at this table" close={() => setLayer(null)}>
-          <ol className="change-rows game-rows" reversed>
+        <Sheet title="Games" close={() => setLayer(null)}>
+          <ol className="game-rows" reversed>
             {room.hands
               .map((hand, i) => ({ hand, number: i + 1 }))
               .reverse()
               .map(({ hand, number }) => (
                 <li key={hand.id}>
-                  <span>Game {number}</span>
-                  <span>{name(hand.winner)} won</span>
-                  <strong>{hand.each} each</strong>
+                  <span className="game-number">Game {number}</span>
+                  <PlayerTile id={hand.winner} />
+                  <span className="game-winner">
+                    {hand.winner === player.id ? "You" : name(hand.winner)}
+                    <small>won {hand.each} from each</small>
+                  </span>
+                  <strong className="delta" data-sign="1">
+                    +{3 * hand.each}
+                  </strong>
                 </li>
               ))}
           </ol>
@@ -735,7 +725,7 @@ function SeatedTable({
           <div className="calculator-footer">
             <button
               type="button"
-              className="meeting-secondary"
+              className="meeting-chip"
               disabled={busy || offline}
               onClick={() => void act("undo")}
             >
@@ -857,8 +847,12 @@ function Lobby({
                     const seat = room.seats.find((item) => item.wind === w);
                     return (
                       <li key={wind} data-empty={!seat}>
-                        <span className="seat-tile" aria-hidden="true">
-                          <WindTile wind={w} />
+                        <span className="seat-tile">
+                          {seat ? (
+                            <PlayerTile id={seat.id} />
+                          ) : (
+                            <EmptyTile glyph={WIND_GLYPHS[w]} />
+                          )}
                         </span>
                         <span>
                           <span className="sr-only">{wind}: </span>
@@ -915,7 +909,13 @@ function Tables({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [sheet, setSheet] = useState(false);
+  const [seen, setSeen] = useState({ session: "", games: 0 });
+  const [cheer, setCheer] = useState<string>();
+  useEffect(() => {
+    if (!cheer) return;
+    const timer = setTimeout(() => setCheer(undefined), 2600);
+    return () => clearTimeout(timer);
+  }, [cheer]);
   const inFlight = useRef(false);
   // A failed refresh (including the 10 s timeout) is shown instead of a
   // table that silently stops changing, and blocks uncertain score writes.
@@ -1066,6 +1066,15 @@ function Tables({
     );
   const room = table ? rooms.find((item) => item.table === table) : undefined;
   const here = table !== undefined && mine?.table === table;
+  // A game saved at this table, by any phone, cheers its winner. Compared
+  // with the last render rather than an id, so Undo never cheers.
+  const session = room ? `${room.table}-${room.session}` : "";
+  const games = room?.hands.length ?? 0;
+  if (seen.session !== session || seen.games !== games) {
+    setSeen({ session, games });
+    if (seen.session === session && games > seen.games)
+      setCheer(room!.hands.at(-1)!.winner);
+  }
   // You can take a seat when you're not seated, or move within your own
   // table until its first game is saved.
   const canSit =
@@ -1130,6 +1139,7 @@ function Tables({
             you={player.id}
             canSit={canSit}
             busy={busy || roomsFailed}
+            cheer={cheer}
             sit={(wind) => void act("join", { table, seat: wind })}
             tapOwn={() => {
               if (mine?.hands.length)
@@ -1154,7 +1164,6 @@ function Tables({
                 )?.net ?? null
               }
               act={act}
-              standings={() => setSheet(true)}
             />
           )}
           {!mine && (
@@ -1171,13 +1180,6 @@ function Tables({
         <p className="meeting-error" role="alert">
           {error}
         </p>
-      )}
-      {sheet && (
-        <StandingsSheet
-          tables={tonightTables(results, rooms)}
-          you={player.id}
-          close={() => setSheet(false)}
-        />
       )}
     </div>
   );

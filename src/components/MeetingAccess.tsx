@@ -17,6 +17,7 @@ import {
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import Image from "next/image";
+import PlayerTile from "@/components/PlayerTile";
 import { formatShortDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 
@@ -105,13 +106,17 @@ export default function MeetingAccess({
           <span className="sr-only">Mahjong Club @ UVA website</span>
         </Link>
         <p className="meeting-status">
-          {meeting?.open && meeting.date
-            ? `${formatShortDate(meeting.date)} · ${
-                meeting.checkinsOpen
-                  ? `${meeting.players?.length ?? 0} here`
-                  : "Scores still open"
-              }`
-            : "Mahjong Club @ UVA"}
+          {meeting?.open && meeting.date ? (
+            <>
+              <small>Mahjong Club @ UVA</small>
+              <b>
+                {formatShortDate(meeting.date)}
+                {!meeting.checkinsOpen && " · Scores still open"}
+              </b>
+            </>
+          ) : (
+            <b>Mahjong Club @ UVA</b>
+          )}
         </p>
         {player && (
           <button
@@ -120,6 +125,7 @@ export default function MeetingAccess({
             aria-haspopup="dialog"
             onClick={() => setSheet(true)}
           >
+            <PlayerTile id={player.id} />
             <span>{player.display}</span>
             <IconChevronDown size={16} aria-hidden="true" />
           </button>

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { IconCheck } from "@tabler/icons-react";
 import { TileFace, SuitFace } from "@/components/PlayingTile";
+import PlayerTile from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
 import {
@@ -115,13 +115,18 @@ function CheckInForm({
     const here = meeting.players || [];
     return (
       <div className="meeting-receipt">
-        <span className="meeting-check" aria-hidden="true">
-          <IconCheck size={34} stroke={3} />
+        <span className="meeting-hero-tile">
+          <PlayerTile id={player.id} />
         </span>
         <p className="eyebrow" role="status">
           You’re checked in
         </p>
-        <h1>You’re in, {player.display.split(" ")[0]}.</h1>
+        <h1>
+          You’re in,{" "}
+          <span className="meeting-accent">
+            {player.display.split(" ")[0]}!
+          </span>
+        </h1>
         <p>
           {seatedAt
             ? `You’re seated at Table ${seatedAt}.`
@@ -141,8 +146,11 @@ function CheckInForm({
                   data-you={p.id === player.id || undefined}
                   style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
                 >
-                  {p.display}
-                  {p.id === player.id && <small> (you)</small>}
+                  <PlayerTile id={p.id} />
+                  <span>
+                    {p.display}
+                    {p.id === player.id && <small> (you)</small>}
+                  </span>
                 </li>
               ))}
             </ul>
