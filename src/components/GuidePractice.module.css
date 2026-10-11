@@ -26,9 +26,13 @@
   font: 600 0.9rem var(--sans);
   cursor: pointer;
 }
-.lesson button:hover:not(:disabled),
 .lesson button[aria-pressed="true"] {
   background: #e3ecdc;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lesson button:hover:not(:disabled) {
+    background: #e3ecdc;
+  }
 }
 .lesson button:focus-visible {
   outline: 3px solid var(--jade);
@@ -122,9 +126,11 @@
   font-size: 0.8rem;
   font-weight: 700;
 }
-.lesson .seat:hover:not(:disabled) {
-  background: #ffffff15;
-  border-color: #f4da9a90;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .seat:hover:not(:disabled) {
+    background: #ffffff15;
+    border-color: #f4da9a90;
+  }
 }
 .lesson .seat[data-active="true"] {
   background: #e6c88918;
@@ -186,8 +192,10 @@
   padding: 8px;
   border-radius: 14px;
 }
-.lesson .diceButton:hover:not(:disabled) {
-  background: #ffffff15;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .diceButton:hover:not(:disabled) {
+    background: #ffffff15;
+  }
 }
 .dice {
   display: flex;
@@ -248,8 +256,10 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.lesson .stacks button:hover:not(:disabled) {
-  background: #ffffff16;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .stacks button:hover:not(:disabled) {
+    background: #ffffff16;
+  }
 }
 .lesson .stacks button[data-break="true"]::before {
   content: "";
@@ -327,7 +337,7 @@
 }
 .rules summary {
   cursor: pointer;
-  padding: 0.3rem 0;
+  padding: 0.75rem 0;
 }
 .rules p {
   line-height: 1.7;
@@ -379,8 +389,10 @@
       transform 0.5s ease,
       opacity 0.4s ease;
   }
-  .stacks button:hover:not(:disabled) .stackTile {
-    transform: translateY(-6px);
+  @media (hover: hover) and (pointer: fine) {
+    .stacks button:hover:not(:disabled) .stackTile {
+      transform: translateY(-6px);
+    }
   }
   .stacks button[data-next="true"] .stackTile {
     animation: inviteDraw 1.5s ease-in-out 3;
@@ -461,8 +473,10 @@
   box-shadow: 0 4px 0 #a89156;
   white-space: normal;
 }
-.lesson .dealNext:hover:not(:disabled) {
-  background: #fff0c7;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .dealNext:hover:not(:disabled) {
+    background: #fff0c7;
+  }
 }
 .nextPlayer {
   display: flex;
@@ -567,9 +581,13 @@
   border-color: #285643;
   box-shadow: 0 var(--control-depth) 0 #143b2d;
 }
-.lesson .primaryButton:hover:not(:disabled),
 .lesson .primaryButton[aria-pressed="true"] {
   background: #1b4332;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lesson .primaryButton:hover:not(:disabled) {
+    background: #1b4332;
+  }
 }
 .lesson .helpButton,
 .lesson .replay {
@@ -578,10 +596,12 @@
   color: #285643;
   box-shadow: none;
 }
-.lesson .helpButton:hover:not(:disabled),
-.lesson .replay:hover:not(:disabled) {
-  background: #e3ecdc;
-  border-color: #9aad9c;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .helpButton:hover:not(:disabled),
+  .lesson .replay:hover:not(:disabled) {
+    background: #e3ecdc;
+    border-color: #9aad9c;
+  }
 }
 .lesson
   button:disabled:not(.seat):not(.diceButton):not(.turnChoice):not(
@@ -605,9 +625,11 @@
   cursor: pointer;
   touch-action: manipulation;
 }
-.lesson .diceButton[data-ready="true"]:hover {
-  background: #214c3c;
-  border-color: #f1dfa9;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .diceButton[data-ready="true"]:hover {
+    background: #214c3c;
+    border-color: #f1dfa9;
+  }
 }
 .rollLabel {
   display: flex;
@@ -641,13 +663,21 @@
   .diceButton[data-ready="true"] .dice > span {
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .diceButton[data-ready="true"]:hover .dice > span,
   .diceButton[data-ready="true"]:focus-visible .dice > span {
     transform: translateY(-5px) rotate(-14deg);
   }
-  .diceButton[data-ready="true"]:hover .dice > span:last-child,
+  @media (hover: hover) and (pointer: fine) {
+    .diceButton[data-ready="true"]:hover .dice > span {
+      transform: translateY(-5px) rotate(-14deg);
+    }
+  }
   .diceButton[data-ready="true"]:focus-visible .dice > span:last-child {
     transform: translateY(-5px) rotate(15deg);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .diceButton[data-ready="true"]:hover .dice > span:last-child {
+      transform: translateY(-5px) rotate(15deg);
+    }
   }
 }
 
@@ -880,8 +910,10 @@
       transform 150ms ease-out,
       box-shadow 150ms ease-out;
   }
-  .lesson .callButton:hover:not(:disabled) {
-    transform: translateY(-4px) rotate(-2deg);
+  @media (hover: hover) and (pointer: fine) {
+    .lesson .callButton:hover:not(:disabled) {
+      transform: translateY(-4px) rotate(-2deg);
+    }
   }
   .lesson .callButton:active:not(:disabled) {
     transform: translateY(var(--control-press));
@@ -1174,8 +1206,10 @@
   background: transparent;
   box-shadow: none;
 }
-.lesson .claimTile:hover {
-  background: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .lesson .claimTile:hover {
+    background: transparent;
+  }
 }
 .claimTile svg {
   width: 100%;
