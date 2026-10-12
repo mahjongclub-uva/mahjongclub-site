@@ -21,29 +21,36 @@ import styles from "./MeetingLinks.module.css";
 
 // Matches the backend's default check-in and score margins. Outside these
 // windows the site never contacts the meeting service.
-export function nearMeeting(schedule: ScheduledMeeting[], now: number) {
+export function nearMeeting(
+  schedule: ScheduledMeeting[],
+  now: number,
+  minutesAfter = 60,
+) {
   return schedule.some(
     (m) =>
       now >= Date.parse(m.start) - 30 * 60000 &&
-      now < Date.parse(m.end ?? m.start) + 60 * 60000,
+      now < Date.parse(m.end ?? m.start) + minutesAfter * 60000,
   );
 }
 
-/** Tonight's meeting while check-in is open, and where this phone should go. */
+/**
+ * Tonight's meeting while check-in is open, and where this phone should go.
+ * Asks every two minutes, and only until check-in's scheduled close.
+ */
 function useLiveMeeting(schedule: ScheduledMeeting[]) {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [tonight, setTonight] = useState<ScheduledMeeting>();
   usePoll(
     async (signal) => {
       const now = Date.now();
-      setTonight(schedule.find((m) => nearMeeting([m], now)));
-      if (!nearMeeting(schedule, now)) return setMeeting(null);
+      setTonight(schedule.find((m) => nearMeeting([m], now, 0)));
+      if (!nearMeeting(schedule, now, 0)) return setMeeting(null);
       const next = await getMeeting(MEETING_SERVICE_URL, signal).catch(
         () => null,
       );
       if (!signal.aborted) setMeeting(next);
     },
-    60000,
+    120000,
     [schedule],
   );
   if (!meeting?.checkinsOpen) return null;
