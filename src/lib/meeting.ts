@@ -183,8 +183,6 @@ export function requestError(error: unknown): string {
     : "Could not confirm the request. Please retry or ask an officer.";
 }
 
-export const RETURN_STORAGE = "club-meeting-return";
-
 // Who checked in on this phone. Survives closing the tab, but only for this
 // meeting and only while the meeting still lists the player as checked in.
 const CHECKED_IN = "club-checked-in";
@@ -271,13 +269,6 @@ export function meetingShortcut(meeting: Meeting, player: Player | null) {
   return table
     ? { player, label: `Table ${table}`, href: MEETING_PATHS.table(table) }
     : { player, label: "Tables", href: MEETING_PATHS.tables };
-}
-export function rememberMeetingPage(path: string) {
-  try {
-    sessionStorage.setItem(RETURN_STORAGE, path);
-  } catch {
-    /* Navigation still works without storage. */
-  }
 }
 const resultsSchema = z.object({
   status: z.literal(200),

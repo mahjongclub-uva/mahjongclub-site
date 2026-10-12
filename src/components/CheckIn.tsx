@@ -10,7 +10,6 @@ import {
   cleanComputingId,
   computingIdError,
   postMeeting,
-  rememberMeetingPage,
   playerConfirmed,
   rememberPlayer,
   savedPlayer,
@@ -86,9 +85,6 @@ function CheckInForm({
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
       setPlayer(reply.player);
-      rememberMeetingPage(
-        meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score,
-      );
       setComputingId("");
       setFullName("");
       setSuggestions([]);

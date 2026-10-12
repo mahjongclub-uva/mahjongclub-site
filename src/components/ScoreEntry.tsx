@@ -20,7 +20,6 @@ import {
   postMeeting,
   requestError,
   tableError,
-  rememberMeetingPage,
   type Meeting,
   type Submission,
   MEETING_PATHS,
@@ -317,7 +316,6 @@ function ScoreForm({
           "Could not restore the previous save. Ask an officer to check before submitting another table.",
         );
       }
-      rememberMeetingPage(MEETING_PATHS.score);
       setReady(true);
     }
     void restore();

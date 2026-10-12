@@ -29,7 +29,6 @@ import {
   MEETING_PATHS,
   playerConfirmed,
   postMeeting,
-  rememberMeetingPage,
   rememberPlayer,
   requestError,
   savedPlayer,
@@ -1036,13 +1035,6 @@ function Tables({
     },
     8000,
     [],
-  );
-  useEffect(
-    () =>
-      rememberMeetingPage(
-        table ? MEETING_PATHS.table(table) : MEETING_PATHS.tables,
-      ),
-    [table],
   );
   const mine = player
     ? rooms.find((room) => room.seats.some((seat) => seat.id === player.id))
