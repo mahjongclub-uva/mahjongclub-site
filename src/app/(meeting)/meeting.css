@@ -1177,12 +1177,6 @@ main.meeting-page .live-rank {
     grid-template-columns: 44px 48px 44px;
   }
 }
-/* Meeting navigation {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-block-start: 10px;
-  border-block-end: 1px solid var(--rule);
-}
 .meeting-loading {
   display: grid;
   justify-items: center;
