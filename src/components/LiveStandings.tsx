@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import MeetingAccess from "@/components/MeetingAccess";
+import PlayerTile from "@/components/PlayerTile";
 import {
   getResults,
   getRooms,
@@ -21,8 +22,9 @@ function signed(value: number) {
   return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
 }
 
-/** `embedded` is the public leaderboard's Tonight tab: tonight only, with no
- * page heading, view switch or meeting links. */
+/** Tonight's standings, then how tonight moves the season for the players
+ * who played. `embedded` is the public leaderboard's Tonight tab: tonight
+ * only, with no heading, tiles, season block or meeting links. */
 export function LiveTable({
   meeting,
   semester,
@@ -33,7 +35,6 @@ export function LiveTable({
   embedded?: boolean;
 }) {
   const [results, setResults] = useState<Results | null>(null);
-  const [view, setView] = useState<"tonight" | "semester">("tonight");
   const [me] = useState(() => savedPlayer(meeting));
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(true);
@@ -107,38 +108,30 @@ export function LiveTable({
   );
   const tonight = tonightStandings(results?.tables ?? []);
   const mineTonight = me && tonight.find((row) => row.id === me.id);
-  const showTonight = embedded || view === "tonight";
+  const playedTonight = new Set(tonight.map((row) => row.id));
+  const season = matching
+    ? rows.filter((row) => playedTonight.has(row.id))
+    : [];
   return (
     <section>
-      {!embedded && (
-        <>
-          <h1>{showTonight ? "Tonight." : "This semester."}</h1>
-          <div className="leaderboard-view" role="group" aria-label="Standings">
-            <button
-              type="button"
-              aria-pressed={showTonight}
-              onClick={() => setView("tonight")}
-            >
-              Tonight
-            </button>
-            <button
-              type="button"
-              aria-pressed={!showTonight}
-              onClick={() => setView("semester")}
-            >
-              Semester
-            </button>
-          </div>
-        </>
+      {embedded ? (
+        <p className="meeting-intro">
+          Tonight’s nets include games at tables still playing. Nothing is
+          official until an officer publishes it.
+        </p>
+      ) : (
+        <h1 className="meeting-title">Tonight</h1>
       )}
-      <p className="meeting-intro">
-        {showTonight
-          ? "Each player’s net tonight. Games at tables still playing are included and stay provisional until an officer publishes them."
-          : matching
-            ? "Season scores with tonight’s saved tables added. Provisional until an officer publishes them."
-            : "These are the latest season scores. Tonight’s meeting belongs to a different season."}
-      </p>
-      <p className="live-summary" role="status">
+      <p
+        // On the meeting page the usual "Awaiting review" is left unsaid;
+        // loading, delays and official standings still show.
+        className={
+          !embedded && results && matching && !alreadyCounted && !error
+            ? "sr-only"
+            : "live-summary"
+        }
+        role="status"
+      >
         {!results && matching
           ? error
             ? "Season scores only"
@@ -171,7 +164,7 @@ export function LiveTable({
           </button>
         </div>
       )}
-      {showTonight && mineTonight && (
+      {embedded && mineTonight && (
         <p className="live-you">
           <span>You tonight</span>
           <strong data-sign={Math.sign(mineTonight.net)}>
@@ -183,106 +176,121 @@ export function LiveTable({
           </span>
         </p>
       )}
-      {showTonight ? (
-        <ol className="live-list" aria-label="Tonight’s standings">
-          {tonight.map((row) => (
-            <li key={row.id} data-you={row.id === me?.id || undefined}>
-              <span className="live-rank" aria-label={`Rank ${row.rank}`}>
-                {row.rank}
-              </span>
-              <span className="score-name">
-                {row.display}
-                {row.id === me?.id && " (you)"}
+      <ol className="live-list" aria-label="Tonight’s standings">
+        {tonight.map((row) => (
+          <li key={row.id} data-you={row.id === me?.id || undefined}>
+            <span className="live-rank" aria-label={`Rank ${row.rank}`}>
+              {row.rank}
+            </span>
+            {!embedded && <PlayerTile id={row.id} />}
+            <span className="score-name">
+              {row.display}
+              {row.id === me?.id && <span className="sr-only"> (you)</span>}
+              {embedded && (
                 <small>
                   {row.tables} {row.tables === 1 ? "table" : "tables"} tonight
                 </small>
-              </span>
-              <strong className={`live-points${row.net < 0 ? " down" : ""}`}>
-                {signed(row.net)}
-                <span className="sr-only"> net tonight</span>
-              </strong>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <ol className="live-list" aria-label="Live season standings">
-          {rows.map((row) => {
-            const change = row.before === null ? null : row.before - row.rank;
-            return (
-              <li key={row.id} data-you={row.id === me?.id || undefined}>
-                <span className="live-rank" aria-label={`Rank ${row.rank}`}>
-                  {row.rank}
-                </span>
-                <span className="score-name">
-                  {row.display}
-                  {row.id === me?.id && " (you)"}
-                  <small>
-                    {row.tables} {row.tables === 1 ? "table" : "tables"} this
-                    season
-                  </small>
-                </span>
-                <strong
-                  key={scoreChanges[row.id] || 0}
-                  className={`live-points${scoreChanges[row.id] ? " live-points-changed" : ""}`}
-                >
-                  {row.points}
-                  <span className="sr-only"> points</span>
-                </strong>
-                <span
-                  className={`live-change ${change !== null && change < 0 ? "down" : ""}`}
-                  aria-label={
-                    change === null
-                      ? "New player"
-                      : change > 0
-                        ? `Up ${change} ranks`
-                        : change < 0
-                          ? `Down ${-change} ranks`
-                          : "No rank change"
-                  }
-                >
-                  {change === null
-                    ? "New"
-                    : change > 0
-                      ? `↑ ${change}`
-                      : change < 0
-                        ? `↓ ${-change}`
-                        : "·"}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
+              )}
+            </span>
+            <strong
+              className={`live-points${row.net < 0 ? " down" : row.net > 0 ? " up" : ""}`}
+            >
+              {signed(row.net)}
+              <span className="sr-only"> net tonight</span>
+            </strong>
+          </li>
+        ))}
+      </ol>
+      {!embedded && season.length > 0 && (
+        <section className="live-season" aria-labelledby="season-after">
+          <h2 id="season-after">Season after tonight</h2>
+          <ol
+            className="live-list"
+            aria-label="Season standings for tonight’s players"
+          >
+            {season.map((row) => {
+              const change = row.before === null ? null : row.before - row.rank;
+              return (
+                <li key={row.id} data-you={row.id === me?.id || undefined}>
+                  <span className="score-name">
+                    {row.display}
+                    {row.id === me?.id && (
+                      <span className="sr-only"> (you)</span>
+                    )}
+                  </span>
+                  <strong
+                    key={scoreChanges[row.id] || 0}
+                    className={`live-points${scoreChanges[row.id] ? " live-points-changed" : ""}`}
+                  >
+                    {String(row.points).replace("-", "−")}
+                    <span className="sr-only"> points</span>
+                  </strong>
+                  <span
+                    className={`live-change${change !== null && change < 0 ? " down" : change ? " up" : ""}`}
+                  >
+                    #{row.rank}{" "}
+                    <span
+                      aria-label={
+                        change === null
+                          ? "new player"
+                          : change > 0
+                            ? `up ${change}`
+                            : change < 0
+                              ? `down ${-change}`
+                              : "no change"
+                      }
+                    >
+                      {change === null
+                        ? "new"
+                        : change > 0
+                          ? `↑${change}`
+                          : change < 0
+                            ? `↓${-change}`
+                            : "·"}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
       )}
-      {showTonight && results && !tonight.length && (
+      {results && !tonight.length && (
         <p className="meeting-notice">
           No tables saved yet tonight. Check back after the first table is
           saved.
         </p>
       )}
-      {!showTonight && !rows.length && results && (
-        <p className="meeting-notice">
-          {matching && !alreadyCounted
-            ? "The first recorded table gets things moving. Check back after your table plays."
-            : "No official scores have been recorded yet."}
-        </p>
-      )}
-      {!showTonight && semester.unranked.length > 0 && (
+      {!embedded &&
+        results &&
+        matching &&
+        !alreadyCounted &&
+        tonight.length > 0 && (
+          <p className="quiet">
+            Includes tables still playing. Nothing is official until an officer
+            publishes it.
+          </p>
+        )}
+      {season.length > 0 && semester.unranked.length > 0 && (
         <p className="quiet">
           Players still qualifying appear after their scores are officially
           updated.
         </p>
       )}
-      {!embedded && (
+      {!embedded && !meeting.rooms && (
         <div className="meeting-actions">
-          {/* With table rooms, scores are recorded at the table; typing them
-              in again here would count those games twice. */}
-          <Link
-            className="meeting-primary"
-            href={meeting.rooms ? MEETING_PATHS.tables : MEETING_PATHS.score}
-          >
-            {meeting.rooms ? "Back to the tables" : "Record a table"}
+          {/* Only without table rooms: with them, scores are recorded at the
+              table, and typing them in here would count those games twice. */}
+          <Link className="meeting-primary" href={MEETING_PATHS.score}>
+            Record a table
           </Link>
         </div>
+      )}
+      {/* A phone with no player has no menu, so it gets its own way back. */}
+      {!embedded && meeting.rooms && !me && (
+        <Link className="meeting-text" href={MEETING_PATHS.tables}>
+          See tonight’s tables
+        </Link>
       )}
     </section>
   );

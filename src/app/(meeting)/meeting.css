@@ -10,7 +10,12 @@
   padding: 0 24px 28px;
   --rule: #d8d0c0;
 }
+/* The mock's warm club paper, flat, behind the whole meeting page. */
+body:has(main.meeting-page) {
+  background: oklch(0.95 0.025 88);
+}
 main.meeting-page {
+  --paper: oklch(0.95 0.025 88);
   --display: var(--font-meeting), ui-rounded, system-ui, sans-serif;
   --body: var(--font-meeting), ui-rounded, system-ui, sans-serif;
   --han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
@@ -40,8 +45,7 @@ main.meeting-page {
   align-items: center;
   gap: 10px;
   min-block-size: 64px;
-  margin-block-end: 24px;
-  border-bottom: 1px solid var(--rule);
+  margin-block-end: 14px;
 }
 .meeting-brand {
   display: grid;
@@ -51,6 +55,8 @@ main.meeting-page {
   flex-shrink: 0;
 }
 .meeting-brand img {
+  inline-size: 34px;
+  block-size: 34px;
   border-radius: 50%;
 }
 .meeting-status {
@@ -133,19 +139,20 @@ main.meeting-page {
 .meeting-form label,
 .meeting-calculator label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 16px 0 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 22px 0 8px;
 }
 .meeting-form input,
 .meeting-calculator input {
   width: 100%;
   min-width: 0;
   min-height: 54px;
-  border: 1px solid #c4cabc;
-  border-radius: 12px;
-  background: var(--tile-face-hi);
-  padding: 12px 15px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  padding: 12px 18px;
   font: inherit;
   color: var(--ink);
 }
@@ -176,12 +183,12 @@ main.meeting-page {
   justify-content: center;
   width: 100%;
   min-height: 52px;
-  min-height: 56px;
+  min-height: 60px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 22px;
   background: var(--jade);
   color: var(--paper);
-  font: 800 1.1rem/1.4 var(--body);
+  font: 800 1.2rem/1.4 var(--body);
   padding: 12px 18px;
   text-decoration: none;
   text-align: center;
@@ -265,34 +272,7 @@ main.meeting-page {
   font: 700 1.3rem var(--display);
   flex-shrink: 0;
 }
-.meeting-tiles {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  height: 136px;
-  align-items: center;
-  margin: 16px 0 10px;
-}
-.meeting-tiles > span {
-  width: 88px;
-  height: 124px;
-  filter: drop-shadow(0 5px 3px #5d4b2520);
-  transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
-}
-.meeting-tiles > span:first-child {
-  --tilt: -16deg;
-  --lift: 8px;
-  margin-right: -8px;
-}
-.meeting-tiles > span:nth-child(2) {
-  --tilt: 3deg;
-  --lift: -7px;
-}
-.meeting-tiles > span:last-child {
-  --tilt: 18deg;
-  --lift: 10px;
-  margin-left: -8px;
-}
+
 .meeting-seats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -458,6 +438,10 @@ main.meeting-page {
   outline: 3px solid #8b5924;
   outline-offset: 4px;
 }
+main.meeting-page :focus-visible {
+  outline-color: var(--jade);
+  outline-offset: 4px;
+}
 /* Text actions stay text: they underline when touched instead of filling. */
 .meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
 .meeting-calculator .meeting-text:is(:focus-visible, :active) {
@@ -486,16 +470,6 @@ main.meeting-page {
     transform: none;
   }
 }
-@keyframes deal {
-  from {
-    opacity: 0;
-    transform: translateY(12px) rotate(0deg) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .meeting-page .meeting-text,
   .meeting-calculator .meeting-text,
@@ -512,15 +486,6 @@ main.meeting-page {
   }
   .meeting-seat.filled {
     animation: tile-stamp 280ms ease-out;
-  }
-  .meeting-tiles > span {
-    animation: deal 360ms ease-out backwards;
-  }
-  .meeting-tiles > span:nth-child(2) {
-    animation-delay: 45ms;
-  }
-  .meeting-tiles > span:last-child {
-    animation-delay: 90ms;
   }
   .meeting-page button:active:not(:disabled, .meeting-primary),
   .meeting-calculator button:active:not(:disabled, .meeting-primary) {
@@ -553,10 +518,6 @@ main.meeting-page {
   }
 }
 
-.meeting-tiles svg {
-  width: 100%;
-  height: 100%;
-}
 .live-summary {
   display: flex;
   flex-wrap: wrap;
@@ -581,6 +542,26 @@ main.meeting-page {
 }
 .live-list li + li {
   border-top: 1px solid var(--rule);
+}
+main.meeting-page .live-list {
+  --w: 32px;
+}
+main.meeting-page .live-rank {
+  inline-size: auto;
+  min-inline-size: 2ch;
+  flex-shrink: 0;
+  text-align: center;
+}
+/* Below tonight: where tonight leaves each of tonight's players in the
+   season, before an officer publishes it. */
+.live-season {
+  margin-block-start: 34px;
+}
+.meeting-page .live-season h2 {
+  font-size: 1.4rem;
+}
+.live-season .live-list {
+  margin-block-start: 12px;
 }
 .live-rank {
   width: 24px;
@@ -698,7 +679,7 @@ main.meeting-page {
   }
   .meeting-page .meeting-primary:hover:not(:disabled),
   .meeting-calculator .meeting-primary:hover:not(:disabled) {
-    background: var(--tile-face-hi);
+    background: color-mix(in oklch, var(--jade) 88%, white);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -726,13 +707,7 @@ main.meeting-page {
 .meeting-form h1 {
   color: var(--ink);
 }
-.meeting-form .meeting-tiles {
-  margin-block: 28px 22px;
-}
-.meeting-form input:focus-visible {
-  outline-color: #285b87;
-  border-color: #285b87;
-}
+
 .meeting-receipt .meeting-check {
   background: #f3dfb6;
   color: #244f77;
@@ -743,14 +718,7 @@ main.meeting-page {
   color: var(--ink-soft);
   line-height: 1.6;
 }
-.meeting-form[data-register="true"] .meeting-tiles {
-  height: 88px;
-  margin-block: 12px;
-}
-.meeting-form[data-register="true"] .meeting-tiles > span {
-  width: 55px;
-  height: 78px;
-}
+
 .meeting-matches {
   margin-top: 22px;
   padding: 18px 0 0;
@@ -764,16 +732,6 @@ main.meeting-page {
   font-size: 1.75rem;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .meeting-form .meeting-tiles > span {
-    transition: transform 220ms ease-out;
-  }
-  .meeting-form:focus-within .meeting-tiles > span {
-    transform: rotate(var(--tilt, 0deg))
-      translateY(calc(var(--lift, 0px) - 5px));
-  }
-  .meeting-form[data-busy="true"] .meeting-tiles > span {
-    transform: rotate(0deg) translateY(0);
-  }
   .meeting-matches {
     animation: live-settle 220ms ease-out;
   }
@@ -807,14 +765,15 @@ main.meeting-page {
 .meeting-page .meeting-primary,
 .meeting-calculator .meeting-primary {
   box-shadow:
-    0 var(--control-depth) 0 color-mix(in oklch, var(--jade) 65%, black),
-    0 12px 20px -8px oklch(0.3 0.05 160 / 0.45);
+    0 8px 18px -6px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -4px 0 oklch(0 0 0 / 0.08);
 }
 .meeting-page .meeting-primary:active:not(:disabled),
 .meeting-calculator .meeting-primary:active:not(:disabled) {
-  transform: translateY(var(--control-press));
-  box-shadow: 0 calc(var(--control-depth) - var(--control-press)) 0
-    color-mix(in oklch, var(--jade) 65%, black);
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 8px -4px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -2px 0 oklch(0 0 0 / 0.08);
 }
 .meeting-page .meeting-primary:disabled,
 .meeting-calculator .meeting-primary:disabled {
@@ -1261,27 +1220,6 @@ main.meeting-page {
   }
 }
 
-/* Check-in: how the night works, and who is here. */
-.meeting-howto {
-  list-style: none;
-  padding: 0;
-  margin-block: 16px 0;
-  border-block-start: 1px solid var(--ink);
-}
-.meeting-howto li {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  align-items: baseline;
-  padding-block: 8px;
-  border-block-end: 1px solid var(--rule);
-  font-size: 0.9rem;
-  color: var(--ink);
-}
-.meeting-howto span {
-  color: var(--tile-letter);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
 .meeting-here {
   margin-block-start: 26px;
 }
@@ -1348,27 +1286,12 @@ main.meeting-page {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .meeting-howto li {
-    animation: score-row-in 260ms var(--ease-out) backwards;
-  }
-  .meeting-howto li:nth-child(2) {
-    animation-delay: 60ms;
-  }
-  .meeting-howto li:nth-child(3) {
-    animation-delay: 120ms;
-  }
   .meeting-hero-tile .player-tile {
     animation: hero-slap 520ms var(--pop) backwards;
   }
   .meeting-here li {
     animation: chip-in 240ms var(--ease-out) backwards;
     animation-delay: calc(200ms + var(--i, 0) * 35ms);
-  }
-}
-@media (max-width: 374px) {
-  .meeting-howto li {
-    padding: 8px;
-    font-size: 0.7rem;
   }
 }
 
@@ -1543,17 +1466,14 @@ main.meeting-page {
 .meeting-page .hand-each {
   inline-size: 100%;
   min-block-size: 56px;
-  border: 1px solid #c4cabc;
-  border-radius: 12px;
-  background: var(--tile-face-hi);
+  border: 0;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--clay);
   padding: 8px 14px;
   color: var(--ink);
   font: 700 1.6rem var(--body);
   font-variant-numeric: tabular-nums;
-}
-.hand-each:focus-visible {
-  outline-color: #285b87;
-  border-color: #285b87;
 }
 @media (prefers-reduced-motion: no-preference) {
   .room-card {
@@ -1690,9 +1610,6 @@ button.seat[data-empty] .seat-name {
   padding-block: 10px;
   border-block: 1px solid var(--rule);
   font-size: 0.88rem;
-}
-.table-latest span + span {
-  color: var(--ink-soft);
 }
 .table-actions {
   display: grid;
@@ -1998,4 +1915,232 @@ button.seat[data-empty] .seat-name {
   from {
     opacity: 0;
   }
+}
+
+/* Check-in: the computing ID becomes a row of coloured stickers as it is
+   typed. The real input lies over the row with its text hidden, so the row
+   shows focus and errors for it. */
+.id-stickers {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-block-size: 64px;
+  padding: 10px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--clay);
+}
+.id-stickers > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.id-stickers > span > span {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 50%;
+  background: oklch(0.72 0.15 var(--hue));
+  color: var(--ink);
+  font: 800 1.2rem var(--body);
+  box-shadow: 0 3px 0 oklch(0 0 0 / 0.2);
+}
+.id-stickers > span > [data-slot] {
+  background: none;
+  box-shadow: none;
+  border: 2px dotted color-mix(in oklch, var(--ink-soft) 30%, transparent);
+}
+.id-stickers > span > [data-slot="next"] {
+  border: 3px dotted color-mix(in oklch, var(--ink-soft) 60%, transparent);
+}
+.id-stickers + .field-hint {
+  margin-block: 12px 0;
+  font-size: 0.85rem;
+}
+.meeting-form .id-stickers input {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  block-size: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: transparent;
+  caret-color: transparent;
+  -webkit-text-fill-color: transparent;
+  box-shadow: none;
+}
+.meeting-form .id-stickers input:focus-visible {
+  outline: none;
+}
+.id-stickers > span > [data-slot="open"] {
+  display: none;
+}
+/* Focus shows as a ring inside the card, as the mock keeps the card's edge. */
+.id-stickers:focus-within {
+  box-shadow:
+    var(--clay),
+    inset 0 0 0 2px var(--jade);
+}
+.id-stickers:has([aria-invalid="true"]) {
+  box-shadow:
+    var(--clay),
+    inset 0 0 0 2px var(--tile-letter);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .id-stickers > span > span:not([data-slot]) {
+    animation: sticker-on 320ms var(--pop);
+  }
+}
+@keyframes sticker-on {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+/* Mock D's proportions for the "You're in", table and standings screens:
+   a smaller title on working screens, the action before the wall, and
+   compact rows where your own row is tinted rather than ruled. */
+.meeting-page .meeting-title {
+  font-size: 2rem;
+  margin-block: 4px 0;
+}
+.meeting-receipt h1 {
+  margin-block-end: 20px;
+}
+.meeting-receipt > .meeting-primary {
+  margin-block-end: 28px;
+}
+.meeting-here {
+  margin-block-start: 0;
+}
+.meeting-page .meeting-here h2 {
+  font: 600 0.9rem var(--body);
+  color: var(--ink-soft);
+}
+main.meeting-page .table-latest {
+  justify-items: center;
+  padding-block: 2px 14px;
+  border: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+main.meeting-page .live-list {
+  margin-block: 12px 18px;
+  border: 0;
+}
+main.meeting-page .live-list li {
+  min-block-size: 0;
+  gap: 12px;
+  padding: 9px 6px;
+}
+main.meeting-page .live-list li + li {
+  border-block-start: 2px dashed
+    color-mix(in oklch, var(--ink-soft) 25%, transparent);
+}
+main.meeting-page .live-list li[data-you] {
+  box-shadow: none;
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--tile-letter) 16%, var(--paper));
+}
+main.meeting-page .live-list .score-name {
+  flex: 1;
+  min-inline-size: 0;
+}
+main.meeting-page .live-rank {
+  font: 700 0.95rem var(--body);
+}
+main.meeting-page .live-points {
+  font: 900 1.25rem var(--display);
+}
+main.meeting-page .live-season {
+  margin-block-start: 22px;
+}
+main.meeting-page .live-season h2 {
+  font: 600 0.9rem var(--body);
+  color: var(--ink-soft);
+}
+main.meeting-page .live-season .live-list li {
+  padding-block: 6px;
+}
+main.meeting-page .live-season .live-list li + li {
+  border: 0;
+}
+main.meeting-page .live-season .live-points {
+  font: 700 1rem var(--body);
+}
+main.meeting-page .live-season .live-change {
+  min-inline-size: 60px;
+  font-weight: 700;
+}
+
+/* Closer to mock D: a brighter green for gains (darker than the mock's so it
+   still reads 4.5:1 on your tinted row), a looser wall of tilted tiles, a
+   bigger hero tile, and every standings row ruled. */
+main.meeting-page {
+  --up: oklch(0.45 0.14 150);
+}
+main.meeting-page :is(.delta, .score-net)[data-sign="1"],
+main.meeting-page .live-points.up,
+main.meeting-page .live-change.up {
+  color: var(--up);
+}
+main.meeting-page .live-season .live-points,
+main.meeting-page .live-change {
+  color: var(--ink);
+}
+main.meeting-page .live-change.down {
+  color: var(--tile-letter);
+}
+main.meeting-page .live-list li + li {
+  border-block-start: 0;
+}
+main.meeting-page .live-list li {
+  border-block-end: 2px dashed oklch(0.85 0.02 270);
+}
+main.meeting-page .live-season .live-list > li {
+  border: 0;
+  background: none;
+}
+.table-square {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+}
+.meeting-hero-tile {
+  --w: 110px;
+  margin-block-end: 34px;
+}
+.meeting-here ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 10px;
+  margin-block-start: 14px;
+  --w: 46px;
+}
+.meeting-here li {
+  inline-size: 86px;
+  gap: 8px;
+}
+.meeting-here li .player-tile {
+  rotate: none;
+}
+.meeting-here li:nth-child(6n + 1) {
+  rotate: -6deg;
+}
+.meeting-here li:nth-child(6n + 2) {
+  rotate: 4deg;
+}
+.meeting-here li:nth-child(6n + 3) {
+  rotate: -2deg;
+}
+.meeting-here li:nth-child(6n + 4) {
+  rotate: 7deg;
+}
+.meeting-here li:nth-child(6n + 5) {
+  rotate: -5deg;
+}
+.meeting-here li:nth-child(6n) {
+  rotate: 3deg;
 }

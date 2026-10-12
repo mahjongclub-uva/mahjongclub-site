@@ -35,6 +35,13 @@ function PlayerSheet({
   return (
     <Sheet title={player.display} close={close}>
       <ul className="menu-links">
+        {meeting.rooms && (
+          <li>
+            <Link href={MEETING_PATHS.tables} onClick={close}>
+              Tables tonight
+            </Link>
+          </li>
+        )}
         <li>
           <Link href={MEETING_PATHS.standings} onClick={close}>
             Tonight’s standings

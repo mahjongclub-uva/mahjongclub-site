@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
+import IdStickers from "@/components/IdStickers";
 import Sheet from "@/components/Sheet";
 import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
 import { BACKS } from "@/lib/avatar";
@@ -28,10 +29,8 @@ import {
   WINDS,
   type Meeting,
   type Player,
-  type ResultTable,
   type Room,
 } from "@/lib/meeting";
-import { tonightStandings, tonightTables } from "@/lib/live";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
 
@@ -104,25 +103,27 @@ function WhoAreYou({
       </p>
       <fieldset disabled={busy}>
         <legend className="sr-only">Your player</legend>
-        <label htmlFor="tables-computing-id">UVA computing ID</label>
-        <p className="field-hint" id="tables-computing-id-hint">
-          The part before @virginia.edu, for example abc2de.
-        </p>
-        <input
+        <label htmlFor="tables-computing-id">
+          <span className="sr-only">UVA </span>Computing ID
+        </label>
+        <IdStickers
           id="tables-computing-id"
           value={computingId}
-          onChange={(event) => setComputingId(event.target.value)}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          maxLength={40}
-          aria-invalid={Boolean(error)}
-          aria-describedby={
+          onChange={setComputingId}
+          invalid={Boolean(error)}
+          describedBy={
             error
               ? "tables-computing-id-error tables-computing-id-hint"
               : "tables-computing-id-hint"
           }
         />
+        <p className="field-hint" id="tables-computing-id-hint">
+          No ID? Ask an officer.
+          <span className="sr-only">
+            {" "}
+            Your computing ID is the part before @virginia.edu.
+          </span>
+        </p>
         {error && (
           <p
             className="meeting-error"
@@ -254,10 +255,8 @@ function TableSquare({
       aria-label={pick ? "Who won?" : `Seats at Table ${table}`}
     >
       <div className="table-top" aria-hidden="true">
-        <strong>{table}</strong>
-        <span>
-          {games ? `${games} ${games === 1 ? "game" : "games"}` : "Table"}
-        </span>
+        <strong>{games}</strong>
+        <span>{games === 1 ? "game" : "games"}</span>
       </div>
       {WINDS.map((wind, i) => {
         const seat = room?.seats.find((item) => item.wind === i);
@@ -412,7 +411,6 @@ function SeatedTable({
   busy,
   offline,
   error,
-  tonight,
   act,
 }: {
   meeting: Meeting;
@@ -421,7 +419,6 @@ function SeatedTable({
   busy: boolean;
   offline: boolean;
   error: string;
-  tonight: number | null;
   act: (action: string, extra?: Record<string, unknown>) => Promise<boolean>;
 }) {
   const last = room.hands.at(-1)?.id ?? null;
@@ -517,29 +514,12 @@ function SeatedTable({
     }
   }
   const latest = room.hands.at(-1);
-  const mineNow = latest ? gain(latest.winner, latest.each)(player.id) : 0;
   return (
     <>
       {latest ? (
         <p className="table-latest" role="status">
           <span key={latest.id}>
-            Game {games}: {name(latest.winner)} won, {latest.each} from each
-          </span>
-          <span key={`you-${latest.id}`}>
-            You{" "}
-            <b className="delta" data-sign={Math.sign(mineNow)}>
-              {signed(mineNow)}
-            </b>{" "}
-            this game
-            {tonight !== null && (
-              <>
-                {" · "}
-                <b className="delta" data-sign={Math.sign(tonight)}>
-                  {signed(tonight)}
-                </b>{" "}
-                tonight
-              </>
-            )}
+            Game {games}: {name(latest.winner)} won {3 * latest.each}
           </span>
         </p>
       ) : (
@@ -805,7 +785,7 @@ function Lobby({
   );
   return (
     <>
-      <h1>Tables tonight.</h1>
+      <h1>Tables tonight</h1>
       <p className="meeting-intro">
         Sit with three others. Anyone at the table records each game: who won
         and what each other player pays.
@@ -905,7 +885,6 @@ function Tables({
   const [player, setPlayer] = useState(() => savedPlayer(meeting));
   const [confirmed, setConfirmed] = useState(() => playerConfirmed());
   const [rooms, setRooms] = useState<Room[]>(meeting.rooms || []);
-  const [results, setResults] = useState<ResultTable[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -921,9 +900,8 @@ function Tables({
   // table that silently stops changing, and blocks uncertain score writes.
   const [roomsAt, setRoomsAt] = useState(() => Date.now());
   const [roomsFailed, setRoomsFailed] = useState(false);
-  const take = (state: { rooms: Room[]; results: ResultTable[] | null }) => {
+  const take = (state: { rooms: Room[] }) => {
     setRooms(state.rooms);
-    if (state.results) setResults(state.results);
     setRoomsAt(Date.now());
     setRoomsFailed(false);
   };
@@ -1012,8 +990,7 @@ function Tables({
         if (reply.status === 423) refresh();
         return false;
       }
-      if (reply.rooms)
-        take({ rooms: reply.rooms, results: reply.results ?? null });
+      if (reply.rooms) take({ rooms: reply.rooms });
       if (action === "end") window.scrollTo({ top: 0 });
       return true;
     } catch (failure) {
@@ -1102,12 +1079,6 @@ function Tables({
         <Lobby rooms={rooms} mine={mine} ended={ended} you={player.id} />
       ) : (
         <div className="room-view">
-          <Link
-            className="meeting-text meeting-back"
-            href={MEETING_PATHS.tables}
-          >
-            ← All tables
-          </Link>
           {!mine && ended?.ended && (
             <EndedReceipt
               ended={ended.ended}
@@ -1123,7 +1094,9 @@ function Tables({
               </Link>
             </p>
           )}
-          <h1 tabIndex={-1}>Table {table}.</h1>
+          <h1 className="meeting-title" tabIndex={-1}>
+            Table {table}
+          </h1>
           {!here && (
             <p className="meeting-intro">
               {(room?.seats.length ?? 0) >= 4
@@ -1158,11 +1131,6 @@ function Tables({
               busy={busy}
               offline={roomsFailed}
               error={error}
-              tonight={
-                tonightStandings(tonightTables(results, rooms)).find(
-                  (row) => row.id === player.id,
-                )?.net ?? null
-              }
               act={act}
             />
           )}

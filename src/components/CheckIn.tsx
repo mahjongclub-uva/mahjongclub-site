@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { TileFace, SuitFace } from "@/components/PlayingTile";
 import PlayerTile from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
+import IdStickers from "@/components/IdStickers";
 import {
   cleanComputingId,
   computingIdError,
@@ -118,8 +118,8 @@ function CheckInForm({
         <span className="meeting-hero-tile">
           <PlayerTile id={player.id} />
         </span>
-        <p className="eyebrow" role="status">
-          You’re checked in
+        <p className="sr-only" role="status">
+          You’re checked in.
         </p>
         <h1>
           You’re in,{" "}
@@ -127,18 +127,25 @@ function CheckInForm({
             {player.display.split(" ")[0]}!
           </span>
         </h1>
-        <p>
+        <Link
+          className="meeting-primary"
+          href={
+            seatedAt
+              ? MEETING_PATHS.table(seatedAt)
+              : meeting.rooms
+                ? MEETING_PATHS.tables
+                : MEETING_PATHS.score
+          }
+        >
           {seatedAt
-            ? `You’re seated at Table ${seatedAt}.`
+            ? `Return to Table ${seatedAt}`
             : meeting.rooms
-              ? "Sit at a table of four. After each game, anyone at the table records who won."
-              : "Find a table of four. After your last game, one person records the table’s final totals."}
-        </p>
+              ? "Find a table"
+              : "Record a table"}
+        </Link>
         {here.length > 0 && (
-          <section className="meeting-here" aria-label="Here tonight">
-            <h2>
-              Here tonight <span>{here.length}</span>
-            </h2>
+          <section className="meeting-here" aria-labelledby="here-tonight">
+            <h2 id="here-tonight">{here.length} here tonight</h2>
             <ul>
               {here.map((p, i) => (
                 <li
@@ -149,31 +156,15 @@ function CheckInForm({
                   <PlayerTile id={p.id} />
                   <span>
                     {p.display}
-                    {p.id === player.id && <small> (you)</small>}
+                    {p.id === player.id && (
+                      <span className="sr-only"> (you)</span>
+                    )}
                   </span>
                 </li>
               ))}
             </ul>
           </section>
         )}
-        <div className="meeting-actions">
-          <Link
-            className="meeting-primary"
-            href={
-              seatedAt
-                ? MEETING_PATHS.table(seatedAt)
-                : meeting.rooms
-                  ? MEETING_PATHS.tables
-                  : MEETING_PATHS.score
-            }
-          >
-            {seatedAt
-              ? `Return to Table ${seatedAt}`
-              : meeting.rooms
-                ? "Find a table"
-                : "Record a table"}
-          </Link>
-        </div>
       </div>
     );
   }
@@ -200,63 +191,37 @@ function CheckInForm({
         if (!suggestions.length) void submit();
       }}
     >
-      <h1>Grab a seat.</h1>
-      <ol className="meeting-howto" aria-label="How tonight works">
-        <li>
-          <span aria-hidden="true">1</span>Check in
-        </li>
-        <li>
-          <span aria-hidden="true">2</span>Sit at a table of four
-        </li>
-        <li>
-          <span aria-hidden="true">3</span>
-          {meeting.rooms
-            ? "Record each game at the table"
-            : "One person records the scores"}
-        </li>
-      </ol>
-      <div className="meeting-tiles" aria-hidden="true">
-        {(
-          [
-            { suit: "dots", rank: 2 },
-            { suit: "characters", rank: 1 },
-            { suit: "bamboo", rank: 3 },
-          ] as const
-        ).map(({ suit, rank }) => (
-          <span key={suit}>
-            <TileFace index={rank}>
-              <SuitFace suit={suit} rank={rank} />
-            </TileFace>
-          </span>
-        ))}
-      </div>
+      <h1>
+        Who’s <span className="meeting-accent">playing?</span>
+      </h1>
       <fieldset disabled={busy}>
         <legend className="sr-only">Player check-in</legend>
         <div>
-          <label htmlFor="computing-id">UVA computing ID</label>
-          <p className="field-hint" id="computing-id-hint">
-            The part before @virginia.edu, for example abc2de. No UVA ID? An
-            officer can check you in.
-          </p>
-          <input
+          <label htmlFor="computing-id">
+            <span className="sr-only">UVA </span>Computing ID
+          </label>
+          <IdStickers
             id="computing-id"
             value={computingId}
-            onChange={(event) => {
-              setComputingId(event.target.value);
+            onChange={(value) => {
+              setComputingId(value);
               setSuggestions([]);
               setIdError("");
             }}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            maxLength={40}
-            aria-invalid={Boolean(idError)}
-            aria-describedby={
+            invalid={Boolean(idError)}
+            describedBy={
               idError
                 ? "computing-id-error computing-id-hint"
                 : "computing-id-hint"
             }
           />
+          <p className="field-hint" id="computing-id-hint">
+            No ID? Ask an officer.
+            <span className="sr-only">
+              {" "}
+              Your computing ID is the part before @virginia.edu.
+            </span>
+          </p>
           {idError && (
             <p className="meeting-error" id="computing-id-error">
               {idError}
@@ -281,9 +246,8 @@ function CheckInForm({
                 required
               />
               <p className="quiet">
-                Use the name the club already knows you by. Your full name and
-                computing ID stay private; the leaderboard shows your first name
-                and last initial.
+                Use the name the club knows you by. Only officers see it; the
+                leaderboard shows your first name and last initial.
               </p>
             </>
           )}
@@ -325,7 +289,11 @@ function CheckInForm({
           </div>
         ) : (
           <button type="submit" className="meeting-primary">
-            {busy ? "Checking in…" : register ? "Join & check in" : "Check in"}
+            {busy
+              ? "Checking in…"
+              : register
+                ? "Join & check in"
+                : "Let’s play"}
           </button>
         )}
       </fieldset>
