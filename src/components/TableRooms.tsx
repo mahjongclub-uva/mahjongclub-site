@@ -3,10 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  IconArmchair,
   IconArrowBackUp,
+  IconArrowRight,
   IconCheck,
+  IconCrown,
+  IconEraser,
+  IconFlame,
   IconFlag,
   IconHistory,
+  IconPencil,
+  IconPlayerPlay,
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import ContinueAs from "@/components/ContinueAs";
@@ -97,10 +104,6 @@ function WhoAreYou({
       }}
     >
       <h1>Who’s playing on this phone?</h1>
-      <p className="meeting-intro">
-        Enter your computing ID so the table knows it’s you. This also checks
-        you in if you haven’t yet, and brings you back to your table.
-      </p>
       <fieldset disabled={busy}>
         <legend className="sr-only">Your player</legend>
         <label htmlFor="tables-computing-id">
@@ -248,6 +251,19 @@ function TableSquare({
 }) {
   const latest = room?.hands.at(-1);
   const games = room?.hands.length ?? 0;
+  const totalOf = (id: string) =>
+    room?.totals.find((item) => item.id === id)?.total ?? START;
+  // The crown goes to whoever is ahead; nobody wears it while all are level.
+  const scores = room?.seats.map((seat) => totalOf(seat.id)) ?? [];
+  const top = Math.max(...scores);
+  const crowned =
+    games > 0 && scores.some((score) => score !== top) ? top : null;
+  // How many games in a row the latest winner has taken.
+  let streak = 0;
+  for (const hand of [...(room?.hands ?? [])].reverse()) {
+    if (hand.winner !== latest?.winner) break;
+    streak++;
+  }
   return (
     <div
       className="table-square"
@@ -255,28 +271,36 @@ function TableSquare({
       aria-label={pick ? "Who won?" : `Seats at Table ${table}`}
     >
       <div className="table-top" aria-hidden="true">
-        <strong>{games}</strong>
-        <span>{games === 1 ? "game" : "games"}</span>
+        <span>Game</span>
+        <strong>{games + 1}</strong>
       </div>
       {WINDS.map((wind, i) => {
         const seat = room?.seats.find((item) => item.wind === i);
-        const total = seat
-          ? (room!.totals.find((item) => item.id === seat.id)?.total ?? START)
-          : 0;
-        const change =
-          seat && latest
-            ? seat.id === latest.winner
-              ? 3 * latest.each
-              : -latest.each
-            : null;
+        const total = seat ? totalOf(seat.id) : 0;
         const own = seat?.id === you;
+        const leads = !pick && seat && crowned !== null && total === crowned;
+        const lastWin = !pick && seat && latest?.winner === seat.id;
+        const hot = lastWin && streak >= 2;
+        // The glow belongs to the winner's moment, so it fades with the cheer.
+        const glowing = !pick && seat && cheer === seat.id;
+        const standing = `${leads ? ", leading" : ""}${hot ? `, ${streak} wins in a row` : ""}`;
         const body = (
           <>
-            <span className="seat-tile">
+            <span className="seat-tile" data-glow={glowing || undefined}>
               {seat ? (
                 <PlayerTile id={seat.id} />
               ) : (
                 <EmptyTile glyph={WIND_GLYPHS[i]} />
+              )}
+              {leads && (
+                <span className="seat-crown" aria-hidden="true">
+                  <IconCrown />
+                </span>
+              )}
+              {hot && (
+                <span className="seat-streak" aria-hidden="true">
+                  <IconFlame />×{streak}
+                </span>
               )}
             </span>
             {seat && !pick && cheer === seat.id && <Cheer you={own} />}
@@ -288,17 +312,11 @@ function TableSquare({
               // Keyed by the latest game, so a new game settles in.
               <span className="seat-total" key={latest?.id}>
                 {minus(total)}
-                {change !== null && (
-                  <small className="delta" data-sign={Math.sign(change)}>
-                    {" "}
-                    {signed(change)}
-                  </small>
-                )}
               </span>
             )}
           </>
         );
-        const label = `${wind}: ${seat ? seat.display : "open seat"}`;
+        const label = `${wind}: ${seat ? seat.display : "open seat"}${standing}`;
         const cheering = (!pick && seat && cheer === seat.id) || undefined;
         if (pick && seat)
           return (
@@ -342,7 +360,7 @@ function TableSquare({
               data-you
               key={wind}
               disabled={busy}
-              aria-label={`Your seat, ${wind}. ${games ? "End the table to change groups." : "Tap to leave."}`}
+              aria-label={`Your seat, ${wind}${standing}. ${games ? "End the table to change groups." : "Tap to leave."}`}
               onClick={tapOwn}
             >
               {body}
@@ -380,18 +398,38 @@ type Draft = {
 function ChangeRows({
   room,
   change,
+  winner,
+  ranked = false,
 }: {
   room: Room;
   change?: (id: string) => number;
+  winner?: string;
+  // Sort by total and number the places, as at the end of a table.
+  ranked?: boolean;
 }) {
   const total = (id: string) =>
     room.totals.find((item) => item.id === id)?.total ?? START;
   const delta = (id: string) => (change ? change(id) : total(id) - START);
   const after = (id: string) => total(id) + (change ? change(id) : 0);
+  const seats = ranked
+    ? [...room.seats].sort((a, b) => after(b.id) - after(a.id))
+    : room.seats;
+  // Equal totals share a place.
+  const place = (id: string) =>
+    seats.findIndex((seat) => after(seat.id) === after(id)) + 1;
   return (
-    <ul className="change-rows">
-      {room.seats.map((seat) => (
-        <li key={seat.id}>
+    <ul className="change-rows" data-ranked={ranked || undefined}>
+      {seats.map((seat) => (
+        <li key={seat.id} data-winner={seat.id === winner || undefined}>
+          {ranked && (
+            <span
+              className="change-place"
+              aria-label={`Place ${place(seat.id)}`}
+            >
+              {place(seat.id)}
+            </span>
+          )}
+          <PlayerTile id={seat.id} />
           <span>{seat.display}</span>
           <span className="delta" data-sign={Math.sign(delta(seat.id))}>
             {signed(delta(seat.id))}
@@ -483,6 +521,16 @@ function SeatedTable({
   const winnerSeated = room.seats.some((seat) => seat.id === draft.winner);
   const games = room.hands.length;
   const entering = Boolean(draft.winner || draft.each);
+  // Whoever is clearly ahead when the table ends; nobody on a tie.
+  const standings = room.totals
+    .filter((item) => room.seats.some((seat) => seat.id === item.id))
+    .sort((a, b) => b.total - a.total);
+  const topOfTable =
+    standings[0] &&
+    standings[0].total > START &&
+    standings[0].total !== standings[1]?.total
+      ? standings[0]
+      : undefined;
   const gain = (winner: string, each: number) => (id: string) =>
     id === winner ? 3 * each : -each;
   const set = (patch: Partial<Draft>) => {
@@ -519,7 +567,7 @@ function SeatedTable({
       {latest ? (
         <p className="table-latest" role="status">
           <span key={latest.id}>
-            Game {games}: {name(latest.winner)} won {3 * latest.each}
+            Game {games}: <b>{name(latest.winner)}</b> won {3 * latest.each}
           </span>
         </p>
       ) : (
@@ -547,7 +595,7 @@ function SeatedTable({
             setLayer("game");
           }}
         >
-          {entering ? `Continue game ${games + 1}` : `Record game ${games + 1}`}
+          {entering ? "Finish recording" : "Record results"}
         </button>
         <div className="table-links">
           {games > 0 && (
@@ -557,7 +605,7 @@ function SeatedTable({
               onClick={() => setLayer("games")}
             >
               <IconHistory size={20} aria-hidden="true" />
-              Games <span className="chip-count">{games}</span>
+              History
             </button>
           )}
           {(games > 0 || ready) && (
@@ -575,12 +623,11 @@ function SeatedTable({
 
       {layer === "game" && (
         <Sheet
-          title={step === "review" ? "Check, then save" : `Game ${games + 1}`}
+          title={step === "review" ? "Confirm" : `Game ${games + 1}`}
           close={() => setLayer(null)}
         >
           {step === "entry" ? (
             <>
-              <p className="quiet">Tap the winner’s tile.</p>
               <TableSquare
                 room={room}
                 table={room.table}
@@ -600,16 +647,18 @@ function SeatedTable({
                 autoComplete="off"
                 enterKeyHint="done"
                 value={draft.each}
-                aria-describedby="hand-each-hint"
                 onChange={(event) =>
                   set({
                     each: event.target.value.replace(/\D/g, "").slice(0, 4),
                   })
                 }
               />
-              <p className="quiet" id="hand-each-hint">
-                Include flowers and gold. The winner gains three times this.
-              </p>
+              <details className="meeting-more">
+                <summary>What counts?</summary>
+                <p>
+                  Include flowers and gold. The winner gains three times this.
+                </p>
+              </details>
               <div className="calculator-footer">
                 <button
                   type="button"
@@ -629,22 +678,38 @@ function SeatedTable({
                 {entering && (
                   <button
                     type="button"
-                    className="meeting-text"
+                    className="meeting-chip"
                     onClick={() =>
                       setDraft({ ...draft, winner: "", each: "", handId: "" })
                     }
                   >
-                    Clear entry
+                    <IconEraser aria-hidden="true" /> Clear
                   </button>
                 )}
               </div>
             </>
           ) : (
             <>
-              <p className="quiet">
-                {name(draft.winner)} won. Each other player pays {amount}.
-              </p>
-              <ChangeRows room={room} change={gain(draft.winner, amount)} />
+              <div className="confirm-win">
+                <PlayerTile id={draft.winner} />
+                <p>
+                  <strong>
+                    {draft.winner === player.id
+                      ? "You win!"
+                      : `${name(draft.winner)} wins!`}
+                  </strong>
+                  <span>
+                    <b className="delta" data-sign="1">
+                      +{3 * amount}
+                    </b>
+                  </span>
+                </p>
+              </div>
+              <ChangeRows
+                room={room}
+                change={gain(draft.winner, amount)}
+                winner={draft.winner}
+              />
               {error && (
                 <p className="meeting-error" role="alert">
                   {error}
@@ -661,15 +726,15 @@ function SeatedTable({
                     ? "Saving game…"
                     : offline
                       ? "Waiting for connection"
-                      : "Save game"}
+                      : "Save results"}
                 </button>
                 <button
                   type="button"
-                  className="meeting-text"
+                  className="meeting-chip"
                   disabled={busy}
                   onClick={() => setStep("entry")}
                 >
-                  Edit
+                  <IconPencil aria-hidden="true" /> Edit
                 </button>
               </div>
             </>
@@ -678,7 +743,7 @@ function SeatedTable({
       )}
 
       {layer === "games" && (
-        <Sheet title="Games" close={() => setLayer(null)}>
+        <Sheet title="History" close={() => setLayer(null)}>
           <ol className="game-rows" reversed>
             {room.hands
               .map((hand, i) => ({ hand, number: i + 1 }))
@@ -716,18 +781,55 @@ function SeatedTable({
       )}
 
       {layer === "end" && (
-        <Sheet title="End this table?" close={() => setLayer(null)}>
-          <p className="quiet">
-            {games
-              ? `It ends for all four players. ${games} ${games === 1 ? "game goes" : "games go"} to the club’s scoresheet as one table with these totals, then every seat is freed. Table ${room.table} stays open for the next group.`
-              : "It ends for all four players. No games were saved, so nothing goes to the scoresheet."}
-          </p>
-          {games > 0 && <ChangeRows room={room} />}
+        <Sheet title={`End Table ${room.table}?`} close={() => setLayer(null)}>
           {entering && (
-            <p className="meeting-notice">
-              Someone’s game entry on this phone isn’t saved yet. Save or clear
-              it first.
-            </p>
+            <div className="end-unsaved" role="status">
+              <p>A game on this phone isn’t saved yet.</p>
+              <div>
+                <button
+                  type="button"
+                  className="meeting-chip"
+                  onClick={() => setLayer("game")}
+                >
+                  <IconPencil aria-hidden="true" /> Finish it
+                </button>
+                <button
+                  type="button"
+                  className="meeting-chip"
+                  onClick={() => {
+                    setDraft({ ...draft, winner: "", each: "", handId: "" });
+                    setStep("entry");
+                  }}
+                >
+                  <IconEraser aria-hidden="true" /> Clear it
+                </button>
+              </div>
+            </div>
+          )}
+          {games > 0 ? (
+            <>
+              {topOfTable && (
+                <div className="confirm-win">
+                  <PlayerTile id={topOfTable.id} />
+                  <p>
+                    <strong>
+                      {topOfTable.id === player.id
+                        ? "You top the table!"
+                        : `${name(topOfTable.id)} tops the table!`}
+                    </strong>
+                    <span>
+                      <b className="delta" data-sign="1">
+                        +{topOfTable.total - START}
+                      </b>{" "}
+                      after {games} {games === 1 ? "game" : "games"}
+                    </span>
+                  </p>
+                </div>
+              )}
+              <ChangeRows room={room} ranked />
+            </>
+          ) : (
+            <p className="quiet end-note">No games yet, so nothing is saved.</p>
           )}
           {error && (
             <p className="meeting-error" role="alert">
@@ -735,6 +837,11 @@ function SeatedTable({
             </p>
           )}
           <div className="calculator-footer">
+            {games > 0 && (
+              <p className="quiet end-note">
+                These totals go to the official scoresheet.
+              </p>
+            )}
             <button
               type="button"
               className="meeting-primary"
@@ -754,11 +861,11 @@ function SeatedTable({
             </button>
             <button
               type="button"
-              className="meeting-text"
+              className="meeting-chip"
               disabled={busy}
               onClick={() => setLayer(null)}
             >
-              Keep playing
+              <IconPlayerPlay aria-hidden="true" /> Keep playing
             </button>
           </div>
         </Sheet>
@@ -786,10 +893,6 @@ function Lobby({
   return (
     <>
       <h1>Tables tonight</h1>
-      <p className="meeting-intro">
-        Sit with three others. Anyone at the table records each game: who won
-        and what each other player pays.
-      </p>
       {mine ? (
         <div className="room-return">
           <p>You’re seated at Table {mine.table}.</p>
@@ -818,8 +921,10 @@ function Lobby({
               >
                 <div className="room-head">
                   <strong>Table {room.table}</strong>
-                  <span>
-                    {room.seats.length}/4 · {full ? "Playing" : "Seats open"}
+                  <span className="room-status" data-open={!full}>
+                    {full
+                      ? `Playing · ${room.hands.length} ${room.hands.length === 1 ? "game" : "games"}`
+                      : `${4 - room.seats.length} ${room.seats.length === 3 ? "seat" : "seats"} open`}
                   </span>
                 </div>
                 <ul className="room-seats">
@@ -836,22 +941,37 @@ function Lobby({
                         </span>
                         <span>
                           <span className="sr-only">{wind}: </span>
-                          {seat?.display || "Open"}
+                          {seat?.display || (
+                            <span className="sr-only">open</span>
+                          )}
                         </span>
                       </li>
                     );
                   })}
                 </ul>
-                <Link
-                  className="meeting-text"
-                  href={MEETING_PATHS.table(room.table)}
-                >
-                  {mine?.table === room.table
-                    ? "Your table"
-                    : full || mine
-                      ? `View Table ${room.table}`
-                      : `Sit at Table ${room.table}`}
-                </Link>
+                {/* A card only acts when there's something to do there: your
+                    own table, or a free seat while you aren't seated. The
+                    link stretches over the card; see .room-go. */}
+                {mine?.table === room.table ? (
+                  <Link
+                    className="meeting-chip room-go"
+                    href={MEETING_PATHS.table(room.table)}
+                  >
+                    Your table <IconArrowRight aria-hidden="true" />
+                  </Link>
+                ) : (
+                  !full &&
+                  !mine && (
+                    <Link
+                      className="meeting-chip room-go"
+                      data-sit
+                      href={MEETING_PATHS.table(room.table)}
+                    >
+                      <IconArmchair aria-hidden="true" /> Sit here
+                      <span className="sr-only"> at Table {room.table}</span>
+                    </Link>
+                  )
+                )}
               </li>
             );
           })}

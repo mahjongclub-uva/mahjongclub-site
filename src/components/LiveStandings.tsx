@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { IconCrown } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import PlayerTile from "@/components/PlayerTile";
 import {
@@ -112,6 +113,8 @@ export function LiveTable({
   const season = matching
     ? rows.filter((row) => playedTonight.has(row.id))
     : [];
+  // The top three tonight stand on a podium on the meeting page.
+  const podium = embedded ? [] : tonight.slice(0, 3);
   return (
     <section>
       {embedded ? (
@@ -120,16 +123,22 @@ export function LiveTable({
           official until an officer publishes it.
         </p>
       ) : (
-        <h1 className="meeting-title">Tonight</h1>
+        <>
+          {/* Live until an officer publishes tonight, then official. */}
+          <p
+            className="live-badge"
+            data-official={!matching || alreadyCounted || undefined}
+            aria-hidden="true"
+          >
+            {!matching || alreadyCounted ? "Official" : "Live"}
+          </p>
+          <h1 className="meeting-title live-title">Tonight’s standings</h1>
+        </>
       )}
       <p
-        // On the meeting page the usual "Awaiting review" is left unsaid;
-        // loading, delays and official standings still show.
-        className={
-          !embedded && results && matching && !alreadyCounted && !error
-            ? "sr-only"
-            : "live-summary"
-        }
+        // On the meeting page the badge says live or official; only loading
+        // and delays still need words.
+        className={!embedded && results && !error ? "sr-only" : "live-summary"}
         role="status"
       >
         {!results && matching
@@ -176,9 +185,46 @@ export function LiveTable({
           </span>
         </p>
       )}
+      {podium.length > 1 && (
+        // Drawn for the eye only; the list below still reads every place.
+        <div className="live-podium" aria-hidden="true">
+          {[podium[1], podium[0], podium[2]].map(
+            (row, i) =>
+              row && (
+                <div
+                  key={row.id}
+                  data-step={[2, 1, 3][i]}
+                  data-you={row.id === me?.id || undefined}
+                >
+                  <span className="podium-tile">
+                    <PlayerTile id={row.id} />
+                    {i === 1 && (
+                      <span className="seat-crown">
+                        <IconCrown />
+                      </span>
+                    )}
+                  </span>
+                  <span className="podium-name">{row.display}</span>
+                  <strong
+                    className={`live-points${row.net < 0 ? " down" : row.net > 0 ? " up" : ""}`}
+                  >
+                    {signed(row.net)}
+                  </strong>
+                  <span className="podium-step">{row.rank}</span>
+                </div>
+              ),
+          )}
+        </div>
+      )}
       <ol className="live-list" aria-label="Tonight’s standings">
-        {tonight.map((row) => (
-          <li key={row.id} data-you={row.id === me?.id || undefined}>
+        {tonight.map((row, i) => (
+          <li
+            key={row.id}
+            data-you={row.id === me?.id || undefined}
+            className={
+              i < podium.length && podium.length > 1 ? "sr-only" : undefined
+            }
+          >
             <span className="live-rank" aria-label={`Rank ${row.rank}`}>
               {row.rank}
             </span>
@@ -203,7 +249,9 @@ export function LiveTable({
       </ol>
       {!embedded && season.length > 0 && (
         <section className="live-season" aria-labelledby="season-after">
-          <h2 id="season-after">Season after tonight</h2>
+          <h2 id="season-after">
+            Semester leaderboard <span>after tonight</span>
+          </h2>
           <ol
             className="live-list"
             aria-label="Season standings for tonight’s players"
@@ -212,6 +260,7 @@ export function LiveTable({
               const change = row.before === null ? null : row.before - row.rank;
               return (
                 <li key={row.id} data-you={row.id === me?.id || undefined}>
+                  <PlayerTile id={row.id} />
                   <span className="score-name">
                     {row.display}
                     {row.id === me?.id && (
@@ -225,11 +274,19 @@ export function LiveTable({
                     {String(row.points).replace("-", "−")}
                     <span className="sr-only"> points</span>
                   </strong>
-                  <span
-                    className={`live-change${change !== null && change < 0 ? " down" : change ? " up" : ""}`}
-                  >
+                  <span className="live-change">
                     #{row.rank}{" "}
                     <span
+                      className="live-move"
+                      data-move={
+                        change === null
+                          ? "new"
+                          : change > 0
+                            ? "up"
+                            : change < 0
+                              ? "down"
+                              : "same"
+                      }
                       aria-label={
                         change === null
                           ? "new player"
@@ -259,22 +316,6 @@ export function LiveTable({
         <p className="meeting-notice">
           No tables saved yet tonight. Check back after the first table is
           saved.
-        </p>
-      )}
-      {!embedded &&
-        results &&
-        matching &&
-        !alreadyCounted &&
-        tonight.length > 0 && (
-          <p className="quiet">
-            Includes tables still playing. Nothing is official until an officer
-            publishes it.
-          </p>
-        )}
-      {season.length > 0 && semester.unranked.length > 0 && (
-        <p className="quiet">
-          Players still qualifying appear after their scores are officially
-          updated.
         </p>
       )}
       {!embedded && !meeting.rooms && (

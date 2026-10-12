@@ -13,9 +13,6 @@ export default function ContinueAs({
   return (
     <div className="meeting-form">
       <h1>Continue as {player.display.split(" ")[0]}?</h1>
-      <p className="meeting-intro">
-        This phone was last used by {player.display}.
-      </p>
       <button type="button" className="meeting-primary" onClick={yes}>
         Continue as {player.display}
       </button>

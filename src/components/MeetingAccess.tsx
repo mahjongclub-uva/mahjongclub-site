@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useReducer, useState, type ReactNode } from "react";
-import { IconChevronDown } from "@tabler/icons-react";
+import {
+  IconArrowsExchange,
+  IconChevronDown,
+  IconChevronRight,
+  IconLayoutGrid,
+  IconTrophy,
+} from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
 import {
   getMeeting,
@@ -33,30 +39,41 @@ function PlayerSheet({
   close: () => void;
 }) {
   return (
-    <Sheet title={player.display} close={close}>
+    <Sheet title="Menu" close={close}>
+      <div className="menu-you">
+        <PlayerTile id={player.id} />
+        <p>
+          <small>Playing as</small>
+          <strong>{player.display}</strong>
+        </p>
+        <button
+          type="button"
+          className="meeting-chip"
+          onClick={() => {
+            rememberPlayer(meeting, null);
+            window.location.assign(MEETING_PATHS.checkin);
+          }}
+        >
+          <IconArrowsExchange aria-hidden="true" /> Switch
+          <span className="sr-only"> player</span>
+        </button>
+      </div>
       <ul className="menu-links">
         {meeting.rooms && (
           <li>
             <Link href={MEETING_PATHS.tables} onClick={close}>
+              <IconLayoutGrid aria-hidden="true" />
               Tables tonight
+              <IconChevronRight aria-hidden="true" />
             </Link>
           </li>
         )}
         <li>
           <Link href={MEETING_PATHS.standings} onClick={close}>
+            <IconTrophy aria-hidden="true" />
             Tonight’s standings
+            <IconChevronRight aria-hidden="true" />
           </Link>
-        </li>
-        <li>
-          <button
-            type="button"
-            onClick={() => {
-              rememberPlayer(meeting, null);
-              window.location.assign(MEETING_PATHS.checkin);
-            }}
-          >
-            Not you? Switch player
-          </button>
         </li>
       </ul>
     </Sheet>
