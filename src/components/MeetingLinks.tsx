@@ -19,17 +19,12 @@ import { usePoll } from "@/lib/usePoll";
 import PlayerTile from "./PlayerTile";
 import styles from "./MeetingLinks.module.css";
 
-// Matches the backend's default check-in and score margins. Outside these
-// windows the site never contacts the meeting service.
-export function nearMeeting(
-  schedule: ScheduledMeeting[],
-  now: number,
-  minutesAfter = 60,
-) {
-  return schedule.some(
-    (m) =>
-      now >= Date.parse(m.start) - 30 * 60000 &&
-      now < Date.parse(m.end ?? m.start) + minutesAfter * 60000,
+// Matches the backend's check-in window: from 30 minutes before the start
+// until the end. Outside it the site never contacts the meeting service.
+function inCheckIn(meeting: ScheduledMeeting, now: number) {
+  return (
+    now >= Date.parse(meeting.start) - 30 * 60000 &&
+    now < Date.parse(meeting.end ?? meeting.start)
   );
 }
 
@@ -43,8 +38,9 @@ function useLiveMeeting(schedule: ScheduledMeeting[]) {
   usePoll(
     async (signal) => {
       const now = Date.now();
-      setTonight(schedule.find((m) => nearMeeting([m], now, 0)));
-      if (!nearMeeting(schedule, now, 0)) return setMeeting(null);
+      const scheduled = schedule.find((m) => inCheckIn(m, now));
+      setTonight(scheduled);
+      if (!scheduled) return setMeeting(null);
       const next = await getMeeting(MEETING_SERVICE_URL, signal).catch(
         () => null,
       );

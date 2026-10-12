@@ -1,7 +1,6 @@
 /* The meeting flow plays like a game: the site's paper and tile colours, a
    rounded face, soft "clay" surfaces, a jade main button and red highlights.
-   The tokens sit on the meeting layout's own <main>: the public
-   leaderboard's Tonight tab is also a .meeting-page and keeps the site's look. */
+   The tokens sit on the meeting layout's own <main>. */
 .meeting-page {
   inline-size: 100%;
   max-width: 480px;
@@ -9,6 +8,11 @@
   margin: auto;
   padding: 0 24px 28px;
   --rule: #d8d0c0;
+  --han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  --card: var(--tile-face-hi);
+  --clay:
+    0 8px 18px -6px oklch(0.3 0.03 90 / 0.3), inset 0 -4px 0 oklch(0 0 0 / 0.06);
+  --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 /* The mock's warm club paper, flat, behind the whole meeting page. */
 body:has(main.meeting-page) {
@@ -18,11 +22,6 @@ main.meeting-page {
   --paper: oklch(0.95 0.025 88);
   --display: var(--font-meeting), ui-rounded, system-ui, sans-serif;
   --body: var(--font-meeting), ui-rounded, system-ui, sans-serif;
-  --han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
-  --card: var(--tile-face-hi);
-  --clay:
-    0 8px 18px -6px oklch(0.3 0.03 90 / 0.3), inset 0 -4px 0 oklch(0 0 0 / 0.06);
-  --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   font-family: var(--body);
 }
 .meeting-page h1 {
@@ -98,13 +97,6 @@ main.meeting-page {
   overflow: clip;
   text-overflow: ellipsis;
 }
-.meeting-live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tile-letter);
-  flex-shrink: 0;
-}
 .meeting-rehearsal {
   font-size: 0.75rem;
   color: var(--ink-soft);
@@ -169,7 +161,6 @@ main.meeting-page {
 .meeting-calculator button {
   font: inherit;
   cursor: pointer;
-  touch-action: manipulation;
 }
 .meeting-page button:disabled,
 .meeting-calculator button:disabled {
@@ -203,16 +194,7 @@ main.meeting-page {
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
   color: var(--ink);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: underline 1px
-    color-mix(in oklch, var(--ink) 30%, transparent);
-  text-underline-offset: 4px;
 }
 .meeting-back {
   margin-bottom: 20px;
@@ -442,20 +424,7 @@ main.meeting-page :focus-visible {
   outline-color: var(--jade);
   outline-offset: 4px;
 }
-/* Text actions stay text: they underline when touched instead of filling. */
-.meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
-.meeting-calculator .meeting-text:is(:focus-visible, :active) {
-  color: var(--ink);
-  text-decoration: underline 2px var(--tile-letter);
-  text-underline-offset: 4px;
-}
 @media (hover: hover) and (pointer: fine) {
-  .meeting-page .meeting-text:hover:not(:disabled),
-  .meeting-calculator .meeting-text:hover:not(:disabled) {
-    color: var(--ink);
-    text-decoration: underline 2px var(--tile-letter);
-    text-underline-offset: 4px;
-  }
   .player-chips button:hover:not(:disabled) {
     border-color: var(--ink-soft);
   }
@@ -536,14 +505,12 @@ main.meeting-page :focus-visible {
 .live-list li {
   display: flex;
   align-items: center;
-  gap: 12px;
   min-height: 80px;
-  padding: 14px 0;
 }
 .live-list li + li {
   border-top: 1px solid var(--rule);
 }
-main.meeting-page .live-list {
+.meeting-page .live-list {
   --w: 32px;
 }
 main.meeting-page .live-rank {
@@ -554,68 +521,25 @@ main.meeting-page .live-rank {
 }
 /* Below tonight: where tonight leaves each of tonight's players in the
    season, before an officer publishes it. */
-.live-season {
-  margin-block-start: 34px;
-}
-.meeting-page .live-season h2 {
-  font-size: 1.4rem;
-}
 .live-season .live-list {
   margin-block-start: 12px;
 }
 .live-rank {
   width: 24px;
-  font: 700 1.6rem var(--display);
   color: var(--ink-soft);
-}
-.live-points {
-  font: 700 1.7rem var(--display);
-  font-variant-numeric: tabular-nums;
 }
 .live-change {
   min-width: 42px;
   text-align: right;
-  color: var(--jade);
   font-size: 0.78rem;
-}
-.live-change.down {
-  color: var(--tile-letter);
 }
 .live-points.down {
   color: var(--tile-letter);
 }
 .live-list li[data-you] {
   font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--tile-letter);
   padding-inline-start: 12px;
 }
-.live-you {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  column-gap: 12px;
-  margin-block: 18px 6px !important;
-  padding-block: 12px;
-  border-block: 1px solid var(--rule);
-}
-.live-you span:first-child {
-  grid-column: 1 / -1;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-}
-.live-you strong {
-  font: 700 2.2rem var(--display);
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-.live-you strong[data-sign="-1"] {
-  color: var(--tile-letter);
-}
-.live-you span:last-child {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .live-list li {
     animation: live-settle 280ms ease-out;
@@ -1214,14 +1138,12 @@ main.meeting-page .live-rank {
   }
 }
 
-.meeting-here {
-  margin-block-start: 26px;
-}
 .meeting-page .meeting-here h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.3rem;
+  font: 600 0.9rem var(--body);
+  color: var(--ink-soft);
 }
 .meeting-here h2 span {
   color: var(--ink-soft);
@@ -1230,19 +1152,20 @@ main.meeting-page .live-rank {
 }
 /* Everyone here tonight, as a wall of their tiles. */
 .meeting-here ul {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-  gap: 16px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 10px;
   list-style: none;
   padding: 0;
-  margin-block: 16px 0;
-  --w: 44px;
+  margin-block: 14px 0;
+  --w: 46px;
 }
 .meeting-here li {
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 10px;
+  inline-size: 86px;
+  gap: 8px;
   min-inline-size: 0;
   font-size: 0.8rem;
   font-weight: 600;
@@ -1261,8 +1184,8 @@ main.meeting-page .live-rank {
 }
 .meeting-hero-tile {
   display: block;
-  margin-block: 26px 22px;
-  --w: 96px;
+  margin-block: 26px 34px;
+  --w: 110px;
 }
 .meeting-hero-tile .player-tile {
   rotate: -7deg;
@@ -1289,53 +1212,6 @@ main.meeting-page .live-rank {
   }
 }
 
-/* The leaderboard's provisional "Tonight" tab, shown only during a meeting. */
-.leaderboard-view {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-inline-size: 360px;
-  margin-block-end: 20px;
-  border-block-end: 1px solid var(--rule);
-}
-.leaderboard-view button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-block-size: 44px;
-  margin-block-end: -1px;
-  border: 0;
-  border-block-end: 2px solid transparent;
-  background: transparent;
-  color: var(--ink-soft);
-  font: 600 0.88rem var(--body);
-  cursor: pointer;
-}
-.leaderboard-view [aria-pressed="true"] {
-  border-block-end-color: var(--tile-letter);
-  color: var(--ink);
-}
-.leaderboard-view button:focus-visible {
-  outline: 3px solid #8b5924;
-  outline-offset: 2px;
-}
-.meeting-page.leaderboard-live {
-  max-width: none;
-  min-height: auto;
-  margin: 0;
-  padding: 0;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .leaderboard-view button {
-    transition:
-      background-color 150ms ease,
-      color 150ms ease;
-  }
-  .leaderboard-view button:active {
-    transform: scale(0.97);
-  }
-}
-
 /* Tables: a lobby of open tables, and a room that records hand by hand. */
 .room-list {
   list-style: none;
@@ -1345,7 +1221,6 @@ main.meeting-page .live-rank {
 }
 .room-card {
   display: grid;
-  gap: 10px;
   padding-block: 14px;
   border-block-end: 1px solid var(--rule);
 }
@@ -1379,7 +1254,6 @@ main.meeting-page .live-rank {
   justify-items: center;
   gap: 4px;
   min-inline-size: 0;
-  font-size: 0.75rem;
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -1489,7 +1363,7 @@ main.meeting-page .live-rank {
    lives on the tiles; changes are signed text, never chips. */
 .table-square {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
   grid-template-areas:
     ". west ."
     "north table south"
@@ -1506,15 +1380,10 @@ main.meeting-page .live-rank {
   align-content: center;
   inline-size: 100%;
   aspect-ratio: 1;
-  border-radius: 22px;
-  background: var(--card);
-  box-shadow: var(--clay);
-  color: var(--ink-soft);
   font-size: 0.72rem;
 }
 .table-top strong {
   font: 700 2.2rem/1 var(--display);
-  color: var(--ink);
 }
 .meeting-page .seat {
   display: grid;
@@ -1549,7 +1418,6 @@ main.meeting-page .live-rank {
   --w: 48px;
 }
 .room-seats .seat-tile {
-  --w: 34px;
   margin-block-end: 4px;
 }
 .seat-name {
@@ -1601,9 +1469,7 @@ button.seat[data-empty] .seat-name {
 .table-latest {
   display: grid;
   gap: 2px;
-  padding-block: 10px;
   border-block: 1px solid var(--rule);
-  font-size: 0.88rem;
 }
 .table-actions {
   display: grid;
@@ -1623,18 +1489,10 @@ button.seat[data-empty] .seat-name {
 }
 .change-rows li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 4ch;
-  align-items: baseline;
-  gap: 10px;
   padding-block: 8px;
-  font-size: 0.9rem;
-}
-.change-rows li + li {
-  border-block-start: 1px solid var(--rule);
 }
 .change-rows strong {
   text-align: end;
-  font-variant-numeric: tabular-nums;
 }
 .table-sheet .table-square {
   margin-block: 8px 4px;
@@ -2035,13 +1893,6 @@ button.seat[data-empty] .seat-name {
 .meeting-receipt > .meeting-primary {
   margin-block-end: 28px;
 }
-.meeting-here {
-  margin-block-start: 0;
-}
-.meeting-page .meeting-here h2 {
-  font: 600 0.9rem var(--body);
-  color: var(--ink-soft);
-}
 main.meeting-page .table-latest {
   justify-items: center;
   padding-block: 2px 14px;
@@ -2058,10 +1909,6 @@ main.meeting-page .live-list li {
   min-block-size: 0;
   gap: 12px;
   padding: 9px 6px;
-}
-main.meeting-page .live-list li + li {
-  border-block-start: 2px dashed
-    color-mix(in oklch, var(--ink-soft) 25%, transparent);
 }
 main.meeting-page .live-list li[data-you] {
   box-shadow: none;
@@ -2081,15 +1928,8 @@ main.meeting-page .live-points {
 main.meeting-page .live-season {
   margin-block-start: 22px;
 }
-main.meeting-page .live-season h2 {
-  font: 600 0.9rem var(--body);
-  color: var(--ink-soft);
-}
 main.meeting-page .live-season .live-list li {
   padding-block: 6px;
-}
-main.meeting-page .live-season .live-list li + li {
-  border: 0;
 }
 main.meeting-page .live-season .live-points {
   font: 700 1rem var(--body);
@@ -2126,27 +1966,6 @@ main.meeting-page .live-list li {
 main.meeting-page .live-season .live-list > li {
   border: 0;
   background: none;
-}
-.table-square {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
-}
-.meeting-hero-tile {
-  --w: 110px;
-  margin-block-end: 34px;
-}
-.meeting-here ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px 10px;
-  margin-block-start: 14px;
-  --w: 46px;
-}
-.meeting-here li {
-  inline-size: 86px;
-  gap: 8px;
-}
-.meeting-here li .player-tile {
-  rotate: none;
 }
 .meeting-here li:nth-child(6n + 1) {
   rotate: -6deg;
@@ -2323,10 +2142,6 @@ main.meeting-page .meeting-text {
   border-radius: 16px;
   background: color-mix(in oklch, var(--ink) 6%, var(--paper));
   font: 700 0.9rem var(--body);
-  text-decoration: none;
-}
-main.meeting-page
-  .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]) {
   text-decoration: none;
 }
 main.meeting-page .meeting-text:active:not(:disabled) {

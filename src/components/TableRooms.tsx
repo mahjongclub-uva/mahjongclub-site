@@ -16,7 +16,7 @@ import {
   IconPlayerPlay,
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
-import ContinueAs from "@/components/ContinueAs";
+import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers from "@/components/IdStickers";
 import Sheet from "@/components/Sheet";
 import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
@@ -27,38 +27,24 @@ import {
   getRooms,
   MAX_TABLES,
   MEETING_PATHS,
-  playerConfirmed,
   postMeeting,
-  rememberPlayer,
   requestError,
-  savedPlayer,
   WINDS,
   type Meeting,
   type Player,
   type Room,
+  seatedRoom,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
+import { clock, minus, signed } from "@/lib/format";
 
 const START = 205;
 // Unsaved game entry, restored only if the table has not changed since.
 const GAME_DRAFT = "club-game-draft";
 
-function signed(value: number) {
-  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
-}
-const minus = (value: number) => String(value).replace("-", "−");
-const clock = (at: number) =>
-  new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-
 /** A phone that didn't check in names its player by computing ID, never by picking from a list. */
-function WhoAreYou({
-  meeting,
-  choose,
-}: {
-  meeting: Meeting;
-  choose: (player: Player) => void;
-}) {
+function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
   const [computingId, setComputingId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -86,7 +72,6 @@ function WhoAreYou({
         setError(reply.message || "Ask an officer to check your attendance.");
         return;
       }
-      rememberPlayer(meeting, reply.player);
       choose(reply.player);
     } catch (failure) {
       setError(requestError(failure));
@@ -281,11 +266,11 @@ function TableSquare({
         const lastWin = !pick && seat && latest?.winner === seat.id;
         const hot = lastWin && streak >= 2;
         // The glow belongs to the winner's moment, so it fades with the cheer.
-        const glowing = !pick && seat && cheer === seat.id;
+        const cheering = (!pick && seat && cheer === seat.id) || undefined;
         const standing = `${leads ? ", leading" : ""}${hot ? `, ${streak} wins in a row` : ""}`;
         const body = (
           <>
-            <span className="seat-tile" data-glow={glowing || undefined}>
+            <span className="seat-tile" data-glow={cheering}>
               {seat ? (
                 <PlayerTile id={seat.id} />
               ) : (
@@ -302,7 +287,7 @@ function TableSquare({
                 </span>
               )}
             </span>
-            {seat && !pick && cheer === seat.id && <Cheer you={own} />}
+            {cheering && <Cheer you={own} />}
             <span className="seat-name">
               {seat ? seat.display : canSit && !pick ? "Take seat" : "Open"}
               {own && <small> you</small>}
@@ -316,7 +301,6 @@ function TableSquare({
           </>
         );
         const label = `${wind}: ${seat ? seat.display : "open seat"}${standing}`;
-        const cheering = (!pick && seat && cheer === seat.id) || undefined;
         if (pick && seat)
           return (
             <button
@@ -440,6 +424,34 @@ function ChangeRows({
   );
 }
 
+/** A player's moment, up top: their tile, a cheer, and what they gained. */
+function WinCard({
+  id,
+  title,
+  gain,
+  children,
+}: {
+  id: string;
+  title: string;
+  gain: number;
+  children?: string;
+}) {
+  return (
+    <div className="confirm-win">
+      <PlayerTile id={id} />
+      <p>
+        <strong>{title}</strong>
+        <span>
+          <b className="delta" data-sign="1">
+            +{gain}
+          </b>
+          {children}
+        </span>
+      </p>
+    </div>
+  );
+}
+
 /** What a seated player does at the table: one screen, tasks in sheets. */
 function SeatedTable({
   meeting,
@@ -460,48 +472,31 @@ function SeatedTable({
 }) {
   const last = room.hands.at(-1)?.id ?? null;
   // One draft per table session and game; anything else is discarded with a note.
-  const [draft, setDraft] = useState<Draft>(() => {
-    const fresh = {
-      meetingId: meeting.meetingId!,
-      table: room.table,
-      session: room.session,
-      lastHandId: last,
-      winner: "",
-      each: "",
-      handId: "",
-    };
+  const [kept] = useState<Draft | null>(() => {
     try {
-      const kept = JSON.parse(localStorage.getItem(GAME_DRAFT) || "null");
-      if (
-        kept?.meetingId === fresh.meetingId &&
-        kept.table === fresh.table &&
-        kept.session === fresh.session &&
-        kept.lastHandId === fresh.lastHandId
-      )
-        return {
-          ...fresh,
-          winner: kept.winner,
-          each: kept.each,
-          handId: kept.handId,
-        };
+      return JSON.parse(localStorage.getItem(GAME_DRAFT) || "null");
     } catch {
-      /* No draft to restore. */
-    }
-    return fresh;
-  });
-  const [stale, setStale] = useState(() => {
-    try {
-      const kept = JSON.parse(localStorage.getItem(GAME_DRAFT) || "null");
-      return Boolean(
-        kept?.winner &&
-        kept.meetingId === meeting.meetingId &&
-        kept.table === room.table &&
-        (kept.session !== room.session || kept.lastHandId !== last),
-      );
-    } catch {
-      return false;
+      return null; // No draft to restore.
     }
   });
+  const thisTable =
+    kept?.meetingId === meeting.meetingId && kept.table === room.table;
+  const current =
+    thisTable && kept.session === room.session && kept.lastHandId === last;
+  const [draft, setDraft] = useState<Draft>(() => ({
+    meetingId: meeting.meetingId!,
+    table: room.table,
+    session: room.session,
+    lastHandId: last,
+    winner: current ? kept.winner : "",
+    each: current ? kept.each : "",
+    handId: current ? kept.handId : "",
+  }));
+  const [stale, setStale] = useState(() =>
+    Boolean(thisTable && kept.winner && !current),
+  );
+  const clearDraft = () =>
+    setDraft({ ...draft, winner: "", each: "", handId: "" });
   const [layer, setLayer] = useState<null | "game" | "games" | "end">(null);
   const [step, setStep] = useState<"entry" | "review">("entry");
   useEffect(() => {
@@ -557,10 +552,15 @@ function SeatedTable({
       setStale(false);
       setStep("entry");
       setLayer(null);
-      setDraft({ ...draft, winner: "", each: "", handId: "" });
+      clearDraft();
     }
   }
   const latest = room.hands.at(-1);
+  const errorLine = error && (
+    <p className="meeting-error" role="alert">
+      {error}
+    </p>
+  );
   return (
     <>
       {latest ? (
@@ -678,9 +678,7 @@ function SeatedTable({
                   <button
                     type="button"
                     className="meeting-chip"
-                    onClick={() =>
-                      setDraft({ ...draft, winner: "", each: "", handId: "" })
-                    }
+                    onClick={clearDraft}
                   >
                     <IconEraser aria-hidden="true" /> Clear
                   </button>
@@ -689,31 +687,21 @@ function SeatedTable({
             </>
           ) : (
             <>
-              <div className="confirm-win">
-                <PlayerTile id={draft.winner} />
-                <p>
-                  <strong>
-                    {draft.winner === player.id
-                      ? "You win!"
-                      : `${name(draft.winner)} wins!`}
-                  </strong>
-                  <span>
-                    <b className="delta" data-sign="1">
-                      +{3 * amount}
-                    </b>
-                  </span>
-                </p>
-              </div>
+              <WinCard
+                id={draft.winner}
+                title={
+                  draft.winner === player.id
+                    ? "You win!"
+                    : `${name(draft.winner)} wins!`
+                }
+                gain={3 * amount}
+              />
               <ChangeRows
                 room={room}
                 change={gain(draft.winner, amount)}
                 winner={draft.winner}
               />
-              {error && (
-                <p className="meeting-error" role="alert">
-                  {error}
-                </p>
-              )}
+              {errorLine}
               <div className="calculator-footer">
                 <button
                   type="button"
@@ -744,28 +732,21 @@ function SeatedTable({
       {layer === "games" && (
         <Sheet title="History" close={() => setLayer(null)}>
           <ol className="game-rows" reversed>
-            {room.hands
-              .map((hand, i) => ({ hand, number: i + 1 }))
-              .reverse()
-              .map(({ hand, number }) => (
-                <li key={hand.id}>
-                  <span className="game-number">Game {number}</span>
-                  <PlayerTile id={hand.winner} />
-                  <span className="game-winner">
-                    {hand.winner === player.id ? "You" : name(hand.winner)}
-                    <small>won {hand.each} from each</small>
-                  </span>
-                  <strong className="delta" data-sign="1">
-                    +{3 * hand.each}
-                  </strong>
-                </li>
-              ))}
+            {[...room.hands].reverse().map((hand, i) => (
+              <li key={hand.id}>
+                <span className="game-number">Game {games - i}</span>
+                <PlayerTile id={hand.winner} />
+                <span className="game-winner">
+                  {hand.winner === player.id ? "You" : name(hand.winner)}
+                  <small>won {hand.each} from each</small>
+                </span>
+                <strong className="delta" data-sign="1">
+                  +{3 * hand.each}
+                </strong>
+              </li>
+            ))}
           </ol>
-          {error && (
-            <p className="meeting-error" role="alert">
-              {error}
-            </p>
-          )}
+          {errorLine}
           <div className="calculator-footer">
             <button
               type="button"
@@ -796,7 +777,7 @@ function SeatedTable({
                   type="button"
                   className="meeting-chip"
                   onClick={() => {
-                    setDraft({ ...draft, winner: "", each: "", handId: "" });
+                    clearDraft();
                     setStep("entry");
                   }}
                 >
@@ -808,33 +789,24 @@ function SeatedTable({
           {games > 0 ? (
             <>
               {topOfTable && (
-                <div className="confirm-win">
-                  <PlayerTile id={topOfTable.id} />
-                  <p>
-                    <strong>
-                      {topOfTable.id === player.id
-                        ? "You top the table!"
-                        : `${name(topOfTable.id)} tops the table!`}
-                    </strong>
-                    <span>
-                      <b className="delta" data-sign="1">
-                        +{topOfTable.total - START}
-                      </b>{" "}
-                      after {games} {games === 1 ? "game" : "games"}
-                    </span>
-                  </p>
-                </div>
+                <WinCard
+                  id={topOfTable.id}
+                  title={
+                    topOfTable.id === player.id
+                      ? "You top the table!"
+                      : `${name(topOfTable.id)} tops the table!`
+                  }
+                  gain={topOfTable.total - START}
+                >
+                  {` after ${games} ${games === 1 ? "game" : "games"}`}
+                </WinCard>
               )}
               <ChangeRows room={room} ranked />
             </>
           ) : (
             <p className="quiet end-note">No games yet, so nothing is saved.</p>
           )}
-          {error && (
-            <p className="meeting-error" role="alert">
-              {error}
-            </p>
-          )}
+          {errorLine}
           <div className="calculator-footer">
             {games > 0 && (
               <p className="quiet end-note">
@@ -1001,8 +973,7 @@ function Tables({
   refresh: () => void;
   table?: number;
 }) {
-  const [player, setPlayer] = useState(() => savedPlayer(meeting));
-  const [confirmed, setConfirmed] = useState(() => playerConfirmed());
+  const { player, setPlayer, prompt } = useConfirmedPlayer(meeting);
   const [rooms, setRooms] = useState<Room[]>(meeting.rooms || []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -1036,9 +1007,7 @@ function Tables({
     8000,
     [],
   );
-  const mine = player
-    ? rooms.find((room) => room.seats.some((seat) => seat.id === player.id))
-    : undefined;
+  const mine = seatedRoom(rooms, player?.id);
   // The latest ended session this player was part of, while they are unseated.
   const ended =
     player && !mine
@@ -1129,30 +1098,8 @@ function Tables({
     }
   }
 
-  if (!player)
-    return (
-      <WhoAreYou
-        meeting={meeting}
-        choose={(next) => {
-          setPlayer(next);
-          setConfirmed(true);
-        }}
-      />
-    );
-  if (!confirmed)
-    return (
-      <ContinueAs
-        player={player}
-        yes={() => {
-          rememberPlayer(meeting, player);
-          setConfirmed(true);
-        }}
-        no={() => {
-          rememberPlayer(meeting, null);
-          setPlayer(null);
-        }}
-      />
-    );
+  if (!player) return <WhoAreYou choose={setPlayer} />;
+  if (prompt) return prompt;
   const room = table ? rooms.find((item) => item.table === table) : undefined;
   const here = table !== undefined && mine?.table === table;
   // A game saved at this table, by any phone, cheers its winner. Compared

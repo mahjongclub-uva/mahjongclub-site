@@ -55,3 +55,15 @@ export function formatMeetingTime(start: string, end: string | null): string {
     from.marker === to.marker ? from.clock : `${from.clock} ${from.marker}`;
   return `${head}–${to.clock} ${to.marker}`;
 }
+
+/** A signed net such as "+45" or "−20", with a real minus sign. */
+export function signed(value: number) {
+  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
+}
+
+/** A number with a real minus sign. */
+export const minus = (value: number) => String(value).replace("-", "−");
+
+/** A clock time on this phone, such as "6:42 PM". */
+export const clock = (at = Date.now()) =>
+  new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });

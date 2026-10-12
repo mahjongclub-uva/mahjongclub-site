@@ -23,8 +23,10 @@ import {
   type Meeting,
   type Submission,
   MEETING_PATHS,
+  seatedRoom,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
+import { clock, signed } from "@/lib/format";
 
 const START = 205;
 // The last confirmed save, so a reload shows the receipt instead of an empty form.
@@ -38,11 +40,6 @@ const STEPS = ["Players", "Final totals", "Review"] as const;
 
 const cardLabel = (card: number) =>
   card === 50 ? "J / Q / K" : card === 1 ? "A" : String(card);
-
-/** A signed net such as "+45" or "−20", with a real minus sign. */
-function signed(value: number) {
-  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
-}
 
 /** What is still wrong with the table, in words, before the server checks it. */
 function balance(totals: number[]) {
@@ -249,9 +246,7 @@ function ScoreForm({
     requestAnimationFrame(() => calculatorTrigger.current?.focus());
   }
   const players = meeting.players || [];
-  const seatedAt = (id: string) =>
-    meeting.rooms?.find((room) => room.seats.some((seat) => seat.id === id))
-      ?.table;
+  const seatedAt = (id: string) => seatedRoom(meeting.rooms, id)?.table;
   const seats = ids.map((id, i) => ({
     id,
     total: /^-?\d+$/.test(totals[i].trim()) ? Number(totals[i]) : NaN,
@@ -376,10 +371,7 @@ function ScoreForm({
       // The time this browser received the confirmation, not a server clock.
       const kept = {
         table: reply.table,
-        savedAt: new Date().toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-        }),
+        savedAt: clock(),
       };
       setReceipt(kept);
       try {
@@ -463,7 +455,7 @@ function ScoreForm({
         </p>
         {resultRows}
         <div className="meeting-actions">
-          <Link className="meeting-primary" href={MEETING_PATHS.standings}>
+          <Link className="meeting-primary" href={MEETING_PATHS.tonight}>
             See tonight’s standings
           </Link>
           <button type="button" className="meeting-text" onClick={reset}>

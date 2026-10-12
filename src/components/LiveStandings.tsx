@@ -18,22 +18,19 @@ import { liveStandings, tonightStandings, tonightTables } from "@/lib/live";
 import type { Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
+import { clock, minus, signed } from "@/lib/format";
 
-function signed(value: number) {
-  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
-}
+const pointsClass = (net: number) =>
+  `live-points${net < 0 ? " down" : net > 0 ? " up" : ""}`;
 
 /** Tonight's standings, then how tonight moves the season for the players
- * who played. `embedded` is the public leaderboard's Tonight tab: tonight
- * only, with no heading, tiles, season block or meeting links. */
-export function LiveTable({
+ * who played. */
+function LiveTable({
   meeting,
   semester,
-  embedded = false,
 }: {
   meeting: Meeting;
   semester: Semester;
-  embedded?: boolean;
 }) {
   const [results, setResults] = useState<Results | null>(null);
   const [me] = useState(() => savedPlayer(meeting));
@@ -42,6 +39,8 @@ export function LiveTable({
   const [updatedAt, setUpdatedAt] = useState("");
   const previousPoints = useRef<Map<string, number> | null>(null);
   const [scoreChanges, setScoreChanges] = useState<Record<string, number>>({});
+  const matching =
+    meeting.semester === semester.id && semester.scoring_rule === "season-net";
   const retry = usePoll(
     async (signal) => {
       setUpdating(true);
@@ -61,13 +60,7 @@ export function LiveTable({
           throw new Error(
             "The meeting changed. Return to check-in to refresh it.",
           );
-        const nextRows = liveStandings(
-          semester,
-          meeting.semester === semester.id &&
-            semester.scoring_rule === "season-net"
-            ? next
-            : null,
-        );
+        const nextRows = liveStandings(semester, matching ? next : null);
         const previous = previousPoints.current;
         if (previous) {
           const changed = nextRows.filter(
@@ -86,12 +79,7 @@ export function LiveTable({
         );
         setResults(next);
         setError("");
-        setUpdatedAt(
-          new Date().toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        );
+        setUpdatedAt(clock());
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
       } finally {
@@ -101,44 +89,32 @@ export function LiveTable({
     30000,
     [meeting.meetingId, meeting.date],
   );
-  const matching =
-    meeting.semester === semester.id && semester.scoring_rule === "season-net";
   const rows = liveStandings(semester, matching ? results : null);
   const alreadyCounted = Boolean(
     results && semester.last_session && results.date <= semester.last_session,
   );
   const tonight = tonightStandings(results?.tables ?? []);
-  const mineTonight = me && tonight.find((row) => row.id === me.id);
   const playedTonight = new Set(tonight.map((row) => row.id));
   const season = matching
     ? rows.filter((row) => playedTonight.has(row.id))
     : [];
-  // The top three tonight stand on a podium on the meeting page.
-  const podium = embedded ? [] : tonight.slice(0, 3);
+  // The top three tonight stand on a podium.
+  const podium = tonight.slice(0, 3);
   return (
     <section>
-      {embedded ? (
-        <p className="meeting-intro">
-          Tonight’s nets include games at tables still playing. Nothing is
-          official until an officer publishes it.
-        </p>
-      ) : (
-        <>
-          {/* Live until an officer publishes tonight, then official. */}
-          <p
-            className="live-badge"
-            data-official={!matching || alreadyCounted || undefined}
-            aria-hidden="true"
-          >
-            {!matching || alreadyCounted ? "Official" : "Live"}
-          </p>
-          <h1 className="meeting-title live-title">Tonight’s standings</h1>
-        </>
-      )}
+      {/* Live until an officer publishes tonight, then official. */}
       <p
-        // On the meeting page the badge says live or official; only loading
-        // and delays still need words.
-        className={!embedded && results && !error ? "sr-only" : "live-summary"}
+        className="live-badge"
+        data-official={!matching || alreadyCounted || undefined}
+        aria-hidden="true"
+      >
+        {!matching || alreadyCounted ? "Official" : "Live"}
+      </p>
+      <h1 className="meeting-title live-title">Tonight’s standings</h1>
+      <p
+        // The badge says live or official; only loading and delays still
+        // need words.
+        className={results && !error ? "sr-only" : "live-summary"}
         role="status"
       >
         {!results && matching
@@ -173,18 +149,6 @@ export function LiveTable({
           </button>
         </div>
       )}
-      {embedded && mineTonight && (
-        <p className="live-you">
-          <span>You tonight</span>
-          <strong data-sign={Math.sign(mineTonight.net)}>
-            {signed(mineTonight.net)}
-          </strong>
-          <span>
-            #{mineTonight.rank} of {tonight.length} · {mineTonight.tables}{" "}
-            {mineTonight.tables === 1 ? "table" : "tables"}
-          </span>
-        </p>
-      )}
       {podium.length > 1 && (
         // Drawn for the eye only; the list below still reads every place.
         <div className="live-podium" aria-hidden="true">
@@ -205,9 +169,7 @@ export function LiveTable({
                     )}
                   </span>
                   <span className="podium-name">{row.display}</span>
-                  <strong
-                    className={`live-points${row.net < 0 ? " down" : row.net > 0 ? " up" : ""}`}
-                  >
+                  <strong className={pointsClass(row.net)}>
                     {signed(row.net)}
                   </strong>
                   <span className="podium-step">{row.rank}</span>
@@ -228,26 +190,19 @@ export function LiveTable({
             <span className="live-rank" aria-label={`Rank ${row.rank}`}>
               {row.rank}
             </span>
-            {!embedded && <PlayerTile id={row.id} />}
+            <PlayerTile id={row.id} />
             <span className="score-name">
               {row.display}
               {row.id === me?.id && <span className="sr-only"> (you)</span>}
-              {embedded && (
-                <small>
-                  {row.tables} {row.tables === 1 ? "table" : "tables"} tonight
-                </small>
-              )}
             </span>
-            <strong
-              className={`live-points${row.net < 0 ? " down" : row.net > 0 ? " up" : ""}`}
-            >
+            <strong className={pointsClass(row.net)}>
               {signed(row.net)}
               <span className="sr-only"> net tonight</span>
             </strong>
           </li>
         ))}
       </ol>
-      {!embedded && season.length > 0 && (
+      {season.length > 0 && (
         <section className="live-season" aria-labelledby="season-after">
           <h2 id="season-after">
             Semester leaderboard <span>after tonight</span>
@@ -258,6 +213,14 @@ export function LiveTable({
           >
             {season.map((row) => {
               const change = row.before === null ? null : row.before - row.rank;
+              const [move, said, shown] =
+                change === null
+                  ? ["new", "new player", "new"]
+                  : change > 0
+                    ? ["up", `up ${change}`, `↑${change}`]
+                    : change < 0
+                      ? ["down", `down ${-change}`, `↓${-change}`]
+                      : ["same", "no change", "·"];
               return (
                 <li key={row.id} data-you={row.id === me?.id || undefined}>
                   <PlayerTile id={row.id} />
@@ -271,39 +234,17 @@ export function LiveTable({
                     key={scoreChanges[row.id] || 0}
                     className={`live-points${scoreChanges[row.id] ? " live-points-changed" : ""}`}
                   >
-                    {String(row.points).replace("-", "−")}
+                    {minus(row.points)}
                     <span className="sr-only"> points</span>
                   </strong>
                   <span className="live-change">
                     #{row.rank}{" "}
                     <span
                       className="live-move"
-                      data-move={
-                        change === null
-                          ? "new"
-                          : change > 0
-                            ? "up"
-                            : change < 0
-                              ? "down"
-                              : "same"
-                      }
-                      aria-label={
-                        change === null
-                          ? "new player"
-                          : change > 0
-                            ? `up ${change}`
-                            : change < 0
-                              ? `down ${-change}`
-                              : "no change"
-                      }
+                      data-move={move}
+                      aria-label={said}
                     >
-                      {change === null
-                        ? "new"
-                        : change > 0
-                          ? `↑${change}`
-                          : change < 0
-                            ? `↓${-change}`
-                            : "·"}
+                      {shown}
                     </span>
                   </span>
                 </li>
@@ -318,7 +259,7 @@ export function LiveTable({
           saved.
         </p>
       )}
-      {!embedded && !meeting.rooms && (
+      {!meeting.rooms && (
         <div className="meeting-actions">
           {/* Only without table rooms: with them, scores are recorded at the
               table, and typing them in here would count those games twice. */}
@@ -328,7 +269,7 @@ export function LiveTable({
         </div>
       )}
       {/* A phone with no player has no menu, so it gets its own way back. */}
-      {!embedded && meeting.rooms && !me && (
+      {meeting.rooms && !me && (
         <Link className="meeting-text" href={MEETING_PATHS.tables}>
           See tonight’s tables
         </Link>

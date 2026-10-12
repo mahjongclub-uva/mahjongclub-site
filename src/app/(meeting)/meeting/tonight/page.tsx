@@ -3,7 +3,7 @@ import LiveStandings from "@/components/LiveStandings";
 import { getCurrentSemester } from "@/lib/data";
 import { MEETING_REHEARSAL } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Live standings" };
+export const metadata: Metadata = { title: "Tonight’s standings" };
 export default function LivePage() {
   const semester = getCurrentSemester();
   // Rehearsal player IDs must never overlap the real roster's scores.

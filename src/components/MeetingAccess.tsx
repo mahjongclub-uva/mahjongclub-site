@@ -24,7 +24,7 @@ import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import Image from "next/image";
 import PlayerTile from "@/components/PlayerTile";
-import { formatShortDate } from "@/lib/format";
+import { clock, formatShortDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 
 /** Who this phone is playing as, and the two things that belong to them:
@@ -69,7 +69,7 @@ function PlayerSheet({
           </li>
         )}
         <li>
-          <Link href={MEETING_PATHS.standings} onClick={close}>
+          <Link href={MEETING_PATHS.tonight} onClick={close}>
             <IconTrophy aria-hidden="true" />
             Tonight’s standings
             <IconChevronRight aria-hidden="true" />
@@ -103,12 +103,7 @@ export default function MeetingAccess({
         if (signal.aborted) return;
         setMeeting(next);
         setError("");
-        setCheckedAt(
-          new Date().toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        );
+        setCheckedAt(clock());
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
       } finally {

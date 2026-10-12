@@ -61,7 +61,7 @@ The website-copy Sheet remains separate and continues to create its own review p
 ## Meeting check-in backend
 
 The check-in and score entry pages write to the Fall 2026 score workbook, starting with the October 9 meeting.
-Automatic score publishing is not enabled yet: the public leaderboard updates when scores are synced, and `/meeting/standings/` shows the night's provisional standings in the meantime.
+Automatic score publishing is not enabled yet: the public leaderboard updates when scores are synced, and `/meeting/tonight/` shows the night's provisional standings in the meantime.
 If the pages misbehave during a meeting, record attendance and tables in the Sheet as before.
 
 ### Install and configure
@@ -180,7 +180,7 @@ Tables without a phone can still be entered as four final totals at `/meeting/sc
 That form requires four checked-in players and totals that add up to 820, and keeps a retry receipt if the connection drops.
 Players seated at a table are marked there, so the same games are not entered twice.
 
-`/meeting/standings/` shows tonight's nets (games at tables still playing are included and marked provisional) and the semester with tonight added.
+`/meeting/tonight/` shows tonight's nets (games at tables still playing are included and marked provisional) and the semester with tonight added.
 The regular leaderboard remains the official snapshot until the publishing pipeline updates it.
 
 If the site is unavailable, an officer records attendance and results directly in the Sheet.

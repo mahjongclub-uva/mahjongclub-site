@@ -65,12 +65,20 @@ export function liveStandings(
         a.tables - b.tables ||
         a.display.localeCompare(b.display),
     );
+  return ranked(
+    sorted,
+    (a, b) => a.points === b.points && a.tables === b.tables,
+  );
+}
+
+/** Ranks from 1 that never gap; rows share one only when `tied`. */
+function ranked<T extends { rank: number }>(
+  sorted: T[],
+  tied: (a: T, b: T) => boolean,
+) {
   sorted.forEach((row, i) => {
     const prev = sorted[i - 1];
-    row.rank = prev
-      ? prev.rank +
-        Number(prev.points !== row.points || prev.tables !== row.tables)
-      : 1;
+    row.rank = prev ? prev.rank + Number(!tied(prev, row)) : 1;
   });
   return sorted;
 }
@@ -98,8 +106,9 @@ export function tonightTables(
       table: room.table,
       seats: room.seats.map((seat) => {
         const total =
-          room.totals.find((item) => item.id === seat.id)?.total ?? 205;
-        return { ...seat, total, net: total - 205 };
+          room.totals.find((item) => item.id === seat.id)?.total ??
+          SEASON_START;
+        return { ...seat, total, net: total - SEASON_START };
       }),
     }));
   return [...(results ?? []), ...playing];
@@ -128,11 +137,5 @@ export function tonightStandings(tables: ResultTable[]): TonightStanding[] {
       a.tables - b.tables ||
       a.display.localeCompare(b.display),
   );
-  sorted.forEach((row, i) => {
-    const prev = sorted[i - 1];
-    row.rank = prev
-      ? prev.rank + Number(prev.net !== row.net || prev.tables !== row.tables)
-      : 1;
-  });
-  return sorted;
+  return ranked(sorted, (a, b) => a.net === b.net && a.tables === b.tables);
 }

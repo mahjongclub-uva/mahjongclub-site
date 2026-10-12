@@ -114,7 +114,7 @@ Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.o
 | `/meeting/checkin/`   | Check in by computing ID; new players add a name         |
 | `/meeting/tables/`    | The live lobby of tables in play                         |
 | `/meeting/table/N/`   | One physical table (1 to 12): seats, games, End table    |
-| `/meeting/standings/` | Tonight's standings, and the semester with tonight added |
+| `/meeting/tonight/` | Tonight's standings, and the semester with tonight added |
 | `/meeting/score/`     | Fallback: type a table's four final totals               |
 
 `/checkin/`, `/score/`, `/live/` and `/tables/` are forwarding pages for old links and printed QR codes. Static export has no server redirects, so they use a meta refresh.

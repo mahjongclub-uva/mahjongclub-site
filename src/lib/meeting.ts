@@ -196,13 +196,6 @@ export function playerConfirmed() {
     return false;
   }
 }
-export function confirmPlayer() {
-  try {
-    sessionStorage.setItem(CONFIRMED, "1");
-  } catch {
-    /* The question just comes back on the next visit. */
-  }
-}
 export function savedPlayer(meeting: Meeting): Player | null {
   try {
     const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
@@ -245,15 +238,28 @@ export const MEETING_PATHS = {
   checkin: "/meeting/checkin/",
   tables: "/meeting/tables/",
   table: (table: number) => `/meeting/table/${table}/`,
-  standings: "/meeting/standings/",
+  tonight: "/meeting/tonight/",
   score: "/meeting/score/",
 } as const;
 export function isMeetingPage(path: string) {
   return (
-    /^\/meeting(\/(checkin|tables|standings|score|table\/\d{1,2}))?\/?$/.test(
+    /^\/meeting(\/(checkin|tables|tonight|score|table\/\d{1,2}))?\/?$/.test(
       path,
     ) || /^\/(checkin|score|tables|live)\/?$/.test(path)
   );
+}
+/** The table this player sits at tonight, if any. */
+export function seatedRoom(rooms: Room[] | undefined, id?: string) {
+  return rooms?.find((room) => room.seats.some((seat) => seat.id === id));
+}
+/** Where a checked-in player goes next tonight. */
+export function playerNext(meeting: Meeting, id: string) {
+  const table = seatedRoom(meeting.rooms, id)?.table;
+  return table
+    ? { href: MEETING_PATHS.table(table), label: `Return to Table ${table}` }
+    : meeting.rooms
+      ? { href: MEETING_PATHS.tables, label: "Find a table" }
+      : { href: MEETING_PATHS.score, label: "Record a table" };
 }
 /**
  * Where the site's meeting shortcut leads this phone. Only a confirmed player
@@ -263,9 +269,7 @@ export function meetingShortcut(meeting: Meeting, player: Player | null) {
   if (!player) return { player, label: "Check in", href: MEETING_PATHS.hub };
   if (!meeting.rooms)
     return { player, label: "Meeting", href: MEETING_PATHS.hub };
-  const table = meeting.rooms.find((room) =>
-    room.seats.some((seat) => seat.id === player.id),
-  )?.table;
+  const table = seatedRoom(meeting.rooms, player.id)?.table;
   return table
     ? { player, label: `Table ${table}`, href: MEETING_PATHS.table(table) }
     : { player, label: "Tables", href: MEETING_PATHS.tables };

@@ -4,19 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PlayerTile from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
-import ContinueAs from "@/components/ContinueAs";
+import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers, { IdBadge } from "@/components/IdStickers";
 import {
   cleanComputingId,
   computingIdError,
   postMeeting,
-  playerConfirmed,
-  rememberPlayer,
-  savedPlayer,
   requestError,
   type Meeting,
   type Player,
   MEETING_PATHS,
+  playerNext,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 
@@ -36,17 +34,7 @@ function CheckInForm({
   useEffect(() => {
     if (suggestions.length) matchHeading.current?.focus();
   }, [suggestions]);
-  const [player, setPlayerState] = useState(() => savedPlayer(meeting));
-  const [confirmed, setConfirmed] = useState(() => playerConfirmed());
-  const seatedAt = meeting.rooms?.find((room) =>
-    room.seats.some((seat) => seat.id === player?.id),
-  )?.table;
-  function setPlayer(next: Player | null) {
-    setPlayerState(next);
-    // Checking in, or switching away, is an explicit identity choice.
-    setConfirmed(Boolean(next));
-    rememberPlayer(meeting, next);
-  }
+  const { player, setPlayer, prompt } = useConfirmedPlayer(meeting);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -96,19 +84,10 @@ function CheckInForm({
     }
   }
 
-  if (player && !confirmed)
-    return (
-      <ContinueAs
-        player={player}
-        yes={() => {
-          rememberPlayer(meeting, player);
-          setConfirmed(true);
-        }}
-        no={() => setPlayer(null)}
-      />
-    );
+  if (prompt) return prompt;
   if (player) {
     const here = meeting.players || [];
+    const next = playerNext(meeting, player.id);
     return (
       <div className="meeting-receipt">
         <span className="meeting-hero-tile">
@@ -123,21 +102,8 @@ function CheckInForm({
             {player.display.split(" ")[0]}!
           </span>
         </h1>
-        <Link
-          className="meeting-primary"
-          href={
-            seatedAt
-              ? MEETING_PATHS.table(seatedAt)
-              : meeting.rooms
-                ? MEETING_PATHS.tables
-                : MEETING_PATHS.score
-          }
-        >
-          {seatedAt
-            ? `Return to Table ${seatedAt}`
-            : meeting.rooms
-              ? "Find a table"
-              : "Record a table"}
+        <Link className="meeting-primary" href={next.href}>
+          {next.label}
         </Link>
         {here.length > 0 && (
           <section className="meeting-here" aria-labelledby="here-tonight">

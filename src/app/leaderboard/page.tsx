@@ -2,13 +2,12 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { CharacterFace, TileFace } from "@/components/PlayingTile";
 import { RED } from "@/components/TileArtwork";
-import { getCurrentSemester, getMeetings } from "@/lib/data";
+import { getCurrentSemester } from "@/lib/data";
 import { SEASON_START } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import PlayerSearch from "@/components/PlayerSearch";
 import RankTileFlip from "@/components/RankTileFlip";
 import CountUp from "@/components/CountUp";
-import LeaderboardLive from "@/components/LeaderboardLive";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
@@ -75,62 +74,60 @@ export default function Leaderboard() {
 
       <section className="section">
         <div className="section-wrap">
-          <LeaderboardLive semester={semester} schedule={getMeetings()}>
-            {shown.length === 0 ? (
-              <p className="quiet">No tables played yet this semester.</p>
-            ) : (
-              <>
-                {/* Visual only: each row already reads out its rank and points. */}
-                <div className="standings-head" aria-hidden="true">
-                  <span>Rank</span>
-                  <span>Player</span>
-                  <span>Points</span>
-                </div>
-                <ol
-                  className="standings"
-                  aria-label={`${semester.label} standings`}
-                >
-                  {shown.map((player, i) => (
-                    <li
-                      key={player.id}
-                      className="standing"
-                      data-place={i + 1}
-                      style={{ "--i": i } as CSSProperties}
-                    >
-                      <span className="standing-tile">
-                        <RankTile rank={player.rank} />
+          {shown.length === 0 ? (
+            <p className="quiet">No tables played yet this semester.</p>
+          ) : (
+            <>
+              {/* Visual only: each row already reads out its rank and points. */}
+              <div className="standings-head" aria-hidden="true">
+                <span>Rank</span>
+                <span>Player</span>
+                <span>Points</span>
+              </div>
+              <ol
+                className="standings"
+                aria-label={`${semester.label} standings`}
+              >
+                {shown.map((player, i) => (
+                  <li
+                    key={player.id}
+                    className="standing"
+                    data-place={i + 1}
+                    style={{ "--i": i } as CSSProperties}
+                  >
+                    <span className="standing-tile">
+                      <RankTile rank={player.rank} />
+                    </span>
+                    <span className="sr-only">Rank {player.rank}: </span>
+                    <span className="standing-player">
+                      <span className="standing-name">{player.display}</span>
+                      <span className="standing-tables">
+                        {player.tables_played}{" "}
+                        {player.tables_played === 1 ? "table" : "tables"}
                       </span>
-                      <span className="sr-only">Rank {player.rank}: </span>
-                      <span className="standing-player">
-                        <span className="standing-name">{player.display}</span>
-                        <span className="standing-tables">
-                          {player.tables_played}{" "}
-                          {player.tables_played === 1 ? "table" : "tables"}
-                        </span>
-                      </span>
-                      <span className="standing-score">
-                        <b>
-                          <CountUp
-                            value={
-                              seasonNet
-                                ? SEASON_START + player.total_net
-                                : player.total_gain
-                            }
-                            delay={i * 40 + 100}
-                          />
-                        </b>
-                        <span className="sr-only">points</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                    </span>
+                    <span className="standing-score">
+                      <b>
+                        <CountUp
+                          value={
+                            seasonNet
+                              ? SEASON_START + player.total_net
+                              : player.total_gain
+                          }
+                          delay={i * 40 + 100}
+                        />
+                      </b>
+                      <span className="sr-only">points</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
 
-                <p className="rank-touch-hint">
-                  Tap a player to flip their tile.
-                </p>
-              </>
-            )}
-          </LeaderboardLive>
+              <p className="rank-touch-hint">
+                Tap a player to flip their tile.
+              </p>
+            </>
+          )}
         </div>
       </section>
 
