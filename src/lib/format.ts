@@ -8,6 +8,16 @@ export function formatDate(iso: string): string {
   });
 }
 
+/** "2026-09-30" -> "Wed 30 Sept", for the meeting header. */
+export function formatShortDate(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
 /** Pinned rather than read from the environment, since `next build` runs on a
  * GitHub runner in UTC and meeting times must render in the club's zone. */
 const CLUB_TZ = "America/New_York";
@@ -45,3 +55,15 @@ export function formatMeetingTime(start: string, end: string | null): string {
     from.marker === to.marker ? from.clock : `${from.clock} ${from.marker}`;
   return `${head}–${to.clock} ${to.marker}`;
 }
+
+/** A signed net such as "+45" or "−20", with a real minus sign. */
+export function signed(value: number) {
+  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
+}
+
+/** A number with a real minus sign. */
+export const minus = (value: number) => String(value).replace("-", "−");
+
+/** A clock time on this phone, such as "6:42 PM". */
+export const clock = (at = Date.now()) =>
+  new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });

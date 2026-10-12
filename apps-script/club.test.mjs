@@ -204,14 +204,19 @@ function harness() {
   const cache = new Map();
   const events = [];
   const triggers = [];
+  const logs = [];
   const context = vm.createContext({
     Date,
-    console: { error() {} },
+    console: { error() {}, log: (line) => logs.push(JSON.parse(line)) },
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => store[key] || null,
+        getProperties: () => ({ ...store }),
         setProperty: (key, value) => {
           store[key] = value;
+        },
+        deleteProperty: (key) => {
+          delete store[key];
         },
       }),
     },
@@ -251,6 +256,7 @@ function harness() {
       deleteTrigger: (trigger) => triggers.splice(triggers.indexOf(trigger), 1),
     },
     Utilities: {
+      getUuid: () => crypto.randomUUID(),
       formatDate: (value) => value.toISOString().slice(0, 10),
       parseDate: (value) =>
         vm.runInContext(
@@ -288,6 +294,7 @@ function harness() {
     config,
     events,
     triggers,
+    logs,
     now,
     interruptWrite: () => {
       failWrite = true;
@@ -544,4 +551,325 @@ test("Set up is repeatable, and malformed settings do not replace valid settings
     }),
   );
   assert.equal(h.store.settings, previous);
+});
+
+test("negative final totals save, retry, and appear in results", () => {
+  for (const totals of [
+    [-15, 425, 205, 205],
+    [-15, 835, 0, 0],
+  ]) {
+    const h = harness();
+    for (const computingId of ["a1", "b2", "c3", "d4"])
+      assert.equal(h.post({ r: "checkins", computingId }).status, 200);
+    const request = {
+      r: "results",
+      meetingId: h.meeting.id,
+      submissionId: "negative-total-test-1",
+      seats: ["p001", "p002", "p003", "p004"].map((id, i) => ({
+        id,
+        total: totals[i],
+      })),
+    };
+    assert.equal(h.post(request).status, 201);
+    assert.equal(h.post(request).status, 200);
+    const response = h.get({ r: "results" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(
+      response.tables[0].seats.map((seat) => seat.total),
+      totals,
+    );
+    assert.equal(response.tables[0].seats[0].net, -220);
+  }
+});
+
+function seatedTable(h, ids = ["p001", "p002", "p003", "p004"]) {
+  const room = (playerId, action, extra = {}) =>
+    h.post({ r: "rooms", action, meetingId: h.meeting.id, playerId, ...extra });
+  ids.forEach((id, wind) =>
+    assert.equal(room(id, "join", { table: 1, seat: wind }).status, 200),
+  );
+  let lastHandId = null;
+  const hand = (winner, each, by = "p001", handId = crypto.randomUUID()) => {
+    const reply = room(by, "hand", { winner, each, handId, lastHandId });
+    if (reply.status === 200) lastHandId = handId;
+    return reply;
+  };
+  const table = () => h.get({ r: "rooms" }).rooms.find((r) => r.table === 1);
+  const end = (by = "p001", extra = {}) =>
+    room(by, "end", {
+      table: 1,
+      session: table().session,
+      lastHandId,
+      ...extra,
+    });
+  return { room, hand, end, table, last: () => lastHandId };
+}
+
+const savedTables = (h) =>
+  h.context.pointsLayout(h.tabs.Points.grid).filter((block) => !block.empty);
+
+test("a game pays the winner three times each, and End saves one table and releases everyone", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  assert.equal(t.hand("p003", 10, "p004").status, 200);
+  assert.deepEqual(
+    t.table().totals.map((seat) => seat.total),
+    [255, 175, 215, 175],
+  );
+  const session = t.table().session;
+  const ended = t.end("p002");
+  assert.equal(ended.status, 200);
+  assert.equal(ended.saved, 1);
+  const room = t.table();
+  assert.equal(room.seats.length, 0);
+  assert.equal(room.session, session + 1);
+  assert.equal(room.ended.games, 2);
+  assert.equal(room.ended.sheetTable, 1);
+  assert.equal("tableId" in room, false);
+  assert.deepEqual(
+    room.ended.totals.map((seat) => [seat.display, seat.total]),
+    [
+      ["Alex A.", 255],
+      ["Blair B.", 175],
+      ["Casey C.", 215],
+      ["Player p004", 175],
+    ],
+  );
+  // A repeated End from a released player returns the same save, once.
+  assert.equal(t.end("p003", { session }).saved, 1);
+  assert.equal(savedTables(h).length, 1);
+  assert.deepEqual(
+    h.get({ r: "results" }).tables[0].seats.map((seat) => seat.total),
+    [255, 175, 215, 175],
+  );
+  // The rooms read carries tonight's saved tables in the same response.
+  assert.equal(h.get({ r: "rooms" }).results.length, 1);
+  // Everyone can join another table, which starts at 205.
+  assert.equal(t.room("p001", "join", { table: 2, seat: 0 }).status, 200);
+});
+
+test("ending a table with no games releases everyone and writes nothing", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  const ended = t.end();
+  assert.equal(ended.status, 200);
+  assert.equal(ended.saved, null);
+  assert.equal(savedTables(h).length, 0);
+  assert.equal(t.table().seats.length, 0);
+});
+
+test("two phones recording one game count it once, and undo needs the latest view", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  const handId = crypto.randomUUID();
+  assert.equal(t.hand("p001", 20, "p001", handId).status, 200);
+  assert.equal(
+    t.room("p001", "hand", {
+      winner: "p001",
+      each: 20,
+      handId,
+      lastHandId: null,
+    }).status,
+    200,
+  );
+  assert.equal(
+    t.room("p002", "hand", {
+      winner: "p001",
+      each: 20,
+      handId: crypto.randomUUID(),
+      lastHandId: null,
+    }).status,
+    409,
+  );
+  assert.equal(t.table().hands.length, 1);
+  assert.equal(t.room("p003", "undo", { lastHandId: null }).status, 409);
+  assert.equal(t.room("p003", "undo", { lastHandId: handId }).status, 200);
+  assert.equal(t.table().hands.length, 0);
+  for (const [winner, each] of [
+    ["p009", 5],
+    ["p002", 0],
+    ["p002", 1.5],
+  ])
+    assert.equal(
+      t.room("p001", "hand", {
+        winner,
+        each,
+        handId: crypto.randomUUID(),
+        lastHandId: null,
+      }).status,
+      400,
+    );
+});
+
+test("a stale End is refused, and so is ending someone else's table", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  assert.equal(t.end("p001", { lastHandId: null }).status, 409);
+  assert.equal(t.end("p005").status, 409);
+  assert.equal(t.table().seats.length, 4);
+});
+
+test("leaving is allowed only before a game; joining elsewhere needs leaving first", () => {
+  const h = harness();
+  const t = seatedTable(h, ["p001", "p002", "p003"]);
+  assert.equal(t.room("p003", "join", { table: 2 }).status, 409);
+  assert.equal(t.room("p003", "leave").status, 200);
+  assert.equal(t.room("p003", "join", { table: 2 }).status, 200);
+  assert.equal(t.room("p004", "join", { table: 1, seat: 2 }).status, 200);
+  assert.equal(t.room("p005", "join", { table: 1, seat: 3 }).status, 200);
+  t.hand("p002", 15);
+  const leave = t.room("p004", "leave");
+  assert.equal(leave.status, 409);
+  assert.match(leave.message, /End the table/);
+  assert.equal(t.room("p004", "join", { table: 3 }).status, 409);
+  assert.equal(t.table().seats.length, 4);
+});
+
+test("seats are winds: a taken wind is refused by name, and seats return in wind order", () => {
+  const h = harness();
+  const t = seatedTable(h, ["p001"]);
+  const clash = t.room("p002", "join", { table: 1, seat: 0 });
+  assert.equal(clash.status, 409);
+  assert.match(clash.message, /East was just taken/);
+  assert.equal(t.room("p002", "join", { table: 1, seat: 3 }).status, 200);
+  assert.equal(t.room("p003", "join", { table: 1 }).status, 200);
+  assert.deepEqual(
+    t.table().seats.map((seat) => [seat.id, seat.wind]),
+    [
+      ["p001", 0],
+      ["p003", 1],
+      ["p002", 3],
+    ],
+  );
+  // A bad wind is refused, even when moving within your own table.
+  for (const seat of [9, "x", null, 1.5])
+    assert.equal(t.room("p002", "join", { table: 1, seat }).status, 400);
+  assert.deepEqual(
+    t.table().seats.map((item) => item.wind),
+    [0, 1, 3],
+  );
+  // Moving seats at your own table works until a game is saved.
+  assert.equal(t.room("p003", "join", { table: 1, seat: 2 }).status, 200);
+  assert.equal(t.room("p004", "join", { table: 1, seat: 1 }).status, 200);
+  assert.equal(t.room("p005", "join", { table: 1 }).status, 409);
+});
+
+test("players must be checked in, and tables are numbered within the limit", () => {
+  const h = harness();
+  const room = (playerId, extra) =>
+    h.post({
+      r: "rooms",
+      action: "join",
+      meetingId: h.meeting.id,
+      playerId,
+      ...extra,
+    });
+  assert.equal(room("p099", { table: 1 }).status, 409);
+  assert.equal(room("p001", { table: 0 }).status, 400);
+  assert.equal(room("p001", { table: 13 }).status, 400);
+  assert.equal(room("p001", { table: 1, seat: 4 }).status, 400);
+  assert.equal(
+    h.post({
+      r: "rooms",
+      action: "join",
+      meetingId: "old",
+      playerId: "p001",
+      table: 1,
+    }).status,
+    409,
+  );
+});
+
+test("closing the meeting saves every room with games", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p003", 30);
+  h.context.clubClose();
+  assert.equal(savedTables(h).length, 1);
+  assert.equal(
+    Object.keys(h.store).some((key) => key.startsWith("room:")),
+    false,
+  );
+});
+
+test("the first request after scoring closes saves rooms with games", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p002", 25);
+  vm.runInContext(
+    `Date = class extends Date { static now() { return ${h.meeting.closes + 60000}; } }`,
+    h.context,
+  );
+  assert.equal(h.get({ r: "rooms" }).status, 423);
+  assert.equal(savedTables(h).length, 1);
+});
+
+test("a table that cannot save keeps its players and games", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  for (let n = 1; n <= 3; n++)
+    assert.equal(
+      h.post({
+        r: "results",
+        meetingId: h.meeting.id,
+        submissionId: "fill-template-000" + n,
+        seats: ["p001", "p002", "p003", "p004"].map((id) => ({
+          id,
+          total: 205,
+        })),
+      }).status,
+      201,
+    );
+  t.hand("p001", 10);
+  assert.equal(t.end().status, 503);
+  const room = t.table();
+  assert.equal(room.seats.length, 4);
+  assert.equal(room.hands.length, 1);
+});
+
+test("officers can end a stuck table from the Club menu, saving its games", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p004", 20);
+  const alerts = [];
+  h.context.SpreadsheetApp.getUi = () => ({
+    alert: (message) => alerts.push(message),
+    prompt: () => ({
+      getSelectedButton: () => "OK",
+      getResponseText: () => " 1 ",
+    }),
+    ButtonSet: { OK_CANCEL: "OK_CANCEL" },
+    Button: { OK: "OK" },
+  });
+  h.context.clubEndTable();
+  assert.match(alerts[0], /1 games were saved as Table 1/);
+  assert.equal(savedTables(h).length, 1);
+  assert.equal(t.table().seats.length, 0);
+  assert.equal(t.table().ended.by, "An officer");
+  h.context.clubEndTable();
+  assert.match(alerts[1], /Nobody is seated/);
+});
+
+test("each request logs its kind, status and timing, never who sent it", () => {
+  const h = harness();
+  assert.equal(h.post({ r: "checkins", computingId: "a1" }).status, 200);
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  h.get({ r: "rooms" });
+  const lines = h.logs.map((line) => line.request);
+  assert.ok(lines.includes("POST checkins"));
+  assert.ok(lines.includes("POST rooms hand"));
+  assert.ok(lines.includes("GET rooms"));
+  for (const line of h.logs) {
+    assert.deepEqual(Object.keys(line).sort(), [
+      "lockMs",
+      "ms",
+      "request",
+      "status",
+    ]);
+    assert.equal(typeof line.ms, "number");
+  }
+  assert.equal(JSON.stringify(h.logs).match(/a1|p001|Alex|Amber/), null);
 });

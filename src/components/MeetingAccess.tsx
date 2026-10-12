@@ -1,12 +1,84 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { getMeeting, requestError, type Meeting } from "@/lib/meeting";
+import { useEffect, useReducer, useState, type ReactNode } from "react";
+import {
+  IconArrowsExchange,
+  IconChevronDown,
+  IconChevronRight,
+  IconLayoutGrid,
+  IconTrophy,
+} from "@tabler/icons-react";
+import Sheet from "@/components/Sheet";
+import {
+  getMeeting,
+  playerConfirmed,
+  PLAYER_EVENT,
+  rememberPlayer,
+  requestError,
+  savedPlayer,
+  type Meeting,
+  type Player,
+  MEETING_PATHS,
+} from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import Image from "next/image";
-import { formatDate } from "@/lib/format";
+import PlayerTile from "@/components/PlayerTile";
+import { clock, formatShortDate } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
+
+/** Who this phone is playing as, and the two things that belong to them:
+ * tonight's standings and switching player. */
+function PlayerSheet({
+  meeting,
+  player,
+  close,
+}: {
+  meeting: Meeting;
+  player: Player;
+  close: () => void;
+}) {
+  return (
+    <Sheet title="Menu" close={close}>
+      <div className="menu-you">
+        <PlayerTile id={player.id} />
+        <p>
+          <small>Playing as</small>
+          <strong>{player.display}</strong>
+        </p>
+        <button
+          type="button"
+          className="meeting-chip"
+          onClick={() => {
+            rememberPlayer(meeting, null);
+            window.location.assign(MEETING_PATHS.checkin);
+          }}
+        >
+          <IconArrowsExchange aria-hidden="true" /> Switch
+          <span className="sr-only"> player</span>
+        </button>
+      </div>
+      <ul className="menu-links">
+        {meeting.rooms && (
+          <li>
+            <Link href={MEETING_PATHS.tables} onClick={close}>
+              <IconLayoutGrid aria-hidden="true" />
+              Tables tonight
+              <IconChevronRight aria-hidden="true" />
+            </Link>
+          </li>
+        )}
+        <li>
+          <Link href={MEETING_PATHS.tonight} onClick={close}>
+            <IconTrophy aria-hidden="true" />
+            Tonight’s standings
+            <IconChevronRight aria-hidden="true" />
+          </Link>
+        </li>
+      </ul>
+    </Sheet>
+  );
+}
 
 export default function MeetingAccess({
   children,
@@ -17,6 +89,12 @@ export default function MeetingAccess({
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
   const [checkedAt, setCheckedAt] = useState("");
+  const [sheet, setSheet] = useState(false);
+  const [, playerChanged] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    window.addEventListener(PLAYER_EVENT, playerChanged);
+    return () => window.removeEventListener(PLAYER_EVENT, playerChanged);
+  }, []);
   const refresh = usePoll(
     async (signal) => {
       setChecking(true);
@@ -25,12 +103,7 @@ export default function MeetingAccess({
         if (signal.aborted) return;
         setMeeting(next);
         setError("");
-        setCheckedAt(
-          new Date().toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        );
+        setCheckedAt(clock());
       } catch (failure) {
         if (!signal.aborted) setError(requestError(failure));
       } finally {
@@ -40,31 +113,49 @@ export default function MeetingAccess({
     60000,
     [],
   );
+  // Read on every render; PLAYER_EVENT re-renders when the player changes.
+  // Waits for "Continue as" on a phone reopened in a new session.
+  const player =
+    meeting?.open && playerConfirmed() ? savedPlayer(meeting) : null;
   return (
     <div className="meeting-access">
       <header className="meeting-header">
-        <div className="meeting-brand">
-          {LOGO && <Image src={LOGO} alt="" width={36} height={36} />}
-          <span>
-            <strong>
-              {meeting?.date
-                ? `${formatDate(meeting.date)} - Meeting`
-                : "Mahjong meeting"}
-            </strong>
-            <small>Mahjong Club @ UVA</small>
-          </span>
-        </div>
-        <Link href="/" className="meeting-website">
-          Club website ↗
+        <Link className="meeting-brand" href="/">
+          {LOGO && <Image src={LOGO} alt="" width={32} height={32} />}
+          <span className="sr-only">Mahjong Club @ UVA website</span>
         </Link>
-      </header>
-      {meeting?.open && (
         <p className="meeting-status">
-          <span className="meeting-live-dot" aria-hidden="true" />
-          {meeting.checkinsOpen
-            ? "We’re playing right now!"
-            : "Scores are still open"}
+          {meeting?.open && meeting.date ? (
+            <>
+              <small>Mahjong Club @ UVA</small>
+              <b>
+                {formatShortDate(meeting.date)}
+                {!meeting.checkinsOpen && " · Scores still open"}
+              </b>
+            </>
+          ) : (
+            <b>Mahjong Club @ UVA</b>
+          )}
         </p>
+        {player && (
+          <button
+            type="button"
+            className="meeting-you"
+            aria-haspopup="dialog"
+            onClick={() => setSheet(true)}
+          >
+            <PlayerTile id={player.id} />
+            <span>{player.display}</span>
+            <IconChevronDown size={16} aria-hidden="true" />
+          </button>
+        )}
+      </header>
+      {sheet && meeting && player && (
+        <PlayerSheet
+          meeting={meeting}
+          player={player}
+          close={() => setSheet(false)}
+        />
       )}
       {error && (
         <div className="meeting-notice" role="alert">
@@ -80,7 +171,16 @@ export default function MeetingAccess({
           <p>An officer can help with attendance and scores.</p>
         </div>
       )}
-      {!meeting && !error && <p role="status">Checking tonight’s meeting…</p>}
+      {!meeting && !error && (
+        <div className="meeting-loading" role="status">
+          <span aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          Checking tonight’s meeting…
+        </div>
+      )}
       {meeting && !meeting.open && (
         <div className="meeting-closed">
           <h1>See you at the table.</h1>

@@ -1,4 +1,4 @@
-import type { Results } from "./meeting.ts";
+import type { Results, ResultTable, Room } from "./meeting.ts";
 import { SEASON_START, type Semester } from "./schema.ts";
 
 export type LiveStanding = {
@@ -65,12 +65,77 @@ export function liveStandings(
         a.tables - b.tables ||
         a.display.localeCompare(b.display),
     );
+  return ranked(
+    sorted,
+    (a, b) => a.points === b.points && a.tables === b.tables,
+  );
+}
+
+/** Ranks from 1 that never gap; rows share one only when `tied`. */
+function ranked<T extends { rank: number }>(
+  sorted: T[],
+  tied: (a: T, b: T) => boolean,
+) {
   sorted.forEach((row, i) => {
     const prev = sorted[i - 1];
-    row.rank = prev
-      ? prev.rank +
-        Number(prev.points !== row.points || prev.tables !== row.tables)
-      : 1;
+    row.rank = prev ? prev.rank + Number(!tied(prev, row)) : 1;
   });
   return sorted;
+}
+
+export type TonightStanding = {
+  id: string;
+  display: string;
+  rank: number;
+  net: number;
+  tables: number;
+};
+
+/**
+ * Tonight's tables: the saved blocks plus, as provisional tables, the games
+ * at tables still playing. Both come from one rooms read, so a table that
+ * was just ended is either still a room or already a block, never both.
+ */
+export function tonightTables(
+  results: ResultTable[] | null,
+  rooms: Room[],
+): ResultTable[] {
+  const playing = rooms
+    .filter((room) => room.hands.length && room.seats.length === 4)
+    .map((room) => ({
+      table: room.table,
+      seats: room.seats.map((seat) => {
+        const total =
+          room.totals.find((item) => item.id === seat.id)?.total ??
+          SEASON_START;
+        return { ...seat, total, net: total - SEASON_START };
+      }),
+    }));
+  return [...(results ?? []), ...playing];
+}
+
+/** Tonight only: each player's nets from tonight's tables. */
+export function tonightStandings(tables: ResultTable[]): TonightStanding[] {
+  const rows = new Map<string, TonightStanding>();
+  for (const table of tables)
+    for (const seat of table.seats) {
+      if (seat.optOut) continue;
+      const row = rows.get(seat.id) ?? {
+        id: seat.id,
+        display: seat.display,
+        rank: 0,
+        net: 0,
+        tables: 0,
+      };
+      row.net += seat.net;
+      row.tables++;
+      rows.set(seat.id, row);
+    }
+  const sorted = [...rows.values()].sort(
+    (a, b) =>
+      b.net - a.net ||
+      a.tables - b.tables ||
+      a.display.localeCompare(b.display),
+  );
+  return ranked(sorted, (a, b) => a.net === b.net && a.tables === b.tables);
 }

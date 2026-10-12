@@ -5,6 +5,8 @@ import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
 import RollingDot from "@/components/RollingDot";
 import NextMeeting from "@/components/NextMeeting";
+import { HomeMeeting } from "@/components/MeetingLinks";
+import { getMeetings } from "@/lib/data";
 import Photos from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
 import Section from "@/components/Section";
@@ -17,14 +19,16 @@ export default function Home() {
         <div className="section-wrap">
           <Hero />
           <p className="tagline">{TAGLINE}</p>
-          <div className="hero-actions" aria-label="Get started">
-            <Link className="action-link action-link-primary" href="/guide/">
-              Learn the basics
-            </Link>
-            <Link className="action-link" href="/about/">
-              Meet the club
-            </Link>
-          </div>
+          <HomeMeeting schedule={getMeetings()}>
+            <div className="hero-actions" aria-label="Get started">
+              <Link className="action-link action-link-primary" href="/guide/">
+                Learn the basics
+              </Link>
+              <Link className="action-link" href="/about/">
+                Meet the club
+              </Link>
+            </div>
+          </HomeMeeting>
         </div>
       </header>
 

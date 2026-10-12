@@ -1,79 +1,139 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IconArrowRight } from "@tabler/icons-react";
 import {
-  RETURN_STORAGE,
   getMeeting,
-  isMeetingPage,
+  meetingShortcut,
+  playerConfirmed,
+  savedPlayer,
   type Meeting,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
-import { formatDate } from "@/lib/format";
+import { formatMeetingTime } from "@/lib/format";
+import { nunito } from "@/lib/fonts";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
+import PlayerTile from "./PlayerTile";
 import styles from "./MeetingLinks.module.css";
 
-// Matches the backend's default check-in and score margins. Outside these
-// windows the banner never contacts the meeting service.
-function nearMeeting(schedule: ScheduledMeeting[], now: number) {
-  return schedule.some(
-    (m) =>
-      now >= Date.parse(m.start) - 30 * 60000 &&
-      now < Date.parse(m.end ?? m.start) + 60 * 60000,
+// Matches the backend's check-in window: from 30 minutes before the start
+// until the end. Outside it the site never contacts the meeting service.
+function inCheckIn(meeting: ScheduledMeeting, now: number) {
+  return (
+    now >= Date.parse(meeting.start) - 30 * 60000 &&
+    now < Date.parse(meeting.end ?? meeting.start)
   );
 }
 
-export default function MeetingLinks({
-  schedule,
-}: {
-  schedule: ScheduledMeeting[];
-}) {
-  const pathname = usePathname();
+/**
+ * Tonight's meeting while check-in is open, and where this phone should go.
+ * Asks every two minutes, and only until check-in's scheduled close.
+ */
+function useLiveMeeting(schedule: ScheduledMeeting[]) {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
-  const [target, setTarget] = useState("/checkin/");
+  const [tonight, setTonight] = useState<ScheduledMeeting>();
   usePoll(
     async (signal) => {
-      try {
-        const saved = sessionStorage.getItem(RETURN_STORAGE);
-        setTarget(saved && isMeetingPage(saved) ? saved : "/checkin/");
-      } catch {
-        /* Public meeting state is still available without storage. */
-      }
-      if (!nearMeeting(schedule, Date.now())) return setMeeting(null);
+      const now = Date.now();
+      const scheduled = schedule.find((m) => inCheckIn(m, now));
+      setTonight(scheduled);
+      if (!scheduled) return setMeeting(null);
       const next = await getMeeting(MEETING_SERVICE_URL, signal).catch(
         () => null,
       );
       if (!signal.aborted) setMeeting(next);
     },
-    60000,
-    [pathname, schedule],
+    120000,
+    [schedule],
   );
-  if (!meeting?.open || !meeting.date) return null;
-  const href =
-    !meeting.checkinsOpen && target === "/checkin/" ? "/score/" : target;
+  if (!meeting?.checkinsOpen) return null;
+  return {
+    ...meetingShortcut(
+      meeting,
+      playerConfirmed() ? savedPlayer(meeting) : null,
+    ),
+    tonight,
+  };
+}
+
+function Live() {
+  return <span className={styles.live}>Live</span>;
+}
+
+/** Floats at the bottom of every public page but home while check-in is open. */
+export default function MeetingLinks({
+  schedule,
+}: {
+  schedule: ScheduledMeeting[];
+}) {
+  // Home has its own card in the hero.
+  if (usePathname() === "/") return null;
+  return <MeetingPill schedule={schedule} />;
+}
+
+function MeetingPill({ schedule }: { schedule: ScheduledMeeting[] }) {
+  const live = useLiveMeeting(schedule);
+  if (!live) return null;
   return (
-    <Link href={href} className={styles.dock}>
-      <span className={styles.dot} aria-hidden="true" />
+    <Link href={live.href} className={`${styles.pill} ${nunito.variable}`}>
+      <Live />
+      {live.player && <PlayerTile id={live.player.id} />}
       <span>
-        <strong>
-          {meeting.checkinsOpen
-            ? "We’re playing right now!"
-            : "Scores are still open"}
-        </strong>
-        <small>
-          <time dateTime={meeting.date}>{formatDate(meeting.date)}</time> -
-          Meeting
-        </small>
+        <span className="sr-only">Meeting on now: </span>
+        {live.label}
       </span>
-      <b>
-        {target !== "/checkin/"
-          ? "Back to meeting →"
-          : meeting.checkinsOpen
-            ? "Check in →"
-            : "Record a table →"}
-      </b>
+      <IconArrowRight size={18} stroke={2.5} aria-hidden="true" />
     </Link>
+  );
+}
+
+const ACTIONS: Record<string, string> = {
+  "Check in": "Check in",
+  Meeting: "Open the meeting",
+  Tables: "Find a table",
+};
+
+/** The hero's buttons, swapped for the meeting while check-in is open. */
+export function HomeMeeting({
+  schedule,
+  children,
+}: {
+  schedule: ScheduledMeeting[];
+  children: ReactNode;
+}) {
+  const live = useLiveMeeting(schedule);
+  if (!live) return children;
+  const { tonight } = live;
+  return (
+    <section
+      className={`${styles.card} ${nunito.variable}`}
+      aria-labelledby="meeting-now"
+    >
+      <Live />
+      <h2 id="meeting-now">We’re playing now</h2>
+      {live.player ? (
+        <p className={styles.you}>
+          <PlayerTile id={live.player.id} />
+          <span>
+            Playing as <b>{live.player.display}</b>
+          </span>
+        </p>
+      ) : (
+        tonight && (
+          <p className={styles.where}>
+            {[tonight.location, formatMeetingTime(tonight.start, tonight.end)]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        )
+      )}
+      <Link href={live.href} className={styles.go}>
+        {ACTIONS[live.label] ?? `Back to ${live.label}`}
+        <IconArrowRight size={20} stroke={2.5} aria-hidden="true" />
+      </Link>
+    </section>
   );
 }

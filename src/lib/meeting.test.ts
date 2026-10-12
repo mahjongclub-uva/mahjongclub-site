@@ -1,10 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  cleanComputingId,
+  computingIdError,
   getMeeting,
   getResults,
   draftSchema,
   isMeetingPage,
+  meetingShortcut,
   pendingSchema,
   postMeeting,
   tableError,
@@ -114,5 +117,103 @@ test("live results parse; drafts only store valid opaque seats", async (t) => {
     false,
   );
   assert.ok(isMeetingPage("/live/"));
+  assert.ok(isMeetingPage("/meeting/"));
+  assert.ok(isMeetingPage("/meeting/table/12/"));
+  assert.equal(isMeetingPage("/meeting/table/x/"), false);
   assert.equal(isMeetingPage("//outside.example"), false);
+});
+
+test("negative totals survive validation, pending saves, drafts and results", async (t) => {
+  for (const totals of [
+    [-15, 425, 205, 205],
+    [-15, 835, 0, 0],
+  ]) {
+    const signedSeats = players.map((player, i) => ({
+      id: player.id,
+      total: totals[i],
+    }));
+    assert.equal(tableError(signedSeats, players), null);
+    assert.ok(
+      pendingSchema.safeParse({
+        r: "results",
+        meetingId: "m1",
+        submissionId: "ea8971ea-bca2-4ac2-8030-856a6a83da56",
+        seats: signedSeats,
+      }).success,
+    );
+    assert.ok(
+      draftSchema.safeParse({
+        meetingId: "m1",
+        ids: players.map((p) => p.id),
+        totals: totals.map(String),
+      }).success,
+    );
+    t.mock.method(globalThis, "fetch", async () =>
+      Response.json({
+        status: 200,
+        meetingId: "m1",
+        date: "2026-10-09",
+        tables: [
+          {
+            table: 1,
+            seats: signedSeats.map((seat) => ({
+              ...seat,
+              display: seat.id,
+              net: seat.total - 205,
+            })),
+          },
+        ],
+      }),
+    );
+    const results = await getResults("https://example.test/exec");
+    assert.deepEqual(
+      results.tables[0].seats.map((seat) => seat.total),
+      totals,
+    );
+    assert.equal(results.tables[0].seats[0].net, -220);
+    t.mock.restoreAll();
+  }
+});
+
+test("computing IDs accept a pasted UVA email and explain anything else", () => {
+  assert.equal(cleanComputingId("  abc2de@Virginia.edu "), "abc2de");
+  assert.equal(cleanComputingId("abc2de@gmail.com"), "abc2de@gmail.com");
+  assert.equal(computingIdError("abc2de"), null);
+  assert.match(computingIdError("abc2de@gmail.com")!, /before @virginia\.edu/);
+  assert.match(computingIdError("2abc")!, /starts with letters/);
+  assert.match(computingIdError("")!, /Enter/);
+});
+
+test("the meeting shortcut names a table only for a seated, confirmed player", () => {
+  const meeting = {
+    status: 200 as const,
+    open: true,
+    checkinsOpen: true,
+    meetingId: "m1",
+    date: "2026-10-16",
+    semester: "Fall 2026",
+    players,
+    rooms: [
+      {
+        table: 3,
+        session: 1,
+        seats: [{ ...players[0], wind: 0 }],
+        hands: [],
+        totals: [],
+        ended: null,
+      },
+    ],
+  };
+  assert.deepEqual(meetingShortcut(meeting, null), {
+    player: null,
+    label: "Check in",
+    href: "/meeting/",
+  });
+  assert.equal(meetingShortcut(meeting, players[0]).href, "/meeting/table/3/");
+  assert.equal(meetingShortcut(meeting, players[0]).label, "Table 3");
+  assert.equal(meetingShortcut(meeting, players[1]).href, "/meeting/tables/");
+  assert.equal(
+    meetingShortcut({ ...meeting, rooms: undefined }, players[0]).href,
+    "/meeting/",
+  );
 });

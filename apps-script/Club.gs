@@ -4,8 +4,10 @@ function properties() {
 
 function withLock(action) {
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000))
-    fail(503, "Another write is finishing. Please retry.");
+  const waiting = Date.now();
+  const locked = lock.tryLock(10000);
+  if (timing) timing.lockMs = Date.now() - waiting;
+  if (!locked) fail(503, "Another write is finishing. Please retry.");
   try {
     return action();
   } finally {
@@ -190,6 +192,7 @@ function updateMeeting() {
     saveMeeting(meeting);
   }
   if (meeting && !meeting.closed) return meeting;
+  if (meeting) settleRooms(meeting);
   const events = calendarMeetings(now);
   if (events.length > 1)
     fail(503, "Calendar meetings overlap. An officer must correct them.");
@@ -490,12 +493,7 @@ function results(meeting) {
       table: block.number,
       seats: block.seats.map(([name, total, net]) => {
         const player = players.find((item) => item.name === name);
-        if (
-          !player ||
-          !Number.isSafeInteger(total) ||
-          total < 0 ||
-          net !== total - 205
-        )
+        if (!player || !Number.isSafeInteger(total) || net !== total - 205)
           fail(503, "An officer must recheck Table " + block.number + ".");
         return { ...publicPlayer(player), optOut: player.optOut, total, net };
       }),
@@ -516,7 +514,293 @@ function results(meeting) {
   return response;
 }
 
+// Table rooms. README.md, "How a table works", describes the whole lifecycle.
+// A room is a physical table (its number never changes). The group seated
+// there plays a table session: games ("hands" in code) accumulate in Script
+// Properties, one key per table, until someone ends the table. Ending saves
+// the four totals as one "Table N" block in Points Tracking through
+// submitResult, releases all four players and starts the next session.
+// ponytail: fixed table count; make it an officer setting if the club outgrows it.
+// The site's /meeting/table/N pages are generated for the same 12.
+const MAX_TABLES = 12;
+// Keeps a room, with its ended summary, under the 9 KB Script Properties limit.
+const MAX_HANDS = 60;
+const WINDS = ["East", "South", "West", "North"];
+
+// Keyed by meeting too, so a room that failed to save is never overwritten
+// by next meeting's table of the same number.
+function roomKey(room) {
+  return "room:" + room.meetingId + ":" + room.table;
+}
+
+function readRooms(meetingId) {
+  const all = properties().getProperties();
+  return Object.keys(all)
+    .filter((key) => key.startsWith("room:"))
+    .map((key) => JSON.parse(all[key]))
+    .filter((room) => room.meetingId === meetingId)
+    .sort((a, b) => a.table - b.table);
+}
+
+// Empty rooms are kept: an ended session's summary must outlive its players.
+function writeRoom(room) {
+  room.seats.sort((a, b) => a.wind - b.wind);
+  properties().setProperty(roomKey(room), JSON.stringify(room));
+}
+
+// Every win: the other three each pay `each`, so a game always sums to zero.
+function roomTotals(room) {
+  return room.seats.map((seat) => ({
+    id: seat.id,
+    total: room.hands.reduce(
+      (total, hand) =>
+        total + (hand.winner === seat.id ? 3 * hand.each : -hand.each),
+      205,
+    ),
+  }));
+}
+
+// tableId is the workbook submission ID and stays private: anyone holding it
+// could submit a different result under it and block the real save.
+function publicRoom(room) {
+  return {
+    table: room.table,
+    session: room.session,
+    seats: room.seats,
+    hands: room.hands,
+    totals: roomTotals(room),
+    ended: room.ended || null,
+  };
+}
+
+// Ends the session: saves its totals when there were games, releases every
+// seat, and starts a new session at the same physical table.
+function endRoom(room, meeting, by) {
+  let sheetTable = null;
+  if (room.hands.length)
+    sheetTable = submitResult(
+      {
+        submissionId: room.tableId,
+        meetingId: meeting.id,
+        seats: roomTotals(room),
+      },
+      meeting,
+    ).table;
+  room.ended = {
+    session: room.session,
+    lastHandId: room.hands[room.hands.length - 1]?.id || null,
+    sheetTable,
+    at: Date.now(),
+    by,
+    games: room.hands.length,
+    totals: roomTotals(room).map((seat, i) => ({
+      ...seat,
+      display: room.seats[i].display,
+      wind: room.seats[i].wind,
+      optOut: room.seats[i].optOut,
+    })),
+  };
+  room.seats = [];
+  room.hands = [];
+  room.tableId = Utilities.getUuid();
+  room.session++;
+  return sheetTable;
+}
+
+function settleRooms(meeting) {
+  for (const room of readRooms(meeting.id)) {
+    try {
+      if (room.hands.length && room.seats.length === 4)
+        endRoom(room, meeting, "Scoring closed");
+      properties().deleteProperty(roomKey(room));
+    } catch (error) {
+      // ponytail: an unsaved room stays in Script Properties for an officer to copy by hand.
+      console.error(
+        "Table " +
+          room.table +
+          " could not be saved (" +
+          error.message +
+          "): " +
+          JSON.stringify(
+            roomTotals(room).map((seat, i) => [
+              room.seats[i].display,
+              seat.total,
+            ]),
+          ),
+      );
+    }
+  }
+}
+
+// Rooms and tonight's saved tables in one read. Reads take no lock, so a
+// table ended mid-read can show twice for one refresh; saved results are
+// never duplicated.
+function roomsState(meeting) {
+  let tables = null;
+  try {
+    tables = results(meeting).tables;
+  } catch {
+    // The rooms still load; standings wait for an officer to fix the sheet.
+  }
+  return { rooms: readRooms(meeting.id).map(publicRoom), results: tables };
+}
+
+function roomAction(request, meeting) {
+  if (request.meetingId !== meeting.id)
+    fail(409, "The meeting changed. Reload the page.");
+  const player = checkedPlayers(
+    meeting,
+    rosterLayout(sheet("Roster").getDataRange().getValues()),
+  ).find((item) => item.id === request.playerId);
+  if (!player) fail(409, "Check in before joining a table.");
+  const rooms = readRooms(meeting.id);
+  const mine = rooms.find((room) =>
+    room.seats.some((seat) => seat.id === player.id),
+  );
+  const last = (room) => room.hands[room.hands.length - 1]?.id || null;
+  // Two phones at one table must not record the same change twice.
+  const expectSeen = (room) => {
+    if ((request.lastHandId || null) !== last(room))
+      fail(409, "Your table just changed. Check the latest scores.");
+  };
+  const reply = (saved) => ({ status: 200, saved, ...roomsState(meeting) });
+  const action = request.action;
+  if (action === "join") {
+    const table = request.table;
+    if (!Number.isSafeInteger(table) || table < 1 || table > MAX_TABLES)
+      fail(400, "Choose a table from 1 to " + MAX_TABLES + ".");
+    const target = rooms.find((room) => room.table === table) || {
+      meetingId: meeting.id,
+      table,
+      tableId: Utilities.getUuid(),
+      session: 1,
+      seats: [],
+      hands: [],
+      ended: null,
+    };
+    // Checked before any branch: one stored bad wind would break every
+    // phone's rooms read, since the site validates seats strictly.
+    if (
+      request.seat !== undefined &&
+      (!Number.isSafeInteger(request.seat) ||
+        request.seat < 0 ||
+        request.seat > 3)
+    )
+      fail(400, "Choose East, South, West or North.");
+    const taken = (wind) => target.seats.find((seat) => seat.wind === wind);
+    const wind =
+      request.seat === undefined
+        ? [0, 1, 2, 3].find((item) => !taken(item))
+        : request.seat;
+    if (mine && mine.table !== table)
+      fail(
+        409,
+        "You're at Table " +
+          mine.table +
+          ". " +
+          (mine.hands.length ? "End that table" : "Leave it") +
+          " before joining another.",
+      );
+    if (mine) {
+      // Changing seats at your own table is fine until a game is saved.
+      const seat = mine.seats.find((item) => item.id === player.id);
+      if (request.seat === undefined || seat.wind === wind) return reply(null);
+      if (mine.hands.length)
+        fail(409, "Seats are fixed once a game is saved at this table.");
+      if (taken(wind)) fail(409, WINDS[wind] + " was just taken.");
+      seat.wind = wind;
+      writeRoom(mine);
+      return reply(null);
+    }
+    if (wind === undefined || target.seats.length >= 4)
+      fail(409, "Table " + table + " is full.");
+    if (taken(wind)) fail(409, WINDS[wind] + " was just taken.");
+    target.seats.push({ ...publicPlayer(player), optOut: player.optOut, wind });
+    writeRoom(target);
+    return reply(null);
+  }
+  if (action === "leave") {
+    if (!mine) return reply(null);
+    if (mine.hands.length)
+      fail(
+        409,
+        "Games are saved at this table. End the table to leave; it ends for all four players.",
+      );
+    mine.seats = mine.seats.filter((seat) => seat.id !== player.id);
+    writeRoom(mine);
+    return reply(null);
+  }
+  if (action === "end") {
+    const room = rooms.find((item) => item.table === request.table);
+    // A repeated End (a retry, or a second phone) after everyone was released.
+    if (
+      room?.ended &&
+      room.ended.session === request.session &&
+      room.ended.lastHandId === (request.lastHandId || null)
+    )
+      return reply(room.ended.sheetTable);
+    if (!room || mine !== room) fail(409, "You're not seated at this table.");
+    if (room.session !== request.session)
+      fail(409, "Your table just changed. Check the latest scores.");
+    expectSeen(room);
+    const saved = endRoom(room, meeting, player.display);
+    writeRoom(room);
+    return reply(saved);
+  }
+  if (!mine) fail(409, "Join a table first.");
+  if (action === "hand") {
+    if (
+      typeof request.handId !== "string" ||
+      !/^[a-zA-Z0-9-]{16,80}$/.test(request.handId)
+    )
+      fail(400, "A valid game ID is required.");
+    if (mine.hands.some((hand) => hand.id === request.handId))
+      return reply(null);
+    expectSeen(mine);
+    if (mine.seats.length !== 4)
+      fail(409, "A game needs four players at the table.");
+    if (!mine.seats.some((seat) => seat.id === request.winner))
+      fail(400, "Choose the winner from this table.");
+    if (
+      !Number.isSafeInteger(request.each) ||
+      request.each < 1 ||
+      request.each > 9999
+    )
+      fail(400, "Enter what each player pays, as a whole number above 0.");
+    if (mine.hands.length >= MAX_HANDS)
+      fail(409, "End this table to keep recording games.");
+    mine.hands.push({
+      id: request.handId,
+      winner: request.winner,
+      each: request.each,
+    });
+    writeRoom(mine);
+    return reply(null);
+  }
+  if (action === "undo") {
+    expectSeen(mine);
+    if (!mine.hands.length) fail(409, "There is no game to undo.");
+    mine.hands.pop();
+    writeRoom(mine);
+    return reply(null);
+  }
+  fail(404, "Unknown table action.");
+}
+
+// One line per request in the Apps Script Executions log: which kind of
+// request, its status, how long it took and how long it waited for the
+// lock. It never includes names, computing IDs or scores; it is how a
+// meeting's real response times are measured.
+let timing = null;
+function label(request) {
+  const word = (value) =>
+    typeof value === "string" ? value.replace(/[^a-z]/gi, "").slice(0, 12) : "";
+  return [word(request.r), word(request.action)].filter(Boolean).join(" ");
+}
+
 function respond(action) {
+  timing = { request: "", lockMs: 0 };
+  const started = Date.now();
   let response;
   try {
     response = action();
@@ -529,6 +813,14 @@ function respond(action) {
     };
     if (!error.status) console.error(error.stack);
   }
+  console.log(
+    JSON.stringify({
+      request: timing.request,
+      status: response.status,
+      ms: Date.now() - started,
+      lockMs: timing.lockMs,
+    }),
+  );
   return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(
     ContentService.MimeType.JSON,
   );
@@ -537,6 +829,7 @@ function respond(action) {
 function doGet(event) {
   return respond(() => {
     const request = event.parameter || {};
+    timing.request = "GET " + label(request);
     const meeting = currentMeeting();
     if (request.r === "meeting") {
       const state = meetingWindow(meeting, Date.now());
@@ -547,12 +840,20 @@ function doGet(event) {
         date: meeting?.date || null,
         semester: meeting?.semester || null,
       };
-      if (state.open)
+      if (state.open) {
         response.players = checkedPlayers(
           meeting,
           rosterLayout(sheet("Roster").getDataRange().getValues()),
         ).map(publicPlayer);
+        response.rooms = readRooms(meeting.id).map(publicRoom);
+      }
       return response;
+    }
+    // Reads only Script Properties, so phones at a table can refresh often.
+    if (request.r === "rooms") {
+      if (!meetingWindow(meeting, Date.now()).open)
+        fail(423, "The meeting is closed.");
+      return { status: 200, meetingId: meeting.id, ...roomsState(meeting) };
     }
     if (request.r === "results") {
       if (!meetingWindow(meeting, Date.now()).open)
@@ -575,10 +876,13 @@ function doPost(event) {
     }
     if (!request || typeof request !== "object" || Array.isArray(request))
       fail(400, "Invalid request body.");
-    if (!["checkins", "players", "results"].includes(request.r))
+    timing.request = "POST " + label(request);
+    if (!["checkins", "players", "results", "rooms"].includes(request.r))
       fail(404, "Unknown resource.");
     return withLock(() => {
-      const meeting = requireMeeting(request.r !== "results");
+      const scores = request.r === "results" || request.r === "rooms";
+      const meeting = requireMeeting(!scores);
+      if (request.r === "rooms") return roomAction(request, meeting);
       return request.r === "results"
         ? submitResult(request, meeting)
         : checkIn(request, meeting);
@@ -596,6 +900,7 @@ function onOpen() {
     .addItem("Close now", "clubClose")
     .addItem("Check in selected member", "clubCheckIn")
     .addItem("Recheck", "clubRecheck")
+    .addItem("End a table…", "clubEndTable")
     .addToUi();
 }
 
@@ -606,6 +911,41 @@ function menuAction(action) {
   } catch (error) {
     SpreadsheetApp.getUi().alert(error.message);
   }
+}
+
+// Officer recovery. Seats live in Script Properties, so editing cells cannot
+// free them; this ends a table exactly as a player's End table would,
+// saving any games first.
+function clubEndTable() {
+  const ui = SpreadsheetApp.getUi();
+  const answer = ui.prompt(
+    "End a table",
+    "Which table (1 to " + MAX_TABLES + ")? Its games are saved first.",
+    ui.ButtonSet.OK_CANCEL,
+  );
+  if (answer.getSelectedButton() !== ui.Button.OK) return;
+  const table = Number(answer.getResponseText().trim());
+  menuAction(() =>
+    withLock(() => {
+      const meeting = readMeeting();
+      const room =
+        meeting && readRooms(meeting.id).find((item) => item.table === table);
+      if (!room || !room.seats.length)
+        return "Nobody is seated at Table " + table + ".";
+      const games = room.hands.length;
+      const saved = endRoom(room, meeting, "An officer");
+      writeRoom(room);
+      return saved
+        ? "Table " +
+            table +
+            " ended. " +
+            games +
+            " games were saved as Table " +
+            saved +
+            " in Points Tracking."
+        : "Table " + table + " ended. It had no games, so nothing was saved.";
+    }),
+  );
 }
 
 function clubSettings() {
@@ -700,6 +1040,7 @@ function clubClose() {
       if (!meeting) return "There is no meeting to close.";
       meeting.closed = true;
       saveMeeting(meeting);
+      settleRooms(meeting);
       if (!meeting.id.startsWith("manual:"))
         properties().setProperty("closedCalendarEvent", meeting.id);
       else {

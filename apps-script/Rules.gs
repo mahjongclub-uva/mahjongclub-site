@@ -55,13 +55,13 @@ function validateResult(seats, checkedIn) {
   if (seats.some((seat) => !checkedIn.includes(seat.id)))
     fail(400, "Every player must check in tonight.");
   if (
-    seats.some(
-      (seat) =>
-        !Number.isSafeInteger(seat.total) || seat.total < 0 || seat.total > 820,
-    ) ||
+    seats.some((seat) => !Number.isSafeInteger(seat.total)) ||
     seats.reduce((sum, seat) => sum + seat.total, 0) !== 820
   ) {
-    fail(400, "Enter whole totals of zero or more that add up to 820.");
+    fail(
+      400,
+      "Enter whole totals that add up to 820. Negative totals are allowed.",
+    );
   }
   return seats.map((seat) => ({
     id: seat.id,

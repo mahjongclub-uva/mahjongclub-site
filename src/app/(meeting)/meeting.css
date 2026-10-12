@@ -1,13 +1,31 @@
-/* The focused meeting flow shares the site's fonts and tile colors. */
+/* The meeting flow plays like a game: the site's paper and tile colours, a
+   rounded face, soft "clay" surfaces, a jade main button and red highlights.
+   The tokens sit on the meeting layout's own <main>. */
 .meeting-page {
+  inline-size: 100%;
   max-width: 480px;
   min-height: 100dvh;
   margin: auto;
   padding: 0 24px 28px;
   --rule: #d8d0c0;
+  --han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  --card: var(--tile-face-hi);
+  --clay:
+    0 8px 18px -6px oklch(0.3 0.03 90 / 0.3), inset 0 -4px 0 oklch(0 0 0 / 0.06);
+  --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* The mock's warm club paper, flat, behind the whole meeting page. */
+body:has(main.meeting-page) {
+  background: oklch(0.95 0.025 88);
+}
+main.meeting-page {
+  --paper: oklch(0.95 0.025 88);
+  --display: var(--font-meeting), ui-rounded, system-ui, sans-serif;
+  --body: var(--font-meeting), ui-rounded, system-ui, sans-serif;
+  font-family: var(--body);
 }
 .meeting-page h1 {
-  font: 700 clamp(2.8rem, 10vw, 3.7rem)/1.02 var(--display);
+  font: 900 clamp(2.5rem, 10vw, 3.3rem)/1.02 var(--display);
   letter-spacing: -0.015em;
   margin: 0;
   overflow-wrap: anywhere;
@@ -19,56 +37,65 @@
 .meeting-page p {
   margin: 0;
 }
+/* One slim line: the club mark (home), the club's name over tonight's date,
+   and the player this phone belongs to, with their tile. */
 .meeting-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 20px 0 14px;
-  border-bottom: 1px solid var(--rule);
+  gap: 10px;
+  min-block-size: 64px;
+  margin-block-end: 14px;
 }
 .meeting-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+  display: grid;
+  place-items: center;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  flex-shrink: 0;
 }
 .meeting-brand img {
+  inline-size: 34px;
+  block-size: 34px;
   border-radius: 50%;
-  flex-shrink: 0;
-}
-.meeting-brand strong {
-  display: block;
-  font: 700 1.3rem/1.15 var(--display);
-}
-.meeting-brand small {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--ink-soft);
-  margin-top: 4px;
-}
-.meeting-page .meeting-website {
-  font-size: 0.75rem;
-  color: var(--jade);
-  white-space: nowrap;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
 }
 .meeting-status {
-  display: flex;
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.meeting-status :is(small, b) {
+  overflow: clip;
+  text-overflow: ellipsis;
+}
+.meeting-status small {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+.meeting-status b {
+  font: 800 1rem var(--display);
+  color: var(--ink);
+}
+.meeting-page .meeting-you {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.8rem;
-  color: var(--jade);
-  padding: 14px 0 26px;
+  min-inline-size: 0;
+  max-inline-size: 50%;
+  --w: 20px;
+  min-block-size: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 0.9rem var(--body);
+  white-space: nowrap;
 }
-.meeting-live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tile-letter);
-  flex-shrink: 0;
+.meeting-you span {
+  min-inline-size: 0;
+  overflow: clip;
+  text-overflow: ellipsis;
 }
 .meeting-rehearsal {
   font-size: 0.75rem;
@@ -104,21 +131,27 @@
 .meeting-form label,
 .meeting-calculator label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 16px 0 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 22px 0 8px;
 }
 .meeting-form input,
 .meeting-calculator input {
   width: 100%;
   min-width: 0;
   min-height: 54px;
-  border: 1px solid #c4cabc;
-  border-radius: 12px;
-  background: var(--tile-face-hi);
-  padding: 12px 15px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  padding: 12px 18px;
   font: inherit;
   color: var(--ink);
+}
+.meeting-page .field-hint {
+  margin-block: -4px 8px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
 }
 .meeting-form input::placeholder {
   color: #686156;
@@ -128,7 +161,6 @@
 .meeting-calculator button {
   font: inherit;
   cursor: pointer;
-  touch-action: manipulation;
 }
 .meeting-page button:disabled,
 .meeting-calculator button:disabled {
@@ -142,11 +174,12 @@
   justify-content: center;
   width: 100%;
   min-height: 52px;
+  min-height: 60px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 22px;
   background: var(--jade);
-  color: var(--tile-face-hi);
-  font: 600 0.97rem/1.4 var(--body);
+  color: var(--paper);
+  font: 800 1.2rem/1.4 var(--body);
   padding: 12px 18px;
   text-decoration: none;
   text-align: center;
@@ -161,14 +194,7 @@
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--jade);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
+  color: var(--ink);
 }
 .meeting-back {
   margin-bottom: 20px;
@@ -186,10 +212,8 @@
   flex-wrap: wrap;
 }
 .meeting-page .meeting-notice {
-  padding: 16px;
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--tile-letter);
-  border-radius: 12px;
+  padding: 4px 0 4px 14px;
+  border-inline-start: 3px solid var(--tile-letter);
   margin: 16px 0;
 }
 .meeting-notice h2 {
@@ -230,39 +254,14 @@
   font: 700 1.3rem var(--display);
   flex-shrink: 0;
 }
-.meeting-tiles {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  height: 136px;
-  align-items: center;
-  margin: 16px 0 10px;
-}
-.meeting-tiles > span {
-  width: 88px;
-  height: 124px;
-  filter: drop-shadow(0 5px 3px #5d4b2520);
-  transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
-}
-.meeting-tiles > span:first-child {
-  --tilt: -16deg;
-  --lift: 8px;
-  margin-right: -8px;
-}
-.meeting-tiles > span:nth-child(2) {
-  --tilt: 3deg;
-  --lift: -7px;
-}
-.meeting-tiles > span:last-child {
-  --tilt: 18deg;
-  --lift: 10px;
-  margin-left: -8px;
-}
+
 .meeting-seats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 28px 0;
+  padding: 0;
+  list-style: none;
 }
 .meeting-seat {
   display: grid;
@@ -270,17 +269,14 @@
   justify-items: center;
   gap: 8px;
   min-height: 100px;
-  border: 1px dashed var(--rule);
-  border-radius: 14px;
+  border-block-end: 1px solid var(--rule);
   font-size: 0.73rem;
   text-align: center;
   padding: 6px;
   overflow-wrap: anywhere;
 }
 .meeting-seat.filled {
-  border-style: solid;
-  border-bottom: 3px solid #cabda5;
-  background: var(--tile-face-hi);
+  border-block-end-color: var(--ink-soft);
 }
 .meeting-lobby {
   display: flex;
@@ -301,11 +297,11 @@
   align-items: center;
   gap: 9px;
   min-width: 0;
-  min-height: 62px;
-  border: 1px solid var(--rule);
-  border-radius: 14px;
-  padding: 10px 12px;
-  background: var(--tile-face-hi);
+  min-height: 56px;
+  border: 0;
+  border-block-end: 1px solid var(--rule);
+  padding: 8px 4px 8px 10px;
+  background: none;
   color: var(--ink);
   text-align: left;
   font-size: 0.9rem;
@@ -314,25 +310,27 @@
   min-width: 0;
   overflow-wrap: break-word;
 }
+.chip-room {
+  display: block;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--tile-letter);
+}
 .player-chips small {
   margin-left: auto;
   color: var(--tile-letter);
 }
+/* Picked: a tile-red rule at the edge and a heavier name, like the
+   seated-you rows elsewhere. */
 .player-chips [aria-pressed="true"] {
-  border-color: var(--jade);
-  background: var(--jade);
-  color: var(--tile-face-hi);
-  box-shadow: 0 3px 0 #203d30;
-}
-.player-chips [aria-pressed="true"] small {
-  color: inherit;
+  box-shadow: inset 3px 0 var(--tile-letter);
+  font-weight: 700;
 }
 .score-rows {
   margin-top: 28px;
-  border: 1px solid var(--rule);
-  border-radius: 18px;
-  background: var(--tile-face-hi);
-  overflow: hidden;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--rule);
 }
 .score-row {
   display: flex;
@@ -357,16 +355,6 @@
   font-size: 0.75rem;
   margin-top: 3px;
 }
-.total-button {
-  min-width: 72px;
-  min-height: 48px;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  background: #f5f0e5;
-  color: var(--jade);
-  padding: 8px 12px;
-  font-variant-numeric: tabular-nums;
-}
 .score-foot {
   position: sticky;
   bottom: 0;
@@ -375,38 +363,17 @@
   background: var(--paper);
   z-index: 1;
 }
-.score-summary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 0.83rem;
-  margin-bottom: 14px;
-}
-.score-summary strong {
-  font-size: 1.2rem;
-  font-variant-numeric: tabular-nums;
-}
-.score-summary small {
-  color: var(--ink-soft);
-  font-weight: 400;
-}
-.score-summary p {
-  width: 100%;
-  font-size: 0.77rem;
-  color: var(--ink-soft);
-}
 .meeting-recovery {
   margin-top: 16px;
 }
 .meeting-page summary {
   min-height: 44px;
   cursor: pointer;
-  color: var(--jade);
+  color: var(--ink);
   padding: 12px 0;
 }
-/* Native dialogs open and close immediately; animating the container broke modal dismissal in rehearsal. */
+/* Closing stays instant: animating a dialog's exit broke dismissal in
+   rehearsal. Opening rises in; see "Sheets rise" at the end. */
 .meeting-calculator {
   position: fixed;
   inset: auto 0 0;
@@ -415,11 +382,10 @@
   max-width: none;
   max-height: 94dvh;
   overflow: auto;
-  border: 1px solid var(--rule);
-  border-bottom: 0;
+  border: 0;
   border-radius: 26px 26px 0 0;
   padding: 22px 24px calc(24px + env(safe-area-inset-bottom));
-  background: var(--tile-face-hi);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--body);
 }
@@ -442,35 +408,8 @@
 }
 .calculator-head button {
   min-width: 44px;
+  text-decoration: none !important;
   font-size: 1.5rem !important;
-}
-.meeting-calculator input {
-  font-size: 2.6rem;
-  font-weight: 600;
-}
-.card-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 18px;
-}
-.card-keypad button {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 2px;
-  min-height: 60px;
-  border: 1px solid var(--rule);
-  background: var(--tile-face-hi);
-  color: var(--jade);
-  padding: 8px 3px;
-}
-.card-keypad small {
-  font-size: 0.65rem;
-  color: var(--ink-soft);
-}
-.card-keypad strong {
-  font-size: 1.1rem;
 }
 .meeting-calculator .quiet {
   font-size: 0.75rem;
@@ -481,32 +420,13 @@
   outline: 3px solid #8b5924;
   outline-offset: 4px;
 }
-/* Text actions stay compact, with the same clear feedback as the tile controls. */
-.meeting-page .meeting-text:is(:focus-visible, :active, [aria-pressed="true"]),
-.meeting-calculator .meeting-text:is(:focus-visible, :active),
-.meeting-page .meeting-website:is(:focus-visible, :active) {
-  background: var(--jade);
-  color: var(--tile-face-hi);
-}
-.meeting-page .meeting-website {
-  padding: 8px;
-  border-radius: 8px;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+main.meeting-page :focus-visible {
+  outline-color: var(--jade);
+  outline-offset: 4px;
 }
 @media (hover: hover) and (pointer: fine) {
-  .meeting-page .meeting-text:hover:not(:disabled),
-  .meeting-calculator .meeting-text:hover:not(:disabled),
-  .meeting-page .meeting-website:hover {
-    background: var(--jade);
-    color: var(--tile-face-hi);
-    box-shadow: 0 3px 0 #203d30;
-  }
-  .player-chips button:hover:not(:disabled),
-  .total-button:hover:not(:disabled),
-  .card-keypad button:hover:not(:disabled) {
-    border-color: var(--jade);
-    box-shadow: 0 3px 0 #203d30;
+  .player-chips button:hover:not(:disabled) {
+    border-color: var(--ink-soft);
   }
 }
 @keyframes tile-stamp {
@@ -519,23 +439,10 @@
     transform: none;
   }
 }
-@keyframes deal {
-  from {
-    opacity: 0;
-    transform: translateY(12px) rotate(0deg) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0px));
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .meeting-page .meeting-text,
   .meeting-calculator .meeting-text,
-  .meeting-page .meeting-website,
-  .player-chips button,
-  .total-button,
-  .card-keypad button {
+  .player-chips button {
     transition:
       background-color 120ms ease-out,
       color 120ms ease-out,
@@ -543,23 +450,14 @@
       box-shadow 120ms ease-out,
       transform 120ms ease-out;
   }
-  .meeting-page a:active {
+  .meeting-page a:active:not(.meeting-primary) {
     transform: scale(0.97);
   }
   .meeting-seat.filled {
     animation: tile-stamp 280ms ease-out;
   }
-  .meeting-tiles > span {
-    animation: deal 360ms ease-out backwards;
-  }
-  .meeting-tiles > span:nth-child(2) {
-    animation-delay: 45ms;
-  }
-  .meeting-tiles > span:last-child {
-    animation-delay: 90ms;
-  }
-  .meeting-page button:active:not(:disabled),
-  .meeting-calculator button:active:not(:disabled) {
+  .meeting-page button:active:not(:disabled, .meeting-primary),
+  .meeting-calculator button:active:not(:disabled, .meeting-primary) {
     transform: scale(0.97);
   }
 }
@@ -567,27 +465,13 @@
   .meeting-calculator {
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
-    border-radius: 24px;
-    border-bottom: 1px solid var(--rule);
+    border-radius: 26px;
     max-height: 92dvh;
   }
 }
 @media (max-width: 374px) {
   .meeting-page {
     padding-inline: 18px;
-  }
-  .meeting-brand strong {
-    font-size: 1.1rem;
-  }
-  .meeting-brand small {
-    font-size: 0.62rem;
-  }
-  .meeting-brand img {
-    width: 30px;
-    height: 30px;
-  }
-  .meeting-page .meeting-website {
-    font-size: 0.69rem;
   }
   .player-chips button {
     padding: 8px;
@@ -603,10 +487,6 @@
   }
 }
 
-.meeting-tiles svg {
-  width: 100%;
-  height: 100%;
-}
 .live-summary {
   display: flex;
   flex-wrap: wrap;
@@ -625,32 +505,41 @@
 .live-list li {
   display: flex;
   align-items: center;
-  gap: 12px;
   min-height: 80px;
-  padding: 14px 0;
 }
 .live-list li + li {
   border-top: 1px solid var(--rule);
 }
+.meeting-page .live-list {
+  --w: 32px;
+}
+main.meeting-page .live-rank {
+  inline-size: auto;
+  min-inline-size: 2ch;
+  flex-shrink: 0;
+  text-align: center;
+}
+/* Below tonight: where tonight leaves each of tonight's players in the
+   season, before an officer publishes it. */
+.live-season .live-list {
+  margin-block-start: 12px;
+}
 .live-rank {
   width: 24px;
-  font: 700 1.6rem var(--display);
   color: var(--ink-soft);
-}
-.live-points {
-  font: 700 1.7rem var(--display);
-  font-variant-numeric: tabular-nums;
 }
 .live-change {
   min-width: 42px;
   text-align: right;
-  color: var(--jade);
   font-size: 0.78rem;
 }
-.live-change.down {
+.live-points.down {
   color: var(--tile-letter);
 }
-
+.live-list li[data-you] {
+  font-weight: 600;
+  padding-inline-start: 12px;
+}
 @media (prefers-reduced-motion: no-preference) {
   .live-list li {
     animation: live-settle 280ms ease-out;
@@ -675,10 +564,11 @@
   justify-content: center;
   min-height: 48px;
   padding: 10px 16px;
-  border: 1px solid var(--jade);
-  border-radius: 8px;
-  background: var(--tile-face-hi);
-  color: var(--jade);
+  gap: 6px;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--control-radius);
+  background: none;
+  color: var(--ink);
   font: 600 0.95rem var(--body);
   text-decoration: none;
   text-align: center;
@@ -697,6 +587,10 @@
   color: var(--ink-soft);
   line-height: 1.6;
 }
+/* Text links under the form start clear of the primary button's raised edge. */
+.meeting-form > .meeting-text {
+  margin-block-start: 14px;
+}
 .meeting-closed > .meeting-text {
   margin-top: 16px;
 }
@@ -704,18 +598,21 @@
   opacity: 0.7;
 }
 @media (hover: hover) and (pointer: fine) {
-  .meeting-page .meeting-secondary:hover:not(:disabled),
-  .meeting-page .meeting-primary:hover:not(:disabled) {
-    background: #203d30;
-    color: var(--tile-face-hi);
+  .meeting-page .meeting-secondary:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
+  .meeting-page .meeting-primary:hover:not(:disabled),
+  .meeting-calculator .meeting-primary:hover:not(:disabled) {
+    background: color-mix(in oklch, var(--jade) 88%, white);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
   .meeting-page .meeting-primary,
   .meeting-page .meeting-secondary {
     transition:
-      background-color 150ms ease-out,
-      color 150ms ease-out;
+      transform 120ms var(--ease-out),
+      box-shadow 120ms var(--ease-out),
+      border-color 150ms ease;
   }
   .meeting-check {
     animation: tile-stamp 280ms ease-out;
@@ -732,15 +629,9 @@
 
 /* Color comes from the tiles and actions, leaving the paper uncluttered. */
 .meeting-form h1 {
-  color: var(--jade);
+  color: var(--ink);
 }
-.meeting-form .meeting-tiles {
-  margin-block: 28px 22px;
-}
-.meeting-form input:focus-visible {
-  outline-color: #285b87;
-  border-color: #285b87;
-}
+
 .meeting-receipt .meeting-check {
   background: #f3dfb6;
   color: #244f77;
@@ -751,14 +642,7 @@
   color: var(--ink-soft);
   line-height: 1.6;
 }
-.meeting-form[data-register="true"] .meeting-tiles {
-  height: 88px;
-  margin-block: 12px;
-}
-.meeting-form[data-register="true"] .meeting-tiles > span {
-  width: 55px;
-  height: 78px;
-}
+
 .meeting-matches {
   margin-top: 22px;
   padding: 18px 0 0;
@@ -772,64 +656,11 @@
   font-size: 1.75rem;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .meeting-form .meeting-tiles > span {
-    transition: transform 220ms ease-out;
-  }
-  .meeting-form:focus-within .meeting-tiles > span {
-    transform: rotate(var(--tilt, 0deg))
-      translateY(calc(var(--lift, 0px) - 5px));
-  }
-  .meeting-form[data-busy="true"] .meeting-tiles > span {
-    transform: rotate(0deg) translateY(0);
-  }
   .meeting-matches {
     animation: live-settle 220ms ease-out;
   }
 }
 
-/* Card details and balance feedback make counting tangible. */
-.card-keypad button {
-  position: relative;
-  border-bottom-width: 3px;
-  border-radius: 6px;
-}
-.card-keypad button[data-counted="true"] {
-  background: #e9f0f5;
-  border-color: #8daecb;
-  color: #244f77;
-}
-.card-keypad .card-count {
-  color: #244f77;
-  font-weight: 700;
-}
-.score-progress-track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 3px;
-  background: #ded8cc;
-  margin-bottom: 14px;
-}
-.score-progress-track > span {
-  display: block;
-  height: 100%;
-  background: #285b87;
-  transform-origin: left;
-}
-.score-progress[data-balanced="true"] .score-progress-track > span {
-  background: var(--jade);
-}
-.score-summary[data-balanced="true"] strong,
-.score-summary[data-balanced="true"] p {
-  color: var(--jade);
-}
-@keyframes count-bump {
-  from {
-    transform: translateY(3px) scale(0.9);
-  }
-  to {
-    transform: none;
-  }
-}
 @keyframes score-highlight {
   from {
     background-color: #f3dfb6;
@@ -839,15 +670,6 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .card-count {
-    animation: count-bump 180ms ease-out;
-  }
-  .score-progress-track > span {
-    transition: transform 220ms ease-out;
-  }
-  .score-summary[data-balanced="true"] strong {
-    animation: count-bump 220ms ease-out;
-  }
   .live-points-changed {
     animation: score-highlight 1000ms ease-out;
   }
@@ -862,14 +684,27 @@
   user-select: none;
   touch-action: manipulation;
 }
+/* The main action is a jade clay button that presses down. Disabled, it
+   lies flat. */
 .meeting-page .meeting-primary,
 .meeting-calculator .meeting-primary {
-  box-shadow: 0 4px 0 #203d30;
+  box-shadow:
+    0 8px 18px -6px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -4px 0 oklch(0 0 0 / 0.08);
 }
 .meeting-page .meeting-primary:active:not(:disabled),
 .meeting-calculator .meeting-primary:active:not(:disabled) {
-  box-shadow: 0 1px 0 #203d30;
-  background: #203d30;
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 8px -4px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -2px 0 oklch(0 0 0 / 0.08);
+}
+.meeting-page .meeting-primary:disabled,
+.meeting-calculator .meeting-primary:disabled {
+  opacity: 1;
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--rule);
+  color: var(--ink-soft);
 }
 .meeting-seat-button {
   width: 100%;
@@ -894,7 +729,7 @@
   bottom: calc(-24px - env(safe-area-inset-bottom));
   padding: 12px 0 calc(16px + env(safe-area-inset-bottom));
   margin-bottom: calc(-24px - env(safe-area-inset-bottom));
-  background: var(--tile-face-hi);
+  background: var(--paper);
 }
 .calculator-footer .meeting-primary {
   margin-top: 0;
@@ -916,4 +751,1767 @@
   .meeting-calculator {
     padding-inline: 20px;
   }
+}
+
+/* Recording a table: steps, signed totals, a live balance and a card counter. */
+.meeting-page {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --short: oklch(0.45 0.09 245);
+  --over: var(--tile-letter);
+}
+.score-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  margin-block: 0 22px;
+}
+.score-steps li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.score-steps li:not(:first-child)::before,
+.score-steps li:not(:first-child)::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 13px;
+  inset-inline: -50% 50%;
+  block-size: 2px;
+  background: var(--rule);
+}
+.score-steps li:not(:first-child)::after {
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.score-steps li:is([data-done="true"], [aria-current="step"])::after {
+  transform: none;
+}
+.score-step-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--paper);
+  font-weight: 700;
+}
+.score-steps [aria-current="step"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.score-steps [data-done="true"] .score-step-dot {
+  border-color: var(--ink);
+}
+.score-steps [aria-current="step"] .score-step-dot {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.score-form > h1:focus-visible {
+  outline-offset: 6px;
+}
+.score-row.editing {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+}
+.score-row.editing .total-field {
+  grid-column: 2;
+}
+.score-name {
+  display: grid;
+  gap: 4px;
+}
+.score-net {
+  justify-self: start;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.score-net[data-sign="1"] {
+  color: var(--jade);
+}
+.score-net[data-sign="-1"] {
+  color: var(--tile-letter);
+}
+.score-net:empty {
+  display: none;
+}
+.score-final {
+  margin-inline-start: auto;
+  font: 700 1.6rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.total-field {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+  gap: 6px;
+}
+.total-field button {
+  display: grid;
+  place-items: center;
+  min-block-size: 50px;
+  border: 1px solid var(--rule);
+  border-block-end-width: 3px;
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  color: var(--ink);
+}
+.total-field .sign-toggle[aria-pressed="true"] {
+  border-color: var(--tile-letter);
+  color: var(--tile-letter);
+}
+.meeting-page .total-field input {
+  min-block-size: 50px;
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+  font: 700 1.45rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.score-balance {
+  --tone: var(--ink-soft);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 12px;
+  margin-block-end: 14px;
+}
+.score-balance[data-state="short"] {
+  --tone: var(--short);
+}
+.score-balance:is([data-state="over"], [data-state="invalid"]) {
+  --tone: var(--over);
+}
+.score-balance[data-state="ok"] {
+  --tone: var(--ink);
+}
+.score-balance .score-progress-track {
+  grid-column: 1 / -1;
+  block-size: 8px;
+  overflow: clip;
+  border-radius: 4px;
+  background: oklch(0.89 0.015 85);
+  margin-block-end: 10px;
+}
+.score-progress-track > span {
+  display: block;
+  block-size: 100%;
+  background: var(--tone);
+  transform: scaleX(var(--fill));
+  transform-origin: left;
+}
+.score-sum {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.score-sum strong {
+  display: inline-block;
+  font: 700 1.5rem var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--tone);
+}
+.score-balance-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tone);
+  text-align: end;
+}
+.score-receipt .score-rows {
+  margin-block-start: 24px;
+}
+
+/* The card counter: one row per card value, typed or stepped. */
+.card-counter {
+  list-style: none;
+  padding: 0;
+  margin-block: 14px 0;
+}
+.card-counter li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "face stepper subtotal"
+    "worth stepper subtotal";
+  align-items: center;
+  column-gap: 12px;
+  padding-block: 6px;
+}
+.card-counter li + li {
+  border-block-start: 1px solid var(--rule);
+}
+.card-face {
+  grid-area: face;
+  justify-self: start;
+  min-inline-size: 40px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  border-block-end-width: 3px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 1rem var(--display);
+  text-align: center;
+  white-space: nowrap;
+}
+.card-counter li[data-counted="true"] .card-face {
+  border-color: var(--short);
+  background: color-mix(in oklch, var(--short) 10%, var(--tile-face-hi));
+  color: var(--short);
+}
+.card-worth {
+  grid-area: worth;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+.card-stepper {
+  grid-area: stepper;
+  display: grid;
+  grid-template-columns: 44px 56px 44px;
+  gap: 4px;
+  justify-self: start;
+}
+.card-stepper button {
+  display: grid;
+  place-items: center;
+  min-block-size: 44px;
+  border: 1px solid var(--rule);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  color: var(--ink);
+}
+.meeting-calculator .card-stepper input {
+  min-block-size: 44px;
+  padding: 4px;
+  border-radius: 10px;
+  text-align: center;
+  font: 700 max(16px, 1.05rem) var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.card-subtotal {
+  grid-area: subtotal;
+  min-inline-size: 36px;
+  text-align: end;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--short);
+}
+.calculator-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  margin-block-end: 6px;
+}
+.calculator-sum span:first-child {
+  margin-inline-end: auto;
+}
+.calculator-sum strong {
+  display: inline-block;
+  font: 700 2.2rem var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.calculator-footer .meeting-quiet-actions {
+  margin-block: 2px 8px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .total-field button:hover:not(:disabled),
+  .card-stepper button:hover:not(:disabled) {
+    border-color: var(--ink-soft);
+  }
+}
+
+@keyframes score-pop {
+  from {
+    transform: translateY(2px);
+  }
+}
+@keyframes score-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .score-steps li::after {
+    transition: transform 280ms var(--ease-in-out);
+  }
+  .score-step-dot {
+    transition:
+      background-color 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      color 200ms var(--ease-out);
+  }
+  .score-progress-track > span {
+    transition:
+      transform 260ms var(--ease-out),
+      background-color 200ms ease;
+  }
+  .score-net,
+  .score-sum strong,
+  .card-subtotal,
+  .calculator-sum strong {
+    animation: score-pop 180ms var(--ease-out);
+  }
+  .score-form[data-stage] .score-rows > li,
+  .score-receipt .score-rows > li {
+    animation: score-row-in 260ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+  .score-form .score-row.editing:nth-child(2) {
+    --i: 1;
+  }
+  .score-form .score-row.editing:nth-child(3) {
+    --i: 2;
+  }
+  .score-form .score-row.editing:nth-child(4) {
+    --i: 3;
+  }
+  .total-field button,
+  .card-stepper button {
+    transition:
+      border-color 120ms ease,
+      background-color 120ms ease,
+      transform 120ms var(--ease-out);
+  }
+}
+@media (max-width: 374px) {
+  .card-counter li {
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+  .card-stepper {
+    grid-template-columns: 44px 48px 44px;
+  }
+}
+.meeting-loading {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding-block: 64px;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.meeting-loading > span {
+  display: flex;
+  gap: 8px;
+}
+.meeting-loading i {
+  inline-size: 22px;
+  block-size: 30px;
+  border: 1px solid var(--rule);
+  border-block-end: 3px solid #cabda5;
+  border-radius: 5px;
+  background: var(--tile-face-hi);
+}
+@keyframes tile-wait {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-loading i {
+    animation: tile-wait 900ms var(--ease-in-out) infinite;
+  }
+  .meeting-loading i:nth-child(2) {
+    animation-delay: 120ms;
+  }
+  .meeting-loading i:nth-child(3) {
+    animation-delay: 240ms;
+  }
+}
+
+.meeting-page .meeting-here h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 0.9rem var(--body);
+  color: var(--ink-soft);
+}
+.meeting-here h2 span {
+  color: var(--ink-soft);
+  font: 600 0.9rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+/* Everyone here tonight, as a wall of their tiles. */
+.meeting-here ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 10px;
+  list-style: none;
+  padding: 0;
+  margin-block: 14px 0;
+  --w: 46px;
+}
+.meeting-here li {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  inline-size: 86px;
+  gap: 8px;
+  min-inline-size: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.meeting-here li:nth-child(odd) .player-tile {
+  rotate: -4deg;
+}
+.meeting-here li:nth-child(3n) .player-tile {
+  rotate: 5deg;
+}
+.meeting-here li[data-you] {
+  color: var(--tile-letter);
+  font-weight: 800;
+}
+.meeting-hero-tile {
+  display: block;
+  margin-block: 26px 34px;
+  --w: 110px;
+}
+.meeting-hero-tile .player-tile {
+  rotate: -7deg;
+}
+@keyframes hero-slap {
+  from {
+    transform: scale(1.6) rotate(12deg);
+    opacity: 0;
+  }
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-hero-tile .player-tile {
+    animation: hero-slap 520ms var(--pop) backwards;
+  }
+  .meeting-here li {
+    animation: chip-in 240ms var(--ease-out) backwards;
+    animation-delay: calc(200ms + var(--i, 0) * 35ms);
+  }
+}
+
+/* Tables: a lobby of open tables, and a room that records hand by hand. */
+.room-list {
+  list-style: none;
+  padding: 0;
+  margin-block: 20px;
+  border-block-start: 1px solid var(--rule);
+}
+.room-card {
+  display: grid;
+  padding-block: 14px;
+  border-block-end: 1px solid var(--rule);
+}
+.room-card[data-full="true"] {
+  color: var(--ink-soft);
+}
+.room-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.room-head strong {
+  font: 700 1.5rem var(--display);
+  color: var(--ink);
+}
+.room-head span {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.room-seats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.room-seats li {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.room-seats li[data-empty="true"] {
+  color: var(--ink-soft);
+}
+.tables-page > .meeting-primary {
+  margin-block-start: 8px;
+}
+.room-saved {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 18px;
+  padding: 4px 0 4px 14px;
+  border-inline-start: 3px solid var(--ink);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.room-stale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-block-end: 16px;
+  padding: 2px 0 2px 14px;
+  border-inline-start: 3px solid var(--tile-letter);
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+.result-card {
+  margin-block: 16px 8px;
+  padding-block: 12px;
+  border-block: 1px solid var(--rule);
+}
+.result-head {
+  display: grid;
+  gap: 2px;
+  margin-block-end: 8px !important;
+}
+.result-head strong {
+  color: var(--ink);
+}
+.result-head span {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.result-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.result-card li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 3.5ch;
+  align-items: center;
+  gap: 8px;
+  padding-block: 5px;
+  font-size: 0.88rem;
+}
+.result-card li + li {
+  border-block-start: 1px solid var(--rule);
+}
+.result-card li span:first-child {
+  overflow-wrap: anywhere;
+}
+.result-card li[data-you] {
+  font-weight: 600;
+}
+.result-card li strong {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.meeting-avatar.empty {
+  color: var(--ink-soft);
+}
+.meeting-page .hand-each {
+  inline-size: 100%;
+  min-block-size: 56px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  padding: 8px 14px;
+  color: var(--ink);
+  font: 700 1.6rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-card {
+    animation: score-row-in 260ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+  .room-saved {
+    animation: score-row-in 240ms var(--ease-out);
+  }
+  /* A newly saved game: the latest line and each seat's total settle in, so
+     a game saved on another phone reads as a change, not a jump. */
+  .table-latest > span,
+  .seat-total {
+    animation: score-row-in 240ms var(--ease-out);
+  }
+}
+
+/* The table: the club's wind tiles around a quiet hairline square. Colour
+   lives on the tiles; changes are signed text, never chips. */
+.table-square {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-areas:
+    ". west ."
+    "north table south"
+    ". east .";
+  align-items: center;
+  justify-items: center;
+  gap: 6px;
+  margin-block: 18px;
+}
+.table-top {
+  grid-area: table;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  font-size: 0.72rem;
+}
+.table-top strong {
+  font: 700 2.2rem/1 var(--display);
+}
+.meeting-page .seat {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  text-align: center;
+  font: inherit;
+}
+.seat[data-wind="East"] {
+  grid-area: east;
+}
+.seat[data-wind="South"] {
+  grid-area: south;
+}
+.seat[data-wind="West"] {
+  grid-area: west;
+}
+.seat[data-wind="North"] {
+  grid-area: north;
+}
+.seat-tile {
+  display: grid;
+  place-items: center;
+  margin-block-end: 8px;
+  --w: 48px;
+}
+.room-seats .seat-tile {
+  margin-block-end: 4px;
+}
+.seat-name {
+  max-inline-size: 100%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.seat-name small {
+  color: var(--tile-letter);
+  font-weight: 600;
+}
+.seat[data-empty] .seat-name {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+button.seat[data-empty] .seat-name {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.seat-total {
+  display: grid;
+  justify-items: center;
+  font: 900 1.4rem/1.1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.seat[aria-pressed="true"] .player-tile {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.seat[aria-pressed="true"] .seat-name {
+  text-decoration: underline 2px var(--tile-letter);
+  text-underline-offset: 4px;
+}
+.delta {
+  font-family: var(--body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+.delta[data-sign="1"] {
+  color: var(--jade);
+}
+.delta[data-sign="-1"] {
+  color: var(--tile-letter);
+}
+.table-latest {
+  display: grid;
+  gap: 2px;
+  border-block: 1px solid var(--rule);
+}
+.table-actions {
+  display: grid;
+  gap: 6px;
+  margin-block-start: 14px;
+}
+.table-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+  margin-block-start: 10px;
+}
+.change-rows {
+  list-style: none;
+  padding: 0;
+  margin-block: 10px;
+}
+.change-rows li {
+  display: grid;
+  padding-block: 8px;
+}
+.change-rows strong {
+  text-align: end;
+}
+.table-sheet .table-square {
+  margin-block: 8px 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seat-tile {
+    transition: transform 160ms var(--ease-out);
+  }
+  .seat[aria-pressed="true"] .seat-tile {
+    transform: translateY(-6px);
+  }
+}
+
+/* The player sheet: two ruled rows. */
+.menu-links {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin-block: 14px 0;
+}
+.menu-links a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-block-size: 60px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  color: var(--ink);
+  font: 800 1.05rem var(--body);
+  text-decoration: none;
+}
+.menu-links a svg {
+  flex-shrink: 0;
+  inline-size: 22px;
+  block-size: 22px;
+}
+.menu-links a svg:last-child {
+  margin-inline-start: auto;
+  color: var(--ink-soft);
+}
+.menu-links a:active {
+  transform: translateY(2px);
+}
+/* Who this phone plays as, with the way to switch beside it. */
+.menu-you {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: color-mix(in oklch, oklch(0.88 0.15 95) 40%, var(--paper));
+  --w: 40px;
+}
+.menu-you .player-tile {
+  rotate: -6deg;
+}
+.menu-you p {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+.menu-you small {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.menu-you strong {
+  font: 900 1.2rem var(--display);
+  overflow-wrap: anywhere;
+}
+
+/* Lobby: the way back to your own table, and the typed-totals fallback. */
+.room-return {
+  display: grid;
+  gap: 12px;
+  margin-block: 18px 8px;
+}
+.meeting-page .lobby-fallback {
+  margin-block-start: 28px;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+.game-rows {
+  list-style: none;
+  padding: 0;
+  margin-block: 10px;
+  --w: 30px;
+}
+.game-rows li {
+  display: grid;
+  grid-template-columns: 4.2rem auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-block: 10px;
+}
+.game-rows li + li {
+  border-block-start: 1px solid var(--rule);
+}
+.game-number {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.game-winner {
+  display: grid;
+  min-inline-size: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.game-winner small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.game-rows .delta {
+  font: 900 1.15rem var(--display);
+}
+
+/* A player's sticker tile: a white face with their glyph, standing on the
+   colour of its back. An open chair is a dashed outline with its wind. */
+.player-tile {
+  /* Each place sets --w for its size; 44px elsewhere. */
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: var(--w, 44px);
+  aspect-ratio: 3 / 4;
+  border-radius: calc(var(--w, 44px) * 0.2);
+  background: #fff;
+  color: var(--g);
+  font: 700 calc(var(--w, 44px) * 0.58) / 1 var(--han);
+  box-shadow:
+    0 calc(var(--w, 44px) * 0.12) 0 var(--b),
+    0 calc(var(--w, 44px) * 0.2) calc(var(--w, 44px) * 0.3) -4px
+      oklch(0.3 0.03 90 / 0.4);
+}
+.player-tile[data-empty] {
+  background: none;
+  box-shadow: none;
+  border: 2px dashed color-mix(in oklch, var(--ink-soft) 55%, transparent);
+  color: var(--ink-soft);
+  font-size: calc(var(--w, 44px) * 0.45);
+}
+
+/* Secondary actions: smaller clay buttons with an icon, so they read as
+   things to press rather than text. */
+.meeting-page .meeting-chip,
+.meeting-calculator .meeting-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  color: var(--ink);
+  font: 700 0.95rem var(--body);
+  text-decoration: none;
+}
+.meeting-page .meeting-chip:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 3px 8px -4px oklch(0.3 0.03 90 / 0.3);
+}
+
+/* The winner's moment, after a game is saved on any phone at the table. */
+.meeting-page .seat {
+  position: relative;
+}
+.seat-cheer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.seat-cheer b {
+  position: absolute;
+  inset-block-start: -14px;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  rotate: -6deg;
+  z-index: 1;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--tile-letter);
+  color: #fff;
+  font: 900 0.85rem var(--display);
+  white-space: nowrap;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.seat-burst {
+  position: absolute;
+  inset-block-start: 30px;
+  inset-inline-start: 50%;
+}
+.seat-burst i {
+  position: absolute;
+  inline-size: 11px;
+  block-size: 14px;
+  margin: -7px 0 0 -6px;
+  border-radius: 3px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 0 var(--c);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-chip {
+    transition:
+      transform 110ms var(--ease-out),
+      box-shadow 110ms var(--ease-out);
+  }
+  .seat[data-cheer] .player-tile {
+    animation: seat-cheer 650ms var(--pop);
+  }
+  .seat-cheer b {
+    animation: cheer-stamp 380ms var(--pop) backwards;
+  }
+  .seat-burst i {
+    animation: cheer-burst 850ms var(--ease-out) 80ms backwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seat-burst {
+    display: none;
+  }
+}
+@keyframes seat-cheer {
+  35% {
+    transform: scale(1.25) rotate(-8deg);
+  }
+}
+@keyframes cheer-stamp {
+  from {
+    scale: 1.9;
+    opacity: 0;
+  }
+}
+@keyframes cheer-burst {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) rotate(var(--spin));
+  }
+}
+
+/* Sheets rise from the bottom edge when they open. Entry only: closing a
+   native dialog stays instant, which kept dismissal reliable. The `translate`
+   property leaves the desktop centring transform alone. */
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-calculator[open] {
+    animation: sheet-rise 280ms var(--ease-drawer);
+  }
+  .meeting-calculator[open]::backdrop {
+    animation: sheet-dim 280ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meeting-calculator[open] {
+    animation: sheet-dim 160ms ease-out;
+  }
+}
+@keyframes sheet-rise {
+  from {
+    translate: 0 100%;
+  }
+}
+@media (min-width: 700px) {
+  @keyframes sheet-rise {
+    from {
+      translate: 0 24px;
+      opacity: 0;
+    }
+  }
+}
+@keyframes sheet-dim {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Check-in: the computing ID is six slots, one per character, and each
+   fills with a coloured tile as it is typed. The real input lies over the
+   slots with its text hidden, so typing, pasting and focus work as usual,
+   and the slots show focus and errors for it. */
+.id-stickers {
+  position: relative;
+}
+.id-stickers > span {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.id-stickers > span > span {
+  display: grid;
+  place-items: center;
+  block-size: 56px;
+  border-radius: 14px;
+  background: oklch(var(--l, 0.72) var(--c, 0.15) var(--hue));
+  color: var(--ink);
+  font: 800 1.4rem var(--body);
+  box-shadow:
+    inset 0 -4px 0 oklch(0 0 0 / 0.14),
+    0 6px 14px -6px oklch(0.3 0.03 90 / 0.35);
+}
+/* An empty slot is pressed into the paper. */
+.id-stickers > span > [data-slot] {
+  background: color-mix(in oklch, var(--ink) 6%, var(--paper));
+  box-shadow: inset 0 3px 5px oklch(0.3 0.03 90 / 0.16);
+}
+/* While typing, the slot the next character goes into is ringed in jade,
+   or the last slot once all six are in. */
+.id-stickers:focus-within [data-slot="next"],
+.id-stickers:focus-within:not(:has([data-slot])) > span > span:last-child {
+  outline: 3px solid var(--jade);
+  outline-offset: 2px;
+}
+.id-stickers:has([aria-invalid="true"]) > span > span {
+  outline: 2px solid var(--tile-letter);
+  outline-offset: 2px;
+}
+.id-stickers + .field-hint {
+  margin-block: 12px 0;
+  font-size: 0.85rem;
+}
+.meeting-form .id-stickers input {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  block-size: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: transparent;
+  caret-color: transparent;
+  -webkit-text-fill-color: transparent;
+  box-shadow: none;
+}
+.meeting-form .id-stickers input:focus-visible {
+  outline: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .id-stickers > span > span:not([data-slot]) {
+    animation: sticker-on 320ms var(--pop);
+  }
+}
+@keyframes sticker-on {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+/* The name step: the ID just entered, small, with a way back to change it. */
+.id-chosen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block: 18px 4px;
+}
+.id-badge {
+  display: inline-flex;
+  gap: 4px;
+}
+.id-badge > span {
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 32px;
+  border-radius: 8px;
+  background: oklch(var(--l, 0.72) var(--c, 0.15) var(--hue));
+  color: var(--ink);
+  font: 800 0.95rem var(--body);
+  box-shadow: inset 0 -3px 0 oklch(0 0 0 / 0.14);
+}
+
+/* Mock D's proportions for the "You're in", table and standings screens:
+   a smaller title on working screens, the action before the wall, and
+   compact rows where your own row is tinted rather than ruled. */
+.meeting-page .meeting-title {
+  font-size: 2rem;
+  margin-block: 4px 0;
+}
+.meeting-receipt h1 {
+  margin-block-end: 20px;
+}
+.meeting-receipt > .meeting-primary {
+  margin-block-end: 28px;
+}
+main.meeting-page .table-latest {
+  justify-items: center;
+  padding-block: 2px 14px;
+  border: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+main.meeting-page .live-list {
+  margin-block: 12px 18px;
+  border: 0;
+}
+main.meeting-page .live-list li {
+  min-block-size: 0;
+  gap: 12px;
+  padding: 9px 6px;
+}
+main.meeting-page .live-list li[data-you] {
+  box-shadow: none;
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--tile-letter) 16%, var(--paper));
+}
+main.meeting-page .live-list .score-name {
+  flex: 1;
+  min-inline-size: 0;
+}
+main.meeting-page .live-rank {
+  font: 700 0.95rem var(--body);
+}
+main.meeting-page .live-points {
+  font: 900 1.25rem var(--display);
+}
+main.meeting-page .live-season {
+  margin-block-start: 22px;
+}
+main.meeting-page .live-season .live-list li {
+  padding-block: 6px;
+}
+main.meeting-page .live-season .live-points {
+  font: 700 1rem var(--body);
+}
+main.meeting-page .live-season .live-change {
+  min-inline-size: 60px;
+  font-weight: 700;
+}
+
+/* Closer to mock D: a brighter green for gains (darker than the mock's so it
+   still reads 4.5:1 on your tinted row), a looser wall of tilted tiles, a
+   bigger hero tile, and every standings row ruled. */
+main.meeting-page {
+  --up: oklch(0.45 0.14 150);
+}
+main.meeting-page :is(.delta, .score-net)[data-sign="1"],
+main.meeting-page .live-points.up,
+main.meeting-page .live-change.up {
+  color: var(--up);
+}
+main.meeting-page .live-season .live-points,
+main.meeting-page .live-change {
+  color: var(--ink);
+}
+main.meeting-page .live-change.down {
+  color: var(--tile-letter);
+}
+main.meeting-page .live-list li + li {
+  border-block-start: 0;
+}
+main.meeting-page .live-list li {
+  border-block-end: 2px dashed oklch(0.85 0.02 270);
+}
+main.meeting-page .live-season .live-list > li {
+  border: 0;
+  background: none;
+}
+.meeting-here li:nth-child(6n + 1) {
+  rotate: -6deg;
+}
+.meeting-here li:nth-child(6n + 2) {
+  rotate: 4deg;
+}
+.meeting-here li:nth-child(6n + 3) {
+  rotate: -2deg;
+}
+.meeting-here li:nth-child(6n + 4) {
+  rotate: 7deg;
+}
+.meeting-here li:nth-child(6n + 5) {
+  rotate: -5deg;
+}
+.meeting-here li:nth-child(6n) {
+  rotate: 3deg;
+}
+
+/* Explanations wait behind a small question: tap it and the answer opens
+   beneath. Native <details>, so it works without script and with a keyboard. */
+.meeting-more {
+  margin-block: 10px 4px;
+  font-size: 0.85rem;
+}
+.meeting-more summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  color: var(--ink-soft);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.meeting-more summary::-webkit-details-marker {
+  display: none;
+}
+.meeting-more summary::before {
+  content: "?";
+  display: inline-grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 2px 0 oklch(0 0 0 / 0.12);
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+.meeting-more[open] summary::before {
+  content: "×";
+}
+.meeting-more summary:active::before {
+  translate: 0 1px;
+  box-shadow: none;
+}
+.meeting-more p {
+  margin-block: 2px 6px;
+  max-inline-size: 36ch;
+  color: var(--ink-soft);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-more[open] p {
+    animation: chip-in 200ms var(--ease-out);
+  }
+}
+
+/* Tables tonight: each table is a card you can tap anywhere. The one link
+   in it stretches over the card, so there is a single tab stop per table. */
+main.meeting-page .room-list {
+  display: grid;
+  gap: 14px;
+  border: 0;
+}
+main.meeting-page .room-card {
+  position: relative;
+  gap: 14px;
+  padding: 16px 16px 14px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  color: var(--ink);
+}
+.room-head strong {
+  font-weight: 900;
+}
+main.meeting-page .room-status {
+  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+}
+main.meeting-page .room-status[data-open="true"] {
+  color: var(--jade);
+}
+main.meeting-page .room-seats .seat-tile {
+  --w: 40px;
+}
+main.meeting-page .room-seats li {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.room-go {
+  justify-self: end;
+}
+.room-go[data-sit] {
+  background: var(--jade);
+  color: oklch(0.99 0.01 90);
+}
+.room-go::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+}
+.room-card:has(.room-go:focus-visible) {
+  outline: 3px solid var(--jade);
+  outline-offset: 3px;
+}
+.room-go:focus-visible {
+  outline: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  main.meeting-page .room-card {
+    transition: transform 120ms var(--ease-out);
+  }
+  main.meeting-page .room-card:has(.room-go:active) {
+    transform: translateY(2px) scale(0.99);
+  }
+}
+/* A table with nothing to do lies flat, so only tappable cards look raised. */
+main.meeting-page .room-card:not(:has(.room-go)) {
+  background: color-mix(in oklch, var(--card) 45%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--ink) 8%, transparent);
+}
+
+/* Your own table's way in: a butter tile, warm against the white card. */
+.room-go:not([data-sit]) {
+  background: oklch(0.88 0.15 95);
+  color: var(--ink);
+}
+
+/* The middle of the table is a felt top in a wooden rim. */
+main.meeting-page .table-top {
+  position: relative;
+  border-radius: 20px;
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.5 0.09 165),
+    oklch(0.41 0.08 165)
+  );
+  box-shadow:
+    inset 0 0 0 7px oklch(0.55 0.07 60),
+    inset 0 0 0 9px oklch(0.45 0.06 60),
+    inset 0 6px 14px oklch(0 0 0 / 0.3),
+    0 10px 20px -8px oklch(0.3 0.03 90 / 0.45);
+  color: oklch(0.95 0.02 165);
+}
+main.meeting-page .table-top strong {
+  color: oklch(0.99 0.01 90);
+}
+
+/* The latest game: the winner's name stands out. */
+main.meeting-page .table-latest b {
+  font-weight: 900;
+  color: var(--ink);
+}
+
+/* Secondary actions are soft buttons, never bare underlined text. */
+main.meeting-page .meeting-text {
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  background: color-mix(in oklch, var(--ink) 6%, var(--paper));
+  font: 700 0.9rem var(--body);
+  text-decoration: none;
+}
+main.meeting-page .meeting-text:active:not(:disabled) {
+  transform: translateY(1px);
+  background: color-mix(in oklch, var(--ink) 11%, var(--paper));
+}
+main.meeting-page .calculator-head .meeting-text {
+  inline-size: 44px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.3rem;
+}
+/* Under a sheet's main button, the second action spans the same width. */
+main.meeting-page .calculator-footer .meeting-chip {
+  inline-size: 100%;
+  margin-block-start: 10px;
+}
+
+/* Confirm: the winner up top, then everyone's change with their tile. */
+.confirm-win {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-block: 6px 14px;
+  padding: 16px;
+  border-radius: 20px;
+  background: color-mix(in oklch, oklch(0.88 0.15 95) 45%, var(--paper));
+  --w: 56px;
+}
+.confirm-win .player-tile {
+  rotate: -6deg;
+}
+.confirm-win p {
+  display: grid;
+  gap: 2px;
+}
+.confirm-win strong {
+  font: 900 1.6rem/1.1 var(--display);
+}
+.confirm-win p > span {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.confirm-win .delta {
+  font: 900 1.1rem var(--display);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .confirm-win .player-tile {
+    animation: hero-slap 420ms var(--pop) backwards;
+  }
+}
+main.meeting-page .change-rows li {
+  grid-template-columns: auto minmax(0, 1fr) auto 4ch;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px;
+  font: 600 1rem var(--body);
+  --w: 30px;
+}
+main.meeting-page .change-rows li + li {
+  border-block-start: 2px dashed oklch(0.85 0.02 270);
+}
+main.meeting-page .change-rows .delta {
+  font: 800 0.9rem var(--body);
+}
+main.meeting-page .change-rows strong {
+  font: 900 1.15rem var(--display);
+}
+.meeting-chip svg {
+  flex-shrink: 0;
+}
+
+/* Game touches at the table: the round on the felt, a crown on whoever
+   leads, a flame for a winning streak, and a gold glow on the last winner. */
+main.meeting-page .table-top span {
+  font: 800 0.7rem var(--body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.seat-tile {
+  position: relative;
+}
+.seat-crown {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: -16px;
+  inset-inline-end: -16px;
+  rotate: 18deg;
+  display: grid;
+  color: oklch(0.42 0.09 75);
+  filter: drop-shadow(0 2px 0 oklch(0.3 0.03 90 / 0.25));
+}
+.seat-crown svg {
+  fill: oklch(0.85 0.16 90);
+  stroke-width: 1.75;
+}
+.seat .seat-crown svg {
+  width: 30px;
+  height: 30px;
+}
+.seat-streak {
+  position: absolute;
+  inset-block-end: -6px;
+  inset-inline-end: -18px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px 2px 4px;
+  border-radius: 999px;
+  background: var(--tile-letter);
+  color: oklch(0.99 0.01 90);
+  font: 900 0.75rem var(--body);
+  box-shadow: 0 2px 0 oklch(0 0 0 / 0.2);
+  rotate: 6deg;
+}
+.seat-streak svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+.seat-tile {
+  isolation: isolate;
+}
+/* The winner glows softly from behind their tile while the cheer lasts,
+   then fades. No edge. */
+.seat-tile[data-glow]::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -18px -24px;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    oklch(0.86 0.17 90),
+    oklch(0.88 0.15 95 / 0.6) 55%,
+    oklch(0.88 0.15 95 / 0)
+  );
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seat-crown {
+    animation: sticker-on 360ms var(--pop) backwards;
+  }
+  .seat-streak {
+    animation: sticker-on 360ms var(--pop) 120ms backwards;
+  }
+}
+@keyframes seat-glow {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.seat-tile[data-glow]::before {
+  opacity: 0;
+  animation: seat-glow 2600ms var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .seat-tile[data-glow]::before {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Ending a table: places down the side, and a note that points at the
+   unsaved game with buttons to deal with it. */
+main.meeting-page .change-rows[data-ranked] li {
+  grid-template-columns: 1.4ch auto minmax(0, 1fr) auto 4ch;
+}
+.change-place {
+  font: 900 1rem var(--display);
+  color: var(--ink-soft);
+  text-align: center;
+}
+.change-rows[data-ranked] li:first-child .change-place {
+  color: var(--ink);
+}
+.end-note {
+  margin-block: 0 10px;
+  text-align: center;
+}
+.end-unsaved {
+  display: grid;
+  gap: 10px;
+  margin-block: 4px 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: color-mix(in oklch, var(--tile-letter) 12%, var(--paper));
+}
+.end-unsaved p {
+  font-weight: 700;
+}
+.end-unsaved div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+/* Room between a sheet's title row and what follows it. */
+main.meeting-page .calculator-head {
+  margin-block-end: 14px;
+}
+
+/* Tonight: the top three stand on a podium, first in the middle wearing
+   the crown. Below, the season rows carry a badge for how each moved. */
+.live-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  margin-block: 34px 6px;
+  text-align: center;
+}
+.live-podium > div {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+  --w: 44px;
+}
+.live-podium > [data-step="1"] {
+  --w: 58px;
+}
+.podium-tile {
+  position: relative;
+  margin-block-end: 8px;
+}
+.podium-tile .seat-crown {
+  inset-block-start: -24px;
+  inset-inline-end: -14px;
+}
+.podium-tile .seat-crown svg {
+  width: 32px;
+  height: 32px;
+}
+.podium-name {
+  max-inline-size: 100%;
+  font: 700 0.85rem var(--body);
+  overflow-wrap: anywhere;
+}
+.live-podium [data-you] .podium-name {
+  color: var(--tile-letter);
+}
+main.meeting-page .live-podium .live-points {
+  font: 900 1.15rem var(--display);
+}
+.podium-step {
+  display: grid;
+  place-items: start center;
+  inline-size: 100%;
+  margin-block-start: 6px;
+  padding-block-start: 8px;
+  border-radius: 16px 16px 6px 6px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  font: 900 1.4rem var(--display);
+  color: var(--ink-soft);
+}
+[data-step="1"] .podium-step {
+  block-size: 84px;
+  background: oklch(0.88 0.15 95);
+  color: var(--ink);
+}
+[data-step="2"] .podium-step {
+  block-size: 62px;
+}
+[data-step="3"] .podium-step {
+  block-size: 46px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .podium-step {
+    transform-origin: bottom;
+    animation: podium-rise 420ms var(--ease-out) backwards;
+  }
+  [data-step="1"] .podium-step {
+    animation-delay: 240ms;
+  }
+  [data-step="2"] .podium-step {
+    animation-delay: 120ms;
+  }
+  .podium-tile {
+    animation: sticker-on 360ms var(--pop) backwards;
+    animation-delay: 420ms;
+  }
+}
+@keyframes podium-rise {
+  from {
+    transform: scaleY(0.2);
+    opacity: 0;
+  }
+}
+main.meeting-page .live-season .live-list {
+  --w: 26px;
+}
+.live-move {
+  display: inline-block;
+  min-inline-size: 34px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-align: center;
+  font: 800 0.75rem var(--body);
+}
+.live-move[data-move="up"] {
+  background: color-mix(in oklch, var(--up) 16%, var(--paper));
+  color: var(--up);
+}
+.live-move[data-move="down"] {
+  background: color-mix(in oklch, var(--tile-letter) 14%, var(--paper));
+  color: var(--tile-letter);
+}
+.live-move[data-move="new"] {
+  background: oklch(0.88 0.15 95);
+  color: var(--ink);
+}
+.live-move[data-move="same"] {
+  color: var(--ink-soft);
+}
+/* Small phones keep "Tonight's standings" on one line. */
+main.meeting-page .live-title {
+  font-size: clamp(1.45rem, 7.4vw, 2rem);
+  white-space: nowrap;
+}
+
+/* Tonight's standings: a badge says live or official, so no note is needed.
+   Section headings are short and bold, with a soft qualifier beside them. */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-block-end: 8px;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--tile-letter) 13%, var(--paper));
+  color: var(--tile-letter);
+  font: 900 0.72rem var(--body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.live-badge::before {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.live-badge[data-official] {
+  background: color-mix(in oklch, var(--jade) 14%, var(--paper));
+  color: var(--jade);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-badge:not([data-official])::before {
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+}
+@keyframes live-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+main.meeting-page .live-season h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  font: 900 1.35rem var(--display);
+  color: var(--ink);
+}
+main.meeting-page .live-season h2 span {
+  font: 600 0.85rem var(--body);
+  color: var(--ink-soft);
 }

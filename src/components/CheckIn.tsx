@@ -2,18 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { TileFace, SuitFace } from "@/components/PlayingTile";
+import PlayerTile from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
+import { useConfirmedPlayer } from "@/components/ContinueAs";
+import IdStickers, { IdBadge } from "@/components/IdStickers";
 import {
+  cleanComputingId,
+  computingIdError,
   postMeeting,
-  rememberMeetingPage,
   requestError,
   type Meeting,
   type Player,
+  MEETING_PATHS,
+  playerNext,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
-
-const CHECKED_IN = "club-checked-in";
 
 function CheckInForm({
   meeting,
@@ -23,6 +26,7 @@ function CheckInForm({
   refresh: () => void;
 }) {
   const [computingId, setComputingId] = useState("");
+  const [idError, setIdError] = useState("");
   const [fullName, setFullName] = useState("");
   const [register, setRegister] = useState(false);
   const [suggestions, setSuggestions] = useState<Player[]>([]);
@@ -30,26 +34,7 @@ function CheckInForm({
   useEffect(() => {
     if (suggestions.length) matchHeading.current?.focus();
   }, [suggestions]);
-  // Survives a reload so the confirmation doesn't vanish; scoped to this meeting.
-  const [player, setPlayerState] = useState<Player | null>(() => {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(CHECKED_IN) || "null");
-      return saved?.meetingId === meeting.meetingId ? saved.player : null;
-    } catch {
-      return null;
-    }
-  });
-  function setPlayer(next: Player | null) {
-    setPlayerState(next);
-    try {
-      sessionStorage.setItem(
-        CHECKED_IN,
-        JSON.stringify(next && { meetingId: meeting.meetingId, player: next }),
-      );
-    } catch {
-      /* The confirmation still shows until the page reloads. */
-    }
-  }
+  const { player, setPlayer, prompt } = useConfirmedPlayer(meeting);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -57,12 +42,19 @@ function CheckInForm({
     choice: { matchId?: string; createNew?: boolean } = {},
   ) {
     if (busy) return;
+    const id = cleanComputingId(computingId);
+    const problem = computingIdError(id);
+    setIdError(problem || "");
+    if (problem) {
+      document.getElementById("computing-id")?.focus();
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       const reply = await postMeeting(MEETING_SERVICE_URL, {
         r: register ? "players" : "checkins",
-        computingId: computingId.trim(),
+        computingId: id,
         ...(register ? { fullName: fullName.trim(), ...choice } : {}),
       });
       if (reply.status === 404 && !register) {
@@ -81,7 +73,6 @@ function CheckInForm({
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
       setPlayer(reply.player);
-      rememberMeetingPage("/score/");
       setComputingId("");
       setFullName("");
       setSuggestions([]);
@@ -93,39 +84,52 @@ function CheckInForm({
     }
   }
 
-  if (player)
+  if (prompt) return prompt;
+  if (player) {
+    const here = meeting.players || [];
+    const next = playerNext(meeting, player.id);
     return (
-      <div className="meeting-receipt" role="status">
-        <p className="eyebrow">You’re checked in</p>
-        <span className="meeting-check" aria-hidden="true">
-          ✓
+      <div className="meeting-receipt">
+        <span className="meeting-hero-tile">
+          <PlayerTile id={player.id} />
         </span>
-        <h1>You’re in, {player.display.split(" ")[0]}.</h1>
-        <p>After playing, one person records your table’s scores.</p>
-        <div className="meeting-actions">
-          <Link className="meeting-primary" href="/score/">
-            Record a table
-          </Link>
-          <div className="meeting-quiet-actions">
-            <Link className="meeting-text" href="/live/">
-              Leaderboard
-            </Link>
-            <button
-              className="meeting-text"
-              type="button"
-              onClick={() => {
-                rememberMeetingPage("/checkin/");
-                setPlayer(null);
-                setRegister(false);
-                setError("");
-              }}
-            >
-              Switch player
-            </button>
-          </div>
-        </div>
+        <p className="sr-only" role="status">
+          You’re checked in.
+        </p>
+        <h1>
+          You’re in,{" "}
+          <span className="meeting-accent">
+            {player.display.split(" ")[0]}!
+          </span>
+        </h1>
+        <Link className="meeting-primary" href={next.href}>
+          {next.label}
+        </Link>
+        {here.length > 0 && (
+          <section className="meeting-here" aria-labelledby="here-tonight">
+            <h2 id="here-tonight">{here.length} here tonight</h2>
+            <ul>
+              {here.map((p, i) => (
+                <li
+                  key={p.id}
+                  data-you={p.id === player.id || undefined}
+                  style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
+                >
+                  <PlayerTile id={p.id} />
+                  <span>
+                    {p.display}
+                    {p.id === player.id && (
+                      <span className="sr-only"> (you)</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     );
+  }
   if (!meeting.checkinsOpen)
     return (
       <div className="meeting-closed">
@@ -134,7 +138,7 @@ function CheckInForm({
           Scores are still open for players already checked in. If you missed
           check-in, ask an officer.
         </p>
-        <Link className="meeting-secondary" href="/score/">
+        <Link className="meeting-secondary" href={MEETING_PATHS.score}>
           Record a table
         </Link>
       </div>
@@ -149,62 +153,88 @@ function CheckInForm({
         if (!suggestions.length) void submit();
       }}
     >
-      <h1>Grab a seat.</h1>
-      <div className="meeting-tiles" aria-hidden="true">
-        {(
-          [
-            { suit: "dots", rank: 2 },
-            { suit: "characters", rank: 1 },
-            { suit: "bamboo", rank: 3 },
-          ] as const
-        ).map(({ suit, rank }) => (
-          <span key={suit}>
-            <TileFace index={rank}>
-              <SuitFace suit={suit} rank={rank} />
-            </TileFace>
-          </span>
-        ))}
-      </div>
+      {register ? (
+        <h1>
+          Hi! What’s your <span className="meeting-accent">name?</span>
+        </h1>
+      ) : (
+        <h1>
+          Who’s <span className="meeting-accent">playing?</span>
+        </h1>
+      )}
       <fieldset disabled={busy}>
         <legend className="sr-only">Player check-in</legend>
-        <div>
-          <label htmlFor="computing-id">UVA computing ID</label>
-          <input
-            id="computing-id"
-            value={computingId}
-            onChange={(event) => {
-              setComputingId(event.target.value);
-              setSuggestions([]);
-            }}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            pattern="[A-Za-z][A-Za-z0-9]*"
-            maxLength={32}
-            required
-          />
-          {register && (
-            <>
-              <p className="quiet" role="status">
-                First time? Add your name.
-              </p>
-              <label htmlFor="full-name">Full name</label>
-              <input
-                id="full-name"
-                autoFocus
-                value={fullName}
-                onChange={(event) => {
-                  setFullName(event.target.value);
+        {register ? (
+          <div>
+            <p className="sr-only" role="status">
+              First time? Add your name.
+            </p>
+            <div className="id-chosen">
+              <IdBadge value={computingId} />
+              <span className="sr-only">Computing ID {computingId}</span>
+              <button
+                type="button"
+                className="meeting-chip"
+                onClick={() => {
+                  setRegister(false);
                   setSuggestions([]);
+                  setError("");
+                  requestAnimationFrame(() =>
+                    document.getElementById("computing-id")?.focus(),
+                  );
                 }}
-                autoComplete="name"
-                maxLength={120}
-                required
-              />
-              <p className="quiet">Your name and ID stay private.</p>
-            </>
-          )}
-        </div>
+              >
+                Change ID
+              </button>
+            </div>
+            <label htmlFor="full-name">Full name · officers only</label>
+            <input
+              id="full-name"
+              autoFocus
+              value={fullName}
+              onChange={(event) => {
+                setFullName(event.target.value);
+                setSuggestions([]);
+              }}
+              autoComplete="name"
+              maxLength={120}
+              required
+            />
+          </div>
+        ) : (
+          <div>
+            <label htmlFor="computing-id">
+              <span className="sr-only">UVA </span>Computing ID
+            </label>
+            <IdStickers
+              id="computing-id"
+              value={computingId}
+              onChange={(value) => {
+                setComputingId(value);
+                setSuggestions([]);
+                setIdError("");
+              }}
+              invalid={Boolean(idError)}
+              describedBy={
+                idError
+                  ? "computing-id-error computing-id-hint"
+                  : "computing-id-hint"
+              }
+            />
+            <p className="field-hint" id="computing-id-hint">
+              No ID? Ask an officer.
+              <span className="sr-only">
+                {" "}
+                Your computing ID is the part before @virginia.edu.
+              </span>
+            </p>
+            {idError && (
+              <p className="meeting-error" id="computing-id-error">
+                {idError}
+              </p>
+            )}
+          </div>
+        )}
         {error && (
           <p className="meeting-error" role="alert">
             {error}
@@ -242,7 +272,11 @@ function CheckInForm({
           </div>
         ) : (
           <button type="submit" className="meeting-primary">
-            {busy ? "Checking in…" : register ? "Join & check in" : "Check in"}
+            {busy
+              ? "Checking in…"
+              : register
+                ? "Join & check in"
+                : "Let’s play"}
           </button>
         )}
       </fieldset>
@@ -251,27 +285,6 @@ function CheckInForm({
           Checking you in…
         </p>
       )}
-      {register && (
-        <button
-          className="meeting-text"
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setRegister(false);
-            setSuggestions([]);
-            setError("");
-            requestAnimationFrame(() =>
-              document.getElementById("computing-id")?.focus(),
-            );
-          }}
-        >
-          Use a different ID
-        </button>
-      )}
-      <Link className="meeting-text" href="/live/">
-        Leaderboard ↗
-      </Link>
-      <p className="quiet">No UVA ID? Ask an officer.</p>
     </form>
   );
 }
