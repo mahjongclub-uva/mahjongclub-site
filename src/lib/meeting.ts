@@ -257,6 +257,21 @@ export function isMeetingPage(path: string) {
     ) || /^\/(checkin|score|tables|live)\/?$/.test(path)
   );
 }
+/**
+ * Where the site's meeting shortcut leads this phone. Only a confirmed player
+ * is named, so a shared phone never offers the last person's table.
+ */
+export function meetingShortcut(meeting: Meeting, player: Player | null) {
+  if (!player) return { player, label: "Check in", href: MEETING_PATHS.hub };
+  if (!meeting.rooms)
+    return { player, label: "Meeting", href: MEETING_PATHS.hub };
+  const table = meeting.rooms.find((room) =>
+    room.seats.some((seat) => seat.id === player.id),
+  )?.table;
+  return table
+    ? { player, label: `Table ${table}`, href: MEETING_PATHS.table(table) }
+    : { player, label: "Tables", href: MEETING_PATHS.tables };
+}
 export function rememberMeetingPage(path: string) {
   try {
     sessionStorage.setItem(RETURN_STORAGE, path);

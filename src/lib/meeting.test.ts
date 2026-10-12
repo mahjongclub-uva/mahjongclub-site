@@ -7,6 +7,7 @@ import {
   getResults,
   draftSchema,
   isMeetingPage,
+  meetingShortcut,
   pendingSchema,
   postMeeting,
   tableError,
@@ -181,4 +182,38 @@ test("computing IDs accept a pasted UVA email and explain anything else", () => 
   assert.match(computingIdError("abc2de@gmail.com")!, /before @virginia\.edu/);
   assert.match(computingIdError("2abc")!, /starts with letters/);
   assert.match(computingIdError("")!, /Enter/);
+});
+
+test("the meeting shortcut names a table only for a seated, confirmed player", () => {
+  const meeting = {
+    status: 200 as const,
+    open: true,
+    checkinsOpen: true,
+    meetingId: "m1",
+    date: "2026-10-16",
+    semester: "Fall 2026",
+    players,
+    rooms: [
+      {
+        table: 3,
+        session: 1,
+        seats: [{ ...players[0], wind: 0 }],
+        hands: [],
+        totals: [],
+        ended: null,
+      },
+    ],
+  };
+  assert.deepEqual(meetingShortcut(meeting, null), {
+    player: null,
+    label: "Check in",
+    href: "/meeting/",
+  });
+  assert.equal(meetingShortcut(meeting, players[0]).href, "/meeting/table/3/");
+  assert.equal(meetingShortcut(meeting, players[0]).label, "Table 3");
+  assert.equal(meetingShortcut(meeting, players[1]).href, "/meeting/tables/");
+  assert.equal(
+    meetingShortcut({ ...meeting, rooms: undefined }, players[0]).href,
+    "/meeting/",
+  );
 });
