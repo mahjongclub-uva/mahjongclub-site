@@ -15,8 +15,10 @@ import {
   type Player,
   MEETING_PATHS,
   playerNext,
+  savedPlayer,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
+import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
 function CheckInForm({
   meeting,
@@ -72,7 +74,7 @@ function CheckInForm({
       }
       if (!reply.player)
         throw new Error("Could not confirm check-in. Please retry.");
-      setPlayer(reply.player);
+      setPlayer(reply.player, reply.meetingId);
       setComputingId("");
       setFullName("");
       setSuggestions([]);
@@ -288,12 +290,18 @@ function CheckInForm({
     </form>
   );
 }
-export default function CheckIn() {
+export default function CheckIn({
+  schedule,
+}: {
+  schedule: ScheduledMeeting[];
+}) {
   return (
-    <MeetingAccess>
+    <MeetingAccess schedule={schedule}>
       {(meeting, refresh) => (
         <CheckInForm
-          key={meeting.meetingId}
+          // The calendar's stand-in and the real reply share a date, so an ID
+          // typed while the service wakes up survives its reply.
+          key={savedPlayer(meeting) ? meeting.meetingId : meeting.date}
           meeting={meeting}
           refresh={refresh}
         />

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
 const playerSchema = z.object({
   id: z.string().regex(/^p\d{3,}$/),
@@ -57,6 +58,7 @@ const replySchema = z.object({
   status: z.number().int(),
   message: z.string().optional(),
   player: playerSchema.optional(),
+  meetingId: z.string().nullable().optional(),
   suggestions: z.array(playerSchema).optional(),
   table: z.number().int().positive().optional(),
   saved: z.number().int().positive().nullable().optional(),
@@ -207,6 +209,45 @@ export function savedPlayer(meeting: Meeting): Player | null {
     return null;
   }
 }
+// Matches the backend's check-in window: from 30 minutes before the start
+// until the end.
+export function inCheckIn(meeting: ScheduledMeeting, now: number) {
+  return (
+    now >= Date.parse(meeting.start) - 30 * 60000 &&
+    now < Date.parse(meeting.end ?? meeting.start)
+  );
+}
+/**
+ * Tonight's meeting as the calendar has it, so check-in can start while the
+ * meeting service wakes up. Not for a phone that already has tonight's
+ * player: it waits for the real reply, which knows whether they're in.
+ */
+export function provisionalMeeting(
+  schedule: ScheduledMeeting[],
+  now: number,
+): Meeting | null {
+  const tonight = schedule.find((m) => inCheckIn(m, now));
+  if (!tonight) return null;
+  try {
+    const saved = JSON.parse(localStorage.getItem(CHECKED_IN) || "null");
+    // A calendar meeting's id ends in its start time.
+    if (saved?.meetingId?.endsWith(":" + Date.parse(tonight.start)))
+      return null;
+  } catch {
+    return null;
+  }
+  return {
+    status: 200,
+    open: true,
+    checkinsOpen: true,
+    meetingId: null,
+    // The start carries the club's own offset, so this is its local date.
+    date: tonight.start.slice(0, 10),
+    semester: null,
+    players: [],
+  };
+}
+export type SavedPlayer = { meetingId: string | null; player: Player };
 /** Fired when this phone's player changes, so the header can follow. */
 export const PLAYER_EVENT = "club-player";
 export function rememberPlayer(meeting: Meeting, player: Player | null) {
@@ -220,7 +261,11 @@ export function rememberPlayer(meeting: Meeting, player: Player | null) {
   } catch {
     /* The page still works until it reloads. */
   }
-  window.dispatchEvent(new Event(PLAYER_EVENT));
+  window.dispatchEvent(
+    new CustomEvent(PLAYER_EVENT, {
+      detail: player && { meetingId: meeting.meetingId, player },
+    }),
+  );
 }
 export const DRAFT_STORAGE = "club-table-draft";
 export const draftSchema = z.object({
@@ -266,7 +311,8 @@ export function playerNext(meeting: Meeting, id: string) {
  * is named, so a shared phone never offers the last person's table.
  */
 export function meetingShortcut(meeting: Meeting, player: Player | null) {
-  if (!player) return { player, label: "Check in", href: MEETING_PATHS.hub };
+  if (!player)
+    return { player, label: "Check in", href: MEETING_PATHS.checkin };
   if (!meeting.rooms)
     return { player, label: "Meeting", href: MEETING_PATHS.hub };
   const table = seatedRoom(meeting.rooms, player.id)?.table;

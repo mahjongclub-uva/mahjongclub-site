@@ -153,7 +153,7 @@ Full names and computing IDs are never included in responses.
 ## Meeting pages
 
 The meeting pages live under `/meeting/` and are unlisted, out of the sitemap and marked noindex.
-The QR codes point at `/checkin/`, which forwards there, so printed codes keep working.
+The QR codes point at `/checkin/`, which opens check-in directly, the same as `/meeting/` and `/meeting/checkin/`.
 The endpoint and rehearsal notice are configured by `MEETING_SERVICE_URL` and `MEETING_REHEARSAL` in `src/lib/site.ts`.
 Rehearsal mode adds a "fake names only" banner and keeps live standings apart from the real season; turn it on only when the URL points at a test workbook.
 
