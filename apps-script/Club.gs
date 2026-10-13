@@ -85,15 +85,25 @@ function validateSettings(value) {
 }
 
 function workbook() {
+  if (timing?.book) return timing.book;
   const id = properties().getProperty("spreadsheetId");
   if (!id) fail(503, "Run Club > Set up from the workbook first.");
-  return SpreadsheetApp.openById(id);
+  const book = SpreadsheetApp.openById(id);
+  if (timing) timing.book = book;
+  return book;
 }
 
 function sheet(name) {
   const tab = workbook().getSheetByName(name);
   if (!tab) fail(503, "Missing workbook tab: " + name + ".");
   return tab;
+}
+
+function workbookTimeZone() {
+  if (timing?.zone) return timing.zone;
+  const zone = workbook().getSpreadsheetTimeZone();
+  if (timing) timing.zone = zone;
+  return zone;
 }
 
 function dateKey(value) {
@@ -103,11 +113,7 @@ function dateKey(value) {
       .slice(0, 10);
   if (!(value instanceof Date) || !Number.isFinite(value.getTime()))
     fail(503, "Expected a valid date in the workbook.");
-  return Utilities.formatDate(
-    value,
-    workbook().getSpreadsheetTimeZone(),
-    "yyyy-MM-dd",
-  );
+  return Utilities.formatDate(value, workbookTimeZone(), "yyyy-MM-dd");
 }
 
 function readMeeting() {
@@ -153,35 +159,36 @@ function startMeeting(id, start, end) {
   return meeting;
 }
 
-// Cached so a room full of phones costs one Calendar read per five minutes;
-// a meeting can therefore open up to five minutes into its check-in window.
+// Cache upcoming events, not whether they are open yet. Recheck their windows
+// on every request so a visit just before opening cannot delay check-in.
 function calendarMeetings(now) {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get("calendar");
-  if (cached) return JSON.parse(cached);
   const config = settings();
-  const calendar = CalendarApp.getCalendarById(config.calendarId);
-  if (!calendar) fail(503, "The configured calendar is not accessible.");
-  const events = calendar
-    .getEvents(
-      new Date(now - (config.scoreMinutesAfter + 1440) * 60000),
-      new Date(now + config.checkinMinutesBefore * 60000),
-    )
-    .filter(
-      (event) =>
-        !event.isAllDayEvent() &&
-        now >=
-          event.getStartTime().getTime() -
-            config.checkinMinutesBefore * 60000 &&
-        now < event.getEndTime().getTime() + config.scoreMinutesAfter * 60000,
-    )
-    .map((event) => ({
-      id: event.getId() + ":" + event.getStartTime().getTime(),
-      start: event.getStartTime().getTime(),
-      end: event.getEndTime().getTime(),
-    }));
-  cache.put("calendar", JSON.stringify(events), 300);
-  return events;
+  const key = "calendar:v2:" + config.calendarId;
+  const cached = cache.get(key);
+  let events;
+  if (cached) events = JSON.parse(cached);
+  else {
+    const calendar = CalendarApp.getCalendarById(config.calendarId);
+    if (!calendar) fail(503, "The configured calendar is not accessible.");
+    events = calendar
+      .getEvents(
+        new Date(now - (config.scoreMinutesAfter + 1440) * 60000),
+        new Date(now + (config.checkinMinutesBefore + 5) * 60000),
+      )
+      .filter((event) => !event.isAllDayEvent())
+      .map((event) => ({
+        id: event.getId() + ":" + event.getStartTime().getTime(),
+        start: event.getStartTime().getTime(),
+        end: event.getEndTime().getTime(),
+      }));
+    cache.put(key, JSON.stringify(events), 300);
+  }
+  return events.filter(
+    (event) =>
+      now >= event.start - config.checkinMinutesBefore * 60000 &&
+      now < event.end + config.scoreMinutesAfter * 60000,
+  );
 }
 
 function updateMeeting() {
@@ -229,8 +236,8 @@ function attendance(meeting) {
   return { tab, grid, layout: attendanceLayout(grid, meeting.date, dateKey) };
 }
 
-function checkedPlayers(meeting, players) {
-  const { grid, layout } = attendance(meeting);
+function checkedPlayers(meeting, players, state = attendance(meeting)) {
+  const { grid, layout } = state;
   if (!layout.column) return [];
   return players.filter((player) => {
     const member = layout.members.find(
@@ -240,6 +247,60 @@ function checkedPlayers(meeting, players) {
   });
 }
 
+// Who is checked in tonight, kept in Script Properties so reads and table
+// actions skip the Roster and Attendance tabs. Stored only under the lock, so
+// a slow read can never overwrite a newer check-in; a read without the lock
+// that finds nothing goes to the sheets rather than queueing. Officer edits to
+// either tab clear it (onEdit).
+function hereTonight(meeting, locked) {
+  const stored = storedHere(meeting);
+  if (stored) return stored;
+  const players = hereFrom(checkedPlayers(meeting, rosterPlayers()));
+  return locked ? storeHere(meeting, players) : players;
+}
+
+function hereFrom(players) {
+  return players.map(({ id, display, optOut }) => ({ id, display, optOut }));
+}
+
+// Under the lock. A list built from a Roster read before the lock can miss
+// someone who signed up meanwhile, so a miss rebuilds it from the sheets once.
+function hereIncluding(meeting, ids) {
+  const players = hereTonight(meeting, true);
+  if (ids.every((id) => players.some((player) => player.id === id)))
+    return players;
+  properties().deleteProperty("here");
+  return hereTonight(meeting, true);
+}
+
+function storedHere(meeting) {
+  const here = JSON.parse(properties().getProperty("here") || "null");
+  return here && here.meetingId === meeting?.id ? here.players : null;
+}
+
+function storeHere(meeting, players) {
+  const value = JSON.stringify({ meetingId: meeting.id, players });
+  // ponytail: one property holds about 150 players; past that, every request
+  // reads the sheets again.
+  if (value.length < 9000) properties().setProperty("here", value);
+  else properties().deleteProperty("here");
+  return players;
+}
+
+// Under the lock only. Without a stored list, builds it from the attendance
+// grid and Roster this check-in already read, rather than reading them again.
+function addHere(meeting, player, roster, state) {
+  const stored = storedHere(meeting);
+  const players = stored || hereFrom(checkedPlayers(meeting, roster, state));
+  if (stored && players.some((item) => item.id === player.id)) return;
+  storeHere(
+    meeting,
+    players.some((item) => item.id === player.id)
+      ? players
+      : [...players, ...hereFrom([player])],
+  );
+}
+
 function publicPlayer(player) {
   return {
     id: player.id,
@@ -247,8 +308,9 @@ function publicPlayer(player) {
   };
 }
 
-function markAttendance(meeting, player) {
-  const { tab, layout } = attendance(meeting);
+// `roster` is the Roster this request read, used to store tonight's list.
+function markAttendance(meeting, player, roster, state = attendance(meeting)) {
+  const { tab, grid, layout } = state;
   let row = layout.members.find(
     (member) => normalize(member.name) === normalize(player.name),
   )?.row;
@@ -256,6 +318,11 @@ function markAttendance(meeting, player) {
   if (!row && !formula)
     fail(503, "Attendance template is missing its # Meets formula.");
   let column = layout.column;
+  if (row && column && grid[row - 1][column - 1] === true) {
+    // Also repairs the list when an officer ticked this player by hand.
+    addHere(meeting, player, roster, state);
+    return { status: 200, player: publicPlayer(player), meetingId: meeting.id };
+  }
   if (!column) {
     // Insert inside the existing date range so # Meets formulas expand with it.
     tab.insertColumnBefore(layout.lastColumn);
@@ -278,11 +345,7 @@ function markAttendance(meeting, player) {
     tab
       .getRange(layout.header, column)
       .setValue(
-        Utilities.parseDate(
-          meeting.date,
-          workbook().getSpreadsheetTimeZone(),
-          "yyyy-MM-dd",
-        ),
+        Utilities.parseDate(meeting.date, workbookTimeZone(), "yyyy-MM-dd"),
       )
       .setNumberFormat("mmm d");
   }
@@ -304,10 +367,11 @@ function markAttendance(meeting, player) {
     tab.getRange(row, 1).setValue(player.name);
   }
   tab.getRange(row, column).setValue(true);
+  addHere(meeting, player, roster, state);
   return { status: 200, player: publicPlayer(player), meetingId: meeting.id };
 }
 
-function checkIn(request, meeting) {
+function checkinId(request) {
   const computingId = text(
     request.computingId,
     "computing ID",
@@ -315,11 +379,71 @@ function checkIn(request, meeting) {
   ).toLowerCase();
   if (!/^[a-z][a-z0-9]*$/.test(computingId))
     fail(400, "Use letters and digits for the computing ID.");
+  return computingId;
+}
+
+function checkinIdsKey() {
+  return "checkin-ids:" + properties().getProperty("spreadsheetId");
+}
+
+function forgetCheckinIds() {
+  try {
+    CacheService.getScriptCache().remove(checkinIdsKey());
+  } catch {
+    // This hint is optional; a failed cache service cannot block a save.
+  }
+}
+
+function rosterPlayers() {
   const players = rosterLayout(sheet("Roster").getDataRange().getValues());
+  // A private, short-lived hint for revealing the newcomer field. Never use
+  // it to identify a player or authorize a write; those reread the roster.
+  try {
+    const value = JSON.stringify({
+      expires: Date.now() + 30000,
+      ids: players.map((player) => player.computingId).filter(Boolean),
+    });
+    if (value.length < 90000)
+      CacheService.getScriptCache().put(checkinIdsKey(), value, 30);
+    else forgetCheckinIds();
+  } catch {
+    // Cache eviction or failure must not prevent check-in.
+  }
+  return players;
+}
+
+function unknownCheckinId(computingId) {
+  try {
+    const hint = JSON.parse(
+      CacheService.getScriptCache().get(checkinIdsKey()) || "null",
+    );
+    return (
+      hint?.expires > Date.now() &&
+      Array.isArray(hint.ids) &&
+      !hint.ids.includes(computingId)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function onEdit(event) {
+  const name = event?.range?.getSheet().getName();
+  if (name === "Roster") forgetCheckinIds();
+  if (name === "Roster" || name === readMeeting()?.attendanceTab)
+    properties().deleteProperty("here");
+}
+
+// `listed` is the Roster if it was read before the lock. A known player's row
+// never moves, so it is safe to use; signing up rereads it, since it adds rows.
+function checkIn(request, meeting, listed) {
+  const computingId = checkinId(request);
+  let players = listed || rosterPlayers();
   const known = players.find((player) => player.computingId === computingId);
-  if (known) return markAttendance(meeting, known);
+  if (known) return markAttendance(meeting, known, players);
   if (request.r === "checkins")
     return { status: 404, message: "Sign up with your full name to check in." };
+  if (listed) players = rosterPlayers();
   const name = text(request.fullName, "full name", 120);
   let player = players.find((item) => normalize(item.name) === normalize(name));
   if (player?.computingId)
@@ -381,7 +505,8 @@ function checkIn(request, meeting) {
   } else {
     roster.getRange(player.row, 2).setValue(computingId);
   }
-  return markAttendance(meeting, player);
+  forgetCheckinIds();
+  return markAttendance(meeting, player, players, plannedAttendance);
 }
 
 function submitResult(request, meeting) {
@@ -395,7 +520,10 @@ function submitResult(request, meeting) {
   const players = rosterLayout(sheet("Roster").getDataRange().getValues());
   const seats = validateResult(
     request.seats,
-    checkedPlayers(meeting, players).map((player) => player.id),
+    hereIncluding(
+      meeting,
+      Array.isArray(request.seats) ? request.seats.map((seat) => seat?.id) : [],
+    ).map((player) => player.id),
   );
   const tab = sheet(meeting.pointsTab);
   const blocks = pointsLayout(tab.getDataRange().getValues());
@@ -455,11 +583,7 @@ function submitResult(request, meeting) {
         "Player",
         "Points",
         "Net",
-        Utilities.parseDate(
-          meeting.date,
-          workbook().getSpreadsheetTimeZone(),
-          "yyyy-MM-dd",
-        ),
+        Utilities.parseDate(meeting.date, workbookTimeZone(), "yyyy-MM-dd"),
       ],
       ...seats.map((seat, index) => [
         players.find((player) => player.id === seat.id).name,
@@ -648,10 +772,9 @@ function roomsState(meeting) {
 function roomAction(request, meeting) {
   if (request.meetingId !== meeting.id)
     fail(409, "The meeting changed. Reload the page.");
-  const player = checkedPlayers(
-    meeting,
-    rosterLayout(sheet("Roster").getDataRange().getValues()),
-  ).find((item) => item.id === request.playerId);
+  const player = hereIncluding(meeting, [request.playerId]).find(
+    (item) => item.id === request.playerId,
+  );
   if (!player) fail(409, "Check in before joining a table.");
   const rooms = readRooms(meeting.id);
   const mine = rooms.find((room) =>
@@ -663,7 +786,8 @@ function roomAction(request, meeting) {
     if ((request.lastHandId || null) !== last(room))
       fail(409, "Your table just changed. Check the latest scores.");
   };
-  const reply = (saved) => ({ status: 200, saved, ...roomsState(meeting) });
+  // doPost adds the rooms after releasing the lock.
+  const reply = (saved) => ({ status: 200, saved });
   const action = request.action;
   if (action === "join") {
     const table = request.table;
@@ -821,6 +945,7 @@ function respond(action) {
       lockMs: timing.lockMs,
     }),
   );
+  timing = null;
   return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(
     ContentService.MimeType.JSON,
   );
@@ -841,10 +966,7 @@ function doGet(event) {
         semester: meeting?.semester || null,
       };
       if (state.open) {
-        response.players = checkedPlayers(
-          meeting,
-          rosterLayout(sheet("Roster").getDataRange().getValues()),
-        ).map(publicPlayer);
+        response.players = hereTonight(meeting).map(publicPlayer);
         response.rooms = readRooms(meeting.id).map(publicRoom);
       }
       return response;
@@ -879,14 +1001,41 @@ function doPost(event) {
     timing.request = "POST " + label(request);
     if (!["checkins", "players", "results", "rooms"].includes(request.r))
       fail(404, "Unknown resource.");
-    return withLock(() => {
+    // Check-ins read the Roster before queueing for the lock, and settle
+    // unknown IDs and repeat check-ins without queueing at all.
+    let roster;
+    if (request.r === "checkins") {
+      const computingId = checkinId(request);
+      const open = readMeeting();
+      if (meetingWindow(open, Date.now()).checkinsOpen) {
+        const signUp = {
+          status: 404,
+          message: "Sign up with your full name to check in.",
+        };
+        if (unknownCheckinId(computingId)) return signUp;
+        roster = rosterPlayers();
+        const known = roster.find((item) => item.computingId === computingId);
+        if (!known) return signUp;
+        if (storedHere(open)?.some((item) => item.id === known.id))
+          return {
+            status: 200,
+            player: publicPlayer(known),
+            meetingId: open.id,
+          };
+      }
+    }
+    const reply = withLock(() => {
       const scores = request.r === "results" || request.r === "rooms";
       const meeting = requireMeeting(!scores);
       if (request.r === "rooms") return roomAction(request, meeting);
       return request.r === "results"
         ? submitResult(request, meeting)
-        : checkIn(request, meeting);
+        : checkIn(request, meeting, roster);
     });
+    // Read after the lock, so the next table is not kept waiting.
+    return request.r === "rooms"
+      ? { ...reply, ...roomsState(readMeeting()) }
+      : reply;
   });
 }
 
@@ -1073,7 +1222,7 @@ function clubCheckIn() {
         );
       if (!player)
         fail(400, "Select a member row in Roster or Attendance first.");
-      markAttendance(meeting, player);
+      markAttendance(meeting, player, players);
       return "Checked in " + publicPlayer(player).display + ".";
     }),
   );
