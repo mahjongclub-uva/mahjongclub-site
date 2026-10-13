@@ -106,18 +106,18 @@ Fall 2025 is test data on an older rule and still reads names from the gitignore
 
 ## Meeting nights
 
-Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.org/checkin/), which forwards to the meeting pages under `/meeting/`. These pages are unlisted and not indexed.
+Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.org/checkin/), which opens check-in directly; the other meeting pages live under `/meeting/`. These pages are unlisted and not indexed.
 
 | Page                | What it does                                             |
 | ------------------- | -------------------------------------------------------- |
-| `/meeting/`         | Who this phone is, and the next step                     |
+| `/meeting/`         | Same as check-in, so a QR code lands on the ID slots     |
 | `/meeting/checkin/` | Check in by computing ID; new players add a name         |
 | `/meeting/tables/`  | The live lobby of tables in play                         |
 | `/meeting/table/N/` | One physical table (1 to 12): seats, games, End table    |
 | `/meeting/tonight/` | Tonight's standings, and the semester with tonight added |
 | `/meeting/score/`   | Fallback: type a table's four final totals               |
 
-`/checkin/`, `/score/`, `/live/` and `/tables/` are forwarding pages for old links and printed QR codes. Static export has no server redirects, so they use a meta refresh.
+`/score/`, `/live/` and `/tables/` are forwarding pages for old links. Static export has no server redirects, so they use a meta refresh.
 
 - The pages talk to a Google Apps Script web app bound to the score workbook. Its code is in `apps-script/`, and setup is in the [officer guide](OFFICER_GUIDE.md#meeting-check-in-backend).
 - Its URL is `MEETING_SERVICE_URL` in `src/lib/site.ts`. Redeploying the script under a new owner changes the URL, but the QR codes never need reprinting because they point at the site.

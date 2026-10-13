@@ -15,10 +15,12 @@ import {
 export function useConfirmedPlayer(meeting: Meeting) {
   const [player, setPlayerState] = useState(() => savedPlayer(meeting));
   const [confirmed, setConfirmed] = useState(() => playerConfirmed());
-  function setPlayer(next: Player | null) {
+  // Check-in passes the meeting id from its reply, which it may have sent
+  // before this page heard back about the meeting.
+  function setPlayer(next: Player | null, meetingId = meeting.meetingId) {
     setPlayerState(next);
     setConfirmed(Boolean(next));
-    rememberPlayer(meeting, next);
+    rememberPlayer({ ...meeting, meetingId }, next);
   }
   const prompt =
     player && !confirmed ? (

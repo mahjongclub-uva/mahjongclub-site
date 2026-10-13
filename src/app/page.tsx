@@ -7,7 +7,7 @@ import RollingDot from "@/components/RollingDot";
 import NextMeeting from "@/components/NextMeeting";
 import { HomeMeeting } from "@/components/MeetingLinks";
 import { getMeetings } from "@/lib/data";
-import Photos from "@/components/Photos";
+import Photos, { ClubPhoto } from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
 import Section from "@/components/Section";
 import RevealSection from "@/components/RevealSection";
@@ -48,15 +48,7 @@ export default function Home() {
         <div className="meeting-summary">
           <NextMeeting />
           <figure className="meeting-photo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={MEETING_PHOTO.src}
-              alt={MEETING_PHOTO.alt}
-              width={MEETING_PHOTO.width}
-              height={MEETING_PHOTO.height}
-              loading="lazy"
-              decoding="async"
-            />
+            <ClubPhoto photo={MEETING_PHOTO} />
           </figure>
         </div>
         <Calendar />

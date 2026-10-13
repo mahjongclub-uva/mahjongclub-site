@@ -5,13 +5,13 @@ import {
   computingIdError,
   getMeeting,
   getResults,
-  draftSchema,
   isMeetingPage,
   meetingShortcut,
-  pendingSchema,
   postMeeting,
+  provisionalMeeting,
   tableError,
 } from "./meeting.ts";
+import { draftSchema, pendingSchema } from "./meetingSchemas.ts";
 
 const players = [1, 2, 3, 4].map((i) => ({
   id: `p00${i}`,
@@ -78,6 +78,18 @@ test("Apps Script transport uses plain-text POST and validates application statu
   assert.equal(requests[1].init.referrerPolicy, "no-referrer");
   assert.deepEqual(requests[1].init.headers, { "Content-Type": "text/plain" });
   assert.equal("k" in JSON.parse(requests[1].init.body as string), false);
+  // No meeting yet: the closed reply still parses.
+  t.mock.method(globalThis, "fetch", async () =>
+    Response.json({
+      status: 200,
+      open: false,
+      checkinsOpen: false,
+      meetingId: null,
+      date: null,
+      semester: null,
+    }),
+  );
+  assert.equal((await getMeeting("https://example.test/exec")).open, false);
 });
 
 test("live results parse; drafts only store valid opaque seats", async (t) => {
@@ -207,7 +219,7 @@ test("the meeting shortcut names a table only for a seated, confirmed player", (
   assert.deepEqual(meetingShortcut(meeting, null), {
     player: null,
     label: "Check in",
-    href: "/meeting/",
+    href: "/meeting/checkin/",
   });
   assert.equal(meetingShortcut(meeting, players[0]).href, "/meeting/table/3/");
   assert.equal(meetingShortcut(meeting, players[0]).label, "Table 3");
@@ -216,4 +228,34 @@ test("the meeting shortcut names a table only for a seated, confirmed player", (
     meetingShortcut({ ...meeting, rooms: undefined }, players[0]).href,
     "/meeting/",
   );
+});
+
+test("check-in starts from the calendar only for a phone without tonight's player", () => {
+  const start = "2026-10-16T17:30:00-04:00";
+  const schedule = [
+    { start, end: "2026-10-16T20:00:00-04:00", summary: "", location: null },
+  ];
+  const saved = new Map<string, string>();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: { getItem: (key: string) => saved.get(key) ?? null },
+  });
+  const at = (time: string) => provisionalMeeting(schedule, Date.parse(time));
+  assert.equal(at("2026-10-16T16:59:00-04:00"), null);
+  assert.equal(at("2026-10-16T20:00:00-04:00"), null);
+  assert.equal(at("2026-10-16T17:05:00-04:00")?.date, "2026-10-16");
+  assert.equal(at("2026-10-16T17:05:00-04:00")?.checkinsOpen, true);
+  saved.set(
+    "club-checked-in",
+    JSON.stringify({ meetingId: "old:1", player: players[0] }),
+  );
+  assert.ok(at("2026-10-16T17:05:00-04:00"));
+  saved.set(
+    "club-checked-in",
+    JSON.stringify({
+      meetingId: "evt:" + Date.parse(start),
+      player: players[0],
+    }),
+  );
+  assert.equal(at("2026-10-16T17:05:00-04:00"), null);
 });

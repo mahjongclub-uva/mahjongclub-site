@@ -15,8 +15,6 @@ import {
   CARD_VALUES,
   PENDING_STORAGE,
   DRAFT_STORAGE,
-  draftSchema,
-  pendingSchema,
   postMeeting,
   requestError,
   tableError,
@@ -25,6 +23,7 @@ import {
   MEETING_PATHS,
   seatedRoom,
 } from "@/lib/meeting";
+import { draftSchema, pendingSchema } from "@/lib/meetingSchemas";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { clock, signed } from "@/lib/format";
 

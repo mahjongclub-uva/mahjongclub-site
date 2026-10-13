@@ -7,7 +7,8 @@
 
 import { z } from "zod";
 
-export const SEASON_START = 205;
+// Defined outside this file so client code can use it without loading zod.
+export { SEASON_START } from "./format.ts";
 
 /**
  * Awards the site can render. The pipeline may emit any subset/order, or

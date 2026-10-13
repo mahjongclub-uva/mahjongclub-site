@@ -1,3 +1,6 @@
+/** Everyone starts a season at 205 (re-exported by schema.ts). */
+export const SEASON_START = 205;
+
 /** "2025-11-22" -> "22 November 2025". Parsed as UTC so it cannot slip a day. */
 export function formatDate(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {

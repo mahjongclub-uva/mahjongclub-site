@@ -1,5 +1,6 @@
 import type { Results, ResultTable, Room } from "./meeting.ts";
-import { SEASON_START, type Semester } from "./schema.ts";
+import type { Semester } from "./schema.ts";
+import { SEASON_START } from "./format.ts";
 
 export type LiveStanding = {
   id: string;

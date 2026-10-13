@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconArrowRight } from "@tabler/icons-react";
 import {
   getMeeting,
+  inCheckIn,
   meetingShortcut,
   playerConfirmed,
   savedPlayer,
@@ -18,15 +19,6 @@ import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
 import PlayerTile from "./PlayerTile";
 import styles from "./MeetingLinks.module.css";
-
-// Matches the backend's check-in window: from 30 minutes before the start
-// until the end. Outside it the site never contacts the meeting service.
-function inCheckIn(meeting: ScheduledMeeting, now: number) {
-  return (
-    now >= Date.parse(meeting.start) - 30 * 60000 &&
-    now < Date.parse(meeting.end ?? meeting.start)
-  );
-}
 
 /**
  * Tonight's meeting while check-in is open, and where this phone should go.

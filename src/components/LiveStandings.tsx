@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconCrown } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
@@ -8,6 +8,7 @@ import PlayerTile from "@/components/PlayerTile";
 import {
   getResults,
   getRooms,
+  inCheckIn,
   requestError,
   savedPlayer,
   type Meeting,
@@ -15,10 +16,16 @@ import {
   MEETING_PATHS,
 } from "@/lib/meeting";
 import { liveStandings, tonightStandings, tonightTables } from "@/lib/live";
-import type { Semester } from "@/lib/schema";
+import type { Meeting as ScheduledMeeting, Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
 import { clock, minus, signed } from "@/lib/format";
+
+// Tonight's tables, asked for alongside the meeting check rather than after
+// it, during the meeting's window only. Taken once by the first update;
+// null means ask again.
+let firstRooms: Promise<Awaited<ReturnType<typeof getRooms>> | null> | null =
+  null;
 
 const pointsClass = (net: number) =>
   `live-points${net < 0 ? " down" : net > 0 ? " up" : ""}`;
@@ -47,13 +54,18 @@ function LiveTable({
       try {
         // With table rooms, one read carries both the rooms and the saved
         // tables, so games still in play count once and only once.
-        const next: Results = meeting.rooms
-          ? await getRooms(MEETING_SERVICE_URL, signal).then((state) => ({
+        const early = firstRooms;
+        firstRooms = null;
+        const state =
+          meeting.rooms &&
+          ((await early) ?? (await getRooms(MEETING_SERVICE_URL, signal)));
+        const next: Results = state
+          ? {
               status: 200 as const,
               meetingId: meeting.meetingId!,
               date: meeting.date!,
               tables: tonightTables(state.results, state.rooms),
-            }))
+            }
           : await getResults(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
         if (next.meetingId !== meeting.meetingId || next.date !== meeting.date)
@@ -277,7 +289,17 @@ function LiveTable({
     </section>
   );
 }
-export default function LiveStandings({ semester }: { semester: Semester }) {
+export default function LiveStandings({
+  semester,
+  schedule,
+}: {
+  semester: Semester;
+  schedule: ScheduledMeeting[];
+}) {
+  useEffect(() => {
+    if (schedule.some((m) => inCheckIn(m, Date.now())))
+      firstRooms = getRooms(MEETING_SERVICE_URL).catch(() => null);
+  }, [schedule]);
   return (
     <MeetingAccess>
       {(meeting) => (

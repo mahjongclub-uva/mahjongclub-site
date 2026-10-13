@@ -13,11 +13,13 @@ import {
   getMeeting,
   playerConfirmed,
   PLAYER_EVENT,
+  provisionalMeeting,
   rememberPlayer,
   requestError,
   savedPlayer,
   type Meeting,
   type Player,
+  type SavedPlayer,
   MEETING_PATHS,
 } from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
@@ -25,6 +27,7 @@ import Link from "next/link";
 import Image from "next/image";
 import PlayerTile from "@/components/PlayerTile";
 import { clock, formatShortDate } from "@/lib/format";
+import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
 
 /** Who this phone is playing as, and the two things that belong to them:
@@ -80,28 +83,55 @@ function PlayerSheet({
   );
 }
 
+// The last reply, so moving between meeting pages starts from it instead of
+// waiting on the service again. Empty on every full page load.
+let lastMeeting: Meeting | null = null;
+
 export default function MeetingAccess({
   children,
+  schedule,
 }: {
   children: (meeting: Meeting, refresh: () => void) => ReactNode;
+  /** Lets the page start from the calendar while the first reply is slow. */
+  schedule?: ScheduledMeeting[];
 }) {
-  const [meeting, setMeeting] = useState<Meeting | null>(null);
+  const [fetched, setMeeting] = useState(() => lastMeeting);
+  const [early, setEarly] = useState<Meeting | null>(null);
+  const meeting = fetched ?? early;
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
   const [checkedAt, setCheckedAt] = useState("");
   const [sheet, setSheet] = useState(false);
   const [, playerChanged] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
-    window.addEventListener(PLAYER_EVENT, playerChanged);
-    return () => window.removeEventListener(PLAYER_EVENT, playerChanged);
+    // A player who just checked in joins the last reply, so the next page
+    // knows them before the service has answered again.
+    const changed = (event: Event) => {
+      const saved = (event as CustomEvent<SavedPlayer | null>).detail;
+      const withPlayer = (shown: Meeting | null) =>
+        shown &&
+        saved &&
+        shown.meetingId === saved.meetingId &&
+        !shown.players?.some((p) => p.id === saved.player.id)
+          ? { ...shown, players: [...(shown.players ?? []), saved.player] }
+          : shown;
+      lastMeeting = withPlayer(lastMeeting);
+      setMeeting(withPlayer);
+      playerChanged();
+    };
+    window.addEventListener(PLAYER_EVENT, changed);
+    return () => window.removeEventListener(PLAYER_EVENT, changed);
   }, []);
   const refresh = usePoll(
     async (signal) => {
       setChecking(true);
+      // Decided once, so checking in early cannot bring the loading screen back.
+      if (schedule)
+        setEarly((shown) => shown ?? provisionalMeeting(schedule, Date.now()));
       try {
         const next = await getMeeting(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
-        setMeeting(next);
+        setMeeting((lastMeeting = next));
         setError("");
         setCheckedAt(clock());
       } catch (failure) {
