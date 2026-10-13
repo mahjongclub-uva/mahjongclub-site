@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import LiveStandings from "@/components/LiveStandings";
-import { getCurrentSemester } from "@/lib/data";
+import { getCurrentSemester, getMeetings } from "@/lib/data";
 import { MEETING_REHEARSAL } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Tonight’s standings" };
@@ -16,5 +16,5 @@ export default function LivePage() {
         sessions: 0,
       }
     : semester;
-  return <LiveStandings semester={baseline} />;
+  return <LiveStandings semester={baseline} schedule={getMeetings()} />;
 }

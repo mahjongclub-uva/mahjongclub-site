@@ -35,6 +35,34 @@ const FORBIDDEN_MARKERS = [
   /Canva/i,
 ];
 
+// Smaller copies of every public photo, so phones download one near the size
+// they show it at. src/components/Photos.tsx lists them in srcset.
+const SMALLER_WIDTHS = [800, 1200];
+const SIZED = /-(800|1200)\.webp$/;
+
+/** Writes any missing smaller copy of each public photo. */
+async function sizeVariants() {
+  for (const image of await filesIn(PUBLIC_PHOTOS, new Set([".webp"]))) {
+    if (SIZED.test(image)) continue;
+    const { width } = await sharp(image).metadata();
+    for (const target of SMALLER_WIDTHS.filter((w) => w < width)) {
+      const output = image.replace(/\.webp$/, `-${target}.webp`);
+      try {
+        await stat(output);
+        continue;
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+      await sharp(image)
+        .resize({ width: target })
+        .webp({ quality: 80, effort: 6 })
+        .toFile(`${output}.tmp`);
+      await rename(`${output}.tmp`, output);
+      console.log(`Prepared ${relative(ROOT, output)}`);
+    }
+  }
+}
+
 function slug(filename) {
   return basename(filename, extname(filename))
     .normalize("NFKD")
@@ -83,10 +111,7 @@ async function prepare() {
   await mkdir(PROCESSED, { recursive: true });
   await mkdir(PUBLIC_PHOTOS, { recursive: true });
   const inputs = await filesIn(INBOX, INPUT_EXTENSIONS);
-  if (!inputs.length) {
-    console.log("No photos found in photo-inbox/.");
-    return;
-  }
+  if (!inputs.length) console.log("No photos found in photo-inbox/.");
 
   for (const input of inputs) {
     const name = slug(input);
@@ -119,6 +144,7 @@ async function prepare() {
     await rename(input, archived);
     console.log(`  original moved to ${relative(ROOT, archived)}`);
   }
+  await sizeVariants();
 }
 
 async function check() {

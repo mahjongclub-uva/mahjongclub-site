@@ -14,6 +14,7 @@ import {
   UNIVERSITY_STATEMENT,
 } from "@/lib/site";
 import Section from "@/components/Section";
+import { ClubPhoto } from "@/components/Photos";
 import BackToTop from "@/components/BackToTop";
 
 export const metadata = {
@@ -40,13 +41,11 @@ export default function About() {
           <p className="page-intro">{ABOUT.intro}</p>
           {ABOUT_INTRO_PHOTO && (
             <figure className="about-photo about-intro-photo">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={ABOUT_INTRO_PHOTO.src}
-                alt={ABOUT_INTRO_PHOTO.alt}
-                width={ABOUT_INTRO_PHOTO.width}
-                height={ABOUT_INTRO_PHOTO.height}
-                decoding="async"
+              {/* The page's largest image, so it loads first. */}
+              <ClubPhoto
+                photo={ABOUT_INTRO_PHOTO}
+                loading="eager"
+                fetchPriority="high"
               />
             </figure>
           )}
@@ -74,15 +73,7 @@ export default function About() {
             </Link>
           </div>
           <figure className="about-photo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={ABOUT_PHOTO.src}
-              alt={ABOUT_PHOTO.alt}
-              width={ABOUT_PHOTO.width}
-              height={ABOUT_PHOTO.height}
-              loading="lazy"
-              decoding="async"
-            />
+            <ClubPhoto photo={ABOUT_PHOTO} />
           </figure>
         </div>
       </Section>

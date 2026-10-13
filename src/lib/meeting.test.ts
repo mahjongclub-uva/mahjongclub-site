@@ -5,14 +5,13 @@ import {
   computingIdError,
   getMeeting,
   getResults,
-  draftSchema,
   isMeetingPage,
   meetingShortcut,
-  pendingSchema,
   postMeeting,
   provisionalMeeting,
   tableError,
 } from "./meeting.ts";
+import { draftSchema, pendingSchema } from "./meetingSchemas.ts";
 
 const players = [1, 2, 3, 4].map((i) => ({
   id: `p00${i}`,

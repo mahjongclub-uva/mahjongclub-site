@@ -2,7 +2,8 @@
 
 import { IconSearch, IconCards, IconTrophy } from "@tabler/icons-react";
 import { useState } from "react";
-import { SEASON_START, type Standing, type Unranked } from "@/lib/schema";
+import type { Standing, Unranked } from "@/lib/schema";
+import { SEASON_START } from "@/lib/format";
 
 export default function PlayerSearch({
   standings,
