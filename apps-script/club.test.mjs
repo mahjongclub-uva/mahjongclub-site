@@ -12,6 +12,9 @@ function harness() {
     writes: 0,
     flushes: 0,
     locks: 0,
+    // tryLock(0): take the lock only if it is free, never waiting.
+    quickLocks: 0,
+    noteReads: 0,
     zones: 0,
   };
   const roster = [
@@ -40,6 +43,7 @@ function harness() {
   }
   const tabs = {};
   let failWrite = false;
+  let busy = false;
   class Range {
     constructor(tab, row, column, rows = 1, columns = 1) {
       Object.assign(this, { tab, row, column, rows, columns });
@@ -85,7 +89,18 @@ function harness() {
       return this;
     }
     getNote() {
+      calls.noteReads++;
       return this.tab.notes[this.row + ":" + this.column] || "";
+    }
+    getNotes() {
+      calls.noteReads++;
+      return Array.from({ length: this.rows }, (_, r) =>
+        Array.from(
+          { length: this.columns },
+          (_, c) =>
+            this.tab.notes[this.row + r + ":" + (this.column + c)] || "",
+        ),
+      );
     }
     getFormulas() {
       return Array.from({ length: this.rows }, (_, r) =>
@@ -249,9 +264,12 @@ function harness() {
     },
     LockService: {
       getScriptLock: () => ({
-        tryLock: () => {
-          calls.locks++;
-          assert.equal(locked, false);
+        tryLock: (ms) => {
+          if (ms === 0) calls.quickLocks++;
+          else calls.locks++;
+          // Another request holds it: a quick try gives up at once.
+          if (ms === 0 && (locked || busy)) return false;
+          assert.equal(locked, false, "a lock taken inside a held lock");
           locked = true;
           return true;
         },
@@ -332,6 +350,10 @@ function harness() {
         }),
       ),
     get: (request) => JSON.parse(context.doGet({ parameter: request })),
+    // Another request holding the lock, as a quick try sees it.
+    hold: (value) => {
+      busy = value;
+    },
     // An officer typing in a tab, as the simple onEdit trigger sees it.
     edit: (name) =>
       context.onEdit({ range: { getSheet: () => ({ getName: () => name }) } }),
@@ -1096,12 +1118,17 @@ test("an unavailable ID cache cannot block registration or authoritative saves",
 
 test("tonight's list spares reads, table actions and repeat check-ins the sheets and the queue", () => {
   const h = harness();
-  // Before any write, a read goes to the sheets without queueing or storing.
+  // With the lock busy, a read goes to the sheets without waiting or storing.
+  h.hold(true);
   let before = { ...h.calls };
   assert.equal(h.get({ r: "meeting" }).players.length, 6);
   assert.equal(h.calls.locks, before.locks);
   assert.equal(h.store.here, undefined);
-  // The first check-in stores the list; reads then skip the sheets.
+  // With it free, the read stores the list without waiting.
+  h.hold(false);
+  h.get({ r: "meeting" });
+  assert.equal(h.calls.locks, before.locks, "never waits for the lock");
+  assert.ok(h.store.here);
   h.post({ r: "checkins", computingId: "b2" });
   before = { ...h.calls };
   assert.equal(h.get({ r: "meeting" }).players.length, 6);
@@ -1184,4 +1211,50 @@ test("a list stored from an older Roster rebuilds rather than refusing a checked
   const t = seatedTable(h, ["p001", "p002", "p003", "p006"]);
   assert.equal(t.hand("p006", 10).status, 200);
   assert.ok(JSON.parse(h.store.here).players.some((p) => p.id === "p006"));
+});
+
+test("saves read every receipt note at once, and reads between meetings never queue", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  const notes = h.calls.noteReads;
+  assert.equal(t.end().status, 200);
+  assert.equal(h.calls.noteReads - notes, 1, "one note read per save");
+  // After close, the first read saves the tables under the lock; later reads,
+  // with nothing to open, close or save, never queue.
+  h.store.meeting = JSON.stringify({ ...h.meeting, closed: true });
+  h.get({ r: "meeting" });
+  const locks = h.calls.locks;
+  assert.equal(h.get({ r: "meeting" }).open, false);
+  assert.equal(h.calls.locks, locks);
+});
+
+test("a made-up player ID cannot force tonight's list to be rebuilt", () => {
+  const h = harness();
+  h.post({ r: "checkins", computingId: "a1" });
+  const reads = h.fullReads.Attendance;
+  const reply = h.post({
+    r: "rooms",
+    action: "join",
+    meetingId: h.meeting.id,
+    playerId: "not-a-player",
+    table: 1,
+  });
+  assert.equal(reply.status, 409);
+  assert.equal(h.fullReads.Attendance, reads);
+});
+
+test("Recheck reads Attendance once per semester, and Points edits refresh results", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  t.end();
+  t.room("p002", "join", { table: 2, seat: 0 });
+  const reads = h.fullReads.Attendance;
+  h.context.clubRecheck();
+  assert.equal(h.fullReads.Attendance - reads, 1);
+  h.get({ r: "results" });
+  assert.ok(h.cache.has("results:" + h.meeting.id));
+  h.edit("Points");
+  assert.equal(h.cache.has("results:" + h.meeting.id), false);
 });

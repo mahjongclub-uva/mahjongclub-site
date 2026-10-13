@@ -51,9 +51,8 @@ function validateSettings(value) {
       typeof semester.pointsTab !== "string" ||
       !semester.pointsTab.trim() ||
       [semester.start, semester.end].some(
-        (date) =>
-          !Number.isFinite(new Date(date + "T12:00:00Z").getTime()) ||
-          new Date(date + "T12:00:00Z").toISOString().slice(0, 10) !== date,
+        // toJSON() is null for an impossible date such as 2026-02-30.
+        (date) => new Date(date + "T12:00:00Z").toJSON()?.slice(0, 10) !== date,
       )
     )
       fail(400, "Each semester needs an id, start/end dates and tab names.");
@@ -214,12 +213,21 @@ function updateMeeting() {
   return meeting;
 }
 
-// Reads skip the lock while a meeting is open; only opening or closing takes it.
+// Reads skip the lock unless the meeting has to open, close or save its
+// tables; updateMeeting decides again under the lock.
 function currentMeeting() {
+  const now = Date.now();
   const meeting = readMeeting();
-  return meetingWindow(meeting, Date.now()).open
-    ? meeting
-    : withLock(updateMeeting);
+  if (meetingWindow(meeting, now).open) return meeting;
+  const closing = meeting && !meeting.closed && now >= meeting.closes;
+  const unsettled = meeting?.closed && readRooms(meeting.id).length > 0;
+  const events = calendarMeetings(now);
+  const opening =
+    events.length > 1 ||
+    (events.length === 1 &&
+      properties().getProperty("closedCalendarEvent") !== events[0].id &&
+      meeting?.id !== events[0].id);
+  return closing || unsettled || opening ? withLock(updateMeeting) : meeting;
 }
 
 function requireMeeting(checkin) {
@@ -255,8 +263,20 @@ function checkedPlayers(meeting, players, state = attendance(meeting)) {
 function hereTonight(meeting, locked) {
   const stored = storedHere(meeting);
   if (stored) return stored;
-  const players = hereFrom(checkedPlayers(meeting, rosterPlayers()));
-  return locked ? storeHere(meeting, players) : players;
+  if (locked)
+    return storeHere(
+      meeting,
+      hereFrom(checkedPlayers(meeting, rosterPlayers())),
+    );
+  // A read stores the list only if the lock is free this instant.
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(0))
+    return hereFrom(checkedPlayers(meeting, rosterPlayers()));
+  try {
+    return hereTonight(meeting, true);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function hereFrom(players) {
@@ -266,8 +286,15 @@ function hereFrom(players) {
 // Under the lock. A list built from a Roster read before the lock can miss
 // someone who signed up meanwhile, so a miss rebuilds it from the sheets once.
 function hereIncluding(meeting, ids) {
+  const fresh = !storedHere(meeting);
   const players = hereTonight(meeting, true);
-  if (ids.every((id) => players.some((player) => player.id === id)))
+  // A list just read from the sheets is already current, and a malformed ID
+  // can never match, so neither is worth a second read.
+  if (
+    fresh ||
+    ids.some((id) => !/^p\d{3,}$/.test(id)) ||
+    ids.every((id) => players.some((player) => player.id === id))
+  )
     return players;
   properties().deleteProperty("here");
   return hereTonight(meeting, true);
@@ -292,13 +319,9 @@ function storeHere(meeting, players) {
 function addHere(meeting, player, roster, state) {
   const stored = storedHere(meeting);
   const players = stored || hereFrom(checkedPlayers(meeting, roster, state));
-  if (stored && players.some((item) => item.id === player.id)) return;
-  storeHere(
-    meeting,
-    players.some((item) => item.id === player.id)
-      ? players
-      : [...players, ...hereFrom([player])],
-  );
+  const has = players.some((item) => item.id === player.id);
+  if (!stored || !has)
+    storeHere(meeting, has ? players : [...players, ...hereFrom([player])]);
 }
 
 function publicPlayer(player) {
@@ -427,11 +450,20 @@ function unknownCheckinId(computingId) {
   }
 }
 
+const SIGN_UP = {
+  status: 404,
+  message: "Sign up with your full name to check in.",
+};
+
 function onEdit(event) {
   const name = event?.range?.getSheet().getName();
+  const meeting = readMeeting();
   if (name === "Roster") forgetCheckinIds();
-  if (name === "Roster" || name === readMeeting()?.attendanceTab)
+  if (name === "Roster" || name === meeting?.attendanceTab)
     properties().deleteProperty("here");
+  // An officer's fix in Points Tracking shows at once, not after the cache.
+  if (meeting && (name === "Roster" || name === meeting.pointsTab))
+    CacheService.getScriptCache().remove("results:" + meeting.id);
 }
 
 // `listed` is the Roster if it was read before the lock. A known player's row
@@ -441,8 +473,7 @@ function checkIn(request, meeting, listed) {
   let players = listed || rosterPlayers();
   const known = players.find((player) => player.computingId === computingId);
   if (known) return markAttendance(meeting, known, players);
-  if (request.r === "checkins")
-    return { status: 404, message: "Sign up with your full name to check in." };
+  if (request.r === "checkins") return SIGN_UP;
   if (listed) players = rosterPlayers();
   const name = text(request.fullName, "full name", 120);
   let player = players.find((item) => normalize(item.name) === normalize(name));
@@ -532,7 +563,9 @@ function submitResult(request, meeting) {
     submissionId: request.submissionId,
     seats,
   });
-  const notes = blocks.map((block) => tab.getRange(block.row, 2).getNote());
+  // One read for every block's receipt note, not one call per block.
+  const column = tab.getRange(1, 2, tab.getMaxRows(), 1).getNotes();
+  const notes = blocks.map((block) => column[block.row - 1][0]);
   const existing = notes.findIndex((note) => {
     try {
       return JSON.parse(note).submissionId === request.submissionId;
@@ -971,18 +1004,15 @@ function doGet(event) {
       }
       return response;
     }
-    // Reads only Script Properties, so phones at a table can refresh often.
-    if (request.r === "rooms") {
-      if (!meetingWindow(meeting, Date.now()).open)
-        fail(423, "The meeting is closed.");
-      return { status: 200, meetingId: meeting.id, ...roomsState(meeting) };
-    }
-    if (request.r === "results") {
-      if (!meetingWindow(meeting, Date.now()).open)
-        fail(423, "The meeting is closed.");
-      return results(meeting);
-    }
-    fail(404, "Unknown resource.");
+    if (request.r !== "rooms" && request.r !== "results")
+      fail(404, "Unknown resource.");
+    if (!meetingWindow(meeting, Date.now()).open)
+      fail(423, "The meeting is closed.");
+    // Script Properties plus the 30-second results cache, so phones at a
+    // table can refresh often without reading the sheets each time.
+    return request.r === "rooms"
+      ? { status: 200, meetingId: meeting.id, ...roomsState(meeting) }
+      : results(meeting);
   });
 }
 
@@ -1008,14 +1038,10 @@ function doPost(event) {
       const computingId = checkinId(request);
       const open = readMeeting();
       if (meetingWindow(open, Date.now()).checkinsOpen) {
-        const signUp = {
-          status: 404,
-          message: "Sign up with your full name to check in.",
-        };
-        if (unknownCheckinId(computingId)) return signUp;
+        if (unknownCheckinId(computingId)) return SIGN_UP;
         roster = rosterPlayers();
         const known = roster.find((item) => item.computingId === computingId);
-        if (!known) return signUp;
+        if (!known) return SIGN_UP;
         if (storedHere(open)?.some((item) => item.id === known.id))
           return {
             status: 200,
@@ -1197,7 +1223,7 @@ function clubClose() {
         if (events.length === 1)
           properties().setProperty("closedCalendarEvent", events[0].id);
       }
-      return "Meeting closed. Automatic score publishing is added in build step 5.";
+      return "Meeting closed. Saved tables publish with the next score update.";
     }),
   );
 }
@@ -1237,15 +1263,17 @@ function clubRecheck() {
         const tab = sheet(semester.pointsTab);
         const grid = tab.getDataRange().getValues();
         const blocks = pointsLayout(grid);
+        // Read once per semester; each block only picks its date's column.
+        const ticks = sheet(semester.attendanceTab).getDataRange().getValues();
         blocks.forEach((block) => {
           let message = "";
           if (!block.empty) {
             try {
               const date = dateKey(block.date);
-              const checked = checkedPlayers(
-                { date, attendanceTab: semester.attendanceTab },
-                players,
-              ).map((player) => player.id);
+              const checked = checkedPlayers({ date }, players, {
+                grid: ticks,
+                layout: attendanceLayout(ticks, date, dateKey),
+              }).map((player) => player.id);
               const seats = block.seats.map(([name, total, net]) => {
                 const player = players.find((item) => item.name === name);
                 if (!player || net !== total - 205)
