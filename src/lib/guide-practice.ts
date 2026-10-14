@@ -1,12 +1,14 @@
-export const SEATS = ["You", "Right player", "Across player", "Left player"];
+/** Seats as the table calls them, counterclockwise from you. */
+export const SEATS = ["You", "Right", "Across", "Left"];
 /** The seat whose wall a roll lands on, counting counterclockwise from the dealer as 1. */
 export const wallSeat = (total: number, dealer = 0) => (dealer + total - 1) % 4;
 export type Suit = "bamboo" | "dots" | "characters";
 /** At the club, winds and dragons are set aside like flowers and seasons. */
 export type Bonus = "flower" | "season" | "wind" | "dragon";
 export type Piece = { suit: Suit | Bonus; rank: number };
-export type Call = "Win" | "Pung" | "Kong" | "Chow" | "Pass";
-export const CALLS: Call[] = ["Win", "Pung", "Kong", "Chow", "Pass"];
+/** Kong is left out of the game: rare at the table, and the lesson card covers it. */
+export type Call = "Win" | "Pung" | "Chow" | "Pass";
+export const CALLS: Call[] = ["Win", "Pung", "Chow", "Pass"];
 /** Seats as SEATS numbers them: 1 right, 2 across, 3 left. */
 export type Seat = 1 | 2 | 3;
 export const LEFT: Seat = 3;
@@ -78,7 +80,6 @@ export function legalCalls(hand: Piece[], discard: Piece, from: Seat): Call[] {
     (call) =>
       (call === "Win" && isWin([...hand, discard])) ||
       (call === "Pung" && held >= 2) ||
-      (call === "Kong" && held >= 3) ||
       (call === "Chow" && chow) ||
       call === "Pass",
   );
@@ -116,15 +117,13 @@ export type CallRound = {
   uses: number[];
   /** Tiles in no set, by index: what you throw after a claim. */
   loose: number[];
-  /** After a kong, the replacement from the flower side. */
-  replacement?: Piece;
   answer: Call;
   /** Another player shouting for the same tile. */
   rival?: Seat;
   why: string;
 };
 
-const KINDS = ["Pung", "Chow", "Pass", "Kong", "Win"] as const;
+const KINDS = ["Pung", "Chow", "Pass", "Win"] as const;
 type RoundKind = (typeof KINDS)[number];
 const otherSeat = (not: Seat, rand: Rand) =>
   pick(
@@ -149,7 +148,7 @@ export function makeCallRound(
       keyTiles = run.filter((_, n) => n !== gap);
       from = kind === "Chow" ? LEFT : pick([1, 2] as Seat[], rand);
     } else {
-      keyTiles = kind === "Kong" ? [tile, tile, tile] : [tile, tile];
+      keyTiles = [tile, tile];
       from = pick([1, 2, 3] as Seat[], rand);
     }
     // Win: four sets and a pair around the open run. Otherwise three sets, a
@@ -159,16 +158,9 @@ export function makeCallRound(
     while (kept.length + keyTiles.length + loose.length < 16)
       loose.push(randomTile(rand));
     const hand = sortHand([...kept, ...keyTiles, ...loose]);
-    const replacement = kind === "Kong" ? randomTile(rand) : undefined;
-    const all = [...hand, tile, ...(replacement ? [replacement] : [])];
-    if (tooMany(all)) continue;
+    if (tooMany([...hand, tile])) continue;
     const legal = legalCalls(hand, tile, from);
-    const want: Call[] =
-      kind === "Pass"
-        ? ["Pass"]
-        : kind === "Kong"
-          ? ["Pung", "Kong", "Pass"]
-          : [kind, "Pass"];
+    const want: Call[] = kind === "Pass" ? ["Pass"] : [kind, "Pass"];
     if (legal.join() !== CALLS.filter((c) => want.includes(c)).join()) continue;
     const uses = indexIn(hand, keyTiles);
     const rival =
@@ -178,22 +170,19 @@ export function makeCallRound(
     const why =
       kind === "Pung"
         ? `Two ${pieceName(tile)} in your hand and this one: three alike.`
-        : kind === "Kong"
-          ? "Three in your hand and this one: four alike. A kong draws a replacement from the flower side."
-          : kind === "Pass"
-            ? "A chow only comes from the player on your left. Let it go."
-            : kind === "Win"
-              ? "That finishes your hand: five sets and a pair. A win beats a pung."
-              : rival
-                ? "A run from your left, but a pung beats a chow, so they take it."
-                : "A run, from the player on your left.";
+        : kind === "Pass"
+          ? "A chow only comes from the player on your left. Let it go."
+          : kind === "Win"
+            ? "That finishes your hand: five sets and a pair. A win beats a pung."
+            : rival
+              ? "A run from your left, but a pung beats a chow, so they take it."
+              : "A run, from the player on your left.";
     return {
       from,
       discard: tile,
       hand,
       uses,
       loose: indexIn(hand, loose).filter((i) => !uses.includes(i)),
-      replacement,
       answer: kind,
       rival,
       why,
@@ -201,7 +190,7 @@ export function makeCallRound(
   }
 }
 
-/** Five rounds, one of each kind, in a random order. */
+/** Four rounds, one of each kind, in a random order. */
 export function makeCallRounds(rand: Rand = Math.random): CallRound[] {
   const kinds = [...KINDS];
   for (let i = kinds.length - 1; i > 0; i--) {
@@ -223,17 +212,13 @@ export function seeded(seed: number): Rand {
 
 /** One short line for a pick that isn't this round's answer. */
 export function callNudge(round: CallRound, call: Call) {
-  const legal = legalCalls(round.hand, round.discard, round.from);
   if (call === "Pass") return "You can claim this one. Look at your hand.";
-  if (legal.includes(call)) return "You can, but you hold three. Make it four.";
   if (call === "Win") return "Your hand isn't one tile from done.";
   if (call === "Chow")
     return round.from === LEFT
       ? "A chow needs the tiles on either side, in one suit."
       : "A chow only comes from the player on your left.";
-  return call === "Kong"
-    ? "A kong needs three of this tile in your hand."
-    : "A pung needs two of this tile in your hand.";
+  return "A pung needs two of this tile in your hand.";
 }
 
 /* The turn game: three turns, ending on a self-drawn win. */

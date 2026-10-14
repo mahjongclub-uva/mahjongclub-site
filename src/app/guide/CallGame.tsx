@@ -20,14 +20,12 @@ import styles from "./games.module.css";
 const HAN: Record<Call, string> = {
   Win: "胡",
   Pung: "碰",
-  Kong: "槓",
   Chow: "吃",
   Pass: "→",
 };
-const SHORT = ["You", "Right", "Across", "Left"];
 const SIDE = ["you", "right", "top", "left"];
 
-/** Five discards, one of each call, in a random order. */
+/** Four discards, one of each call, in a random order. */
 export default function CallGame() {
   const [rounds, setRounds] = useState(() => makeCallRounds(seeded(7)));
   const [n, setN] = useState(0);
@@ -56,7 +54,7 @@ export default function CallGame() {
           <span className={styles.stamp} lang="zh-Hant" aria-hidden="true">
             好
           </span>
-          <h3>Five calls, done.</h3>
+          <h3>Every call, done.</h3>
           <p>
             {firstTry} of {rounds.length} on the first try.
           </p>
@@ -108,20 +106,16 @@ function Round({
   const meld = claimed
     ? [...round.uses.map((i) => round.hand[i]), round.discard]
     : [];
-  // After a pung, chow or kong you throw one of your loose tiles; after a
-  // kong, the replacement from the flower side joins them first.
+  // After a pung or chow you throw one of your loose tiles.
   const [thrown, setThrown] = useState<Piece | null>(null);
   const mustThrow = claimed && round.answer !== "Win";
   const throwing = mustThrow && !thrown;
   useEffect(() => onStep(`${solved}-${!!thrown}`), [solved, thrown, onStep]);
-  const choices = [
-    ...round.loose.map((i) => round.hand[i]),
-    ...(round.replacement ? [round.replacement] : []),
-  ];
+  const choices = round.loose.map((i) => round.hand[i]);
   return (
     <>
       <h3 className={styles.prompt}>
-        {SHORT[round.from]} throws {name}.
+        {SEATS[round.from]} throws {name}.
       </h3>
       <div className={`${styles.felt} ${styles.table}`}>
         {[2, 3, 1, 0].map((seat) => (
@@ -131,7 +125,7 @@ function Round({
             data-side={SIDE[seat]}
             data-lit={seat === round.from}
           >
-            {SHORT[seat]}
+            {SEATS[seat]}
             {seat === round.from && " · threw"}
             {solved && seat === round.rival && (
               <span className={styles.bubble}>
@@ -191,12 +185,6 @@ function Round({
             </li>
           ),
         )}
-        {thrown && round.replacement && thrown !== round.replacement && (
-          <li>
-            <span className="sr-only">{pieceName(round.replacement)}</span>
-            <GameTile piece={round.replacement} />
-          </li>
-        )}
       </ul>
       {solved ? (
         <div className={styles.verdict} role="status">
@@ -204,7 +192,7 @@ function Round({
             {round.answer === "Pass"
               ? "Right to pass."
               : lost
-                ? `${SHORT[round.rival!]} calls pung and takes it.`
+                ? `${SEATS[round.rival!]} calls pung and takes it.`
                 : round.answer === "Win"
                   ? "胡! You win."
                   : `${round.answer}!`}
@@ -258,11 +246,7 @@ function Round({
       {throwing && (
         <>
           <p className={styles.ask}>Now throw a tile.</p>
-          <ThrowRow
-            tiles={choices}
-            fresh={round.replacement ? choices.length - 1 : undefined}
-            onThrow={(i) => setThrown(choices[i])}
-          />
+          <ThrowRow tiles={choices} onThrow={(i) => setThrown(choices[i])} />
         </>
       )}
       <p className={styles.nudge} role="status">

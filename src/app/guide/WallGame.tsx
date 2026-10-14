@@ -257,7 +257,7 @@ export default function WallGame() {
               <span>
                 {selectedSeat === 0
                   ? "Your wall"
-                  : `${SEATS[selectedSeat]}'s wall`}
+                  : `${SEATS[selectedSeat]} wall`}
               </span>
               <div
                 role="group"

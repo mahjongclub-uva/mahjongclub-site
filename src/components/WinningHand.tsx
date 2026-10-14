@@ -17,7 +17,9 @@ const MEANS = { Pair: "two alike", Pung: "three alike", Chow: "a run" };
 export default function WinningHand() {
   return (
     <figure className="winning-hand">
-      <figcaption>One example</figcaption>
+      <figcaption>
+        <span>One example</span> Five sets and a pair
+      </figcaption>
       <div className="hand-groups">
         {GROUPS.map((group, i) => (
           <div className="hand-group" key={i}>

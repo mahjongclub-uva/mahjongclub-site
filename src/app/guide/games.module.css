@@ -15,7 +15,6 @@
   --out: cubic-bezier(0.23, 1, 0.32, 1);
   display: grid;
   gap: 14px;
-  max-inline-size: 720px;
   margin-block-start: 1.5rem;
 }
 .game h3 {
@@ -406,7 +405,7 @@ button.stack:focus-visible,
 /* The five calls, shaped like tiles. */
 .calls {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
 .call {

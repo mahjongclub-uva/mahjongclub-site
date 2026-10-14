@@ -35,17 +35,17 @@ test("a win is five sets and a pair", () => {
   assert.ok(!isWin([...hand.slice(0, 16), { suit: "dots", rank: 8 }]));
 });
 
-test("chows only from the left; pungs and kongs from anyone", () => {
+test("chows only from the left; pungs from anyone", () => {
   const hand = [...t("characters", 5, 6), ...t("dots", 8, 8, 8)];
   const seven = { suit: "characters", rank: 7 } as const;
   const eight = { suit: "dots", rank: 8 } as const;
   assert.deepEqual(legalCalls(hand, seven, LEFT), ["Chow", "Pass"]);
   assert.deepEqual(legalCalls(hand, seven, 1), ["Pass"]);
-  assert.deepEqual(legalCalls(hand, eight, 2), ["Pung", "Kong", "Pass"]);
+  assert.deepEqual(legalCalls(hand, eight, 2), ["Pung", "Pass"]);
 });
 
 test("every random round allows exactly the call it teaches", () => {
-  for (const kind of ["Pung", "Chow", "Pass", "Kong", "Win"] as const) {
+  for (const kind of ["Pung", "Chow", "Pass", "Win"] as const) {
     for (let n = 0; n < 500; n++) {
       const r = makeCallRound(kind);
       assert.equal(r.answer, kind);
@@ -61,7 +61,7 @@ test("every random round allows exactly the call it teaches", () => {
       // Winds and dragons are bonus tiles at the club: never in a hand.
       for (const x of [...r.hand, r.discard])
         assert.ok(["characters", "dots", "bamboo"].includes(x.suit));
-      if (["Pung", "Chow", "Kong"].includes(kind)) assert.ok(r.loose.length);
+      if (["Pung", "Chow"].includes(kind)) assert.ok(r.loose.length);
       const all = [...r.hand, r.discard];
       for (const x of all)
         assert.ok(
@@ -71,11 +71,10 @@ test("every random round allows exactly the call it teaches", () => {
   }
 });
 
-test("five rounds, one of each, and a seed always deals the same", () => {
+test("four rounds, one of each, and a seed always deals the same", () => {
   const a = makeCallRounds(seeded(1));
   assert.deepEqual(a.map((r) => r.answer).sort(), [
     "Chow",
-    "Kong",
     "Pass",
     "Pung",
     "Win",
@@ -86,7 +85,7 @@ test("five rounds, one of each, and a seed always deals the same", () => {
 test("a wrong pick gets a nudge, never the answer", () => {
   for (let n = 0; n < 200; n++)
     for (const r of makeCallRounds())
-      for (const call of ["Win", "Pung", "Kong", "Chow", "Pass"] as const)
+      for (const call of ["Win", "Pung", "Chow", "Pass"] as const)
         if (call !== r.answer) assert.ok(!callNudge(r, call).includes(r.why));
 });
 

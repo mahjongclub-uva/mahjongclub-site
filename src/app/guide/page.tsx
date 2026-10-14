@@ -1,5 +1,5 @@
 import PlayingTile from "@/components/PlayingTile";
-import { IconBrandInstagram } from "@tabler/icons-react";
+import { IconArrowUpRight, IconBrandInstagram } from "@tabler/icons-react";
 import styles from "./guide.module.css";
 import WallGame from "./WallGame";
 import Lesson from "./Lesson";
@@ -26,59 +26,45 @@ export default function Guide() {
         </header>
         <LessonRack />
 
-        <Lesson
-          id="tiles"
-          number={1}
-          title="Meet the tiles"
-          qualifier="144 in a set"
-        >
+        <Lesson id="tiles" number={1} title="Meet the 144 tiles">
           <TileSet />
         </Lesson>
 
-        <Lesson
-          id="hand"
-          number={2}
-          title="The goal"
-          qualifier="five sets and a pair"
-        >
+        <Lesson id="hand" number={2} title="The goal">
           <WinningHand />
-          <ul className={styles.chips} aria-label="Counting to a win">
-            <li>16 in hand</li>
-            <li>17 to win</li>
+          <ul className={styles.facts} aria-label="Counting to a win">
             <li>
-              <span lang="zh-Hans">金</span> fills a gap
+              <b>16</b> in hand
+            </li>
+            <li>
+              <b>17</b> to win
+            </li>
+            <li>
+              <b lang="zh-Hans">金</b> <span className="sr-only">gold</span>{" "}
+              fills a gap
             </li>
           </ul>
           {SPECIAL_HAND_POST && (
             <a
-              className={styles.softButton}
+              className={styles.linkButton}
               href={SPECIAL_HAND_POST}
               target="_blank"
               rel="noopener noreferrer"
             >
               <IconBrandInstagram aria-hidden="true" />
               Other special hands
+              <IconArrowUpRight aria-hidden="true" />
             </a>
           )}
         </Lesson>
 
-        <Lesson
-          id="setup"
-          number={3}
-          title="Set up the wall"
-          qualifier="we’ll do it for you at first"
-        >
+        <Lesson id="setup" number={3} title="Set up the wall">
           <div className={styles.playSurface}>
             <WallGame />
           </div>
         </Lesson>
 
-        <Lesson
-          id="fuzhou"
-          number={4}
-          title="Gold and flowers"
-          qualifier="the Fuzhou twist"
-        >
+        <Lesson id="fuzhou" number={4} title="Gold and flowers">
           <figure className={styles.goldExample}>
             <div className={styles.goldTiles}>
               <ul className="tile-row" aria-label="Two eight-dot tiles">
@@ -129,30 +115,20 @@ export default function Guide() {
               </dt>
               <dd>
                 Draw a flower, season, wind or dragon? Set it face-up beside you
-                and draw a replacement from the flower side. Each flower or
-                season adds to your winnings.
+                and draw a replacement from the flower side. Each one adds to
+                your winnings.
               </dd>
             </div>
           </dl>
         </Lesson>
 
-        <Lesson
-          id="turn"
-          number={5}
-          title="Take a turn"
-          qualifier="draw, then discard"
-        >
+        <Lesson id="turn" number={5} title="Take a turn">
           <div className={styles.playSurface}>
             <TurnGame />
           </div>
         </Lesson>
 
-        <Lesson
-          id="calls"
-          number={6}
-          title="Make your call"
-          qualifier="claim a discard"
-        >
+        <Lesson id="calls" number={6} title="Make your call">
           <div className={styles.callRules}>
             <div className={styles.callExamples}>
               <div>
