@@ -56,6 +56,7 @@ function Hint({ children }: { children: string }) {
 
 export function WallPractice() {
   const [dice, setDice] = useState([3, 4]);
+  const [dealer, setDealer] = useState(0);
   const [stage, setStage] = useState<
     "ready" | "wall" | "break" | "draw" | "done"
   >("ready");
@@ -68,7 +69,9 @@ export function WallPractice() {
   const rack = useRef<HTMLDivElement>(null);
   const flightFrom = useRef<DOMRect | null>(null);
   const total = dice[0] + dice[1];
-  const selectedSeat = wallSeat(total);
+  const selectedSeat = wallSeat(total, dealer);
+  const dealerName = dealer === 0 ? "You" : SEATS[dealer];
+  const next = (dealer + 1) % 4;
   const focus =
     stage === "break" ? selectedStack : Math.min(total + taken + 1, 18);
   const windowStart = Math.max(1, Math.min(focus - 2, 14));
@@ -117,6 +120,7 @@ export function WallPractice() {
     setTaken(0);
     setSelectedStack(1);
     setRound(round + 1);
+    setDealer(Math.floor(Math.random() * 4));
     setDice([
       1 + Math.floor(Math.random() * 6),
       1 + Math.floor(Math.random() * 6),
@@ -153,14 +157,18 @@ export function WallPractice() {
   }
   const prompt =
     stage === "ready"
-      ? "You’re the dealer. Roll to start!"
+      ? "Roll to start!"
       : stage === "wall"
         ? "Whose wall did you land on?"
         : stage === "break"
           ? "Find the break."
           : stage === "draw"
-            ? "Grab your tiles."
-            : "Wall open. You’re dealt in!";
+            ? dealer === 0
+              ? "Grab your tiles."
+              : "Grab the dealer’s tiles."
+            : dealer === 0
+              ? "Wall open. You’re dealt in!"
+              : "Wall open. The dealer’s dealt in!";
   return (
     <div
       className={`${styles.lesson} ${styles.wallGame}`}
@@ -188,14 +196,14 @@ export function WallPractice() {
         <h3>{prompt}</h3>
         <p>
           {stage === "ready"
-            ? "Tap the dice to throw them."
+            ? "Tap the dice to pick a dealer and throw."
             : stage === "wall"
-              ? `You rolled ${total}. Count around the table from your seat, then tap that wall.`
+              ? `${dealerName} ${dealer === 0 ? "deal" : "deals"} and rolled ${total}. Count around the table from the dealer’s seat, then tap that wall.`
               : stage === "break"
                 ? `Step ${total} stacks in from the wall’s right end, then break it open.`
                 : stage === "draw"
-                  ? "Tap the two stacks just past the gap. That’s four tiles."
-                  : "Four tiles in your rack."}
+                  ? "The dealer takes first. Tap the two stacks just past the gap. That’s four tiles."
+                  : `Four tiles in ${dealer === 0 ? "your" : "the dealer’s"} rack.`}
         </p>
       </div>
       <div className={styles.gameBoard} data-closeup={closeUp}>
@@ -204,40 +212,45 @@ export function WallPractice() {
         </div>
         {!closeUp ? (
           <div className={styles.overhead}>
-            {SEATS.map((seat, i) => (
-              <button
-                type="button"
-                key={seat}
-                className={`${styles.seat} ${styles[`seat${i}`]}`}
-                data-active={stage === "wall" && wallSeat(count) === i}
-                disabled={stage !== "wall"}
-                aria-label={`${seat}${i === 0 ? " · dealer" : ""}`}
-                onClick={() => {
-                  if (i === selectedSeat) {
-                    setPlaying(false);
-                    setStage("break");
-                    setFeedback("");
-                  } else
-                    setFeedback(
-                      "Try again. You are 1; right is 2, across is 3, left is 4. Keep counting.",
-                    );
-                }}
-              >
-                <span>
-                  {seat}
-                  {i === 0 ? " · dealer" : ""}
-                </span>
-                <span
-                  key={round}
-                  className={styles.miniWall}
-                  aria-hidden="true"
+            {SEATS.map((seat, i) => {
+              const isDealer = stage !== "ready" && i === dealer;
+              return (
+                <button
+                  type="button"
+                  key={seat}
+                  className={`${styles.seat} ${styles[`seat${i}`]}`}
+                  data-active={
+                    stage === "wall" && wallSeat(count, dealer) === i
+                  }
+                  disabled={stage !== "wall"}
+                  aria-label={`${seat}${isDealer ? " · dealer" : ""}`}
+                  onClick={() => {
+                    if (i === selectedSeat) {
+                      setPlaying(false);
+                      setStage("break");
+                      setFeedback("");
+                    } else
+                      setFeedback(
+                        "Try again. The dealer is 1, then count counterclockwise, one seat per number.",
+                      );
+                  }}
                 >
-                  {Array.from({ length: 18 }, (_, n) => (
-                    <i key={n} style={{ animationDelay: `${n * 20}ms` }} />
-                  ))}
-                </span>
-              </button>
-            ))}
+                  <span>
+                    {seat}
+                    {isDealer ? " · dealer" : ""}
+                  </span>
+                  <span
+                    key={round}
+                    className={styles.miniWall}
+                    aria-hidden="true"
+                  >
+                    {Array.from({ length: 18 }, (_, n) => (
+                      <i key={n} style={{ animationDelay: `${n * 20}ms` }} />
+                    ))}
+                  </span>
+                </button>
+              );
+            })}
             <div className={styles.tableCenter}>
               <button
                 type="button"
@@ -272,7 +285,7 @@ export function WallPractice() {
               {stage !== "ready" && <strong>Total {total}</strong>}
               {stage === "wall" && (
                 <span key={count} className={styles.countLabel} role="status">
-                  {count} · {SEATS[wallSeat(count)]}
+                  {count} · {SEATS[wallSeat(count, dealer)]}
                 </span>
               )}
             </div>
@@ -397,7 +410,7 @@ export function WallPractice() {
               className={styles.rack}
               aria-label={`Dealer’s hand: ${taken * 2} of 4 tiles dealt`}
             >
-              <span>You · dealer</span>
+              <span>{dealerName} · dealer</span>
               <div>
                 {Array.from({ length: 4 }, (_, n) => (
                   <span
@@ -420,8 +433,10 @@ export function WallPractice() {
               <div className={styles.nextPlayer} role="status">
                 <IconArrowRight size={22} aria-hidden="true" />
                 <span>
-                  <strong>Player on your right is next</strong>Dealing carries
-                  on counterclockwise.
+                  <strong>
+                    {next === 0 ? "You’re next" : `${SEATS[next]} is next`}
+                  </strong>
+                  Dealing carries on counterclockwise.
                 </span>
               </div>
             )}
@@ -460,7 +475,7 @@ export function WallPractice() {
         {(stage === "wall" || stage === "break") && (
           <Hint key={`${round}-${stage}`}>
             {stage === "wall"
-              ? "Start at your seat. Every fourth count brings you back to the same player."
+              ? "Start at the dealer’s seat. Every fourth count comes back to the dealer."
               : "Each stack is two tiles. Start at 1 on the right."}
           </Hint>
         )}
@@ -492,6 +507,10 @@ export function WallPractice() {
 export function CallPractice() {
   const [round, setRound] = useState(0);
   const [scenario, setScenario] = useState(FIRST_CALL);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- A fresh round once the page runs; the static HTML keeps the fixed one.
+    setScenario(makeCallScenario());
+  }, []);
   return (
     <div
       className={styles.lesson}
@@ -678,6 +697,10 @@ export function TurnPractice() {
   const [step, setStep] = useState(0);
   const [discardIndex, setDiscardIndex] = useState<number | null>(null);
   const [tiles, setTiles] = useState(FIRST_TURN);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- A fresh hand once the page runs; the static HTML keeps the fixed one.
+    setTiles(makeTurnHand());
+  }, []);
   const discard = discardIndex === null ? null : tiles[discardIndex];
   return (
     <div

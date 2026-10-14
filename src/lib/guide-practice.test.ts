@@ -12,6 +12,9 @@ test("two-dice totals select seats counterclockwise, starting at the dealer", ()
   const expected = [1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
   for (let total = 2; total <= 12; total++)
     assert.equal(wallSeat(total), expected[total - 2]);
+  // Across deals: a 2 lands on the left player, a 5 back on across.
+  assert.equal(wallSeat(2, 2), 3);
+  assert.equal(wallSeat(5, 2), 2);
 });
 
 test("random call rounds always follow the calling rules", () => {

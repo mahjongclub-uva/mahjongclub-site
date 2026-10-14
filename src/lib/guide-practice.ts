@@ -1,5 +1,6 @@
 export const SEATS = ["You", "Right player", "Across player", "Left player"];
-export const wallSeat = (total: number) => (total - 1) % 4;
+/** The seat whose wall a roll lands on, counting counterclockwise from the dealer as 1. */
+export const wallSeat = (total: number, dealer = 0) => (dealer + total - 1) % 4;
 export type Call = "Pung" | "Chow" | "Pass";
 type Suit = "bamboo" | "dots" | "characters";
 export type Tile = { suit: Suit; rank: number };
@@ -28,7 +29,7 @@ export type CallScenario = {
   after: Tile;
 };
 
-/** Fixed so the static HTML and the first client render agree. */
+/** Fixed so the static HTML and the first client render agree; swapped for a random round once the page runs. */
 export const FIRST_CALL: CallScenario = {
   suit: "dots",
   ranks: [8, 8],
