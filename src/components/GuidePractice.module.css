@@ -224,7 +224,7 @@
   border-radius: 20px;
   background: #f1dfa9;
   color: #173f33;
-  font-weight: 750;
+  font-weight: 700;
 }
 .wallCaption > span:first-child {
   font-weight: 700;
@@ -835,7 +835,7 @@
 }
 .callBubble strong {
   display: block;
-  font: 800 1.7rem var(--display);
+  font: 700 1.7rem var(--display);
 }
 .callBubble strong[lang="zh"] {
   font:

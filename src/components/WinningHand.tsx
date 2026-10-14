@@ -1,34 +1,37 @@
 import PlayingTile, { type Suit } from "@/components/PlayingTile";
 
-const GROUPS: { label: string; suit: Suit; ranks: number[] }[] = [
-  { label: "Pair: two matching tiles", suit: "bamboo", ranks: [2, 2] },
-  {
-    label: "Pung: three matching tiles",
-    suit: "bamboo",
-    ranks: [1, 1, 1],
-  },
-  { label: "Chow: a run in one suit", suit: "bamboo", ranks: [5, 6, 7] },
-  { label: "Pung", suit: "dots", ranks: [8, 8, 8] },
-  { label: "Chow", suit: "characters", ranks: [2, 3, 4] },
-  { label: "Pung", suit: "dots", ranks: [3, 3, 3] },
+const GROUPS: {
+  kind: "Pair" | "Pung" | "Chow";
+  suit: Suit;
+  ranks: number[];
+}[] = [
+  { kind: "Pair", suit: "bamboo", ranks: [2, 2] },
+  { kind: "Pung", suit: "bamboo", ranks: [1, 1, 1] },
+  { kind: "Chow", suit: "bamboo", ranks: [5, 6, 7] },
+  { kind: "Pung", suit: "dots", ranks: [8, 8, 8] },
+  { kind: "Chow", suit: "characters", ranks: [2, 3, 4] },
+  { kind: "Pung", suit: "dots", ranks: [3, 3, 3] },
 ];
+const MEANS = { Pair: "two alike", Pung: "three alike", Chow: "a run" };
 
 export default function WinningHand() {
   return (
     <figure className="winning-hand">
-      <figcaption>
-        <strong>One example: five sets + one pair</strong>
-        <span>This is only one way to win!</span>
-      </figcaption>
+      <figcaption>One example</figcaption>
       <div className="hand-groups">
         {GROUPS.map((group, i) => (
           <div className="hand-group" key={i}>
-            <ul className="tile-row" aria-label={group.label}>
+            <ul
+              className="tile-row"
+              aria-label={`${group.kind}: ${MEANS[group.kind]}`}
+            >
               {group.ranks.map((rank, j) => (
                 <PlayingTile key={j} suit={group.suit} rank={rank} />
               ))}
             </ul>
-            <p>{group.label}</p>
+            <p aria-hidden="true">
+              <b data-kind={group.kind}>{group.kind}</b> {MEANS[group.kind]}
+            </p>
           </div>
         ))}
       </div>
