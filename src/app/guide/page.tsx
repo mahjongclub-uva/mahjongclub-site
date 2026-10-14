@@ -1,13 +1,11 @@
 import PlayingTile from "@/components/PlayingTile";
 import { IconBrandInstagram } from "@tabler/icons-react";
 import styles from "./guide.module.css";
-import {
-  WallPractice,
-  CallPractice,
-  TurnPractice,
-} from "@/components/GuidePractice";
+import WallGame from "./WallGame";
 import Lesson from "./Lesson";
 import LessonRack from "./LessonRack";
+import CallGame from "./CallGame";
+import TurnGame from "./TurnGame";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
 import { SPECIAL_HAND_POST } from "@/lib/site";
@@ -71,7 +69,7 @@ export default function Guide() {
           qualifier="we’ll do it for you at first"
         >
           <div className={styles.playSurface}>
-            <WallPractice />
+            <WallGame />
           </div>
         </Lesson>
 
@@ -130,9 +128,9 @@ export default function Guide() {
                 </span>
               </dt>
               <dd>
-                Draw a flower or season? Set it face-up beside you and draw a
-                replacement from the flower side. Each one adds to your
-                winnings.
+                Draw a flower, season, wind or dragon? Set it face-up beside you
+                and draw a replacement from the flower side. Each flower or
+                season adds to your winnings.
               </dd>
             </div>
           </dl>
@@ -145,7 +143,7 @@ export default function Guide() {
           qualifier="draw, then discard"
         >
           <div className={styles.playSurface}>
-            <TurnPractice />
+            <TurnGame />
           </div>
         </Lesson>
 
@@ -199,8 +197,7 @@ export default function Guide() {
             </div>
             <p className={styles.callNote}>
               Call, show your set, then discard. After a kong, draw a
-              replacement from the flower side first. Winds and dragons can pung
-              or kong, but never chow.
+              replacement from the flower side first.
             </p>
             <p className={styles.callNote}>
               You may also hear pong or peng for pung, chi for chow, and kang or
@@ -212,7 +209,7 @@ export default function Guide() {
             </p>
           </div>
           <div className={styles.playSurface}>
-            <CallPractice />
+            <CallGame />
           </div>
         </Lesson>
       </div>

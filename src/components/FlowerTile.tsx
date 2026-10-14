@@ -46,24 +46,50 @@ function CornerNumber({
  * top-left and number top-right.
  */
 export default function FlowerTile({ rank }: { rank: 1 | 2 | 3 | 4 }) {
-  const { name, character } = FLOWERS[rank - 1];
   return (
-    <Tile name={`${name} flower tile, ${rank}`}>
-      <Traced face={`flower${rank}`} />
-      <Glyph char={character} x={20} y={27} size={20} fill={BLUE} />
-      <CornerNumber x={72} rank={rank} fill={BLUE} />
+    <Tile name={`${FLOWERS[rank - 1].name} flower tile, ${rank}`}>
+      <FlowerFace rank={rank} />
     </Tile>
+  );
+}
+
+export function FlowerFace({ rank }: { rank: number }) {
+  return (
+    <>
+      <Traced face={`flower${rank}`} />
+      <Glyph
+        char={FLOWERS[rank - 1].character}
+        x={20}
+        y={27}
+        size={20}
+        fill={BLUE}
+      />
+      <CornerNumber x={72} rank={rank} fill={BLUE} />
+    </>
   );
 }
 
 /** Seasons: a red number top-left and a red name top-right. */
 export function SeasonTile({ rank }: { rank: 1 | 2 | 3 | 4 }) {
-  const { name, character } = SEASONS[rank - 1];
   return (
-    <Tile name={`${name} season tile, ${rank}`}>
+    <Tile name={`${SEASONS[rank - 1].name} season tile, ${rank}`}>
+      <SeasonFace rank={rank} />
+    </Tile>
+  );
+}
+
+export function SeasonFace({ rank }: { rank: number }) {
+  return (
+    <>
       <Traced face={`season${rank}`} />
       <CornerNumber x={16} rank={rank} fill={RED} />
-      <Glyph char={character} x={66} y={27} size={20} fill={RED} />
-    </Tile>
+      <Glyph
+        char={SEASONS[rank - 1].character}
+        x={66}
+        y={27}
+        size={20}
+        fill={RED}
+      />
+    </>
   );
 }
