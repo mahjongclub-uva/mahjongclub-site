@@ -301,6 +301,29 @@ h2 > .qualifier {
   font-size: 0.78rem;
   font-weight: 800;
 }
+.page :global(.tile-set .tile-set-aside) {
+  grid-column: 1 / -1;
+  max-inline-size: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0.75rem 0 0;
+  padding-block-start: 1rem;
+  border-block-start: 2px dashed
+    color-mix(in oklch, var(--ink) 15%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.page :global(.tile-set .tile-set-aside strong) {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--butter);
+  color: var(--ink);
+  font: 700 0.72rem/1.4 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .page :global(.tile-set .set-tile) {
   inline-size: min(72px, calc((100cqi - 2rem - 8 * var(--tile-gap)) / 9));
 }

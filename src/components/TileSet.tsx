@@ -50,14 +50,20 @@ export default function TileSet() {
         ))}
       </Group>
 
-      <Group id="honours-winds" count="four of each" title="Winds">
+      {/* At the club, honours are bonus tiles like flowers: never kept in a hand. */}
+      <p className="tile-set-aside">
+        <strong>Set aside</strong> Draw one? Lay it face up and draw again from
+        the flower side.
+      </p>
+
+      <Group id="bonus-winds" count="four of each" title="Winds">
         <CharacterTile name="East wind" index="E" bottom="東" ink={BLUE} />
         <CharacterTile name="South wind" index="S" bottom="南" ink={BLUE} />
         <CharacterTile name="West wind" index="W" bottom="西" ink={BLUE} />
         <CharacterTile name="North wind" index="N" bottom="北" ink={BLUE} />
       </Group>
 
-      <Group id="honours-dragons" count="four of each" title="Dragons">
+      <Group id="bonus-dragons" count="four of each" title="Dragons">
         <CharacterTile name="Red dragon" bottom="中" />
         <CharacterTile name="Green dragon" bottom="發" ink={GREEN} />
         <Tile name="White dragon">
@@ -65,7 +71,7 @@ export default function TileSet() {
         </Tile>
       </Group>
 
-      <Group id="honours-flowers" count="one of each" title="Flowers">
+      <Group id="bonus-flowers" count="one of each" title="Flowers">
         <FlowerTile rank={1} />
         <FlowerTile rank={2} />
         <FlowerTile rank={3} />
