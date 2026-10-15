@@ -1,18 +1,21 @@
 "use client";
 
-import { IconSearch, IconCards, IconTrophy } from "@tabler/icons-react";
+import Link from "next/link";
+import { IconArrowRight, IconSearch, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import type { Standing, Unranked } from "@/lib/schema";
-import { SEASON_START } from "@/lib/format";
+import { StandingRow } from "@/components/StandingParts";
 
 export default function PlayerSearch({
   standings,
   unranked,
   seasonNet,
+  minTables,
 }: {
   standings: Standing[];
   unranked: Unranked[];
   seasonNet: boolean;
+  minTables: number;
 }) {
   const [query, setQuery] = useState("");
   const term = query.trim().toLocaleLowerCase();
@@ -28,18 +31,9 @@ export default function PlayerSearch({
     <section className="section player-search" aria-labelledby="find-player">
       <div className="section-wrap">
         <div className="search-panel">
-          <IconCards
-            className="search-decoration"
-            size={76}
-            stroke={1.2}
-            aria-hidden="true"
-          />
           <h2 className="section-title" id="find-player">
             Don’t see yourself?
           </h2>
-          <p className="quiet">
-            Find your name below. Everyone is welcome at the table.
-          </p>
           <label className="sr-only" htmlFor="player-query">
             Search for your name
           </label>
@@ -50,58 +44,77 @@ export default function PlayerSearch({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search for your name"
+              placeholder="Type your name"
               autoComplete="off"
               aria-describedby="search-status"
             />
+            {term && (
+              <span
+                className="search-count"
+                data-none={count === 0 || undefined}
+                aria-hidden="true"
+              >
+                {count} found
+              </span>
+            )}
             {query && (
               <button
                 type="button"
-                className="action-link"
-                onClick={() => setQuery("")}
+                className="search-clear"
+                aria-label="Clear search"
+                onClick={() => {
+                  setQuery("");
+                  // The button goes with the text; keep focus in the box.
+                  document.getElementById("player-query")?.focus();
+                }}
               >
-                Clear
+                <IconX size={20} stroke={2.4} aria-hidden="true" />
               </button>
             )}
           </div>
-          <p
-            className={term ? "quiet" : "sr-only"}
-            id="search-status"
-            role="status"
-          >
+          {!term && (
+            <p className="search-hint">
+              Anyone who has played a scored table shows up here.
+            </p>
+          )}
+          <p className="sr-only" id="search-status" role="status">
             {term
               ? `${count} ${count === 1 ? "player" : "players"} found.`
               : ""}
           </p>
           {term && count === 0 && (
-            <p>Try a first name or a shorter spelling.</p>
+            <div className="search-empty">
+              <strong>Not on the board yet</strong>
+              <p>
+                Play {minTables === 1 ? "one table" : `${minTables} tables`} at
+                a meeting and you’re on it.
+              </p>
+              <Link href="/#when">
+                Next meeting <IconArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </div>
           )}
           {count > 0 && (
-            <ul className="search-results">
+            <ul className="standings">
               {ranked.map((player) => (
-                <li key={player.id}>
-                  <strong>{player.display}</strong>
-                  <span>
-                    <IconTrophy size={18} aria-hidden="true" /> Rank{" "}
-                    <b>{player.rank}</b>
-                  </span>
-                  <span>
-                    <b>
-                      {seasonNet
-                        ? SEASON_START + player.total_net
-                        : player.total_gain}
-                    </b>{" "}
-                    points
-                  </span>
-                </li>
+                <StandingRow
+                  key={player.id}
+                  player={player}
+                  seasonNet={seasonNet}
+                  match={term}
+                />
               ))}
               {waiting.map((player) => (
-                <li key={player.id}>
-                  <strong>{player.display}</strong>
-                  <span>Not yet ranked</span>
-                  <span>
-                    {player.tables_needed} more{" "}
-                    {player.tables_needed === 1 ? "table" : "tables"} to qualify
+                <li key={player.id} className="standing">
+                  <span className="standing-tile rank-plain" aria-hidden="true">
+                    –
+                  </span>
+                  <span className="standing-player">
+                    <span className="standing-name">{player.display}</span>
+                    <span className="lb-tables">
+                      {player.tables_needed} more{" "}
+                      {player.tables_needed === 1 ? "table" : "tables"} to rank
+                    </span>
                   </span>
                 </li>
               ))}
