@@ -27,7 +27,7 @@ export function formatShortDate(iso: string): string {
 
 /** Pinned rather than read from the environment, since `next build` runs on a
  * GitHub runner in UTC and meeting times must render in the club's zone. */
-const CLUB_TZ = "America/New_York";
+export const CLUB_TZ = "America/New_York";
 
 /** "2026-09-18T17:30:00-04:00" -> "Friday 18 September". */
 export function formatMeetingDay(iso: string): string {

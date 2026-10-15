@@ -869,58 +869,6 @@ main {
 
 /* Guide and club information ------------------------------------------- */
 
-.social-list strong {
-  font-family: var(--display);
-  font-size: var(--text-lg);
-  font-weight: 600;
-}
-
-.social-list {
-  border-block-start: 1px solid var(--rule);
-}
-
-.social-list > a,
-.social-list > div {
-  min-height: 86px;
-  padding-block: var(--space-3);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-3);
-  border-block-end: 1px solid var(--rule);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .social-list > a:hover strong {
-    color: var(--jade);
-  }
-}
-
-.social-list span {
-  display: grid;
-  gap: 2px;
-}
-
-.social-list small,
-.social-list b {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-}
-
-.social-list small {
-  color: var(--ink-soft);
-}
-
-.social-list b {
-  color: var(--jade);
-}
-
-.social-list-pending b {
-  color: var(--ink-soft);
-}
-
 .club-notes {
   padding-block: var(--space-5);
   border-block-start: 1px solid var(--rule);
@@ -950,11 +898,6 @@ main {
 
   .hero-actions .action-link {
     flex: 1 1 9rem;
-  }
-
-  .social-list > a,
-  .social-list > div {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -1153,69 +1096,19 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
 }
 
-/* The next meeting, stated in words above the calendar frame.
-   Three lines: a label, the day, then time and room. Stacked rather than
-   strung along one line, because at 375px a single line wraps in the middle
-   of a date and reads as two half-facts. */
-.next-meeting {
-  margin: 0 0 var(--space-4);
-}
-
-.next-meeting-label {
-  margin: 0;
-  font-family: var(--sans);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--jade);
-}
-
-.next-meeting-when {
-  margin: var(--space-1) 0 0;
-  font-family: var(--display);
-  font-size: var(--text-xl);
-  line-height: 1.15;
-  color: var(--ink);
-}
-
-.next-meeting-detail {
-  margin: var(--space-2) 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-3);
-  font-family: var(--sans);
-  font-size: var(--text-base);
-}
-
-.next-meeting-time {
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-/* The room, emphasised: full ink where its neighbour is soft, and a jade
-   marker in front so the eye lands on it first. Weight and colour both, so
-   the emphasis survives greyscale. */
-.next-meeting-where {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.next-meeting-where::before {
-  content: "";
-  /* Decorative, so it stays out of the accessibility tree — the room name
-     itself carries every bit of the meaning. */
-  flex: none;
-  width: 0.42em;
-  height: 0.42em;
-  border-radius: 50%;
-  background: var(--jade);
-  transform: translateY(-0.12em);
-}
+/* The next meeting as a raised card: a tear-off calendar tile, then the day,
+   then time and room as chips. Stacked, because at 375px one line wraps in
+   the middle of a date. */
+.next-meeting { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(12px, 4vw, 18px); padding: clamp(14px, 4vw, 20px); border-radius: 22px; background: #fffcf6; box-shadow: 0 0 0 1px #0000000d, 0 12px 26px -16px #0005; }
+.next-meeting-tile { display: grid; justify-items: center; align-content: center; width: clamp(64px, 20vw, 80px); aspect-ratio: 3 / 4; border-radius: 12px; background: linear-gradient(#fffdf6, #f7efdc); box-shadow: 0 0 0 1px #0001, 5px 6px 0 #a9d2c3; rotate: -4deg; }
+.next-meeting-tile small { color: var(--accent); font: 700 0.8rem / 1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; }
+.next-meeting-tile b { color: #1d4f9a; font: 700 2.7rem / 1 var(--display); }
+.next-meeting-tile span { margin-top: 2px; color: var(--ink-soft); font: 600 0.75rem / 1 var(--sans); }
+.next-meeting-label { display: inline-block; white-space: nowrap; margin: 0; padding: 6px 11px; border-radius: 999px; background: oklch(0.88 0.15 95); color: var(--ink); font: 700 0.7rem / 1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; }
+.next-meeting-when { margin: 10px 0 12px; font: 700 clamp(1.7rem, 5vw, 2.4rem) / 1 var(--display); color: var(--ink); }
+.next-meeting-detail { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.next-meeting-detail span { display: inline-flex; white-space: nowrap; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: #f2ebdc; font: 600 0.9rem / 1 var(--sans); font-variant-numeric: tabular-nums; }
+.next-meeting-detail svg { flex: none; color: var(--accent); }
 
 /* The scoring explanation under the leaderboard. Deliberately quiet: it is
    reference material, and the table above it is the reason people came. */
@@ -1458,8 +1351,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
 .home-page .section:has(#first-night) > .section-wrap { position: relative; }
 .home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
-.home-page .next-meeting { border-left: 3px solid var(--jade); padding: 1.25rem 0 1.25rem 1.5rem; }
-.home-page .next-meeting-when { font-size: clamp(1.7rem, 3vw, 2.6rem); }
 .home-page .calendar-frame { width: 100%; margin: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px #254a3510; }
 .home-page .section-reveal { border-block: 1px solid var(--rule); }
 .action-link { border-radius: 9px; min-height: 48px; box-shadow: 0 3px 0 #23483226; }
@@ -1473,7 +1364,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .photo-slot img { aspect-ratio: 4 / 3; object-fit: cover; }
 .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 5; }
 .photo-slot figcaption { padding-top: 0.75rem; color: var(--ink-soft); }@media (prefers-reduced-motion: no-preference) {
-  .action-link, .social-list > a { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+  .action-link { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
   @media (hover: hover) and (pointer: fine) { .action-link:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #23483226; } }
   .action-link:active { transform: translateY(2px); box-shadow: none; }
   .set-tile-body { transition: transform 240ms ease, filter 240ms ease; }
@@ -1486,7 +1377,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .home-page .welcome, .home-page .meeting-layout { grid-template-columns: 1fr; gap: 2rem; }
   .home-page .section-title { max-width: 100%; }
   .home-page .welcome > div:first-child { padding-top: 0; }
-  .home-page .next-meeting { margin: 0; }
   .photo-grid { grid-template-columns: 1fr; }
   .photo-slot:nth-child(2n) { padding-top: 0; }
   .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }}
@@ -1707,9 +1597,6 @@ body {
 }
 .winning-hand { background: #ebe6dd; border-color: #d5cec1; }
 .club-photo-placeholder { background: linear-gradient(145deg, #eee5d6, #e4d6c1); border-color: #cdbda5; }
-.social-list > a { border-color: #243d5835; }
-.social-list > a b { color: var(--nav-ink); border: 1px solid #243d5840; border-radius: 6px; padding: 0.6rem 0.8rem; }
-@media (hover: hover) and (pointer: fine) { .social-list > a:hover { background: #e8edf280; } }
 .footer { background: #243344; color: #f5efe4; border-top: 4px solid #c9ab75; }
 .footer-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; }
 .footer .footer-disclaimer { flex-basis: 100%; color: #f5efe4; }
@@ -1809,23 +1696,26 @@ body { background-image: none; }
 .about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
 .about-page .officers { gap: 2rem; }
 .about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
-.about-page .social-list { display: grid; gap: 1rem; border: 0; }
-.about-page .social-list > a { grid-template-columns: auto minmax(0, 1fr) auto; padding: 1.5rem; border: 1px solid #243d5840; background: #fffcf5; border-radius: 12px; box-shadow: 0 3px 0 #243d5812; gap: 1.2rem; }
-.about-page .social-list strong { font-size: 1.2rem; }
-.join-icon { color: var(--nav-ink); }
-.about-page .social-list b { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
-@media (prefers-reduced-motion: no-preference) {
-  @media (hover: hover) and (pointer: fine) {
-    .about-page .social-list > a:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #243d5812; }
-    .about-page .social-list > a:hover .join-icon { transform: rotate(-8deg); }
-  }
-  .join-icon { transition: transform 180ms ease; }
+/* About links: raised cards you can press; one still pending lies flat. */
+.link-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 12px; }
+.link-card { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; border-radius: 16px; background: #fffcf6; color: var(--ink); text-decoration: none; box-shadow: 0 0 0 1px #0000000f, 0 4px 0 #d9cfbb; }
+a.link-card:active { translate: 0 3px; box-shadow: 0 0 0 1px #0000000f, 0 1px 0 #d9cfbb; }
+div.link-card { box-shadow: 0 0 0 1px #0000000f; }
+.link-card > svg:first-child { flex: none; color: var(--accent); }
+.link-card > span { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.link-card strong { font: 700 1.05rem / 1.2 var(--sans); }
+.link-card small { color: var(--ink-soft); font-size: 0.8rem; }
+.link-card > svg:last-child { flex: none; color: var(--ink-soft); }
+/* The press card: the outlet as a badge, the headline in the display face. */
+.press-card { padding: 18px 20px; }
+.press-card strong { font: 700 clamp(1.4rem, 4vw, 1.9rem) / 1.1 var(--display); }
+.press-card b { justify-self: start; padding: 5px 10px; border-radius: 999px; background: oklch(0.88 0.15 95); font: 700 0.7rem / 1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; }
+@media (hover: hover) and (pointer: fine) {
+  a.link-card:hover { background: #fff; }
 }
 @media (max-width: 700px) {
   .about-story, .about-officers-layout { grid-template-columns: 1fr; gap: 2rem; }
   .about-photo { aspect-ratio: 4 / 3; margin: 0.5rem; }
-  .about-page .social-list > a { padding: 1.2rem; grid-template-columns: auto minmax(0, 1fr); gap: 0.8rem; }
-  .about-page .social-list > a b { grid-column: 2; justify-self: start; }
 }
 .about-page .section-wrap { max-width: 70rem; }
 .about-page .page-intro { max-width: 42rem; }
@@ -1873,10 +1763,10 @@ body::before {
 
 /* Club theme: ivory paper, charcoal ink, vermilion interface accents. */
 :root { --accent: #a33428; }
-.section-title::after, .eyebrow::before, .next-meeting-where::before { background: var(--accent); }
-.eyebrow, .next-meeting-label,
-.call-guide dt span, .hand-group p, .join-icon { color: var(--accent); }
-.call-guide > div, .home-page .next-meeting { border-color: var(--accent); }
+.section-title::after, .eyebrow::before { background: var(--accent); }
+.eyebrow,
+.call-guide dt span, .hand-group p { color: var(--accent); }
+.call-guide > div { border-color: var(--accent); }
 :focus-visible { outline-color: var(--accent); }
 .search-panel { background: #eee6d7; border-color: var(--rule); box-shadow: 0 1px 1px -0.5px rgb(0 0 0 / 0.06), 0 3px 3px -1.5px rgb(0 0 0 / 0.06), 0 6px 6px -3px rgb(0 0 0 / 0.06), 0 12px 12px -6px rgb(0 0 0 / 0.06); }
 .about-officers-layout { display: block; }

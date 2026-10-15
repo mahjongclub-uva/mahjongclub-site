@@ -46,6 +46,19 @@ export const INSTAGRAM: string | null = siteContent.instagram || null;
 export const SPECIAL_HAND_POST: string | null =
   "https://www.instagram.com/p/DPKzhk_DOrP/?img_index=1";
 
+/** A news story about the club, linked from the about page. Null hides it. */
+export const PRESS: {
+  outlet: string;
+  title: string;
+  date: string;
+  url: string;
+} | null = {
+  outlet: "UVA Today",
+  title: "Mahjong Club is building community at UVA",
+  date: "2026-02-03",
+  url: "https://news.virginia.edu/content/mahjong-club-building-community-uva",
+};
+
 /** GroupMe invite URL. Keep null until there's a current link, otherwise the Contact page sends people to an expired or guessed group. */
 export const GROUPME_URL: string | null = siteContent.groupme_url || null;
 
