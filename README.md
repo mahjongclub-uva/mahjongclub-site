@@ -131,13 +131,11 @@ Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.o
 - **Table session:** one group's run of games at a physical table, from the first seat taken until someone taps End table. Each session has a number that goes up every time the table is ended.
 - **Game:** one reported win. The winner gains three times what each other player pays, and the other three each pay it, so a game always sums to zero. Everyone starts a session at 205. Code calls games `hands`.
 
-The lifecycle:
+What players see at a table is in the [officer guide](OFFICER_GUIDE.md#tables-on-the-night). The rules the backend enforces:
 
-1. A checked-in player takes a wind seat (East, South, West or North) at a table. A player belongs to one table at a time; the backend refuses a second.
-2. Once all four seats are taken, any of the four reports a game: winner, what each other player pays, a review of every change, then Save game.
-3. A player can leave alone only while the session has no games. After that, only End table, which affects all four.
-4. End table writes the session's four totals as one `Table N` block in Points Tracking, the same as a typed-totals save. It releases all four players and starts the next session at the same table. A session with no games writes nothing.
-5. When scoring closes, any session with games is saved the same way on the next request.
+- A player belongs to one table at a time; a second seat is refused.
+- Games can be saved only once all four seats are taken; any of the four can save one. A player can leave alone only while the session has no games; after that, only End table, which releases all four.
+- End table writes the four totals as one `Table N` block in Points Tracking, the same as a typed-totals save, and starts the next session at the same table. A session with no games writes nothing, and one still open when scoring closes is saved on the next request.
 
 The workbook has no per-game rows. Games live in Script Properties (one key per table, `room:<meeting>:<table>`) until the table ends. The scoresheet block number ("scoresheet Table 8") is not the physical table number.
 
@@ -164,6 +162,8 @@ The workbook has no per-game rows. Games live in Script Properties (one key per 
 | Another phone saved first | The entry is cleared with a note if it was the same game, or kept with a warning if different                      |
 
 After a meeting, **Extensions → Apps Script → Executions** shows one log line per request, such as `{"request":"POST rooms hand","status":200,"ms":840,"lockMs":12}`: its kind, outcome, duration and time spent waiting for the write lock. These lines never include names, IDs or scores. They are the measurements for deciding whether the meeting backend needs to move off Apps Script.
+
+Check-in keeps a 30-second list of known computing IDs and a five-minute cache of upcoming calendar events in Apps Script (opening times are rechecked on every request). Both are hints: check-in and sign-up reread the roster under the lock before saving. The details are commented in `apps-script/Club.gs`. Changes there need the Apps Script deployment updated, and local tests say nothing about Google's response times.
 
 To rehearse without touching the real workbook, run the in-memory harness used in `apps-script/club.test.mjs` behind a local server, never the live URL.
 
