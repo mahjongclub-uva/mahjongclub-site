@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import { formatPoints } from "@/lib/format";
 
 /**
  * A score counting up from 0 as its row lands. JavaScript rather than a CSS
@@ -32,13 +33,15 @@ export default function CountUp({
     let frame = 0;
     const tick = (now: number) => {
       const t = Math.min(1, Math.max(0, (now - start) / 600));
-      element.textContent = String(Math.round(value * (1 - (1 - t) ** 3)));
+      element.textContent = formatPoints(
+        Math.round(value * (1 - (1 - t) ** 3)),
+      );
       if (t < 1) frame = requestAnimationFrame(tick);
     };
     tick(performance.now());
     return () => {
       cancelAnimationFrame(frame);
-      element.textContent = String(value);
+      element.textContent = formatPoints(value);
       // A remount (or Strict Mode's rerun) must judge visibility afresh.
       delete element.dataset.counted;
     };
@@ -46,7 +49,7 @@ export default function CountUp({
 
   return (
     <span ref={ref} className="count">
-      {value}
+      {formatPoints(value)}
     </span>
   );
 }
