@@ -1,90 +1,15 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import {
-  IconCrownFilled,
-  IconTriangleFilled,
-  IconTriangleInvertedFilled,
-} from "@tabler/icons-react";
-import { CharacterFace, TileFace } from "@/components/PlayingTile";
-import { RED } from "@/components/TileArtwork";
+import { IconCrownFilled } from "@tabler/icons-react";
 import { getCurrentSemester } from "@/lib/data";
 import { SEASON_START, type Standing } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
 import PlayerSearch from "@/components/PlayerSearch";
-import RankTileFlip from "@/components/RankTileFlip";
 import CountUp from "@/components/CountUp";
+import { Delta, RankTile, StandingRow } from "@/components/StandingParts";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;
-
-/** 一 through 九, with 伍 for five as on the guide's tiles. */
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
-
-/**
- * A rank as the guide's character tile, turning over to show the number for
- * anyone who doesn't read the characters. Plain number past nine.
- */
-function RankTile({ rank }: { rank: number }) {
-  const numeral = NUMERALS[rank];
-  if (!numeral) return <span className="rank-plain">{rank}</span>;
-  return (
-    <RankTileFlip rank={rank}>
-      <span className="rank-front">
-        <TileFace>
-          <CharacterFace top={numeral} bottom="萬" />
-        </TileFace>
-      </span>
-      <span className="rank-back">
-        <TileFace>
-          <text
-            x="44"
-            y="84"
-            textAnchor="middle"
-            fontFamily="var(--body), sans-serif"
-            fontWeight="700"
-            fontSize="64"
-            fill={RED}
-          >
-            {rank}
-          </text>
-        </TileFace>
-      </span>
-    </RankTileFlip>
-  );
-}
-
-/** How far a season score sits from the start, by sign and arrow as well as colour. */
-function Delta({ net }: { net: number }) {
-  const Arrow = net < 0 ? IconTriangleInvertedFilled : IconTriangleFilled;
-  return (
-    <span className="lb-delta" data-dir={net < 0 ? "down" : "up"}>
-      <Arrow size={11} aria-hidden="true" />
-      {net < 0 ? "−" : "+"}
-      {Math.abs(net)}
-      <span className="sr-only"> from {SEASON_START}</span>
-    </span>
-  );
-}
-
-/** Tables played as tile backs; a count past six. */
-function Tables({ count }: { count: number }) {
-  return (
-    <span className="lb-tables">
-      <span className="sr-only">
-        {count} {count === 1 ? "table" : "tables"}
-      </span>
-      <span className="lb-pips" aria-hidden="true">
-        {count > 6 ? (
-          <>
-            <i />×{count}
-          </>
-        ) : (
-          Array.from({ length: count }, (_, k) => <i key={k} />)
-        )}
-      </span>
-    </span>
-  );
-}
 
 export default function Leaderboard() {
   const semester = getCurrentSemester();
@@ -165,30 +90,12 @@ export default function Leaderboard() {
                   aria-label={`${semester.label} standings, from fourth`}
                 >
                   {shown.slice(3).map((player, i) => (
-                    <li
+                    <StandingRow
                       key={player.id}
-                      className="standing"
-                      style={{ "--i": i + 3 } as CSSProperties}
-                    >
-                      <span className="standing-tile">
-                        <RankTile rank={player.rank} />
-                      </span>
-                      <span className="sr-only">Rank {player.rank}: </span>
-                      <span className="standing-player">
-                        <span className="standing-name">{player.display}</span>
-                        <Tables count={player.tables_played} />
-                      </span>
-                      <span className="standing-score">
-                        <b>
-                          <CountUp
-                            value={score(player)}
-                            delay={(i + 3) * 40 + 100}
-                          />
-                        </b>
-                        <span className="sr-only"> points</span>
-                        {seasonNet && <Delta net={player.total_net} />}
-                      </span>
-                    </li>
+                      player={player}
+                      seasonNet={seasonNet}
+                      index={i + 3}
+                    />
                   ))}
                 </ol>
               )}
@@ -205,6 +112,7 @@ export default function Leaderboard() {
         standings={semester.standings}
         unranked={semester.unranked}
         seasonNet={seasonNet}
+        minTables={tables}
       />
 
       <section className="section">
