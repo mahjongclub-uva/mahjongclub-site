@@ -1,83 +1,414 @@
-.hero {
-  margin-top: 2rem;
+/* The guide plays like the meeting pages in the site's own type: soft clay
+   cards, a jade accent and butter highlights. Barlow for headings, Public
+   Sans for anything small, where a condensed face gets cramped. */
+.page {
+  --card: var(--tile-face-hi);
+  --butter: oklch(0.88 0.15 95);
+  --clay:
+    0 8px 18px -6px oklch(0.3 0.03 90 / 0.3), inset 0 -4px 0 oklch(0 0 0 / 0.06);
+  --han: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  font-family: var(--body);
+  padding-block-end: 3rem;
 }
-.heroCopy {
-  padding-block: 3rem 1rem;
-}
-.heroCopy h1 {
-  margin: 0;
-  font: 700 clamp(2.75rem, 6vw, 5rem) / 1.08 var(--display);
-  letter-spacing: -0.025em;
-}
-.heroCopy > p {
-  margin: 1.5rem 0;
-  color: var(--ink-soft);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-.lessonNav {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.4rem;
-  width: min(calc(100% - 4rem), 68rem);
-  margin: 1.5rem auto 0;
-  padding: 0.3rem;
-  /* A floating paper bar that stays in reach on a long page. Translucent so
-     the page reads as scrolling beneath it rather than being cut off. */
-  position: sticky;
-  top: 0.5rem;
-  z-index: 2;
-  border-radius: 14px;
-  background: rgb(246 242 233 / 0.82);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow:
-    0 2px 3px -1px rgb(0 0 0 / 0.1),
-    0 1px 0 rgb(25 28 33 / 0.02),
-    0 0 0 1px rgb(25 28 33 / 0.08);
-}
-@media (prefers-reduced-transparency: reduce) {
-  .lessonNav {
-    background: #f6f2e9;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+/* A 16px gutter on phones, so tiles and games get the width. */
+@media (max-width: 560px) {
+  .page :global(.section-wrap) {
+    padding-inline: 1rem;
   }
 }
-.page :global(.section-title) {
-  scroll-margin-top: 6rem;
+.hero {
+  padding-block: 2rem 0;
 }
-.lessonNav a {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-height: 52px;
-  padding: 0.5rem 0.65rem;
-  border-radius: 10px;
+.hero h1 {
+  margin: 0;
+  font: 700 clamp(2.4rem, 7vw, 3.6rem) / 1.02 var(--display);
+  letter-spacing: -0.015em;
+}
+.qualifier {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* The lessons as tiles on a wooden rack, pinned once you scroll past it. */
+.rack {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 3;
+  margin: 1.25rem calc(-1 * var(--space-4)) 0;
+  padding: 0.5rem var(--space-4) 0.75rem;
+  background: linear-gradient(var(--paper) 82%, transparent);
+}
+.rack ol {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 9px 8px 13px;
+  list-style: none;
+  border-radius: 16px;
+  background: linear-gradient(oklch(0.55 0.07 60), oklch(0.45 0.06 60));
+  box-shadow:
+    inset 0 -5px 0 oklch(0.35 0.05 60),
+    0 8px 16px -8px oklch(0.3 0.03 90 / 0.5);
+}
+.rack a {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-block-size: 52px;
+  border-radius: 8px;
+  background: linear-gradient(var(--tile-face-hi), var(--tile-face));
+  box-shadow:
+    0 4px 0 var(--tile-back-hi),
+    0 6px 0 var(--tile-back);
   color: var(--ink);
   text-decoration: none;
-  font: 600 1.3rem / 1.1 var(--display);
 }
-.lessonNav svg {
-  width: 27px;
-  height: 27px;
-  flex-shrink: 0;
+.rack svg {
+  inline-size: 22px;
+  block-size: 22px;
   color: var(--jade);
-  stroke-width: 1.6;
 }
-.lessonNav small {
-  display: block;
-  margin-top: 0.35rem;
+.rack strong {
+  font: 700 0.66rem / 1 var(--sans);
+}
+.rack small {
+  display: none;
+}
+.rackNumber {
+  position: absolute;
+  inset: 3px auto auto 5px;
   color: var(--ink-soft);
-  font: 400 0.72rem / 1.3 var(--sans);
+  font: 700 0.6rem / 1 var(--sans);
 }
-.page :global(.section) {
-  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+/* A butter dot on phones; a "Game" tag where there's room for words. */
+.rackGame {
+  position: absolute;
+  inset: -5px -3px auto auto;
+  inline-size: 11px;
+  block-size: 11px;
+  overflow: clip;
+  border-radius: 50%;
+  background: var(--butter);
+  box-shadow: 0 0 0 2px var(--card);
+  color: transparent;
+  font-size: 0;
 }
+.rack a[aria-current] {
+  translate: 0 4px;
+  box-shadow:
+    0 2px 0 var(--tile-back-hi),
+    0 3px 0 var(--tile-back),
+    0 0 14px 4px oklch(0.88 0.15 95 / 0.95);
+}
+.rack a:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 3px;
+}
+.rack a:active {
+  scale: 0.97;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rack a {
+    transition:
+      translate 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      box-shadow 160ms ease;
+  }
+}
+@media (min-width: 900px) {
+  .rack ol {
+    gap: 12px;
+    padding: 12px 14px 18px;
+    border-radius: 22px;
+  }
+  .rack a {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    align-items: center;
+    gap: 0 10px;
+    min-block-size: 62px;
+    padding: 6px 12px;
+  }
+  .rack svg {
+    grid-row: span 2;
+    inline-size: 28px;
+    block-size: 28px;
+  }
+  .rack strong {
+    font-size: 0.95rem;
+    font-weight: 900;
+  }
+  .rack small {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .rackNumber {
+    display: none;
+  }
+  .rackGame {
+    inset: -8px -6px auto auto;
+    inline-size: auto;
+    block-size: auto;
+    padding: 1px 7px;
+    border-radius: 999px;
+    color: var(--ink);
+    font: 700 0.6rem / 1.4 var(--sans);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+/* A phone on its side: one slim row, each icon beside its name. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .rack ol {
+    padding: 6px 8px 9px;
+    border-radius: 14px;
+  }
+  .rack a {
+    grid-auto-flow: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-block-size: 44px;
+  }
+  .rack svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+  .rack strong {
+    font-size: 0.8rem;
+  }
+  .rackNumber {
+    display: none;
+  }
+}
+
+/* Links that land on a lesson, and keyboard focus, stay clear of the pinned
+   rack, as the LIVE pill keeps the end of the page clear. */
+:global(html):has(.rack) {
+  scroll-padding-block-start: 7.5rem;
+}
+
+/* Each lesson is one clay card. */
+.lesson {
+  margin-block-start: 1.25rem;
+  padding: clamp(1rem, 3.5vw, 1.75rem);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--clay);
+}
+.lesson h2 {
+  margin: 0.6rem 0 1rem;
+  font: 700 clamp(1.6rem, 4.5vw, 2.1rem) / 1.1 var(--display);
+  letter-spacing: -0.01em;
+}
+.badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--card);
+  font: 700 0.72rem / 1.4 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+/* Three facts as a plain list, so they never read as buttons. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+.facts b {
+  display: block;
+  color: var(--ink);
+  font: 700 1.9rem/1.1 var(--display);
+}
+.facts b[lang] {
+  color: var(--tile-letter);
+  font-family: var(--han);
+}
+/* A link out: jade, outlined, with an arrow, so it reads as a way off the page. */
+.linkButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  inline-size: fit-content;
+  min-block-size: 48px;
+  margin: 1.25rem auto 0;
+  padding: 0 18px;
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 2px var(--jade);
+  color: var(--jade);
+  font: 700 1rem var(--sans);
+  text-decoration: none;
+}
+.linkButton svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .linkButton:hover {
+    background: var(--jade);
+    color: #fff;
+  }
+}
+.linkButton:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 3px;
+}
+.linkButton:active {
+  scale: 0.97;
+}
+
+/* The tile chart: every group on its own panel, suits full width and the
+   set-aside tiles in pairs where there's room. One tile size throughout. */
+.page :global(.tile-set) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  margin: 0;
+  container-type: inline-size;
+}
+.page :global(.tile-set .tile-group) {
+  display: block;
+  margin: 0;
+  padding: 0.85rem 1rem 1rem;
+  border: 0;
+  border-radius: 18px;
+  background: var(--tile-face);
+}
+.page :global(.tile-set .tile-group h3) {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0 0 0.75rem;
+  color: var(--ink);
+  font: 700 1.05rem var(--display);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.page :global(.tile-set .tile-group h3 small) {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.page :global(.tile-set .tile-set-aside) {
+  grid-column: 1 / -1;
+  max-inline-size: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0.75rem 0 0;
+  padding-block-start: 1rem;
+  border-block-start: 2px dashed
+    color-mix(in oklch, var(--ink) 15%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.page :global(.tile-set .tile-set-aside strong) {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--butter);
+  color: var(--ink);
+  font: 700 0.72rem/1.4 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.page :global(.tile-set .set-tile) {
+  inline-size: min(72px, calc((100cqi - 2rem - 8 * var(--tile-gap)) / 9));
+}
+@media (min-width: 701px) {
+  .page :global(.tile-set) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .page :global(.tile-set .tile-group:has([id^="suit-"])) {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 560px) {
+  .lesson {
+    padding: 1rem 0.85rem 1.1rem;
+  }
+  .page :global(.tile-set .tile-group) {
+    padding: 0.75rem 0.6rem 0.9rem;
+  }
+  .page :global(.tile-set .set-tile) {
+    inline-size: min(64px, calc((100cqi - 1.2rem - 4 * var(--tile-gap)) / 5));
+  }
+}
+
+/* The example hand: each set on a panel, named by a badge. */
+.page :global(.winning-hand) {
+  margin: 0;
+}
+.page :global(.winning-hand figcaption) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font: 700 1.25rem/1.2 var(--display);
+  text-align: start;
+}
+.page :global(.winning-hand figcaption span) {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--butter);
+  font: 700 0.72rem / 1.4 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.page :global(.hand-groups) {
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+.page :global(.hand-group) {
+  padding: 0.85rem 0.5rem 0.75rem;
+  border-radius: 16px;
+  background: var(--tile-face);
+}
+.page :global(.hand-group p) {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-top: 0.6rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.page :global(.hand-group p b) {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--card);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.page :global(.hand-group p b[data-kind="Pair"]) {
+  background: var(--accent);
+}
+.page :global(.hand-group p b[data-kind="Chow"]) {
+  background: var(--jade);
+}
+
 /* The games are drawn for a phone; past that they keep a table-sized
    width instead of stretching the felt into empty space. */
-.playSurface {
-  max-width: 46rem;
-}
 .playSurface > div {
   margin-top: 0;
   padding: 0;
@@ -88,77 +419,6 @@
 .callRules {
   margin-block: 1.5rem;
   padding-block: 0.5rem;
-}
-.page :global(.tile-group) {
-  padding-top: 1.5rem;
-  gap: 0.5rem 2rem;
-}
-.page :global(.tile-group h3) {
-  font: 600 1.6rem var(--display);
-  text-transform: none;
-  letter-spacing: 0;
-}
-.page :global(.tile-set) {
-  gap: 1.5rem;
-}
-.lessonNav a:focus-visible {
-  outline: 3px solid var(--jade);
-  outline-offset: 5px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .lessonNav a:hover {
-    background: #dde6d9;
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .lessonNav a {
-    transition: background 150ms ease;
-  }
-}
-@media (max-width: 900px) {
-  .lessonNav small {
-    display: none;
-  }
-  .lessonNav a {
-    gap: 0.4rem;
-    font-size: 1.15rem;
-  }
-}
-@media (max-width: 700px) {
-  .hero {
-    margin-top: 1rem;
-  }
-  .heroCopy {
-    padding-block: 1.7rem 0.5rem;
-  }
-  .heroCopy > p {
-    margin: 1rem 0 1.2rem;
-    font-size: 0.9rem;
-  }
-  .lessonNav {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    width: calc(100% - 2rem);
-    gap: 0;
-    margin-top: 0.5rem;
-    padding: 0.25rem 0;
-  }
-  .lessonNav a {
-    justify-content: center;
-    min-height: 44px;
-    padding: 0.25rem 0.1rem;
-    text-align: center;
-    font-size: 0.85rem;
-    line-height: 1.1;
-  }
-  .lessonNav svg {
-    display: none;
-  }
-  .page :global(.section-title) {
-    scroll-margin-top: 4.75rem;
-  }
-  .page :global(.section) {
-    padding-block: 1.5rem;
-  }
 }
 
 .callExamples {
@@ -192,22 +452,6 @@
 }
 .callNote + .callNote {
   margin-top: 0.5rem;
-}
-.nextLesson {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  width: fit-content;
-  min-height: 48px;
-  margin-top: 0.5rem;
-  padding-block: 0.5rem;
-  color: var(--jade);
-  font-weight: 600;
-  text-decoration: none;
-}
-.nextLesson:focus-visible {
-  outline: 3px solid var(--jade);
-  outline-offset: 4px;
 }
 @media (max-width: 700px) {
   .callExamples {
@@ -244,9 +488,6 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-}
-.page :global(.winning-hand figcaption) {
-  text-align: left;
 }
 .page :global(.call-guide) {
   margin-block: 1.5rem 0;
@@ -334,10 +575,7 @@
    run the full content width at one size, and no line ends on a lone word.
    Phones keep their own sizes. */
 @media (min-width: 701px) {
-  .heroCopy > p,
-  .callNote,
-  .page :global(.guide-note),
-  .page :global(.guide-call-intro) {
+  .callNote {
     max-width: none;
     font-size: 1rem;
   }

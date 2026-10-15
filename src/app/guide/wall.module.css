@@ -1,13 +1,13 @@
+/* The wall game, in the same felt and clay as the other guide games. */
 .lesson {
-  margin-top: 2rem;
-  padding: clamp(1rem, 3vw, 2rem);
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: var(--tile-face);
+  margin-top: 1.5rem;
 }
 .lesson h3 {
   margin: 0;
-  font: 600 clamp(1.6rem, 3vw, 2.2rem) var(--display);
+  font: 700 1.6rem/1.05 var(--display);
+}
+.lesson > :first-child {
+  margin-block-end: 14px;
 }
 .lesson h4 {
   margin: 0;
@@ -19,20 +19,24 @@
 .lesson button {
   min-height: 44px;
   padding: 0.65rem 1rem;
-  border: 2px solid #537665;
-  border-radius: var(--control-radius);
+  border: 0;
+  border-radius: 16px;
   color: var(--ink);
-  background: #fffcf5;
-  font: 600 0.9rem var(--sans);
+  background: color-mix(in oklch, var(--ink) 6%, var(--tile-face-hi));
+  font: 700 0.9rem var(--sans);
   cursor: pointer;
+  touch-action: manipulation;
 }
 .lesson button[aria-pressed="true"] {
-  background: #e3ecdc;
+  background: color-mix(in oklch, var(--ink) 12%, var(--tile-face-hi));
 }
 @media (hover: hover) and (pointer: fine) {
   .lesson button:hover:not(:disabled) {
-    background: #e3ecdc;
+    background: color-mix(in oklch, var(--ink) 11%, var(--tile-face-hi));
   }
+}
+.countControls button[hidden] {
+  visibility: hidden;
 }
 .lesson button:focus-visible {
   outline: 3px solid var(--jade);
@@ -40,44 +44,6 @@
 }
 .lesson button:disabled {
   cursor: default;
-}
-.gameBadge {
-  font: 500 0.75rem var(--sans);
-  color: var(--ink-soft);
-}
-.progress {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  list-style: none;
-  margin: 1.5rem 0;
-  padding: 0 0 1rem;
-  border-bottom: 1px solid var(--rule);
-}
-.progress li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--ink-soft);
-  font-size: 0.8rem;
-}
-.progress li > span:first-child {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--rule);
-  border-radius: 50%;
-}
-.progress li[aria-current] {
-  color: var(--ink);
-  font-weight: 700;
-}
-.progress li[aria-current] > span:first-child,
-.progress li[data-complete="true"] > span:first-child {
-  background: #285643;
-  color: #fff8e8;
-  border-color: #285643;
 }
 .gamePrompt {
   min-height: 80px;
@@ -87,26 +53,18 @@
   isolation: isolate;
   height: 490px;
   overflow: hidden;
-  border: 8px solid #a77a52;
-  border-radius: 28px;
-  background: radial-gradient(ellipse at 45% 35%, #346b55, #173f33);
+  border-radius: 20px;
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.5 0.09 165),
+    oklch(0.41 0.08 165)
+  );
   box-shadow:
-    inset 0 0 0 2px #e0b78660,
-    inset 0 12px 30px #0b251d55,
-    0 5px 0 #6d5139,
-    0 12px 20px #24352b18;
-  color: #fff9e9;
-}
-.feltMark {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font:
-    700 10rem var(--font-han),
-    serif;
-  opacity: 0.035;
-  pointer-events: none;
+    inset 0 0 0 7px oklch(0.55 0.07 60),
+    inset 0 0 0 9px oklch(0.45 0.06 60),
+    inset 0 6px 14px oklch(0 0 0 / 0.3),
+    0 10px 20px -8px oklch(0.3 0.03 90 / 0.45);
+  color: oklch(0.95 0.02 165);
 }
 .overhead {
   position: absolute;
@@ -203,32 +161,37 @@
 }
 .dice > span {
   display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  width: 50px;
+  height: 50px;
+  padding: 8px;
   border-radius: 10px;
-  border: 1px solid #f5ecd5;
-  background: #fff9e9;
-  color: #943b30;
-  font: 3rem/1 sans-serif;
+  background: var(--tile-face-hi);
   box-shadow:
-    0 5px 0 #c2b79c,
-    0 9px 12px #06251d66;
+    inset 0 -3px 0 var(--tile-face-lo),
+    0 4px 8px oklch(0 0 0 / 0.3);
   transform: rotate(-7deg);
+}
+.dice i {
+  border-radius: 50%;
+}
+.dice i[data-on="true"] {
+  background: var(--tile-letter);
 }
 .dice > span:last-child {
   transform: rotate(9deg);
 }
 .countLabel {
   padding: 0.35rem 0.7rem;
-  border-radius: 20px;
-  background: #f1dfa9;
-  color: #173f33;
-  font-weight: 750;
+  border-radius: 99px;
+  background: var(--butter);
+  color: var(--ink);
+  font-weight: 700;
 }
 .wallCaption > span:first-child {
   font-weight: 700;
-  color: #f1dfa9;
+  color: var(--butter);
   font-size: 1rem;
 }
 .direction strong {
@@ -244,7 +207,8 @@
   gap: 12px 3px;
   padding: 18px 0;
 }
-.lesson .stacks button {
+.lesson .stacks button,
+.lesson .stacks .stackDone {
   position: relative;
   min-width: 0;
   padding: 3px 0;
@@ -261,7 +225,8 @@
     background: #ffffff16;
   }
 }
-.lesson .stacks button[data-break="true"]::before {
+.lesson .stacks button[data-break="true"]::before,
+.lesson .stacks .stackDone[data-break="true"]::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 -1px;
@@ -271,7 +236,8 @@
   background: #e6c88920;
   border-color: #e6c889;
 }
-.stacks button[data-drawn="true"] .stackTile {
+.stacks button[data-drawn="true"] .stackTile,
+.stacks .stackDone[data-drawn="true"] .stackTile {
   opacity: 0;
   transform: translateY(50px) rotate(8deg);
 }
@@ -322,9 +288,6 @@
   margin: 0.8rem 0;
   font-size: 0.9rem;
 }
-.hint button {
-  flex-shrink: 0;
-}
 .lesson .replay {
   margin-top: 0.5rem;
 }
@@ -341,25 +304,6 @@
 }
 .rules p {
   line-height: 1.7;
-}
-.callScene {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 1.5rem;
-  margin: 1rem 0;
-  border: 6px solid #a77a52;
-  border-radius: 20px;
-  background: radial-gradient(ellipse at top, #346b55, #173f33);
-  color: #fff9e9;
-  box-shadow: 0 4px 0 #6d5139;
-}
-.callScene > div {
-  min-height: 160px;
-}
-.callScene p {
-  margin-top: 0;
-  font-weight: 600;
 }
 @media (prefers-reduced-motion: no-preference) {
   .lesson button {
@@ -379,9 +323,10 @@
   .countLabel {
     animation: arrive 0.4s ease-out;
   }
-  .stacks button {
+  .stacks button,
+  .stacks .stackDone {
     transition:
-      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.28s cubic-bezier(0.23, 1, 0.32, 1),
       background 0.2s;
   }
   .stackTile {
@@ -396,10 +341,6 @@
   }
   .stacks button[data-next="true"] .stackTile {
     animation: inviteDraw 1.5s ease-in-out 3;
-  }
-
-  .meld li:last-child {
-    animation: takeTile 0.5s backwards cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 @keyframes buildWall {
@@ -436,16 +377,6 @@
     transform: translateY(-6px);
   }
 }
-@keyframes takeTile {
-  from {
-    opacity: 0;
-    transform: translateY(-70px) rotate(-12deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(0);
-  }
-}
 
 .wallCloseup .direction {
   max-width: none;
@@ -467,15 +398,14 @@
 .lesson .dealNext {
   align-self: center;
   margin: 0.5rem 0 1rem;
-  background: #f1dfa9;
-  border-color: #f1dfa9;
-  color: #173f33;
-  box-shadow: 0 4px 0 #a89156;
+  background: var(--butter);
+  color: var(--ink);
+  box-shadow: inset 0 -4px 0 oklch(0.72 0.13 85);
   white-space: normal;
 }
 @media (hover: hover) and (pointer: fine) {
   .lesson .dealNext:hover:not(:disabled) {
-    background: #fff0c7;
+    background: oklch(0.91 0.13 95);
   }
 }
 .nextPlayer {
@@ -486,10 +416,10 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding: 0.75rem;
-  border-radius: 8px;
-  background: #f1dfa9;
-  color: #173f33;
-  font-size: 0.75rem;
+  border-radius: 16px;
+  background: var(--butter);
+  color: var(--ink);
+  font-size: 0.8rem;
 }
 .nextPlayer strong {
   display: block;
@@ -521,7 +451,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .wallCloseup {
-    animation: approachWall 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: approachWall 0.3s cubic-bezier(0.23, 1, 0.32, 1) both;
     transform-origin: center 35%;
   }
   .wallCloseup[data-stage="break"] .stackTile {
@@ -530,7 +460,8 @@
   .wallCloseup[data-stage="break"] .direction {
     animation: countDirection 1.3s ease-in-out 2;
   }
-  .stacks button[data-break="true"] {
+  .stacks button[data-break="true"],
+  .stacks .stackDone[data-break="true"] {
     animation: markBreak 0.8s ease-out 2;
   }
 }
@@ -573,23 +504,25 @@
   justify-content: center;
   gap: 0.5rem;
   white-space: nowrap;
-  box-shadow: 0 var(--control-depth) 0 #b6aa96;
+  box-shadow: inset 0 -3px 0 oklch(0 0 0 / 0.08);
 }
 .lesson .primaryButton {
-  background: #285643;
-  color: #fff9e9;
-  border-color: #285643;
-  box-shadow: 0 var(--control-depth) 0 #143b2d;
+  min-height: 52px;
+  background: var(--jade);
+  color: #fff;
+  font-size: 1.05rem;
+  box-shadow:
+    0 8px 18px -6px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -4px 0 oklch(0 0 0 / 0.12);
 }
 .lesson .primaryButton[aria-pressed="true"] {
-  background: #1b4332;
+  background: oklch(0.38 0.06 165);
 }
 @media (hover: hover) and (pointer: fine) {
   .lesson .primaryButton:hover:not(:disabled) {
-    background: #1b4332;
+    background: oklch(0.38 0.06 165);
   }
 }
-.lesson .helpButton,
 .lesson .replay {
   background: transparent;
   border-color: transparent;
@@ -597,25 +530,17 @@
   box-shadow: none;
 }
 @media (hover: hover) and (pointer: fine) {
-  .lesson .helpButton:hover:not(:disabled),
   .lesson .replay:hover:not(:disabled) {
     background: #e3ecdc;
     border-color: #9aad9c;
   }
-}
-.lesson
-  button:disabled:not(.seat):not(.diceButton):not(.turnChoice):not(
-    .turnWall
-  ):not(.stacks button):not(.callButton[aria-pressed="true"]) {
-  opacity: 0.65;
-  box-shadow: none;
 }
 .lesson .diceButton[data-ready="true"] {
   display: grid;
   justify-items: center;
   gap: 1.1rem;
   padding: 1.2rem 1.4rem 0.8rem;
-  border: 1px solid #f1dfa980;
+  border: 1px solid color-mix(in oklch, var(--butter) 50%, transparent);
   border-bottom-width: 4px;
   border-radius: 20px;
   background: #163c30;
@@ -628,7 +553,7 @@
 @media (hover: hover) and (pointer: fine) {
   .lesson .diceButton[data-ready="true"]:hover {
     background: #214c3c;
-    border-color: #f1dfa9;
+    border-color: var(--butter);
   }
 }
 .rollLabel {
@@ -683,23 +608,29 @@
 
 /* Gold marks the current action; blue identifies the tiles you can handle. */
 .gamePrompt h3 {
-  color: #8c3b30;
-  font-size: 1.5rem;
+  color: var(--ink);
 }
 .gamePrompt p {
-  margin: 0.5rem 0 1rem;
-  color: #293e34;
-  font-size: 1rem;
+  margin: 0.4rem 0 1rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
 }
 .lesson .seat > span:first-child {
   display: inline-block;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  background: #163c30;
+  padding: 5px 9px;
+  border-radius: 99px;
+  background: oklch(0 0 0 / 0.25);
+  font: 700 0.7rem/1 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lesson .seat > span[data-dealer="true"] {
+  background: var(--butter);
+  color: var(--ink);
 }
 .lesson .seat[data-active="true"] > span:first-child {
   color: #173f33;
-  background: #f1dfa9;
+  background: var(--butter);
 }
 .tableCenter > strong {
   font-size: 1.05rem;
@@ -737,7 +668,7 @@
   padding: 2px 4px;
   border-radius: 4px;
   color: #173f33;
-  background: #f1dfa9;
+  background: var(--butter);
 }
 .wallCaption {
   display: flex;
@@ -756,7 +687,7 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid #fff0c7;
   border-radius: 10px;
-  background: #f1dfa9;
+  background: var(--butter);
   color: #173f33;
   box-shadow: 0 3px 0 #a89156;
   font-variant-numeric: tabular-nums;
@@ -779,7 +710,7 @@
   text-align: right;
   font-size: 0.8rem;
   margin: 2rem 0 0.5rem;
-  color: #f1dfa9;
+  color: var(--butter);
   font-weight: 600;
 }
 .rack > span {
@@ -787,7 +718,7 @@
   color: #fff9e9;
 }
 .rack > span:last-child {
-  color: #f1dfa9;
+  color: var(--butter);
   font-size: 1rem;
 }
 .gameControls .feedback {
@@ -811,148 +742,11 @@
   text-align: center;
 }
 .lesson .stacks button[aria-pressed="true"] {
-  background: #f1dfa926;
-  border-color: #f1dfa9;
-}
-
-.callScene .callAnnouncement {
-  grid-column: 1 / -1;
-  display: grid;
-  place-items: center;
-  min-height: 138px;
-}
-.callBubble {
-  position: relative;
-  min-width: 170px;
-  padding: 0.75rem 1.5rem;
-  border: 3px solid #173f33;
-  border-radius: 45% 45% 40% 15%;
-  background: #fff4cf;
-  color: #173f33;
-  box-shadow: 5px 6px 0 #09281f;
-  text-align: center;
-  transform: rotate(-4deg);
-}
-.callBubble strong {
-  display: block;
-  font: 800 1.7rem var(--display);
-}
-.callBubble strong[lang="zh"] {
-  font:
-    800 3.5rem / 1.1 var(--font-han),
-    serif;
-}
-.callBubble > span {
-  display: block;
-  margin-top: 0.2rem;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-.callBubble[data-call="Pung"] {
-  background: #ffe1c9;
-  color: #873a2e;
-}
-.callBubble[data-call="Chow"] {
-  background: #d6ecff;
-  color: #204f7a;
-  transform: rotate(4deg);
-}
-.callActions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-.lesson .callButton {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.8rem 0.35rem;
-  border: 2px solid #466a57;
-  border-radius: var(--control-radius);
-  background: #fff6dc;
-  color: #254f3a;
-  box-shadow: 0 var(--control-depth) 0 #466a57;
-  white-space: normal;
-}
-.lesson .callButton[data-call="Pung"] {
-  background: #ffe1c9;
-  color: #873a2e;
-  border-color: #873a2e;
-  box-shadow: 0 var(--control-depth) 0 #873a2e;
-}
-.lesson .callButton[data-call="Chow"] {
-  background: #d6ecff;
-  color: #204f7a;
-  border-color: #204f7a;
-  box-shadow: 0 var(--control-depth) 0 #204f7a;
-}
-.callCharacter {
-  font:
-    800 2.1rem / 1.2 var(--font-han),
-    serif;
-}
-.callButton strong {
-  font-size: 1.05rem;
-}
-.callButton > span:last-child {
-  font-size: 0.7rem;
-  font-weight: 500;
-}
-.lesson .callActions .callButton[aria-pressed="true"]:disabled {
-  opacity: 1;
-  outline: 3px solid currentColor;
-  outline-offset: 3px;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .lesson .callButton {
-    transition:
-      transform 150ms ease-out,
-      box-shadow 150ms ease-out;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .lesson .callButton:hover:not(:disabled) {
-      transform: translateY(-4px) rotate(-2deg);
-    }
-  }
-  .lesson .callButton:active:not(:disabled) {
-    transform: translateY(var(--control-press));
-    box-shadow: 0 1px 0 currentColor;
-  }
-  .callBubble[data-react="true"] {
-    animation: callPop 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-}
-@keyframes callPop {
-  0% {
-    opacity: 0;
-    scale: 0.4;
-  }
-  55% {
-    opacity: 1;
-    scale: 1.15;
-  }
-  78% {
-    scale: 0.95;
-  }
-  100% {
-    scale: 1;
-  }
+  background: color-mix(in oklch, var(--butter) 15%, transparent);
+  border-color: var(--butter);
 }
 
 /* Keep secondary help quiet and the next action unmistakable. */
-.hint {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin: 0.5rem 0;
-  color: var(--ink-soft);
-  font-size: 0.8rem;
-  min-height: 0;
-}
-.hint > span:empty {
-  display: none;
-}
 .feedback:empty {
   display: none;
 }
@@ -977,282 +771,64 @@
   animation: none !important;
   transition: none !important;
 }
-@media (max-width: 1000px) {
-  .wallOverview i {
-    flex: 1;
-    height: 24px;
-    border-radius: 2px;
-    background: #65afe9;
-    box-shadow:
-      0 3px 0 #f0e7d0,
-      0 5px 0 #256ca5;
-  }
-  .wallOverview i[data-selected="true"] {
-    outline: 2px solid #f1dfa9;
-    outline-offset: 2px;
-    transform: translateY(-4px);
-  }
-  .wallOverview i[data-break="true"] {
-    border-left: 2px solid #f1dfa9;
-  }
-  .wallOverview i[data-drawn="true"] {
-    opacity: 0.2;
-  }
-  .stacks {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-  .stacks button[data-near="false"] {
-    display: none;
-  }
-
-  .countControls {
-    display: grid;
-    align-items: center;
-    grid-template-columns: 44px 1fr 44px;
-    max-width: 190px;
-    margin: 0.5rem auto 0;
-    gap: 0.75rem;
-  }
-  .countControls > span {
-    white-space: nowrap;
-    font-size: 0.9rem;
-  }
-  .lesson .countControls button {
-    min-width: 0;
-    white-space: normal;
-    font-size: 0.75rem;
-    padding: 0;
-    box-shadow: none;
-    background: transparent;
-    border-color: #d9e9df80;
-    color: #fff9e9;
-  }
-  .wallOverview {
-    display: flex;
-    flex-direction: row-reverse;
-    gap: 3px;
-    margin: 0.75rem 0 1.5rem;
-    margin-bottom: 0.75rem;
-  }
-}
-
-.turnStatus {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-weight: 700;
-}
-.turnStatus > span {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-.turnTable {
-  margin-block: 1rem 1.5rem;
-  padding: clamp(1rem, 3vw, 2rem);
-  border: 6px solid #a77a52;
-  border-radius: 20px;
-  background: radial-gradient(ellipse at top, #346b55, #173f33);
-  color: #fff9e9;
-  box-shadow: 0 4px 0 #6d5139;
-}
-.turnTop {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  min-height: 140px;
-}
-.turnTable p {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
-}
-.turnTable small {
-  color: #d9e9df;
-}
-.turnWall {
-  display: flex;
-  gap: 5px;
-}
-.turnWall .stackTile {
-  width: 25px;
-  height: 36px;
-  margin: 0;
+.wallOverview i {
+  flex: 1;
+  height: 24px;
+  border-radius: 2px;
+  background: #65afe9;
   box-shadow:
-    inset 1px 1px 0 #c7e9ff70,
-    0 1px 0 #eee4cc,
-    0 3px 0 #1c669a,
-    0 5px 3px #08291f50;
+    0 3px 0 #f0e7d0,
+    0 5px 0 #256ca5;
 }
-.turnTable :global(.tile-row) {
-  flex-wrap: nowrap;
+.wallOverview i[data-selected="true"] {
+  outline: 2px solid var(--butter);
+  outline-offset: 2px;
+  transform: translateY(-4px);
 }
-.turnTable :global(.set-tile) {
-  width: clamp(32px, 8vw, 58px);
+.wallOverview i[data-break="true"] {
+  border-left: 2px solid var(--butter);
 }
-.turnNote {
-  min-height: 2.5em;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
+.wallOverview i[data-drawn="true"] {
+  opacity: 0.2;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .turnDraw li:nth-child(3) {
-    animation: takeTile 280ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
-  }
+.stacks {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-
-.turnTable .turnHand {
-  gap: 6px;
+.stacks button[data-near="false"],
+.stacks .stackDone[data-near="false"] {
+  display: none;
 }
-.turnHand > li {
-  width: clamp(44px, 8vw, 58px);
-  flex-shrink: 0;
+.countControls {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 44px 1fr 44px;
+  max-width: 190px;
+  margin: 0.5rem auto 0;
+  gap: 0.75rem;
 }
-.lesson .turnChoice {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  box-shadow: none;
+.countControls > span {
+  white-space: nowrap;
+  font-size: 0.9rem;
 }
-.lesson .turnChoice svg {
-  position: static;
-  width: 100%;
-  height: auto;
-}
-.lesson .turnChoice[data-hint="true"] {
-  outline: 1px solid #f1dfa975;
-  outline-offset: 3px;
-}
-.turnTable .discardHint {
-  margin: 1rem 0 0;
+.lesson .countControls button {
+  min-width: 0;
+  white-space: normal;
   font-size: 0.75rem;
-  color: #d9e9df;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+  border-color: #d9e9df80;
+  color: #fff9e9;
 }
-@media (max-width: 380px) {
-  .turnTable {
-    padding-inline: 0.4rem;
-  }
-  .turnTable .turnHand {
-    gap: 3px;
-  }
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .lesson .turnChoice:hover:not(:disabled) {
-    transform: translateY(-3px);
-  }
+.wallOverview {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 3px;
+  margin: 0.75rem 0 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 /* The wall itself is the draw control, so the turn is played on the table. */
-.lesson .turnWall {
-  gap: 5px;
-  min-height: 44px;
-  padding: 4px;
-  border: 0;
-  background: none;
-  box-shadow: none;
-  cursor: pointer;
-}
-.lesson .turnWall:disabled {
-  cursor: default;
-}
-.tapCue {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
-  color: #f1dfa9;
-}
-.discardSlot {
-  width: fit-content;
-  min-width: clamp(44px, 8vw, 58px);
-  min-height: 64px;
-  border: 2px dashed #ffffff40;
-  border-radius: 6px;
-}
-.discardSlot:has(li) {
-  border-color: transparent;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .lesson .turnWall:not(:disabled) .stackTile:last-child {
-    animation: inviteDraw 1.5s ease-in-out infinite;
-  }
-  .discardSlot li {
-    animation: takeTile 280ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
-  }
-}
-
-.claimFinish {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-block: 1rem 1.5rem;
-  padding: 1.25rem;
-  border: 1px solid #28564330;
-  border-radius: 12px;
-  background: #e4ebdf;
-}
-.lesson .claimTile {
-  display: block;
-  flex: 0 0 60px;
-  width: 60px;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  box-shadow: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .lesson .claimTile:hover {
-    background: transparent;
-  }
-}
-.claimTile svg {
-  width: 100%;
-  height: auto;
-}
-.claimInstruction strong {
-  color: #285643;
-  font-size: 1rem;
-}
-.claimInstruction p {
-  margin: 0.4rem 0 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-.claimFinish[data-discarded="true"] {
-  background: #f1eee5;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .claimTile {
-    transition: transform 180ms ease-out;
-  }
-  .claimTile:active {
-    transform: translateY(3px);
-  }
-  .claimFinish[data-discarded="true"] .claimTile {
-    animation: arrive 250ms ease-out;
-  }
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  button.claimTile:hover {
-    transform: translateY(-3px);
-  }
-}
-@media (max-width: 560px) {
-  .claimFinish {
-    padding: 1rem;
-    gap: 1rem;
-  }
-  .lesson .claimTile {
-    flex-basis: 52px;
-    width: 52px;
-  }
-}
 
 /* Keep the mobile table and its close-up proportional to the available width. */
 
@@ -1297,11 +873,6 @@
   .rack > span:first-child {
     flex-basis: 100%;
   }
-  .hint {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-  }
 
   .wallCloseup .direction {
     margin-top: 0.6rem;
@@ -1327,45 +898,6 @@
     font-size: 1.3rem;
   }
 
-  .callScene {
-    grid-template-columns: 1fr 1.4fr;
-    gap: 0.75rem;
-    padding: 1rem 0.6rem;
-  }
-  .callScene > div {
-    min-width: 0;
-    min-height: 105px;
-  }
-  .callScene p {
-    font-size: 0.75rem;
-  }
-  .callScene :global(.tile-row) {
-    gap: 3px;
-    flex-wrap: nowrap;
-  }
-  .callScene :global(.set-tile) {
-    width: 34px;
-  }
-  .callActions {
-    gap: 0.5rem;
-  }
-
-  .gameBadge {
-    display: none;
-  }
-  .progress {
-    gap: 0.25rem;
-    margin: 0 0 1rem;
-    padding-bottom: 0.75rem;
-  }
-  .progress li:not([aria-current]) .progressLabel {
-    display: none;
-  }
-  .progress li {
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.8rem;
-  }
   .gamePrompt {
     min-height: 85px;
   }
@@ -1378,12 +910,6 @@
   .direction {
     margin: 1rem 0 0.3rem;
     font-size: 0.7rem;
-  }
-  .callButton > span:last-child {
-    display: none;
-  }
-  .callScene .callAnnouncement {
-    min-height: 115px;
   }
 
   .gameBoard:not([data-closeup="true"]) {
