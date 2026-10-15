@@ -21,7 +21,7 @@
 }
 .hero h1 {
   margin: 0;
-  font: 700 clamp(2.4rem, 7vw, 3.6rem) / 1.02 var(--display);
+  font: 700 var(--title-size) / 0.95 var(--display);
   letter-spacing: -0.015em;
 }
 .qualifier {
@@ -204,7 +204,7 @@
 }
 .lesson h2 {
   margin: 0.6rem 0 1rem;
-  font: 700 clamp(1.6rem, 4.5vw, 2.1rem) / 1.1 var(--display);
+  font: 700 var(--heading-size) / 1.05 var(--display);
   letter-spacing: -0.01em;
 }
 .badge {
@@ -439,7 +439,7 @@
 }
 .callExamples p,
 .callNote {
-  font-size: 0.85rem;
+  font-size: 0.97rem;
   line-height: 1.5;
 }
 .callExamples p {
