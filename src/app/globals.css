@@ -1153,69 +1153,19 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
 }
 
-/* The next meeting, stated in words above the calendar frame.
-   Three lines: a label, the day, then time and room. Stacked rather than
-   strung along one line, because at 375px a single line wraps in the middle
-   of a date and reads as two half-facts. */
-.next-meeting {
-  margin: 0 0 var(--space-4);
-}
-
-.next-meeting-label {
-  margin: 0;
-  font-family: var(--sans);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--jade);
-}
-
-.next-meeting-when {
-  margin: var(--space-1) 0 0;
-  font-family: var(--display);
-  font-size: var(--text-xl);
-  line-height: 1.15;
-  color: var(--ink);
-}
-
-.next-meeting-detail {
-  margin: var(--space-2) 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-3);
-  font-family: var(--sans);
-  font-size: var(--text-base);
-}
-
-.next-meeting-time {
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-/* The room, emphasised: full ink where its neighbour is soft, and a jade
-   marker in front so the eye lands on it first. Weight and colour both, so
-   the emphasis survives greyscale. */
-.next-meeting-where {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.next-meeting-where::before {
-  content: "";
-  /* Decorative, so it stays out of the accessibility tree — the room name
-     itself carries every bit of the meaning. */
-  flex: none;
-  width: 0.42em;
-  height: 0.42em;
-  border-radius: 50%;
-  background: var(--jade);
-  transform: translateY(-0.12em);
-}
+/* The next meeting as a raised card: a tear-off calendar tile, then the day,
+   then time and room as chips. Stacked, because at 375px one line wraps in
+   the middle of a date. */
+.next-meeting { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(12px, 4vw, 18px); padding: clamp(14px, 4vw, 20px); border-radius: 22px; background: #fffcf6; box-shadow: 0 0 0 1px #0000000d, 0 12px 26px -16px #0005; }
+.next-meeting-tile { display: grid; justify-items: center; align-content: center; width: clamp(64px, 20vw, 80px); aspect-ratio: 3 / 4; border-radius: 12px; background: linear-gradient(#fffdf6, #f7efdc); box-shadow: 0 0 0 1px #0001, 5px 6px 0 #a9d2c3; rotate: -4deg; }
+.next-meeting-tile small { color: var(--accent); font: 700 0.8rem / 1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; }
+.next-meeting-tile b { color: #1d4f9a; font: 700 2.7rem / 1 var(--display); }
+.next-meeting-tile span { margin-top: 2px; color: var(--ink-soft); font: 600 0.75rem / 1 var(--sans); }
+.next-meeting-label { display: inline-block; white-space: nowrap; margin: 0; padding: 6px 11px; border-radius: 999px; background: oklch(0.88 0.15 95); color: var(--ink); font: 700 0.7rem / 1 var(--sans); letter-spacing: 0.09em; text-transform: uppercase; }
+.next-meeting-when { margin: 10px 0 12px; font: 700 clamp(1.7rem, 5vw, 2.4rem) / 1 var(--display); color: var(--ink); }
+.next-meeting-detail { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.next-meeting-detail span { display: inline-flex; white-space: nowrap; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: #f2ebdc; font: 600 0.9rem / 1 var(--sans); font-variant-numeric: tabular-nums; }
+.next-meeting-detail svg { flex: none; color: var(--accent); }
 
 /* The scoring explanation under the leaderboard. Deliberately quiet: it is
    reference material, and the table above it is the reason people came. */
@@ -1458,8 +1408,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
 .home-page .section:has(#first-night) > .section-wrap { position: relative; }
 .home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
-.home-page .next-meeting { border-left: 3px solid var(--jade); padding: 1.25rem 0 1.25rem 1.5rem; }
-.home-page .next-meeting-when { font-size: clamp(1.7rem, 3vw, 2.6rem); }
 .home-page .calendar-frame { width: 100%; margin: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px #254a3510; }
 .home-page .section-reveal { border-block: 1px solid var(--rule); }
 .action-link { border-radius: 9px; min-height: 48px; box-shadow: 0 3px 0 #23483226; }
@@ -1486,7 +1434,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .home-page .welcome, .home-page .meeting-layout { grid-template-columns: 1fr; gap: 2rem; }
   .home-page .section-title { max-width: 100%; }
   .home-page .welcome > div:first-child { padding-top: 0; }
-  .home-page .next-meeting { margin: 0; }
   .photo-grid { grid-template-columns: 1fr; }
   .photo-slot:nth-child(2n) { padding-top: 0; }
   .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }}
@@ -1873,10 +1820,10 @@ body::before {
 
 /* Club theme: ivory paper, charcoal ink, vermilion interface accents. */
 :root { --accent: #a33428; }
-.section-title::after, .eyebrow::before, .next-meeting-where::before { background: var(--accent); }
-.eyebrow, .next-meeting-label,
+.section-title::after, .eyebrow::before { background: var(--accent); }
+.eyebrow,
 .call-guide dt span, .hand-group p, .join-icon { color: var(--accent); }
-.call-guide > div, .home-page .next-meeting { border-color: var(--accent); }
+.call-guide > div { border-color: var(--accent); }
 :focus-visible { outline-color: var(--accent); }
 .search-panel { background: #eee6d7; border-color: var(--rule); box-shadow: 0 1px 1px -0.5px rgb(0 0 0 / 0.06), 0 3px 3px -1.5px rgb(0 0 0 / 0.06), 0 6px 6px -3px rgb(0 0 0 / 0.06), 0 12px 12px -6px rgb(0 0 0 / 0.06); }
 .about-officers-layout { display: block; }
