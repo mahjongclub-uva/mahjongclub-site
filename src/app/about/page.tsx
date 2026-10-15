@@ -3,6 +3,7 @@ import {
   IconMessageCircle,
   IconArrowUpRight,
 } from "@tabler/icons-react";
+import { formatDate } from "@/lib/format";
 import Link from "next/link";
 import {
   ABOUT,
@@ -11,6 +12,7 @@ import {
   GROUPME_URL,
   INSTAGRAM,
   OFFICERS,
+  PRESS,
   UNIVERSITY_STATEMENT,
 } from "@/lib/site";
 import Section from "@/components/Section";
@@ -93,53 +95,64 @@ export default function About() {
         </div>
       </Section>
 
+      {PRESS && (
+        <Section id="news" title="Read about us!">
+          <a
+            className="link-card press-card"
+            href={PRESS.url}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span>
+              <b>{PRESS.outlet}</b>
+              <strong>{PRESS.title}</strong>
+              <small>
+                <time dateTime={PRESS.date}>{formatDate(PRESS.date)}</time>
+              </small>
+            </span>
+            <IconArrowUpRight size={22} aria-hidden="true" />
+          </a>
+        </Section>
+      )}
+
       <Section id="connect" title="Join the next table">
-        <div className="social-list">
+        <div className="link-cards">
           {GROUPME_URL ? (
-            <a href={GROUPME_URL} rel="noopener noreferrer" target="_blank">
-              <IconMessageCircle
-                className="join-icon"
-                size={30}
-                stroke={1.5}
-                aria-hidden="true"
-              />
+            <a
+              className="link-card"
+              href={GROUPME_URL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <IconMessageCircle size={26} aria-hidden="true" />
               <span>
                 <strong>GroupMe</strong>
-                <small>Reminders, questions, and last-minute changes</small>
+                <small>Reminders and last-minute changes</small>
               </span>
-              <b>
-                Join GroupMe <IconArrowUpRight size={17} aria-hidden="true" />
-              </b>
+              <IconArrowUpRight size={20} aria-hidden="true" />
             </a>
           ) : (
-            <div className="social-list-pending">
+            <div className="link-card">
+              <IconMessageCircle size={26} aria-hidden="true" />
               <span>
                 <strong>GroupMe</strong>
-                <small>Ask a club officer for the current invitation</small>
+                <small>Ask a club officer for the invitation</small>
               </span>
-              <b>Invite pending</b>
             </div>
           )}
-
           {INSTAGRAM && (
             <a
+              className="link-card"
               href={`https://instagram.com/${INSTAGRAM}`}
               rel="me noopener noreferrer"
               target="_blank"
             >
-              <IconBrandInstagram
-                className="join-icon"
-                size={30}
-                stroke={1.5}
-                aria-hidden="true"
-              />
+              <IconBrandInstagram size={26} aria-hidden="true" />
               <span>
                 <strong>Instagram</strong>
-                <small>Photos, announcements, and meeting updates</small>
+                <small>@{INSTAGRAM}</small>
               </span>
-              <b>
-                Follow us <IconArrowUpRight size={17} aria-hidden="true" />
-              </b>
+              <IconArrowUpRight size={20} aria-hidden="true" />
             </a>
           )}
         </div>
