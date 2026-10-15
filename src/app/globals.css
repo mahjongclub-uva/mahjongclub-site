@@ -26,6 +26,16 @@
 
 body {
   margin: 0;
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--paper);
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
 }
 
 img,
@@ -59,20 +69,9 @@ svg {
   --flip-stagger: 150ms;
   --flip-duration: 900ms;
   --sub-duration: 700ms;
-  /* Paper and ink. Celadon is a glaze colour, so the page is barely green —
-     the saturation lives on the tiles, where the area is small. Contrast
-     ratios against --paper are noted; keep them above 4.5. */
-  --paper: #f5eedc;
-  --ink: #2e2e2c;                  /* charcoal, 11.8:1 on cream */
-  --ink-soft: #585850;             /* 6.2:1  */
+  /* Celadon is a glaze colour, so it stays on the tiles and accents; keep
+     text colours above 4.5:1 on --paper. */
   --jade: #2a6350;                 /* 5.8:1  */
-  --rule: #c7cfbc;
-
-  /* Gold, for the player at the top. Dark enough to be read as text on the
-     wash beneath it as well as on the page — 5.3:1 on the wash, 6.3:1 on
-     cream. #7a5c14 sat at exactly 4.50 on the deeper wash, on the line. */
-  --gold: #6e5210;
-  --gold-wash: #e6dbb4;
 
   /* Tiles. Ivory face, jade reverse, vermilion letterform — the colours a
      real character tile actually uses. */
@@ -86,12 +85,10 @@ svg {
   --tile-back-lo: #1b4437;
   --tile-side: #a9d2c3;            /* celadon side of an illustrated tile */
   --tile-body: #ddd4bd;            /* ivory body, seen on a tile's side */
-  --tile-rim: rgba(63, 136, 113, 0.3);
 
   /* Type. Barlow Condensed gives headings a printed poster character; Public Sans
      keeps instructions and club information easy to scan on a phone. Both
      are self-hosted by next/font. */
-  --display: var(--font-display), "Iowan Old Style", Georgia, serif;
   --body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;
   --sans: var(--body);
@@ -117,39 +114,18 @@ svg {
   --measure: 34rem;                /* body text stays readable */
   --content: 46rem;                /* the page column */
 
-  --texture-linen: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27220%27%20height%3D%27220%27%3E%3Cfilter%20id%3D%27l%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.07%200.34%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.18%20%200%200%200%200%200.22%20%200%200%200%200%200.16%20%200%200%200%200.36%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20filter%3D%27url%28%23l%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
-  --texture-grain: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Cfilter%20id%3D%27g%27%20x%3D%270%27%20y%3D%270%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.8%27%20numOctaves%3D%274%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27matrix%27%20values%3D%270%200%200%200%200.20%20%200%200%200%200%200.26%20%200%200%200%200%200.19%20%200%200%200%200.55%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27160%27%20height%3D%27160%27%20filter%3D%27url%28%23g%29%27%20opacity%3D%270.2%27%2F%3E%3C%2Fsvg%3E");
+  /* Paper, ink and accent; text colours stay above 4.5:1 on --paper. */
+  --paper: #f6f1e8;
+  --display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --ink: #292722;
+  --ink-soft: #605b52;
+  --nav-ink: #292722;
+  --rule: #d0c6b6;
+  --accent: #a33428;
 }
 
 /* 3. Base ================================================================= */
 
-body {
-  min-height: 100dvh;
-  background-color: var(--paper);
-  /* A soft light from above, over a fine grain. Together they read as a
-     glazed, slightly imperfect surface rather than flat colour. The highlight
-     must not repeat, or it draws a seam across the page. */
-  background-image:
-    radial-gradient(
-      120% 70% at 50% 0%,
-      rgba(255, 255, 255, 0.6),
-      rgba(255, 255, 255, 0) 58%
-    ),
-    radial-gradient(
-      130% 90% at 50% 100%,
-      rgba(35, 40, 31, 0.08),
-      rgba(35, 40, 31, 0) 55%
-    ),
-    /* The same laid paper the toned sections use, so the whole site sits on
-       one material rather than changing texture between bands. */
-    var(--texture-linen);
-  background-repeat: no-repeat, no-repeat, repeat;
-  color: var(--ink);
-  font-family: var(--body);
-  font-size: var(--text-base);
-  line-height: var(--leading-body);
-  -webkit-font-smoothing: antialiased;
-}
 
 h1,
 h2 {
@@ -176,8 +152,6 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--jade);
-  outline-offset: 3px;
   border-radius: 2px;
 }
 
@@ -211,9 +185,7 @@ main {
   gap: var(--space-2);
   font-family: var(--sans);
   font-size: var(--text-xs);
-  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-soft);
 }
 
 /* A small jade block, the colour of a tile's reverse. Decorative only — the
@@ -223,7 +195,6 @@ main {
   width: 14px;
   height: 6px;
   border-radius: 1px;
-  background: var(--tile-back);
 }
 
 /* 4. Hero and tiles =======================================================
@@ -246,11 +217,6 @@ main {
   gap: 2px;
   list-style: none;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.45);
-  box-shadow:
-    inset 0 0 0 1px var(--rule),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 3px rgba(35, 40, 31, 0.07);
 }
 
 .nav a {
@@ -317,7 +283,6 @@ main {
 }
 
 .hero {
-  padding-block: var(--space-5) var(--space-6);
   text-align: center;
 }
 
@@ -373,7 +338,6 @@ main {
   translate: 0 -50%;
   /* Taller than the tiles so the contact shadow and the lean have room. */
   height: 165%;
-  pointer-events: none;
 }
 
 .hero-scene canvas {
@@ -541,8 +505,6 @@ main {
 
 .tile-letter {
   position: relative;
-  font-family: var(--display);
-  font-weight: 600;
   font-size: clamp(1rem, 4.2vw, 1.6rem);
   line-height: 1;
 }
@@ -582,39 +544,17 @@ main {
 }
 
 .action-link {
-  min-height: 44px;
   padding: 0.65rem var(--space-3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--jade);
-  border-radius: 4px;
-  color: var(--jade);
   font-family: var(--sans);
   font-size: var(--text-sm);
   font-weight: 650;
   line-height: 1.2;
-  text-decoration: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .action-link:hover {
-    color: var(--ink);
-    background: rgba(255, 255, 255, 0.38);
-  }
-}
-
-.action-link-primary {
-  color: var(--tile-face-hi);
-  background: var(--jade);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .action-link-primary:hover {
-    color: var(--tile-face-hi);
-    background: var(--tile-back-lo);
-  }
-}/* 5. Sections ============================================================= */
+/* 5. Sections ============================================================= */
 
 /* Three colour blocks in the palette's own colours. A mark in the whitespace,
    the way a dinkus works in a printed book — not a band across the page. */
@@ -622,7 +562,6 @@ main {
 .section-title {
   margin: 0 0 var(--space-4);
   font-size: var(--text-xl);
-  letter-spacing: -0.005em;
 }
 
 /* The short rule reads like the edge of a face-down tile: jade back over an
@@ -634,13 +573,6 @@ main {
   height: 7px;
   margin-block-start: var(--space-3);
   border-radius: 2px;
-  background: linear-gradient(
-    to bottom,
-    var(--tile-back-hi) 0%,
-    var(--tile-back) 54%,
-    var(--tile-face) 54%,
-    var(--tile-face-lo) 100%
-  );
   box-shadow: 0 1px 1px rgba(35, 40, 31, 0.14);
 }
 
@@ -667,9 +599,7 @@ main {
 
 .page-title {
   margin: 0;
-  font-weight: 600;
   font-size: var(--text-2xl);
-  letter-spacing: -0.02em;
 }/* Running prose. Paragraphs already cap at --measure; this just gives them
    air between one another. */
 .prose p + p {
@@ -850,8 +780,6 @@ main {
 
 .photo-grid {
   display: grid;
-  gap: var(--space-3);
-  grid-template-columns: 1fr;
 }
 
 @media (min-width: 640px) {
@@ -862,16 +790,11 @@ main {
 
 .photo-slot {
   margin: 0;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.35);
 }
 
 .photo-slot img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 /* Guide and club information ------------------------------------------- */
@@ -919,8 +842,6 @@ main {
   max-width: var(--content);
   margin-inline: auto;
   padding: var(--space-5) var(--space-4) var(--space-6);
-  display: grid;
-  gap: var(--space-3);
 }
 
 .footer p {
@@ -954,16 +875,6 @@ main {
    start state — so no motion ever means "content missing".
    ======================================================================== */
 
-/* A pale woven table surface, with porcelain and jade kept on the tiles. */
-body {
-  background-color: #e7eee5;
-  background-image:
-    radial-gradient(ellipse at 50% 0%, #fafbf4 0%, transparent 65%),
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(42, 99, 80, 0.025) 3px 4px),
-    repeating-linear-gradient(90deg, transparent 0 3px, rgba(42, 99, 80, 0.025) 3px 4px);
-  background-repeat: no-repeat, repeat, repeat;
-}
-
 .hero {
   padding-block: clamp(2.5rem, 6vw, 4rem) clamp(2rem, 5vw, 3rem);
 }
@@ -993,8 +904,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   }
 
 @media (prefers-reduced-motion: no-preference) {
-  .action-link { transition: transform 160ms ease, background-color 160ms ease; }
-  .action-link:active { transform: translateY(2px); }
   .nav a { transition: background-color 160ms ease; }
 }
 
@@ -1222,7 +1131,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }/* Every mark on an illustrated tile is engraved (see #engrave). */
 .tile-ink { filter: url(#engrave); }
 
-
 /* 14. Halftone field ====================================================== */
 
 /* 15. Reading highlight =================================================== */
@@ -1266,7 +1174,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .nav-marker {
   position: absolute;
   inset-block: 4px;
-  inset-inline-start: 4px;
   pointer-events: none;
 }
 
@@ -1274,7 +1181,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
   display: block;
   height: 100%;
   border-radius: 12px;
-  background: var(--tile-face);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.85),
     0 1px 2px rgba(35, 40, 31, 0.14);
@@ -1352,16 +1258,13 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .section { padding-block: clamp(3rem, 7vw, 6rem); }
 .home-page .section-title { max-width: 14ch; }
 .home-page .section-title::after { display: none; }
-.home-page .welcome { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-.home-page .welcome > div:first-child { padding-top: 1rem; }
+.home-page .welcome { grid-template-columns: 1fr 1fr; }
 .home-page .welcome p { max-width: 36ch; font-size: 1.15rem; }
 .home-page .section:has(#first-night) { border-top: 1px solid var(--rule); }
 .home-page .section:has(#first-night) > .section-wrap { position: relative; }
-.home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3rem; align-items: start; }
+.home-page .meeting-layout { display: grid; grid-template-columns: 0.8fr 1.2fr; align-items: start; }
 .home-page .calendar-frame { width: 100%; margin: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px #254a3510; }
 .home-page .section-reveal { border-block: 1px solid var(--rule); }
-.action-link { border-radius: 9px; min-height: 48px; box-shadow: 0 3px 0 #23483226; }
-@media (hover: hover) and (pointer: fine) { .action-link-primary:hover { color: var(--tile-face-hi); background: #204b3d; } }
 :focus-visible { outline: 3px solid var(--jade); outline-offset: 5px; }
 .photo-grid { grid-template-columns: 1.35fr 1fr; align-items: start; gap: 2rem; }
 .photo-slot { aspect-ratio: auto; background: none; border-radius: 0; overflow: visible; animation: none; }
@@ -1395,14 +1298,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 .home-page .tagline { max-width: 46ch; }
 .nav a:active { background: #d2decc; }
 
-/* Reference-art refinement: a soft paper ground with bamboo-like shadows. */
-body {
-  background-color: #f0f2e9;
-  background-image:
-    radial-gradient(ellipse at 48% 8%, #fffefa 0%, transparent 65%),
-    linear-gradient(104deg, transparent 0 7%, #48674605 7.2% 8.1%, transparent 8.3% 91%, #48674606 91.2% 92%, transparent 92.2%);
-  background-attachment: fixed;
-}
+/* The hero's flat tiles hold still once the 3D scene or its fallback is up. */
 .hero-stage .wordmark-tiles { transition: none; }
 .hero-stage[data-scene="fallback"] .tile,
 .hero-stage[data-scene="fallback"] .tile-scene { animation: none; }
@@ -1417,7 +1313,6 @@ body {
   padding: 2rem;
   border: 1px solid #c1d0bc;
   border-radius: 14px;
-  background: linear-gradient(145deg, #e5ece0, #d7e4d4);
 }
 .home-page .club-photo-placeholder p { font: 1.2rem var(--display); margin: 0; color: #47604c; }
 .photo-corner { position: absolute; width: 35px; height: 35px; border-color: #8ca68f; border-style: solid; }
@@ -1514,10 +1409,10 @@ body {
 .guide-page .tile-group > .tile-row { grid-column: 2; grid-row: 1 / 3; align-self: center; }
 .guide-page .set-tile-body { filter: none; }
 .guide-tile { width: 100%; height: 100%; }
-.winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; background: #e6ede0; }
+.winning-hand { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid #cedccc; border-radius: 14px; }
 .winning-hand figcaption { display: grid; gap: 0.3rem; text-align: center; }
 .hand-group .tile-row { justify-content: center; flex-wrap: nowrap; }
-.hand-group p { margin: 0.5rem auto 0; text-align: center; font-size: 0.9rem; color: var(--jade); }
+.hand-group p { margin: 0.5rem auto 0; text-align: center; font-size: 0.9rem; }
 .guide-page #hand + .winning-hand { margin-top: 1rem; }
 
 /* Tile sizes on the guide. Widths are shares of the row, so a row never
@@ -1559,7 +1454,7 @@ body {
 .call-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
 .call-guide > div { border-top: 2px solid var(--jade); padding-top: 1rem; }
 .call-guide dt { font: 600 1.6rem var(--display); }
-.call-guide dt span { display: block; margin-top: 0.4rem; font: 600 0.9rem var(--sans); color: var(--jade); }
+.call-guide dt span { display: block; margin-top: 0.4rem; font: 600 0.9rem var(--sans); }
 .call-guide dd { margin: 0.75rem 0 0; max-width: 40ch; }
 @media (max-width: 560px) {
   .call-guide { grid-template-columns: 1fr; }
@@ -1567,29 +1462,14 @@ body {
 
 /* A connected reading path, wrapping into a vertical path on phones. */
 .player-search label { display: block; font-weight: 600; margin-bottom: 0.65rem; }
-/* Ink-blue navigation balances the jade tile artwork and warm paper. */
-:root { --nav-ink: #243d58; --paper: #f6f1e8; }
-body {
-  background-color: var(--paper);
-  background-image:
-    radial-gradient(ellipse at 95% 12%, #e0b78d30, transparent 48%),
-    repeating-linear-gradient(0deg, transparent 0 47px, #243d5805 47px 48px);
-}
+/* Outlined, cream secondary buttons. */
 .action-link {
   gap: 0.55rem;
   border: 1px solid #243d5870;
   color: var(--nav-ink);
   background: var(--card);
-  border-radius: 6px;
-  box-shadow: 0 3px 0 #243d5824;
   text-decoration: none;
 }
-.action-link-primary { background: var(--nav-ink); color: #fffdf6; border-color: var(--nav-ink); }
-@media (hover: hover) and (pointer: fine) {
-  .action-link:hover { background: #e8edf2; color: var(--nav-ink); box-shadow: 0 5px 0 #243d5824; }
-  .action-link-primary:hover { background: #172c42; color: #fffdf6; }
-}
-.action-link:active { transform: translateY(3px); box-shadow: none; }
 .back-to-top { position: sticky; bottom: 1rem; display: flex; justify-content: flex-end; padding: 0 1rem; margin-top: 2rem; pointer-events: none; z-index: 3; }
 .back-to-top a { pointer-events: auto; }
 /* Hidden at the top of the page, where it has nothing to do, and fading in
@@ -1604,8 +1484,8 @@ body {
 .winning-hand { background: #ebe6dd; border-color: #d5cec1; }
 .club-photo-placeholder { background: linear-gradient(145deg, #eee5d6, #e4d6c1); border-color: #cdbda5; }
 .footer { background: #292722; color: #f5efe4; border-top: 4px solid #c9ab75; }
-.footer-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; }
-.footer .footer-disclaimer { flex-basis: 100%; color: #f5efe4; }
+.footer-inner { flex-wrap: wrap; align-items: center; }
+.footer .footer-disclaimer { flex-basis: 100%; }
 .footer a { color: #f5efe4; text-decoration-color: #a69c88; text-underline-offset: 4px; }
 @media (hover: hover) and (pointer: fine) { .footer a:hover { color: #f3d5a2; } }
 /* The site's red focus ring would vanish on the dark footer. */
@@ -1615,11 +1495,9 @@ body {
 .footer-contact svg { flex-shrink: 0; }
 .footer-links { margin-left: auto; }
 @media (max-width: 560px) {
-  .footer-inner { gap: 0.5rem; }
   .footer-contact { display: grid; gap: 0.25rem; }
   .footer-links { margin-left: 0; width: 100%; }
 }/* Tiles tossed round the page, behind the content (see AmbientTiles). */
-body { isolation: isolate; }
 .ambient-tiles { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
 .ambient-tile {
   position: absolute;
@@ -1642,13 +1520,12 @@ body { isolation: isolate; }
 @media (prefers-reduced-motion: reduce) {
   .ambient-tile { transform: rotate(var(--turn)); transition: none; }
 }
-.page-title, .section-title { letter-spacing: -0.035em; }
 .tagline { font-weight: 600; }
 .club-photos .photo-grid:has(> :only-child) { grid-template-columns: 1fr; }
 .club-photos .photo-slot img { aspect-ratio: 3 / 2; }
 .club-photos figcaption { font-size: 0.85rem; font-style: italic; }
 .player-search { padding-top: 0; }
-.search-panel { position: relative; padding: clamp(1.3rem, 4vw, 2.6rem); background: #e9edf0; border: 1px solid #243d5838; border-radius: 16px; box-shadow: 0 6px 0 #243d5812; }
+.search-panel { position: relative; padding: clamp(1.3rem, 4vw, 2.6rem); border: 1px solid #243d5838; border-radius: 16px; }
 .search-panel .section-title::after { display: none; }
 .search-panel .section-title { margin-bottom: 1.5rem; }
 .search-panel .eyebrow, .search-panel .section-title { position: relative; }
@@ -1658,7 +1535,6 @@ body { isolation: isolate; }
 .home-page .welcome { gap: clamp(2rem, 5vw, 4rem); align-items: center; }
 .home-page .welcome > div:first-child { padding-top: 0; }
 .photo-slot > img { border-radius: 14px; }
-body { background-image: none; }
 .footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1.1rem 2rem; }
 .footer-brand { display: flex; gap: 0.65rem; align-items: center; text-decoration: none; font-weight: 700; font-size: 0.95rem; min-width: 0; min-height: 44px; }
 .footer-brand img { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; }
@@ -1675,14 +1551,12 @@ body { background-image: none; }
   .footer-links { justify-self: start; }
 }
 
-/* Clean sans headings and a distinct ink navigation bar. */
-:root { --display: var(--font-display), ui-sans-serif, system-ui, sans-serif; }
-.nav ul { background: #243344; box-shadow: 0 5px 15px #172c4226, inset 0 0 0 1px #172c42; }
+/* Light text on the dark navigation bar. */
 .nav ul a { color: #f5efe4; font-family: var(--body); font-weight: 700; }
 @media (hover: hover) and (pointer: fine) { .nav ul a:hover { background: #ffffff14; color: #fff; } }
-.nav ul a[aria-current="page"] { color: #243344; background: #fffaf0; }
+.nav ul a[aria-current="page"] { background: #fffaf0; }
 .nav-marker span { background: #fffaf0; }
-.nav[data-marker="on"] ul a[aria-current="page"] { background: transparent; color: #243344; }
+.nav[data-marker="on"] ul a[aria-current="page"] { background: transparent; }
 .nav ul a:focus-visible { outline-color: #c6a76a; outline-offset: -3px; }
 .about-page .section { padding-block: clamp(2.5rem, 6vw, 5rem); }
 .about-page .section-title { margin-bottom: 2rem; }
@@ -1701,7 +1575,7 @@ body { background-image: none; }
   .about-page:has(.about-intro-photo) .about-story { grid-template-columns: 1fr 1.2fr; }
   .about-page:has(.about-intro-photo) .about-story .about-photo { grid-row: 1; grid-column: 1; transform: rotate(-2deg); }
 }
-.about-officers-layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.about-officers-layout { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(2rem, 5vw, 4rem); }
 .about-page .officers { gap: 2rem; }
 .about-page .officers > div { padding-bottom: 1.2rem; border-bottom: 1px solid #243d5828; }
 /* About links: raised cards you can press; one still pending lies flat. */
@@ -1743,14 +1617,12 @@ body::before {
   background-size: 180px 180px, 320px 320px;
   background-repeat: repeat;
 }
-.page-title, .section-title { font-weight: 600; letter-spacing: -0.025em; }
 .eyebrow { letter-spacing: 0.1em; }
 .call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
 
-/* Printed game-room palette and solid, tile-like controls. */
-:root { --ink: #292722; --ink-soft: #605b52; --nav-ink: #292722; --rule: #d0c6b6; }
-.page-title, .section-title { font-weight: 700; letter-spacing: -0.015em; }
-.nav ul { background: #292722; box-shadow: 0 4px 0 #171612, 0 8px 18px #29272218; }
+/* Solid, tile-like controls in the charcoal palette. */
+.page-title, .section-title { font-weight: 700; }
+.nav ul { background: #292722; }
 .nav ul a[aria-current="page"], .nav[data-marker="on"] ul a[aria-current="page"] { color: #292722; }
 .action-link { border-color: #29272280; box-shadow: 0 4px 0 #b6aa96; }
 .action-link-primary { background: var(--jade); border-color: #1f4d3e; color: #fffaf0; box-shadow: 0 4px 0 #1b4436; }
@@ -1763,7 +1635,7 @@ body::before {
   .action-link:active { transform: none; }
 }
 
-/* Even navigation rim and quieter leaderboard alignment. */
+/* Navigation shadow and page-head spacing. */
 .nav ul { box-shadow: 0 6px 16px #29272220; }
 .tile-letter { font-family: var(--body); font-weight: 700; }
 .page-head { padding-bottom: clamp(2rem, 5vw, 3.5rem); }
@@ -1772,8 +1644,7 @@ body::before {
   .page-title { line-height: 1.08; }
 }
 
-/* Club theme: ivory paper, charcoal ink, vermilion interface accents. */
-:root { --accent: #a33428; }
+/* Vermilion accents: labels, rules and the focus ring. */
 .section-title::after, .eyebrow::before { background: var(--accent); }
 .eyebrow,
 .call-guide dt span, .hand-group p { color: var(--accent); }
@@ -1789,7 +1660,6 @@ body::before {
 .home-page .meeting-layout { gap: clamp(1.5rem, 4vw, 3rem); }
 
 /* Keep the footer at the bottom of the window on short pages. */
-body { display: flex; flex-direction: column; }
 body > main { flex: 1 0 auto; }
 
 /* 404: the guide's tiles, dropped onto the table one by one. */
