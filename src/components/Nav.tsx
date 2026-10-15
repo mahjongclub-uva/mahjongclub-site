@@ -3,7 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "@/components/Logo";
+import { LOGO, FULL_NAME } from "@/lib/site";
 
 /**
  * The only client component on the site, so the current tab can mark itself
@@ -60,7 +60,16 @@ export default function Nav() {
       data-marker={marker ? "on" : undefined}
     >
       <div className="nav-inner">
-        <Logo />
+        {/* Holds its space when empty, so adding a logo later doesn't shift
+            the page; decorative, since the name is in the <h1>. */}
+        <div className="logo" role="presentation">
+          {LOGO ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={LOGO} alt="" width={176} height={176} />
+          ) : (
+            <span className="logo-empty" aria-hidden="true" title={FULL_NAME} />
+          )}
+        </div>
         <ul ref={listRef}>
           {/* Purely decorative (aria-current on the link handles a11y). No
               guard needed against animating on first paint: it's inserted

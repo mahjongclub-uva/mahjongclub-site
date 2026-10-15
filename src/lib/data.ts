@@ -51,7 +51,7 @@ function readJson(path: string, file: string): unknown {
   }
 }
 
-export function getMeta(): Meta {
+function getMeta(): Meta {
   return parseOrDie(
     metaSchema,
     readJson(join(DATA_DIR, "meta.json"), "data/meta.json"),
@@ -59,7 +59,7 @@ export function getMeta(): Meta {
   );
 }
 
-export function getSemester(id: string): Semester {
+function getSemester(id: string): Semester {
   const file = `data/semesters/${id}.json`;
   return parseOrDie(
     semesterSchema,
@@ -72,7 +72,7 @@ export function getSemester(id: string): Semester {
  * Loads everything and checks cross-file rules a per-file schema can't see
  * (meta.json and a semester file disagreeing). Call once at build time.
  */
-export function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
+function getAllData(): { meta: Meta; semesters: Map<string, Semester> } {
   const meta = getMeta();
   const semesters = new Map<string, Semester>();
 

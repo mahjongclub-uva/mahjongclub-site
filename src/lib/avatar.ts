@@ -18,7 +18,7 @@ export const BACKS = {
   mint: "oklch(0.84 0.12 160)",
 } as const;
 
-export type Avatar = {
+type Avatar = {
   glyph: (typeof GLYPHS)[number];
   ink: keyof typeof INKS;
   back: keyof typeof BACKS;
