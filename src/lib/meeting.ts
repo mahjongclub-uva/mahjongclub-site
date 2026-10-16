@@ -272,12 +272,13 @@ export function actionLanded(
     );
   return "missing";
 }
-/** Where a checked-in player goes next tonight. */
+/** Where a checked-in player goes next tonight. The calendar's stand-in
+ * (no meetingId yet) has no rooms only because the service hasn't answered. */
 export function playerNext(meeting: Meeting, id: string) {
   const table = seatedRoom(meeting.rooms, id)?.table;
   return table
     ? { href: MEETING_PATHS.table(table), label: `Return to Table ${table}` }
-    : meeting.rooms
+    : meeting.rooms || meeting.meetingId === null
       ? { href: MEETING_PATHS.tables, label: "Find a table" }
       : { href: MEETING_PATHS.score, label: "Record a table" };
 }

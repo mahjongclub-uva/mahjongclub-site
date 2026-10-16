@@ -8,6 +8,7 @@ import {
   getResults,
   isMeetingPage,
   meetingShortcut,
+  playerNext,
   postMeeting,
   provisionalMeeting,
   tableError,
@@ -324,5 +325,24 @@ test("after a lost reply, each table action is recognised only once it took effe
   assert.equal(
     actionLanded("join", sent, undefined, [room(1, ["p002"], [])]),
     "missing",
+  );
+});
+
+test("checking in before the service answers still leads to the tables", () => {
+  // The calendar's stand-in, as provisionalMeeting builds it.
+  const stand = {
+    status: 200 as const,
+    open: true,
+    checkinsOpen: true,
+    meetingId: null,
+    date: "2026-10-16",
+    semester: null,
+    players: [],
+  };
+  assert.equal(playerNext(stand, "p001").label, "Find a table");
+  // A real reply without rooms is a service from before table rooms.
+  assert.equal(
+    playerNext({ ...stand, meetingId: "m1" }, "p001").label,
+    "Record a table",
   );
 });
