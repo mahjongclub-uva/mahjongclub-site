@@ -75,9 +75,16 @@ export async function getMeeting(
     );
   return (await schemas()).meetingSchema.parse(body);
 }
-export async function getRooms(url: string, signal?: AbortSignal) {
+/** The rooms; with `withResults`, tonight's saved tables too, which cost the
+ * service a sheet read and only Tonight's standings show. */
+export async function getRooms(
+  url: string,
+  signal?: AbortSignal,
+  withResults = false,
+) {
   const target = new URL(url);
   target.searchParams.set("r", "rooms");
+  if (!withResults) target.searchParams.set("results", "0");
   // Short, so one hung request cannot freeze a table's view for long.
   const { reply } = await readResponse(
     target.href,
