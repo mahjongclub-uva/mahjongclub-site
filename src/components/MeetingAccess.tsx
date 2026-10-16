@@ -11,6 +11,8 @@ import {
 import Sheet from "@/components/Sheet";
 import {
   getMeeting,
+  keepMeeting,
+  latestMeeting,
   playerConfirmed,
   PLAYER_EVENT,
   provisionalMeeting,
@@ -83,10 +85,6 @@ function PlayerSheet({
   );
 }
 
-// The last reply, so moving between meeting pages starts from it instead of
-// waiting on the service again. Empty on every full page load.
-let lastMeeting: Meeting | null = null;
-
 export default function MeetingAccess({
   children,
   schedule,
@@ -95,7 +93,7 @@ export default function MeetingAccess({
   /** Lets the page start from the calendar while the first reply is slow. */
   schedule?: ScheduledMeeting[];
 }) {
-  const [fetched, setMeeting] = useState(() => lastMeeting);
+  const [fetched, setMeeting] = useState(latestMeeting);
   const [early, setEarly] = useState<Meeting | null>(null);
   const meeting = fetched ?? early;
   const [error, setError] = useState("");
@@ -115,7 +113,7 @@ export default function MeetingAccess({
         !shown.players?.some((p) => p.id === saved.player.id)
           ? { ...shown, players: [...(shown.players ?? []), saved.player] }
           : shown;
-      lastMeeting = withPlayer(lastMeeting);
+      keepMeeting(withPlayer(latestMeeting()));
       setMeeting(withPlayer);
       playerChanged();
     };
@@ -131,7 +129,7 @@ export default function MeetingAccess({
       try {
         const next = await getMeeting(MEETING_SERVICE_URL, signal);
         if (signal.aborted) return;
-        setMeeting((lastMeeting = next));
+        setMeeting(next);
         setError("");
         setCheckedAt(clock());
       } catch (failure) {

@@ -7,6 +7,8 @@ import {
   getMeeting,
   getResults,
   isMeetingPage,
+  keepRooms,
+  latestMeeting,
   meetingShortcut,
   playerNext,
   postMeeting,
@@ -345,4 +347,39 @@ test("checking in before the service answers still leads to the tables", () => {
     playerNext({ ...stand, meetingId: "m1" }, "p001").label,
     "Record a table",
   );
+});
+
+test("a meeting reply already on its way never puts older rooms back", async (t) => {
+  const reply = (rooms: unknown[]) =>
+    Response.json({
+      status: 200,
+      open: true,
+      checkinsOpen: true,
+      meetingId: "m1",
+      date: "2026-10-16",
+      semester: "fall-2026",
+      players,
+      rooms,
+    });
+  t.mock.method(globalThis, "fetch", async () => reply([]));
+  await getMeeting("https://example.test/exec");
+  let answer: (value: Response) => void = () => {};
+  t.mock.method(
+    globalThis,
+    "fetch",
+    () => new Promise<Response>((resolve) => (answer = resolve)),
+  );
+  const slow = getMeeting("https://example.test/exec");
+  const played = {
+    table: 1,
+    session: 1,
+    seats: [],
+    hands: [{ id: "h1", winner: "p001", each: 5 }],
+    totals: [],
+    ended: null,
+  };
+  keepRooms([played]);
+  answer(reply([]));
+  assert.deepEqual((await slow).rooms, [played]);
+  assert.deepEqual(latestMeeting()?.rooms, [played]);
 });

@@ -59,10 +59,27 @@ async function readResponse(
   const reply = (await parsers).replySchema.parse(body);
   return { body, reply };
 }
+// The last meeting reply, kept across client navigation so the next meeting
+// page (including one opened from the site's meeting shortcut) starts from it
+// instead of waiting on the service again. A table's room changes join it.
+// Empty on every full page load.
+let latest: Meeting | null = null;
+// Counts room changes from tables, so a meeting reply that was already on its
+// way never puts older rooms back.
+let roomChanges = 0;
+export const latestMeeting = () => latest;
+export function keepMeeting(meeting: Meeting | null) {
+  latest = meeting;
+}
+export function keepRooms(rooms: Room[]) {
+  roomChanges++;
+  if (latest) latest = { ...latest, rooms };
+}
 export async function getMeeting(
   url: string,
   signal?: AbortSignal,
 ): Promise<Meeting> {
+  const seen = roomChanges;
   const target = new URL(url);
   target.searchParams.set("r", "meeting");
   const { body, reply } = await readResponse(target.href, {
@@ -73,7 +90,9 @@ export async function getMeeting(
     throw new Error(
       reply.message || "An officer needs to check the meeting settings.",
     );
-  return (await schemas()).meetingSchema.parse(body);
+  const next = (await schemas()).meetingSchema.parse(body);
+  return (latest =
+    latest && seen !== roomChanges ? { ...next, rooms: latest.rooms } : next);
 }
 /** The rooms; with `withResults`, tonight's saved tables too, which cost the
  * service a sheet read and only Tonight's standings show. */

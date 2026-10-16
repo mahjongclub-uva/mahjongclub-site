@@ -26,6 +26,7 @@ import {
   computingIdError,
   actionLanded,
   getRooms,
+  keepRooms,
   MAX_TABLES,
   MEETING_PATHS,
   postMeeting,
@@ -992,6 +993,7 @@ function Tables({
   const [roomsAt, setRoomsAt] = useState(() => Date.now());
   const [roomsFailed, setRoomsFailed] = useState(false);
   const take = (state: { rooms: Room[] }) => {
+    keepRooms(state.rooms);
     setRooms(state.rooms);
     setRoomsAt(Date.now());
     setRoomsFailed(false);
