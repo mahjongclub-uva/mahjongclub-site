@@ -212,6 +212,59 @@ export function isMeetingPage(path: string) {
 export function seatedRoom(rooms: Room[] | undefined, id?: string) {
   return rooms?.find((room) => room.seats.some((seat) => seat.id === id));
 }
+/**
+ * After a lost reply: whether a table action took effect anyway, judged from
+ * a fresh read against the table this phone saw when it sent it. An action
+ * that landed must not be offered again; a second End or Undo could act on a
+ * newer game. "unsure" when the table was ended meanwhile and the read can no
+ * longer tell.
+ */
+export function actionLanded(
+  action: string,
+  sent: {
+    playerId: string;
+    table?: number;
+    seat?: number;
+    session?: number;
+    handId?: string;
+    lastHandId: string | null;
+  },
+  before: Room | undefined,
+  rooms: Room[],
+): "landed" | "missing" | "unsure" {
+  const at = (table?: number) => rooms.find((room) => room.table === table);
+  const answer = (landed: boolean) => (landed ? "landed" : "missing");
+  if (action === "join") {
+    const seat = at(sent.table)?.seats.find((s) => s.id === sent.playerId);
+    return answer(
+      Boolean(seat && (sent.seat === undefined || seat.wind === sent.seat)),
+    );
+  }
+  if (action === "end")
+    return answer((at(sent.table)?.session ?? 0) > (sent.session ?? Infinity));
+  if (
+    action === "hand" &&
+    rooms.some(
+      (room) =>
+        room.hands.some((hand) => hand.id === sent.handId) ||
+        room.ended?.lastHandId === sent.handId,
+    )
+  )
+    return "landed";
+  if (!before) return "missing";
+  const room = at(before.table);
+  if (action === "leave")
+    return answer(!room?.seats.some((seat) => seat.id === sent.playerId));
+  if (room?.session !== before.session) return "unsure";
+  if (action === "undo")
+    return answer(
+      Boolean(
+        sent.lastHandId &&
+        !room.hands.some((hand) => hand.id === sent.lastHandId),
+      ),
+    );
+  return "missing";
+}
 /** Where a checked-in player goes next tonight. */
 export function playerNext(meeting: Meeting, id: string) {
   const table = seatedRoom(meeting.rooms, id)?.table;

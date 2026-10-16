@@ -24,6 +24,7 @@ import { BACKS } from "@/lib/avatar";
 import {
   cleanComputingId,
   computingIdError,
+  actionLanded,
   getRooms,
   MAX_TABLES,
   MEETING_PATHS,
@@ -995,13 +996,18 @@ function Tables({
     setRoomsAt(Date.now());
     setRoomsFailed(false);
   };
+  // Bumped when an action starts and when it finishes, so a refresh that
+  // overlapped one is dropped instead of putting older seats back.
+  const actions = useRef(0);
   const reload = usePoll(
     async (signal) => {
+      const started = actions.current;
       try {
         const next = await getRooms(MEETING_SERVICE_URL, signal);
-        if (!signal.aborted) take(next);
+        if (!signal.aborted && started === actions.current) take(next);
       } catch {
-        if (!signal.aborted) setRoomsFailed(true);
+        if (!signal.aborted && started === actions.current)
+          setRoomsFailed(true);
       }
     },
     8000,
@@ -1022,6 +1028,7 @@ function Tables({
     // A ref, not state: a second tap before the re-render must not send again.
     if (inFlight.current || !player) return false;
     inFlight.current = true;
+    actions.current++;
     const lastHandId =
       "lastHandId" in extra
         ? (extra.lastHandId as string | null)
@@ -1079,20 +1086,26 @@ function Tables({
       // before offering a retry, so a saved game is never entered twice.
       const fresh = await getRooms(MEETING_SERVICE_URL).catch(() => null);
       if (fresh) take(fresh);
-      const id = (extra as { handId?: string }).handId;
-      if (
-        action === "hand" &&
-        fresh?.rooms.some((room) => room.hands.some((hand) => hand.id === id))
-      )
-        return true;
+      const outcome =
+        fresh &&
+        actionLanded(
+          action,
+          { ...extra, playerId: player.id, lastHandId },
+          mine,
+          fresh.rooms,
+        );
+      if (outcome === "landed") return true;
       setError(
         requestError(failure) +
-          (fresh
+          (outcome === "missing"
             ? " Nothing was saved; try again."
-            : " Check the connection before trying again."),
+            : outcome === "unsure"
+              ? " This table was ended meanwhile. Check Tonight’s standings before saving again."
+              : " Check the connection before trying again."),
       );
       return false;
     } finally {
+      actions.current++;
       inFlight.current = false;
       setBusy(false);
     }
