@@ -667,11 +667,11 @@ function SeatedTable({
                 </span>
                 <button
                   type="button"
-                  className="game-change-winner"
+                  className="meeting-chip"
                   onClick={() => setStep("winner")}
                   aria-label="Change winner"
                 >
-                  Change
+                  <IconPencil aria-hidden="true" /> Change
                 </button>
               </div>
               <label htmlFor="hand-each">Each other player pays</label>
