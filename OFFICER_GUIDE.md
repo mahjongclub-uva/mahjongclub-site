@@ -37,6 +37,12 @@ If something is wrong, GitHub opens an issue called **Website content update is 
 
 Leaving `ready_to_publish` on `TRUE` is fine; nothing happens while the Sheet matches the site.
 
+## Instagram story
+
+Every deploy redraws the weekly leaderboard story from the published standings.
+After the score update is merged and the site has updated, open `/story.png` on the site on your phone, long-press the image and save it, then post it.
+If it still shows last week's date, wait ten minutes and reload; the old copy can be cached that long.
+
 ## Meetings
 
 The homepage reads upcoming meetings from the club's public Google Calendar.
