@@ -10,6 +10,50 @@ from unittest.mock import patch
 from pipeline import build_data
 
 
+class ScoreImportTests(unittest.TestCase):
+    def grid(self, points: str, net: str) -> dict[tuple[int, int], str]:
+        grid = {(1, 2): "Table 1", (2, 2): "Player", (2, 5): "46313"}
+        for row in range(3, 7):
+            grid[row, 2] = f"Private Player {row}"
+            grid[row, 3] = points
+            grid[row, 4] = net
+        return grid
+
+    def test_fractional_scores_stop_the_import_before_any_output_is_written(self):
+        # Truncation used to turn an unbalanced 823.6-point table into 820.
+        output = io.StringIO()
+        with (
+            patch("sys.argv", ["build_data.py"]),
+            patch.object(build_data, "read_excel_grid", return_value=self.grid("205.9", "0.9")),
+            patch.object(build_data, "load_roster") as load_roster,
+            patch.object(build_data, "write_json") as write_json,
+            contextlib.redirect_stdout(io.StringIO()),
+            contextlib.redirect_stderr(output),
+            self.assertRaises(SystemExit),
+        ):
+            build_data.main()
+
+        load_roster.assert_not_called()
+        write_json.assert_not_called()
+        self.assertIn("Table 1 row 3", output.getvalue())
+        self.assertNotIn("Private Player", output.getvalue())
+
+    def test_invalid_points_or_net_are_rejected_without_printing_names(self):
+        for points, net in (("205.5", "0"), ("205", "0.5"), ("NaN", "0"),
+                            ("205", "Infinity"), ("not a score", "0")):
+            with self.subTest(points=points, net=net):
+                output = io.StringIO()
+                with contextlib.redirect_stderr(output), self.assertRaises(SystemExit):
+                    build_data.parse_tables(self.grid(points, net))
+                self.assertIn("whole-number points and net", output.getvalue())
+                self.assertNotIn("Private Player", output.getvalue())
+
+    def test_integer_decimal_and_exponent_cells_still_import(self):
+        tables = build_data.parse_tables(self.grid("205.0", "0e0"))
+        build_data.check_tables(tables)
+        self.assertEqual([seat[1:] for seat in tables[0].seats], [(205, 0)] * 4)
+
+
 class PrivateLogTests(unittest.TestCase):
     def test_missing_date_warning_does_not_print_player_names(self):
         table = build_data.Table(21, None)

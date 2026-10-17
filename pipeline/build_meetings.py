@@ -98,6 +98,8 @@ def parse_datetime(value: str, params: dict[str, str]) -> dt.datetime:
 
 class Event:
     def __init__(self) -> None:
+        self.uid = ""
+        self.recurrence_id: dt.datetime | None = None
         self.start: dt.datetime | None = None
         self.end: dt.datetime | None = None
         self.summary = ""
@@ -121,7 +123,7 @@ def parse_events(text: str) -> list[Event]:
             current = Event()
             continue
         if name == "END" and value == "VEVENT":
-            if current and current.start:
+            if current and (current.start or current.recurrence_id):
                 events.append(current)
             current = None
             continue
@@ -136,7 +138,13 @@ def parse_events(text: str) -> list[Event]:
         if current is None or depth_other:
             continue
 
-        if name == "DTSTART":
+        if name == "UID":
+            current.uid = value
+        elif name == "RECURRENCE-ID":
+            if params.get("RANGE"):
+                raise ValueError("Unsupported RECURRENCE-ID RANGE; keeping the previous calendar output.")
+            current.recurrence_id = parse_datetime(value, params)
+        elif name == "DTSTART":
             current.start = parse_datetime(value, params)
         elif name == "DTEND":
             current.end = parse_datetime(value, params)
@@ -155,6 +163,18 @@ def parse_events(text: str) -> list[Event]:
         elif name == "EXDATE":
             for piece in value.split(","):
                 current.excluded.add(parse_datetime(piece, params))
+
+    # A changed or cancelled occurrence replaces its original start, even if
+    # Google lists the override before the recurring series in the feed.
+    overrides: dict[str, set[dt.datetime]] = {}
+    for event in events:
+        if event.recurrence_id is not None:
+            if not event.uid:
+                raise ValueError("A calendar override needs a UID.")
+            overrides.setdefault(event.uid, set()).add(event.recurrence_id)
+    for event in events:
+        if event.recurrence_id is None and event.uid in overrides:
+            event.excluded.update(overrides[event.uid])
 
     return events
 

@@ -29,6 +29,7 @@ import sys
 import zipfile
 import datetime as dt
 import xml.etree.ElementTree as ET
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 
@@ -262,7 +263,13 @@ def parse_tables(grid: dict[tuple[int, int], str]) -> list[Table]:
 
         points, net = grid.get((row, COL_POINTS)), grid.get((row, COL_NET))
         if label and points is not None and net is not None:
-            current.seats.append((label, int(float(points)), int(float(net))))
+            try:
+                scores = [Decimal(value) for value in (points, net)]
+                if any(not value.is_finite() or value != value.to_integral_value() for value in scores):
+                    raise ValueError
+            except (InvalidOperation, ValueError):
+                die(f"{current} row {row} requires whole-number points and net")
+            current.seats.append((label, int(scores[0]), int(scores[1])))
 
     return [t for t in tables if t.seats]
 

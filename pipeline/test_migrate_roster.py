@@ -32,6 +32,23 @@ class MigrateRosterTests(unittest.TestCase):
             [("p001", "p004")],
         )
 
+    def test_local_id_cannot_replace_a_different_existing_player(self):
+        existing = {"Private Existing": {"id": "p001", "display": "E.", "opt_out": False}}
+        local = {"Private Local": {"id": "p001", "display": "L.", "opt_out": True}}
+        output = io.StringIO()
+        with contextlib.redirect_stderr(output), self.assertRaises(SystemExit):
+            plan_rows(existing, local, [])
+        self.assertIn("cannot migrate p001", output.getvalue())
+        self.assertNotIn("Private", output.getvalue())
+
+    def test_duplicate_local_ids_are_rejected_before_migration(self):
+        local = {
+            "Private First": {"id": "p001", "display": "F.", "opt_out": False},
+            "Private Second": {"id": "p001", "display": "S.", "opt_out": False},
+        }
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            plan_rows({}, local, [])
+
     def test_roster_tab_rejects_a_repeated_id(self):
         grid = {(1, c + 1): h for c, h in enumerate(build_data.ROSTER_COLUMNS)}
         for row, name in ((2, "Ann Lee"), (3, "Bo Kim")):
