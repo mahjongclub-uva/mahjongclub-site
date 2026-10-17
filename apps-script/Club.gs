@@ -2,6 +2,22 @@ function properties() {
   return PropertiesService.getScriptProperties();
 }
 
+// Saved tables change only under the lock. A save makes this count odd
+// before it touches the sheet, and the lock makes it even again once the
+// rooms are written too, so a reader that sees the same even count before
+// and after its reads saw one consistent night: never a table both saved and
+// still playing, nor neither.
+let saving = false;
+const saves = () => Number(properties().getProperty("saves") || 0);
+// Always moves to a new odd count, and the lock to the next even one, so a
+// count left odd by an execution killed mid-save heals at the next save.
+function startSave() {
+  if (saving) return;
+  saving = true;
+  const count = saves();
+  properties().setProperty("saves", String(count + (count % 2 ? 2 : 1)));
+}
+
 function withLock(action) {
   const lock = LockService.getScriptLock();
   const waiting = Date.now();
@@ -13,7 +29,9 @@ function withLock(action) {
   } finally {
     try {
       SpreadsheetApp.flush();
+      if (saving) properties().setProperty("saves", String(saves() + 1));
     } finally {
+      saving = false;
       lock.releaseLock();
     }
   }
@@ -608,6 +626,7 @@ function submitResult(request, meeting) {
       503,
       "No empty Table N template is available. Ask an officer to add one.",
     );
+  startSave();
   // Reserve the same block on retries, including a failure between the note and values write.
   tab.getRange(block.row, 2).setNote(receipt);
   const netFormulas = tab.getRange(block.row + 2, 4, 4, 1).getFormulas();
@@ -635,11 +654,13 @@ function submitResult(request, meeting) {
   };
 }
 
-function results(meeting) {
+// Cached with the save count it was read at, so a rebuild that read the
+// sheets just before a save can never stand in for the night after it.
+function results(meeting, at = saves()) {
   const cache = CacheService.getScriptCache();
   const key = "results:" + meeting.id;
-  const cached = cache.get(key);
-  if (cached) return JSON.parse(cached);
+  const cached = JSON.parse(cache.get(key) || "null");
+  if (cached?.saves === at) return cached.response;
   const players = rosterLayout(sheet("Roster").getDataRange().getValues());
   const tables = pointsLayout(
     sheet(meeting.pointsTab).getDataRange().getValues(),
@@ -669,7 +690,7 @@ function results(meeting) {
     date: meeting.date,
     tables,
   };
-  cache.put(key, JSON.stringify(response), 30);
+  if (at % 2 === 0) cache.put(key, JSON.stringify({ saves: at, response }), 30);
   return response;
 }
 
@@ -791,17 +812,29 @@ function settleRooms(meeting) {
   }
 }
 
-// Rooms and tonight's saved tables in one read. Reads take no lock, so a
-// table ended mid-read can show twice for one refresh; saved results are
-// never duplicated.
-function roomsState(meeting) {
-  let tables = null;
-  try {
-    tables = results(meeting).tables;
-  } catch {
-    // The rooms still load; standings wait for an officer to fix the sheet.
+// The rooms, and with `withResults` tonight's saved tables, for Tonight's
+// standings; tables only need the rooms, so their requests skip the sheets.
+// Reads take no lock: a read that overlapped a save waits it out and reads
+// again (see `saves`).
+function roomsState(meeting, withResults) {
+  if (!withResults) return { rooms: readRooms(meeting.id).map(publicRoom) };
+  for (let attempt = 1; ; attempt++) {
+    const at = saves();
+    // ponytail: gives up after about a second and shows what it read; a save
+    // that slow means the sheet itself is struggling.
+    if (at % 2 && attempt < 5) {
+      Utilities.sleep(250);
+      continue;
+    }
+    let tables = null;
+    try {
+      tables = results(meeting, at).tables;
+    } catch {
+      // The rooms still load; standings wait for an officer to fix the sheet.
+    }
+    const rooms = readRooms(meeting.id).map(publicRoom);
+    if (saves() === at || attempt >= 5) return { rooms, results: tables };
   }
-  return { rooms: readRooms(meeting.id).map(publicRoom), results: tables };
 }
 
 function roomAction(request, meeting) {
@@ -1010,10 +1043,16 @@ function doGet(event) {
       fail(404, "Unknown resource.");
     if (!meetingWindow(meeting, Date.now()).open)
       fail(423, "The meeting is closed.");
-    // Script Properties plus the 30-second results cache, so phones at a
-    // table can refresh often without reading the sheets each time.
+    // Table phones refresh from Script Properties alone; Tonight's standings
+    // add the 30-second results cache, so neither reads the sheets each time.
     return request.r === "rooms"
-      ? { status: 200, meetingId: meeting.id, ...roomsState(meeting) }
+      ? {
+          status: 200,
+          meetingId: meeting.id,
+          // Tables send results=0; anything else, including a site from
+          // before that, still gets tonight's saved tables.
+          ...roomsState(meeting, request.results !== "0"),
+        }
       : results(meeting);
   });
 }

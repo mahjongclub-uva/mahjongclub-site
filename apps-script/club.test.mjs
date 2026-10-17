@@ -643,7 +643,8 @@ function seatedTable(h, ids = ["p001", "p002", "p003", "p004"]) {
     if (reply.status === 200) lastHandId = handId;
     return reply;
   };
-  const table = () => h.get({ r: "rooms" }).rooms.find((r) => r.table === 1);
+  const table = () =>
+    h.get({ r: "rooms", results: "0" }).rooms.find((r) => r.table === 1);
   const end = (by = "p001", extra = {}) =>
     room(by, "end", {
       table: 1,
@@ -692,10 +693,62 @@ test("a game pays the winner three times each, and End saves one table and relea
     h.get({ r: "results" }).tables[0].seats.map((seat) => seat.total),
     [255, 175, 215, 175],
   );
-  // The rooms read carries tonight's saved tables in the same response.
+  // Tonight's standings get the saved tables with the rooms; tables opt out.
   assert.equal(h.get({ r: "rooms" }).results.length, 1);
+  assert.equal("results" in h.get({ r: "rooms", results: "0" }), false);
   // Everyone can join another table, which starts at 205.
   assert.equal(t.room("p001", "join", { table: 2, seat: 0 }).status, 200);
+});
+
+test("table requests never read the sheets", () => {
+  const h = harness();
+  h.get({ r: "meeting" });
+  const reads = h.calls.reads;
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  assert.equal(
+    "results" in t.room("p001", "undo", { lastHandId: t.last() }),
+    false,
+  );
+  t.table();
+  assert.equal(h.calls.reads, reads);
+});
+
+test("tonight's standings count a table being ended exactly once", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  // Standings rebuilt from the sheets just before End, and cached after it,
+  // are never used for the night after it.
+  assert.equal(h.get({ r: "rooms" }).results.length, 0);
+  const before = h.cache.get("results:" + h.meeting.id);
+  const key = Object.keys(h.store).find((k) => k.startsWith("room:"));
+  const playing = h.store[key];
+  assert.equal(t.end().saved, 1);
+  assert.equal(h.store.saves, "2");
+  h.cache.set("results:" + h.meeting.id, before);
+  assert.equal(h.get({ r: "rooms" }).results.length, 1);
+  // The next group sits down and ends with no games, replacing the summary.
+  const next = seatedTable(h);
+  assert.equal(next.end().saved, null);
+  h.cache.set("results:" + h.meeting.id, before);
+  assert.equal(h.get({ r: "rooms" }).results.length, 1);
+  // A read in the middle of an End (table saved, seats not yet released)
+  // waits for it to finish rather than counting the table twice.
+  const ended = h.store[key];
+  h.store[key] = playing;
+  h.store.saves = "3";
+  h.cache.clear();
+  let waits = 0;
+  h.context.Utilities.sleep = () => {
+    waits++;
+    h.store[key] = ended;
+    h.store.saves = "4";
+  };
+  const state = h.get({ r: "rooms" });
+  assert.equal(waits, 1);
+  assert.equal(state.results.length, 1);
+  assert.equal(state.rooms[0].hands.length, 0);
 });
 
 test("ending a table with no games releases everyone and writes nothing", () => {

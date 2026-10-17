@@ -59,10 +59,27 @@ async function readResponse(
   const reply = (await parsers).replySchema.parse(body);
   return { body, reply };
 }
+// The last meeting reply, kept across client navigation so the next meeting
+// page (including one opened from the site's meeting shortcut) starts from it
+// instead of waiting on the service again. A table's room changes join it.
+// Empty on every full page load.
+let latest: Meeting | null = null;
+// Counts room changes from tables, so a meeting reply that was already on its
+// way never puts older rooms back.
+let roomChanges = 0;
+export const latestMeeting = () => latest;
+export function keepMeeting(meeting: Meeting | null) {
+  latest = meeting;
+}
+export function keepRooms(rooms: Room[]) {
+  roomChanges++;
+  if (latest) latest = { ...latest, rooms };
+}
 export async function getMeeting(
   url: string,
   signal?: AbortSignal,
 ): Promise<Meeting> {
+  const seen = roomChanges;
   const target = new URL(url);
   target.searchParams.set("r", "meeting");
   const { body, reply } = await readResponse(target.href, {
@@ -73,11 +90,20 @@ export async function getMeeting(
     throw new Error(
       reply.message || "An officer needs to check the meeting settings.",
     );
-  return (await schemas()).meetingSchema.parse(body);
+  const next = (await schemas()).meetingSchema.parse(body);
+  return (latest =
+    latest && seen !== roomChanges ? { ...next, rooms: latest.rooms } : next);
 }
-export async function getRooms(url: string, signal?: AbortSignal) {
+/** The rooms; with `withResults`, tonight's saved tables too, which cost the
+ * service a sheet read and only Tonight's standings show. */
+export async function getRooms(
+  url: string,
+  signal?: AbortSignal,
+  withResults = false,
+) {
   const target = new URL(url);
   target.searchParams.set("r", "rooms");
+  if (!withResults) target.searchParams.set("results", "0");
   // Short, so one hung request cannot freeze a table's view for long.
   const { reply } = await readResponse(
     target.href,
@@ -212,12 +238,66 @@ export function isMeetingPage(path: string) {
 export function seatedRoom(rooms: Room[] | undefined, id?: string) {
   return rooms?.find((room) => room.seats.some((seat) => seat.id === id));
 }
-/** Where a checked-in player goes next tonight. */
+/**
+ * After a lost reply: whether a table action took effect anyway, judged from
+ * a fresh read against the table this phone saw when it sent it. An action
+ * that landed must not be offered again; a second End or Undo could act on a
+ * newer game. "unsure" when the table was ended meanwhile and the read can no
+ * longer tell.
+ */
+export function actionLanded(
+  action: string,
+  sent: {
+    playerId: string;
+    table?: number;
+    seat?: number;
+    session?: number;
+    handId?: string;
+    lastHandId: string | null;
+  },
+  before: Room | undefined,
+  rooms: Room[],
+): "landed" | "missing" | "unsure" {
+  const at = (table?: number) => rooms.find((room) => room.table === table);
+  const answer = (landed: boolean) => (landed ? "landed" : "missing");
+  if (action === "join") {
+    const seat = at(sent.table)?.seats.find((s) => s.id === sent.playerId);
+    return answer(
+      Boolean(seat && (sent.seat === undefined || seat.wind === sent.seat)),
+    );
+  }
+  if (action === "end")
+    return answer((at(sent.table)?.session ?? 0) > (sent.session ?? Infinity));
+  if (
+    action === "hand" &&
+    rooms.some(
+      (room) =>
+        room.hands.some((hand) => hand.id === sent.handId) ||
+        room.ended?.lastHandId === sent.handId,
+    )
+  )
+    return "landed";
+  if (!before) return "missing";
+  const room = at(before.table);
+  if (action === "leave")
+    return answer(!room?.seats.some((seat) => seat.id === sent.playerId));
+  if (room?.session !== before.session) return "unsure";
+  if (action === "undo")
+    return answer(
+      Boolean(
+        sent.lastHandId &&
+        !room.hands.some((hand) => hand.id === sent.lastHandId),
+      ),
+    );
+  return "missing";
+}
+/** Where a checked-in player goes next tonight. The calendar's stand-in
+ * (no meetingId yet) has no rooms only because the service hasn't answered. */
 export function playerNext(meeting: Meeting, id: string) {
   const table = seatedRoom(meeting.rooms, id)?.table;
   return table
     ? { href: MEETING_PATHS.table(table), label: `Return to Table ${table}` }
-    : meeting.rooms
+    : meeting.rooms || meeting.meetingId === null
       ? { href: MEETING_PATHS.tables, label: "Find a table" }
       : { href: MEETING_PATHS.score, label: "Record a table" };
 }
