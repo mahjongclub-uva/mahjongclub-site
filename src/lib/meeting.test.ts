@@ -1,12 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  actionLanded,
   cleanComputingId,
   computingIdError,
   getMeeting,
   getResults,
   isMeetingPage,
+  keepRooms,
+  latestMeeting,
   meetingShortcut,
+  playerNext,
   postMeeting,
   provisionalMeeting,
   tableError,
@@ -258,4 +262,124 @@ test("check-in starts from the calendar only for a phone without tonight's playe
     }),
   );
   assert.equal(at("2026-10-16T17:05:00-04:00"), null);
+});
+
+test("after a lost reply, each table action is recognised only once it took effect", () => {
+  const seat = (id: string, wind: number) => ({ id, display: id, wind });
+  const room = (
+    session: number,
+    ids: string[],
+    hands: string[],
+    lastHandId?: string,
+  ) => ({
+    table: 2,
+    session,
+    seats: ids.map(seat),
+    hands: hands.map((id) => ({ id, winner: ids[0], each: 5 })),
+    totals: [],
+    ended: lastHandId
+      ? {
+          session: session - 1,
+          lastHandId,
+          sheetTable: 4,
+          at: 0,
+          by: "",
+          games: 3,
+          totals: [],
+        }
+      : null,
+  });
+  const before = room(1, ["p001", "p002", "p003", "p004"], ["h1", "h2"]);
+  const sent = { playerId: "p001", table: 2, lastHandId: "h2" };
+  const landed = (action: string, after: ReturnType<typeof room>, extra = {}) =>
+    actionLanded(action, { ...sent, ...extra }, before, [after]);
+  assert.equal(
+    landed("hand", room(1, ["p001"], ["h1", "h2", "h3"]), { handId: "h3" }),
+    "landed",
+  );
+  assert.equal(landed("hand", before, { handId: "h3" }), "missing");
+  // Another phone ended the table straight after this game was saved.
+  assert.equal(
+    landed("hand", room(2, [], [], "h3"), { handId: "h3" }),
+    "landed",
+  );
+  assert.equal(
+    landed("hand", room(2, [], [], "h2"), { handId: "h3" }),
+    "unsure",
+  );
+  assert.equal(landed("undo", room(1, ["p001"], ["h1"])), "landed");
+  assert.equal(landed("undo", before), "missing");
+  // Someone else ended the table and a new session began: this Undo can't tell.
+  assert.equal(landed("undo", room(2, ["p001"], [])), "unsure");
+  assert.equal(landed("end", room(2, [], []), { session: 1 }), "landed");
+  assert.equal(landed("end", before, { session: 1 }), "missing");
+  assert.equal(landed("leave", room(1, ["p002"], [])), "landed");
+  assert.equal(landed("leave", before), "missing");
+  const full = room(1, ["p002", "p003", "p004", "p001"], []);
+  assert.equal(
+    actionLanded("join", { ...sent, seat: 3 }, undefined, [full]),
+    "landed",
+  );
+  assert.equal(
+    actionLanded("join", { ...sent, seat: 1 }, undefined, [full]),
+    "missing",
+  );
+  assert.equal(
+    actionLanded("join", sent, undefined, [room(1, ["p002"], [])]),
+    "missing",
+  );
+});
+
+test("checking in before the service answers still leads to the tables", () => {
+  // The calendar's stand-in, as provisionalMeeting builds it.
+  const stand = {
+    status: 200 as const,
+    open: true,
+    checkinsOpen: true,
+    meetingId: null,
+    date: "2026-10-16",
+    semester: null,
+    players: [],
+  };
+  assert.equal(playerNext(stand, "p001").label, "Find a table");
+  // A real reply without rooms is a service from before table rooms.
+  assert.equal(
+    playerNext({ ...stand, meetingId: "m1" }, "p001").label,
+    "Record a table",
+  );
+});
+
+test("a meeting reply already on its way never puts older rooms back", async (t) => {
+  const reply = (rooms: unknown[]) =>
+    Response.json({
+      status: 200,
+      open: true,
+      checkinsOpen: true,
+      meetingId: "m1",
+      date: "2026-10-16",
+      semester: "fall-2026",
+      players,
+      rooms,
+    });
+  t.mock.method(globalThis, "fetch", async () => reply([]));
+  await getMeeting("https://example.test/exec");
+  let answer: (value: Response) => void = () => {};
+  t.mock.method(
+    globalThis,
+    "fetch",
+    () => new Promise<Response>((resolve) => (answer = resolve)),
+  );
+  const slow = getMeeting("https://example.test/exec");
+  const played = {
+    table: 1,
+    session: 1,
+    seats: [],
+    hands: [{ id: "h1", winner: "p001", each: 5 }],
+    totals: [],
+    ended: null,
+  };
+  keepRooms([played]);
+  answer(reply([]));
+  assert.deepEqual((await slow).rooms, [played]);
+  assert.deepEqual(latestMeeting()?.rooms, [played]);
 });

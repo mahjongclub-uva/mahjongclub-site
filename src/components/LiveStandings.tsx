@@ -58,7 +58,8 @@ function LiveTable({
         firstRooms = null;
         const state =
           meeting.rooms &&
-          ((await early) ?? (await getRooms(MEETING_SERVICE_URL, signal)));
+          ((await early) ??
+            (await getRooms(MEETING_SERVICE_URL, signal, true)));
         const next: Results = state
           ? {
               status: 200 as const,
@@ -298,7 +299,9 @@ export default function LiveStandings({
 }) {
   useEffect(() => {
     if (schedule.some((m) => inCheckIn(m, Date.now())))
-      firstRooms = getRooms(MEETING_SERVICE_URL).catch(() => null);
+      firstRooms = getRooms(MEETING_SERVICE_URL, undefined, true).catch(
+        () => null,
+      );
   }, [schedule]);
   return (
     <MeetingAccess>
