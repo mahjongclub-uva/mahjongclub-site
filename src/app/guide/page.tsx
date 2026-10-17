@@ -22,8 +22,11 @@ export default function Guide() {
     <main className={`guide-page ${styles.page}`}>
       <div className="section-wrap">
         <header className={styles.hero}>
-          <h1>Learn one of the ways to play</h1>
-          <p className={styles.qualifier}>We teach as we play.</p>
+          <h1>Learn how to play!</h1>
+          <p className={styles.qualifier}>
+            We teach as we play. This is just <strong>one</strong> of the ways
+            to play.
+          </p>
         </header>
         <LessonRack />
 
