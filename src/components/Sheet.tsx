@@ -6,10 +6,12 @@ import { useEffect, useId, useRef, type ReactNode } from "react";
 export default function Sheet({
   title,
   close,
+  className,
   children,
 }: {
   title: string;
   close: () => void;
+  className?: string;
   children: ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -19,16 +21,29 @@ export default function Sheet({
     // React removes the dialog before this cleanup runs, so the browser
     // cannot return focus itself; hand it back to what opened the sheet.
     const opener = document.activeElement as HTMLElement | null;
+    // Keep the page fixed behind the modal, including on mobile Safari.
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
     element.showModal();
     return () => {
       element.close();
-      opener?.focus();
+      Object.assign(body.style, previous);
+      window.scrollTo({ top: scrollY, behavior: "instant" });
+      opener?.focus({ preventScroll: true });
     };
   }, []);
   return (
     <dialog
       ref={dialog}
-      className="meeting-calculator table-sheet"
+      className={`meeting-calculator table-sheet ${className ?? ""}`}
       aria-labelledby={id}
       onCancel={(event) => {
         event.preventDefault();

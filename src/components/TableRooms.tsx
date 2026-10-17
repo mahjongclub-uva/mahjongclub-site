@@ -628,6 +628,7 @@ function SeatedTable({
 
       {layer === "game" && (
         <Sheet
+          className="game-sheet"
           title={
             step === "review"
               ? "Confirm"
@@ -659,16 +660,20 @@ function SeatedTable({
             </>
           ) : step === "amount" ? (
             <>
-              <button
-                type="button"
-                className="meeting-chip game-winner-choice"
-                onClick={() => setStep("winner")}
-              >
+              <div className="game-winner-row">
                 <PlayerTile id={draft.winner} />
-                {name(draft.winner)} won
-                <IconPencil aria-hidden="true" />
-                <span className="sr-only">Change winner</span>
-              </button>
+                <span>
+                  <strong>{name(draft.winner)}</strong> won
+                </span>
+                <button
+                  type="button"
+                  className="game-change-winner"
+                  onClick={() => setStep("winner")}
+                  aria-label="Change winner"
+                >
+                  Change
+                </button>
+              </div>
               <label htmlFor="hand-each">Each other player pays</label>
               <input
                 id="hand-each"

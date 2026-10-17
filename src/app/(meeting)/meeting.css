@@ -2524,9 +2524,36 @@ main.meeting-page .calculator-head h2 {
 .game-step-note {
   text-align: center;
 }
-.game-winner-choice {
-  margin-block-end: 20px;
+main.meeting-page .game-sheet .calculator-head h2 {
+  font-size: clamp(1.125rem, 5.5vw, 1.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
-.game-winner-choice .player-tile {
+.game-winner-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 4px 20px;
   --w: 28px;
+}
+.game-winner-row > span:nth-child(2) {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.game-change-winner {
+  min-block-size: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--jade);
+  font: 700 0.9rem var(--body);
+  cursor: pointer;
+}
+.game-change-winner:active {
+  background: color-mix(in oklch, var(--jade) 10%, transparent);
+}
+.table-sheet {
+  overscroll-behavior: contain;
 }
