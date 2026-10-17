@@ -1,4 +1,4 @@
-import { SEASON_START } from "./format.ts";
+import { SEASON_START, formatShortDate } from "./format.ts";
 import type { Semester } from "./schema.ts";
 
 /** Places moved since the last meeting, as a story chip. */
@@ -34,23 +34,20 @@ export function storyBoard(semester: Semester) {
       climb = { name: s.display, places: s.rank_change! };
   }
 
-  // "2026-10-16" -> "Fri Oct 16"; UTC so it cannot slip a day.
   const date = semester.last_session
-    ? new Date(`${semester.last_session}T00:00:00Z`)
-        .toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          timeZone: "UTC",
-        })
-        .replace(",", "")
+    ? formatShortDate(semester.last_session)
     : null;
+
+  // Whole ranks only on the podium, so a tie is never split between it and
+  // the rows below: ranks 1, 2, 2, 2 leave the winner alone up there.
+  const cut = top[3]?.rank;
+  const podium = top.slice(0, 3).filter((e) => e.rank !== cut);
 
   return {
     label: semester.label,
     date,
-    podium: top.slice(0, 3),
-    rows: top.slice(3),
+    podium,
+    rows: top.slice(podium.length),
     climb,
     hasMoves: top.some((e) => e.move),
   };

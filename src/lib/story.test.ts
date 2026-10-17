@@ -39,7 +39,7 @@ test("story shows the top nine, movement chips and the biggest climb anywhere on
   const board = storyBoard(
     semester(changes.map((c, i) => player(i + 1, i + 1, 100 - i * 10, c))),
   );
-  assert.equal(board.date, "Fri Oct 16");
+  assert.equal(board.date, "Fri 16 Oct");
   assert.deepEqual(
     board.podium.map((e) => [e.rank, e.score]),
     [
@@ -71,4 +71,23 @@ test("story before places moved exist has no chips and no climb, and copes with 
     [1, 1],
   );
   assert.equal(board.rows.length, 0);
+});
+
+test("a tie for third stays together below the podium", () => {
+  const board = storyBoard(
+    semester([
+      player(1, 1, 90),
+      player(2, 2, 80),
+      player(3, 3, 70),
+      player(4, 3, 70),
+    ]),
+  );
+  assert.deepEqual(
+    board.podium.map((e) => e.rank),
+    [1, 2],
+  );
+  assert.deepEqual(
+    board.rows.map((e) => e.rank),
+    [3, 3],
+  );
 });

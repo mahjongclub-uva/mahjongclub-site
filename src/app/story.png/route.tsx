@@ -11,6 +11,7 @@ import { ImageResponse } from "next/og";
 import { GLYPHS } from "@/components/glyphs";
 import { getCurrentSemester } from "@/lib/data";
 import { formatPoints } from "@/lib/format";
+import { FULL_NAME } from "@/lib/site";
 import { storyBoard, type Move, type StoryEntry } from "@/lib/story";
 
 export const dynamic = "force-static";
@@ -327,7 +328,7 @@ export async function GET() {
             color: "#9d302b",
           }}
         >
-          {`Mahjong Club @ UVA · ${story.label}`}
+          {`${FULL_NAME} · ${story.label}`}
         </div>
         <div
           style={{
