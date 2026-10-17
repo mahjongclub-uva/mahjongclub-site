@@ -2543,16 +2543,22 @@ main.meeting-page .game-sheet .calculator-head h2 {
 }
 .game-change-winner {
   min-block-size: 44px;
-  padding: 0 8px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--jade);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  color: var(--ink);
   font: 700 0.9rem var(--body);
   cursor: pointer;
 }
 .game-change-winner:active {
-  background: color-mix(in oklch, var(--jade) 10%, transparent);
+  transform: translateY(2px);
+  box-shadow: inset 0 -1px 0 oklch(0 0 0 / 0.06);
+}
+.game-change-winner:focus-visible {
+  outline: 3px solid var(--jade);
+  outline-offset: 3px;
 }
 .table-sheet {
   overscroll-behavior: contain;
