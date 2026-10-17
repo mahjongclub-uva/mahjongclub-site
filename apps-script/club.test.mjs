@@ -749,6 +749,30 @@ test("a swap saves the round and keeps the players who stay in their seats", () 
   assert.equal(t.room("p004", "join", { table: 1, seat: 3 }).status, 200);
 });
 
+test("removing someone before any game only frees their seat", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  // A swap saves round 1; the three who stay start round 2 with no games.
+  assert.equal(t.end("p004", { keep: ["p001", "p002", "p003"] }).status, 200);
+  const before = t.table();
+  const removed = t.end("p001", {
+    session: before.session,
+    lastHandId: null,
+    keep: ["p001", "p002"],
+  });
+  assert.equal(removed.status, 200);
+  const room = t.table();
+  // Same round, one seat fewer, and round 1's receipt is still there.
+  assert.equal(room.session, before.session);
+  assert.deepEqual(
+    room.seats.map((seat) => seat.id),
+    ["p001", "p002"],
+  );
+  assert.deepEqual(room.ended, before.ended);
+  assert.equal(savedTables(h).length, 1);
+});
+
 test("table requests never read the sheets", () => {
   const h = harness();
   h.get({ r: "meeting" });
