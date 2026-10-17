@@ -512,6 +512,25 @@ def aggregate(
     return standings, unranked
 
 
+def add_rank_changes(
+    standings: list[dict], tables: list[Table], roster: dict[str, dict], min_tables: int
+) -> None:
+    """Places each player moved at the latest session: positive is up, None is
+    new to the board. Undated tables count on both boards, so they move no one."""
+    dates = sorted({table.date for table in tables if table.date})
+    if not dates:
+        return
+    before, _ = aggregate(
+        [table for table in tables if table.date != dates[-1]],
+        roster, min_tables, "season-net",
+    )
+    previous = {player["id"]: player["rank"] for player in before}
+    for player in standings:
+        player["rank_change"] = (
+            previous[player["id"]] - player["rank"] if player["id"] in previous else None
+        )
+
+
 def build_awards(tables: list[Table], roster: dict[str, dict]) -> list[dict]:
     """Awards use raw net, not gain (a win is a win regardless of ranking),
     and ignore the minimum-tables threshold. No winner means the award is
@@ -593,6 +612,8 @@ def main() -> None:
     standings, unranked = aggregate(
         tables, roster, config["min_tables"], config.get("scoring_rule")
     )
+    if config.get("scoring_rule") == "season-net":
+        add_rank_changes(standings, tables, roster, config["min_tables"])
     # Only tables with a date count as a session. An undated table still
     # counts toward the standings; see check_tables.
     dates = sorted({table.date for table in tables if table.date})
