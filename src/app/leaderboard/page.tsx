@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { IconCrownFilled } from "@tabler/icons-react";
+import {
+  IconCrownFilled,
+  IconTriangleFilled,
+  IconTriangleInvertedFilled,
+} from "@tabler/icons-react";
 import { getCurrentSemester } from "@/lib/data";
 import { SEASON_START, type Standing } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
@@ -76,7 +80,7 @@ export default function Leaderboard() {
                       </b>
                       <span className="sr-only"> points</span>
                     </span>
-                    {seasonNet && <Delta net={player.total_net} />}
+                    {seasonNet && <Delta change={player.rank_change} />}
                     <span className="lb-step" aria-hidden="true">
                       {player.rank}
                     </span>
@@ -128,8 +132,18 @@ export default function Leaderboard() {
                 <li>
                   <b>±</b> each table
                 </li>
+                {/* At one table, the search note already says everyone who played shows up. */}
+                {tables > 1 && (
+                  <li>
+                    <b>{tables}</b> tables to rank
+                  </li>
+                )}
                 <li>
-                  <b>{tables}</b> {tables === 1 ? "table" : "tables"} to rank
+                  <b aria-hidden="true">
+                    <IconTriangleFilled />
+                    <IconTriangleInvertedFilled />
+                  </b>
+                  places moved
                 </li>
               </ul>
             ) : (
