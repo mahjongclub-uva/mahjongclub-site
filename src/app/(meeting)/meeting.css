@@ -1365,9 +1365,9 @@ main.meeting-page .live-rank {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
   grid-template-areas:
-    ". west ."
-    "north table south"
-    ". east .";
+    ". north ."
+    "west table east"
+    ". south .";
   align-items: center;
   justify-items: center;
   gap: 6px;
@@ -1390,6 +1390,8 @@ main.meeting-page .live-rank {
   justify-items: center;
   gap: 2px;
   min-inline-size: 0;
+  /* Laid out like a map, North at the top, because that is what players
+     expect. A real table runs the other way round. */
   min-block-size: 44px;
   padding: 4px;
   border: 0;
@@ -1435,9 +1437,58 @@ main.meeting-page .live-rank {
   font-weight: 500;
 }
 button.seat[data-empty] .seat-name {
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 2px 0 var(--rule);
+  color: var(--jade);
+  font-weight: 900;
+}
+button.seat[data-empty] .seat-tile {
+  position: relative;
+}
+button.seat[data-empty] .seat-tile::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -8px;
+  inset-block-start: -7px;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background:
+    linear-gradient(var(--paper), var(--paper)) center / 11px 3px no-repeat,
+    linear-gradient(var(--paper), var(--paper)) center / 3px 11px no-repeat,
+    var(--jade);
+  box-shadow:
+    0 0 0 2.5px var(--paper),
+    0 3px 6px -2px oklch(0.3 0.06 160 / 0.6);
+}
+@media (hover: hover) and (pointer: fine) {
+  button.seat[data-empty]:hover .player-tile {
+    background: color-mix(in oklch, var(--jade) 10%, var(--paper));
+    color: var(--jade);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button.seat[data-empty] .seat-tile::after {
+    animation: seat-nudge 2.4s var(--ease-out) infinite;
+  }
+  button.seat[data-empty]:active .player-tile {
+    transform: scale(0.94);
+  }
+}
+@keyframes seat-nudge {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  80% {
+    transform: scale(1.18);
+  }
+  90% {
+    transform: scale(0.96);
+  }
 }
 .seat-total {
   display: grid;
@@ -1460,6 +1511,7 @@ button.seat[data-empty] .seat-name {
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
 }
+/* A chair you can take: a jade + on the slot and a "Sit here" chip. */
 .delta[data-sign="1"] {
   color: var(--jade);
 }
@@ -1624,18 +1676,26 @@ button.seat[data-empty] .seat-name {
   inline-size: var(--w, 44px);
   aspect-ratio: 3 / 4;
   border-radius: calc(var(--w, 44px) * 0.2);
-  background: #fff;
+  /* An ivory face lit from above, a thin rim, and a two-step edge in the
+     back colour, darker below, so even butter and mint read as thickness. */
+  background: linear-gradient(#fff 0 45%, #f7f2e4);
   color: var(--g);
   font: 700 calc(var(--w, 44px) * 0.58) / 1 var(--han);
   box-shadow:
-    0 calc(var(--w, 44px) * 0.12) 0 var(--b),
-    0 calc(var(--w, 44px) * 0.2) calc(var(--w, 44px) * 0.3) -4px
-      oklch(0.3 0.03 90 / 0.4);
+    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
+    inset 0 calc(var(--w, 44px) * -0.05) 0 var(--tile-face-lo),
+    0 calc(var(--w, 44px) * 0.07) 0 var(--b),
+    0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
+    0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
+      oklch(0.3 0.03 90 / 0.45);
 }
+/* An open chair: an empty place pressed into the table, the shape of a
+   tile, with its wind faint in it. */
 .player-tile[data-empty] {
-  background: none;
-  box-shadow: none;
-  border: 2px dashed color-mix(in oklch, var(--ink-soft) 55%, transparent);
+  background: color-mix(in oklch, var(--ink) 7%, var(--paper));
+  box-shadow:
+    inset 0 3px 5px oklch(0.3 0.03 90 / 0.28),
+    inset 0 -1px 0 oklch(1 0 0 / 0.6);
   color: var(--ink-soft);
   font-size: calc(var(--w, 44px) * 0.45);
 }
@@ -2439,19 +2499,29 @@ main.meeting-page .live-season .live-list {
   --w: 26px;
 }
 .live-move {
-  display: inline-block;
-  min-inline-size: 34px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  text-align: center;
-  font: 800 0.75rem var(--body);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  inline-size: 44px;
+  block-size: 28px;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow:
+    inset 0 -3px 0 var(--tile-face-lo),
+    0 2px 0 var(--edge),
+    0 4px 6px -3px oklch(0.3 0.03 90 / 0.4);
+  font: 900 0.85rem var(--body);
+  --edge: var(--tile-body);
+}
+.live-move svg {
+  inline-size: 12px;
+  block-size: 12px;
 }
 .live-move[data-move="up"] {
-  background: color-mix(in oklch, var(--up) 16%, var(--paper));
   color: var(--up);
 }
 .live-move[data-move="down"] {
-  background: color-mix(in oklch, var(--tile-letter) 14%, var(--paper));
   color: var(--tile-letter);
 }
 .live-move[data-move="new"] {
@@ -2464,6 +2534,18 @@ main.meeting-page .live-season .live-list {
 /* Small phones keep "Tonight's standings" on one line. */
 main.meeting-page .live-title {
   font-size: clamp(1.45rem, 7.4vw, 2rem);
+/* Where tonight moves you: a little tile with a caret on its face, edged
+   in green or red. The badge has a fixed width so the ranks beside it line
+   up, and a flat dash says "no change". */
+main.meeting-page .live-season .live-change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  /* Room for "#18" and the badge, so every row's points line up. */
+  min-inline-size: calc(4ch + 52px);
+  font-variant-numeric: tabular-nums;
+}
   white-space: nowrap;
 }
 
@@ -2475,14 +2557,23 @@ main.meeting-page .live-title {
   gap: 7px;
   margin-block-end: 8px;
   padding: 4px 11px 4px 9px;
+  --edge: color-mix(in oklch, var(--up) 55%, white);
   border-radius: 999px;
   background: color-mix(in oklch, var(--tile-letter) 13%, var(--paper));
   color: var(--tile-letter);
   font: 900 0.72rem var(--body);
+  --edge: color-mix(in oklch, var(--tile-letter) 45%, white);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+  box-shadow:
+    inset 0 -3px 0 oklch(0 0 0 / 0.08),
+    0 2px 0 oklch(0.72 0.14 85),
+    0 4px 6px -3px oklch(0.3 0.03 90 / 0.4);
 .live-badge::before {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   content: "";
   inline-size: 8px;
   block-size: 8px;
@@ -2513,5 +2604,43 @@ main.meeting-page .live-season h2 {
 }
 main.meeting-page .live-season h2 span {
   font: 600 0.85rem var(--body);
-  color: var(--ink-soft);
+  background: none;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--ink-soft) 70%, transparent);
+}
+.live-move[data-move="same"]::before {
+  content: "";
+  inline-size: 12px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: currentColor;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-move[data-move="up"] {
+    animation: move-up 520ms var(--pop) both;
+  }
+  .live-move[data-move="down"] {
+    animation: move-down 520ms var(--pop) both;
+  }
+  .live-move[data-move="new"] {
+    animation: move-new 460ms var(--pop) both;
+  }
+}
+@keyframes move-up {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+@keyframes move-down {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+@keyframes move-new {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
 }

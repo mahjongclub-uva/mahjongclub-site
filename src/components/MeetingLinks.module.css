@@ -87,10 +87,13 @@
   inline-size: var(--w);
   aspect-ratio: 3 / 4;
   border-radius: calc(var(--w) * 0.2);
-  background: #fff;
+  background: linear-gradient(#fff 0 45%, #f7f2e4);
   color: var(--g);
   font: 700 calc(var(--w) * 0.58) / 1 var(--han);
-  box-shadow: 0 calc(var(--w) * 0.12) 0 var(--b);
+  box-shadow:
+    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
+    0 calc(var(--w) * 0.07) 0 var(--b),
+    0 calc(var(--w) * 0.14) 0 color-mix(in oklch, var(--b), black 18%);
 }
 .pill :global(.player-tile) {
   --w: 26px;
