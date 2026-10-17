@@ -65,7 +65,10 @@ main.meeting-page {
   line-height: 1.2;
   white-space: nowrap;
 }
+/* Grid items won't shrink below their text unless told to, which let a long
+   line run under the menu. */
 .meeting-status :is(small, b) {
+  min-inline-size: 0;
   overflow: clip;
   text-overflow: ellipsis;
 }
@@ -77,25 +80,51 @@ main.meeting-page {
   font: 800 1rem var(--display);
   color: var(--ink);
 }
+/* The menu: a raised pill with your tile, the word and a jade menu icon,
+   so it reads as a button and still shows whose phone it is. */
 .meeting-page .meeting-you {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-inline-size: 0;
-  max-inline-size: 50%;
-  --w: 20px;
-  min-block-size: 44px;
-  padding: 0;
+  gap: 10px;
+  flex-shrink: 0;
+  --w: 22px;
+  min-block-size: 48px;
+  padding: 0 12px 0 10px;
   border: 0;
-  background: none;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--clay);
   color: var(--ink);
-  font: 600 0.9rem var(--body);
+  font: 800 0.95rem var(--body);
   white-space: nowrap;
 }
-.meeting-you span {
-  min-inline-size: 0;
-  overflow: clip;
-  text-overflow: ellipsis;
+.meeting-you-tile {
+  display: grid;
+  margin-block-end: 4px;
+}
+.meeting-you > svg,
+.table-standings svg,
+.meeting-page .standings-back svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+.meeting-you > svg {
+  margin-inline-start: -2px;
+  color: var(--jade);
+  stroke-width: 2.6;
+}
+@media (hover: hover) and (pointer: fine) {
+  .meeting-page .meeting-you:hover {
+    background: #fff;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-you {
+    transition: transform 110ms var(--ease-out);
+  }
+  .meeting-page .meeting-you:active {
+    transform: translateY(2px);
+  }
 }
 .meeting-rehearsal {
   font-size: 0.75rem;
@@ -1364,6 +1393,8 @@ main.meeting-page .live-rank {
 .table-square {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  /* Laid out like a map, North at the top, because that is what players
+     expect. A real table runs the other way round. */
   grid-template-areas:
     ". north ."
     "west table east"
@@ -1390,8 +1421,6 @@ main.meeting-page .live-rank {
   justify-items: center;
   gap: 2px;
   min-inline-size: 0;
-  /* Laid out like a map, North at the top, because that is what players
-     expect. A real table runs the other way round. */
   min-block-size: 44px;
   padding: 4px;
   border: 0;
@@ -1436,6 +1465,7 @@ main.meeting-page .live-rank {
   color: var(--ink-soft);
   font-weight: 500;
 }
+/* A chair you can take: a jade + on the slot and a "Sit here" chip. */
 button.seat[data-empty] .seat-name {
   padding: 3px 10px;
   border-radius: 999px;
@@ -1511,7 +1541,6 @@ button.seat[data-empty] .seat-tile::after {
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
 }
-/* A chair you can take: a jade + on the slot and a "Sit here" chip. */
 .delta[data-sign="1"] {
   color: var(--jade);
 }
@@ -2499,6 +2528,18 @@ main.meeting-page .live-podium .live-points {
 main.meeting-page .live-season .live-list {
   --w: 26px;
 }
+/* Where tonight moves you: a little tile with a caret on its face, edged
+   in green or red. The badge has a fixed width so the ranks beside it line
+   up, and a flat dash says "no change". */
+main.meeting-page .live-season .live-change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  /* Room for "#18" and the badge, so every row's points line up. */
+  min-inline-size: calc(4ch + 52px);
+  font-variant-numeric: tabular-nums;
+}
 .live-move {
   display: inline-flex;
   align-items: center;
@@ -2521,90 +2562,24 @@ main.meeting-page .live-season .live-list {
 }
 .live-move[data-move="up"] {
   color: var(--up);
+  --edge: color-mix(in oklch, var(--up) 55%, white);
 }
 .live-move[data-move="down"] {
   color: var(--tile-letter);
+  --edge: color-mix(in oklch, var(--tile-letter) 45%, white);
 }
 .live-move[data-move="new"] {
   background: oklch(0.88 0.15 95);
-  color: var(--ink);
-}
-.live-move[data-move="same"] {
-  color: var(--ink-soft);
-}
-/* Small phones keep "Tonight's standings" on one line. */
-main.meeting-page .live-title {
-  font-size: clamp(1.45rem, 7.4vw, 2rem);
-/* Where tonight moves you: a little tile with a caret on its face, edged
-   in green or red. The badge has a fixed width so the ranks beside it line
-   up, and a flat dash says "no change". */
-main.meeting-page .live-season .live-change {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  /* Room for "#18" and the badge, so every row's points line up. */
-  min-inline-size: calc(4ch + 52px);
-  font-variant-numeric: tabular-nums;
-}
-  white-space: nowrap;
-}
-
-/* Tonight's standings: a badge says live or official, so no note is needed.
-   Section headings are short and bold, with a soft qualifier beside them. */
-.live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-block-end: 8px;
-  padding: 4px 11px 4px 9px;
-  --edge: color-mix(in oklch, var(--up) 55%, white);
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--tile-letter) 13%, var(--paper));
-  color: var(--tile-letter);
-  font: 900 0.72rem var(--body);
-  --edge: color-mix(in oklch, var(--tile-letter) 45%, white);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
   box-shadow:
     inset 0 -3px 0 oklch(0 0 0 / 0.08),
     0 2px 0 oklch(0.72 0.14 85),
     0 4px 6px -3px oklch(0.3 0.03 90 / 0.4);
-.live-badge::before {
+  color: var(--ink);
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  content: "";
-  inline-size: 8px;
-  block-size: 8px;
-  border-radius: 50%;
-  background: currentColor;
 }
-.live-badge[data-official] {
-  background: color-mix(in oklch, var(--jade) 14%, var(--paper));
-  color: var(--jade);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .live-badge:not([data-official])::before {
-    animation: live-pulse 1.6s ease-in-out infinite;
-  }
-}
-@keyframes live-pulse {
-  50% {
-    opacity: 0.3;
-  }
-}
-main.meeting-page .live-season h2 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-  font: 900 1.35rem var(--display);
-  color: var(--ink);
-}
-main.meeting-page .live-season h2 span {
-  font: 600 0.85rem var(--body);
+.live-move[data-move="same"] {
   background: none;
   box-shadow: none;
   color: color-mix(in oklch, var(--ink-soft) 70%, transparent);
@@ -2644,4 +2619,125 @@ main.meeting-page .live-season h2 span {
     transform: scale(0.6);
     opacity: 0;
   }
+}
+/* Small phones keep "Tonight's standings" on one line. */
+main.meeting-page .live-title {
+  font-size: clamp(1.45rem, 7.4vw, 2rem);
+  white-space: nowrap;
+}
+
+/* Tonight's standings: a badge says live or official, so no note is needed.
+   Section headings are short and bold, with a soft qualifier beside them. */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-block-end: 8px;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--tile-letter) 13%, var(--paper));
+  color: var(--tile-letter);
+  font: 900 0.72rem var(--body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.live-badge::before {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.live-badge[data-official] {
+  background: color-mix(in oklch, var(--jade) 14%, var(--paper));
+  color: var(--jade);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-badge:not([data-official])::before {
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+}
+@keyframes live-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+main.meeting-page .live-season h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  font: 900 1.35rem var(--display);
+  color: var(--ink);
+}
+main.meeting-page .live-season h2 span {
+  font: 600 0.85rem var(--body);
+  color: var(--ink-soft);
+}
+
+/* Ways around the meeting: rows in the menu, each with a live line and the
+   page you are on marked, and a link to the standings once a game is saved. */
+.menu-links a > span {
+  display: grid;
+  min-inline-size: 0;
+}
+.menu-links small {
+  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+}
+.menu-links a[aria-current="page"] {
+  box-shadow: inset 0 0 0 2px var(--jade);
+}
+.menu-links em {
+  margin-inline-start: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--jade);
+  color: var(--paper);
+  font: 900 0.75rem var(--body);
+  font-style: normal;
+  white-space: nowrap;
+}
+.meeting-page .table-standings {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 48px;
+  margin-block-start: 10px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: color-mix(in oklch, var(--jade) 10%, var(--card));
+  color: var(--jade);
+  font: 800 0.95rem var(--body);
+  text-decoration: none;
+}
+.table-standings svg {
+  flex-shrink: 0;
+}
+.table-standings svg:last-child {
+  margin-inline-start: auto;
+}
+/* After your table ends: the standings first, another table second. */
+.meeting-page .ended-next {
+  margin-block: 14px 24px;
+}
+.room-view > .meeting-chip {
+  inline-size: 100%;
+  margin-block-start: 12px;
+}
+/* From the standings, the one tap back to the table you are playing at. */
+.meeting-page .standings-back {
+  display: flex;
+  inline-size: fit-content;
+  margin-block-end: 16px;
+}
+/* Your table's row in the menu carries a Leave button beside it. */
+.menu-links li[data-leave] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.menu-links li[data-leave] .meeting-chip {
+  min-block-size: 60px;
+  border-radius: 18px;
 }

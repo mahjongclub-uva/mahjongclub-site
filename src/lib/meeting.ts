@@ -224,6 +224,8 @@ export const MEETING_PATHS = {
   checkin: "/meeting/checkin/",
   tables: "/meeting/tables/",
   table: (table: number) => `/meeting/table/${table}/`,
+  // The table page asks to leave when it opens with this hash.
+  leave: (table: number) => `/meeting/table/${table}/#leave`,
   tonight: "/meeting/tonight/",
   score: "/meeting/score/",
 } as const;
