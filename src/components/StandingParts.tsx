@@ -46,15 +46,34 @@ export function RankTile({ rank }: { rank: number }) {
   );
 }
 
-/** How far a season score sits from the start, by sign and arrow as well as colour. */
-export function Delta({ net }: { net: number }) {
-  const Arrow = net < 0 ? IconTriangleInvertedFilled : IconTriangleFilled;
+/**
+ * Places a player moved at the latest meeting, by arrow and number as well as
+ * colour: NEW for a player new to the board, a dash for no change. Nothing
+ * when the data predates the field.
+ */
+export function Delta({ change }: { change?: number | null }) {
+  if (change === undefined) return null;
+  const dir =
+    change === null ? "new" : change > 0 ? "up" : change < 0 ? "down" : "same";
+  const Arrow =
+    dir === "up"
+      ? IconTriangleFilled
+      : dir === "down"
+        ? IconTriangleInvertedFilled
+        : null;
+  const said =
+    change === null
+      ? "new to the board"
+      : change === 0
+        ? "same place as last meeting"
+        : `${change > 0 ? "up" : "down"} ${Math.abs(change)} since last meeting`;
   return (
-    <span className="lb-delta" data-dir={net < 0 ? "down" : "up"}>
-      <Arrow size={11} aria-hidden="true" />
-      {net < 0 ? "−" : "+"}
-      {Math.abs(net)}
-      <span className="sr-only"> from {SEASON_START}</span>
+    <span className="lb-delta" data-dir={dir}>
+      {Arrow && <Arrow size={11} aria-hidden="true" />}
+      <span aria-hidden="true">
+        {change === null ? "NEW" : change === 0 ? "–" : Math.abs(change)}
+      </span>
+      <span className="sr-only">{said}</span>
     </span>
   );
 }
@@ -115,7 +134,7 @@ export function StandingRow({
           )}
         </b>
         <span className="sr-only"> points</span>
-        {seasonNet && <Delta net={player.total_net} />}
+        {seasonNet && <Delta change={player.rank_change} />}
       </span>
     </li>
   );

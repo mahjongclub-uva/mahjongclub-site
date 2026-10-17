@@ -40,6 +40,28 @@ class PrivateLogTests(unittest.TestCase):
                         next(p["rank"] for p in standings if p["display"] == "A"))
         self.assertEqual(205 + next(p["total_net"] for p in standings if p["display"] == "A"), 155)
 
+    def test_rank_changes_compare_with_the_board_before_the_latest_session(self):
+        earlier = build_data.Table(1, "2026-10-09")
+        earlier.seats = [("A", 405, 200), ("B", 105, -100), ("C", 205, 0), ("D", 105, -100)]
+        latest = build_data.Table(2, "2026-10-16")
+        latest.seats = [("A", 55, -150), ("B", 405, 200), ("E", 155, -50), ("F", 205, 0)]
+        undated = build_data.Table(21, None)
+        undated.seats = [("A", 255, 50), ("C", 155, -50), ("D", 255, 50), ("G", 155, -50)]
+        roster = {name: {"id": f"p{i:03d}", "display": name, "opt_out": False}
+                  for i, name in enumerate("ABCDEFG", 1)}
+        tables = [earlier, latest, undated]
+
+        standings, _ = build_data.aggregate(tables, roster, 1, "season-net")
+        build_data.add_rank_changes(standings, tables, roster, 1)
+        moved = {p["display"]: (p["rank"], p["rank_change"]) for p in standings}
+
+        # Before Oct 16: A 1st, G 2nd, C and D tied 3rd, B 4th.
+        self.assertEqual(moved["B"], (1, 3))  # up three places
+        self.assertEqual(moved["G"], (4, -2))
+        self.assertEqual(moved["A"], (2, -1))  # down one
+        self.assertEqual(moved["F"][1], None)  # new to the board
+        self.assertEqual(moved["E"][1], None)
+
     def test_invalid_score_does_not_print_player_names(self):
         table = build_data.Table(3, "2026-09-24")
         table.seats = [("Private Player", 204, 0)]
