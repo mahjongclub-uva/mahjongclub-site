@@ -23,9 +23,7 @@ export default function Guide() {
       <div className="section-wrap">
         <header className={styles.hero}>
           <h1>Learn how to play!</h1>
-          <p className={styles.qualifier}>
-            <strong>One</strong> of many ways to play.
-          </p>
+          <p className={styles.qualifier}>One of many ways to play.</p>
         </header>
         <LessonRack />
 

@@ -35,10 +35,6 @@
   font-weight: 700;
   text-wrap: pretty;
 }
-.qualifier strong {
-  color: var(--ink);
-  font-weight: 900;
-}
 
 /* The lessons as tiles on a wooden rack, pinned once you scroll past it. */
 .rack {
