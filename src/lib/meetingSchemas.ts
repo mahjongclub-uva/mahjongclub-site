@@ -3,12 +3,12 @@ import { z } from "zod";
 // The meeting service's replies and this phone's saved drafts, checked at the
 // boundary. Kept apart from meeting.ts so pages that only link to the meeting
 // load zod when a reply actually arrives.
-export const playerSchema = z.object({
+const playerSchema = z.object({
   id: z.string().regex(/^p\d{3,}$/),
   display: z.string().min(1),
 });
 // One saved table: a block in Points Tracking.
-export const resultTableSchema = z.object({
+const resultTableSchema = z.object({
   table: z.number().int().positive(),
   seats: z
     .array(
@@ -22,11 +22,11 @@ export const resultTableSchema = z.object({
 });
 export type ResultTable = z.infer<typeof resultTableSchema>;
 // A seat at a physical table: wind 0-3 is East, South, West, North.
-export const seatSchema = playerSchema.extend({
+const seatSchema = playerSchema.extend({
   wind: z.number().int().min(0).max(3),
   optOut: z.boolean().optional(),
 });
-export const roomSchema = z.object({
+const roomSchema = z.object({
   table: z.number().int().positive(),
   // Which group's session this is; it goes up each time the table is ended.
   session: z.number().int().positive(),

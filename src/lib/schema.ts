@@ -382,6 +382,5 @@ export type Meta = z.infer<typeof metaSchema>;
 export type Semester = z.infer<typeof semesterSchema>;
 export type Standing = Semester["standings"][number];
 export type Unranked = Semester["unranked"][number];
-export type Award = Semester["awards"][number];
-export type Meetings = z.infer<typeof meetingsSchema>;
+type Meetings = z.infer<typeof meetingsSchema>;
 export type Meeting = Meetings["meetings"][number];

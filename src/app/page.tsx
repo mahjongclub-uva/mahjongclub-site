@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PHOTOS, TAGLINE, HOME, MEETING_PHOTO } from "@/lib/site";
-import ClubPhotos from "@/components/ClubPhotos";
 import Hero from "@/components/Hero";
 import Calendar from "@/components/Calendar";
 import RollingDot from "@/components/RollingDot";
@@ -40,7 +39,24 @@ export default function Home() {
               What should I expect?
             </Link>
           </div>
-          <ClubPhotos />
+          {/* The first two approved photos sit beside the welcome. */}
+          <div className="club-photos">
+            {PHOTOS.length ? (
+              <Photos photos={PHOTOS.slice(0, 2)} />
+            ) : (
+              <div className="club-photo-placeholder">
+                <span
+                  className="photo-corner photo-corner-top"
+                  aria-hidden="true"
+                />
+                <p>{HOME.photosPending}</p>
+                <span
+                  className="photo-corner photo-corner-bottom"
+                  aria-hidden="true"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </Section>
 

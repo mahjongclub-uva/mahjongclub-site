@@ -421,6 +421,8 @@ function rosterPlayers() {
   const players = rosterLayout(sheet("Roster").getDataRange().getValues());
   // A private, short-lived hint for revealing the newcomer field. Never use
   // it to identify a player or authorize a write; those reread the roster.
+  // A missed roster-edit notification can show a returning player the name
+  // field for up to 30 seconds; submitting still finds their existing entry.
   try {
     const value = JSON.stringify({
       expires: Date.now() + 30000,

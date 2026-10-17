@@ -2,7 +2,7 @@ import type { Results, ResultTable, Room } from "./meeting.ts";
 import type { Semester } from "./schema.ts";
 import { SEASON_START } from "./format.ts";
 
-export type LiveStanding = {
+type LiveStanding = {
   id: string;
   display: string;
   rank: number;
@@ -84,7 +84,7 @@ function ranked<T extends { rank: number }>(
   return sorted;
 }
 
-export type TonightStanding = {
+type TonightStanding = {
   id: string;
   display: string;
   rank: number;
