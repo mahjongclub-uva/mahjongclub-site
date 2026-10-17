@@ -2358,6 +2358,7 @@ main.meeting-page .calculator-head {
   text-align: center;
 }
 .live-podium > div {
+  grid-row: 1;
   display: grid;
   justify-items: center;
   gap: 4px;

@@ -72,6 +72,17 @@ export function liveStandings(
   );
 }
 
+/**
+ * Who stands on a podium of three: whole ranks only, so a tie is never split
+ * between the podium and the list below it. Ranks 1, 2, 2, 2 leave the
+ * winner alone up there.
+ */
+export function podium<T extends { rank: number }>(sorted: T[]): T[] {
+  const top = sorted.slice(0, 3);
+  const cut = sorted[3]?.rank;
+  return cut === undefined ? top : top.filter((row) => row.rank !== cut);
+}
+
 /** Ranks from 1 that never gap; rows share one only when `tied`. */
 function ranked<T extends { rank: number }>(
   sorted: T[],
