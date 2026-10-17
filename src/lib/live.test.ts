@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { liveStandings, tonightStandings } from "./live.ts";
+import { liveStandings, podium, tonightStandings } from "./live.ts";
 import type { Semester } from "./schema.ts";
 import type { Results } from "./meeting.ts";
 
@@ -142,4 +142,16 @@ test("tonight sums saved nets per player, skips opt-outs, and ranks densely", ()
     ],
   );
   assert.equal(tonightStandings([]).length, 0);
+});
+
+test("the podium holds whole ranks, so a tie is never split by it", () => {
+  const ranks = (list: number[]) =>
+    podium(list.map((rank) => ({ rank }))).map((row) => row.rank);
+  assert.deepEqual(ranks([1, 2, 3, 4]), [1, 2, 3]);
+  assert.deepEqual(ranks([1, 2, 2]), [1, 2, 2]);
+  // Three players tied for second: only the winner stands up there.
+  assert.deepEqual(ranks([1, 2, 2, 2]), [1]);
+  assert.deepEqual(ranks([1, 1, 2, 2]), [1, 1]);
+  assert.deepEqual(ranks([1, 1, 1, 1]), []);
+  assert.deepEqual(ranks([1, 2, 3, 3]), [1, 2]);
 });
