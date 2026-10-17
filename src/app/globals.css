@@ -1898,9 +1898,9 @@ body > main { flex: 1 0 auto; }
 .search-empty p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
 .search-empty a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: var(--r-md); background: var(--jade); color: #fff; font: 700 0.95rem var(--sans); text-decoration: none; box-shadow: 0 4px 0 #1b4436; }
 .search-empty a:active { translate: 0 3px; box-shadow: 0 1px 0 #1b4436; }
-.lb-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 1rem; padding: 0; list-style: none; text-align: center; color: var(--ink-soft); font-size: 0.85rem; }
+.lb-facts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); margin: 0 0 1rem; padding: 0; list-style: none; text-align: center; color: var(--ink-soft); font-size: 0.85rem; }
 .lb-facts b { display: block; color: var(--ink); font: 700 2.3rem / 1 var(--display); }
-.lb-key { display: flex; align-items: center; gap: 8px; }
+.lb-facts b svg { display: inline-block; width: 0.45em; height: 0.45em; vertical-align: 0.25em; }
 @media (min-width: 701px) {
   .lb-podium { gap: 22px; padding: 30px 40px 0; }
   .lb-spot .standing-tile { width: 62px; }

@@ -132,23 +132,24 @@ export default function Leaderboard() {
                 <li>
                   <b>±</b> each table
                 </li>
+                {/* At one table, the search note already says everyone who played shows up. */}
+                {tables > 1 && (
+                  <li>
+                    <b>{tables}</b> tables to rank
+                  </li>
+                )}
                 <li>
-                  <b>{tables}</b> {tables === 1 ? "table" : "tables"} to rank
+                  <b aria-hidden="true">
+                    <IconTriangleFilled />
+                    <IconTriangleInvertedFilled />
+                  </b>
+                  places moved
                 </li>
               </ul>
             ) : (
               <p>
                 Only winning tables count; losses don’t take points away. Play{" "}
                 {tables} {tables === 1 ? "table" : "tables"} to be ranked.
-              </p>
-            )}
-            {seasonNet && (
-              <p className="lb-key">
-                <span className="lb-delta" data-dir="same" aria-hidden="true">
-                  <IconTriangleFilled size={11} />
-                  <IconTriangleInvertedFilled size={11} />
-                </span>{" "}
-                Places moved since last week
               </p>
             )}
             <p>
