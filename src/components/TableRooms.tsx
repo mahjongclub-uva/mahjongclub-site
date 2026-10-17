@@ -13,7 +13,7 @@ import {
   IconFlag,
   IconHistory,
   IconPencil,
-  IconPlayerPlay,
+  IconPlayerPlayFilled,
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
@@ -311,9 +311,7 @@ function TableSquare({
               key={wind}
               aria-pressed={pick.winner === seat.id}
               aria-label={`${seat.display} won`}
-              onClick={() =>
-                pick.choose(pick.winner === seat.id ? "" : seat.id)
-              }
+              onClick={() => pick.choose(seat.id)}
             >
               {body}
             </button>
@@ -495,10 +493,12 @@ function SeatedTable({
   const [stale, setStale] = useState(() =>
     Boolean(thisTable && kept.winner && !current),
   );
-  const clearDraft = () =>
+  const clearDraft = () => {
     setDraft({ ...draft, winner: "", each: "", handId: "" });
+    setStep("winner");
+  };
   const [layer, setLayer] = useState<null | "game" | "games" | "end">(null);
-  const [step, setStep] = useState<"entry" | "review">("entry");
+  const [step, setStep] = useState<"winner" | "amount" | "review">("winner");
   useEffect(() => {
     try {
       if (draft.winner || draft.each)
@@ -550,7 +550,7 @@ function SeatedTable({
     reanchor.current = !done;
     if (done) {
       setStale(false);
-      setStep("entry");
+      setStep("winner");
       setLayer(null);
       clearDraft();
     }
@@ -590,7 +590,13 @@ function SeatedTable({
           className="meeting-primary"
           disabled={!ready}
           onClick={() => {
-            setStep(winnerSeated && amount ? "review" : "entry");
+            setStep(
+              winnerSeated
+                ? amount && draft.handId
+                  ? "review"
+                  : "amount"
+                : "winner",
+            );
             setLayer("game");
           }}
         >
@@ -622,10 +628,16 @@ function SeatedTable({
 
       {layer === "game" && (
         <Sheet
-          title={step === "review" ? "Confirm" : `Game ${games + 1}`}
+          title={
+            step === "review"
+              ? "Confirm"
+              : step === "winner"
+                ? "Who won?"
+                : "What does each pay?"
+          }
           close={() => setLayer(null)}
         >
-          {step === "entry" ? (
+          {step === "winner" ? (
             <>
               <TableSquare
                 room={room}
@@ -635,9 +647,28 @@ function SeatedTable({
                 busy={busy}
                 pick={{
                   winner: draft.winner,
-                  choose: (winner) => set({ winner }),
+                  choose: (winner) => {
+                    set({ winner });
+                    setStep("amount");
+                  },
                 }}
               />
+              <p className="quiet game-step-note">
+                Tap the winner of game {games + 1}.
+              </p>
+            </>
+          ) : step === "amount" ? (
+            <>
+              <button
+                type="button"
+                className="meeting-chip game-winner-choice"
+                onClick={() => setStep("winner")}
+              >
+                <PlayerTile id={draft.winner} />
+                {name(draft.winner)} won
+                <IconPencil aria-hidden="true" />
+                <span className="sr-only">Change winner</span>
+              </button>
               <label htmlFor="hand-each">Each other player pays</label>
               <input
                 id="hand-each"
@@ -719,7 +750,7 @@ function SeatedTable({
                   type="button"
                   className="meeting-chip"
                   disabled={busy}
-                  onClick={() => setStep("entry")}
+                  onClick={() => setStep("amount")}
                 >
                   <IconPencil aria-hidden="true" /> Edit
                 </button>
@@ -778,7 +809,6 @@ function SeatedTable({
                   className="meeting-chip"
                   onClick={() => {
                     clearDraft();
-                    setStep("entry");
                   }}
                 >
                   <IconEraser aria-hidden="true" /> Clear it
@@ -804,7 +834,7 @@ function SeatedTable({
               <ChangeRows room={room} ranked />
             </>
           ) : (
-            <p className="quiet end-note">No games yet, so nothing is saved.</p>
+            <p className="quiet end-note">No games to save yet.</p>
           )}
           {errorLine}
           <div className="calculator-footer">
@@ -836,7 +866,7 @@ function SeatedTable({
               disabled={busy}
               onClick={() => setLayer(null)}
             >
-              <IconPlayerPlay aria-hidden="true" /> Keep playing
+              <IconPlayerPlayFilled aria-hidden="true" /> Keep playing
             </button>
           </div>
         </Sheet>

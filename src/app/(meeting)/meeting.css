@@ -223,6 +223,7 @@ main.meeting-page {
   margin-top: 8px;
 }
 .meeting-error {
+  font-weight: 800;
   color: var(--tile-letter);
   font-size: 0.83rem;
   margin: 12px 0 !important;
@@ -2514,4 +2515,18 @@ main.meeting-page .live-season h2 {
 main.meeting-page .live-season h2 span {
   font: 600 0.85rem var(--body);
   color: var(--ink-soft);
+}
+
+/* Keep sheet headings as strong as the menu cards below them. */
+main.meeting-page .calculator-head h2 {
+  font-weight: 900;
+}
+.game-step-note {
+  text-align: center;
+}
+.game-winner-choice {
+  margin-block-end: 20px;
+}
+.game-winner-choice .player-tile {
+  --w: 28px;
 }
