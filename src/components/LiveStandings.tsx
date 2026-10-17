@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { IconCrown } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconCrown,
+  IconTriangleFilled,
+  IconTriangleInvertedFilled,
+} from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import PlayerTile from "@/components/PlayerTile";
 import {
@@ -11,6 +16,7 @@ import {
   inCheckIn,
   requestError,
   savedPlayer,
+  seatedRoom,
   type Meeting,
   type Results,
   MEETING_PATHS,
@@ -41,9 +47,16 @@ function LiveTable({
 }) {
   const [results, setResults] = useState<Results | null>(null);
   const [me] = useState(() => savedPlayer(meeting));
+  // The table this player is at, so the standings can lead straight back.
+  const [myTable, setMyTable] = useState(
+    () => seatedRoom(meeting.rooms, me?.id)?.table,
+  );
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(true);
   const [updatedAt, setUpdatedAt] = useState("");
+  // The service still sends the rooms when it can't read the saved tables,
+  // so ended tables would silently drop out; say so instead.
+  const [missingSaved, setMissingSaved] = useState(false);
   const previousPoints = useRef<Map<string, number> | null>(null);
   const [scoreChanges, setScoreChanges] = useState<Record<string, number>>({});
   const matching =
@@ -91,6 +104,8 @@ function LiveTable({
           nextRows.map((row) => [row.id, row.points]),
         );
         setResults(next);
+        if (state) setMyTable(seatedRoom(state.rooms, me?.id)?.table);
+        setMissingSaved(Boolean(state && !state.results));
         setError("");
         setUpdatedAt(clock());
       } catch (failure) {
@@ -115,6 +130,15 @@ function LiveTable({
   const podium = tonight.slice(0, 3);
   return (
     <section>
+      {me && meeting.rooms && (
+        <Link
+          className="meeting-chip back-to-table"
+          href={myTable ? MEETING_PATHS.table(myTable) : MEETING_PATHS.tables}
+        >
+          <IconArrowLeft aria-hidden="true" />
+          {myTable ? `Back to Table ${myTable}` : "Tables tonight"}
+        </Link>
+      )}
       {/* Live until an officer publishes tonight, then official. */}
       <p
         className="live-badge"
@@ -161,6 +185,12 @@ function LiveTable({
             {updating ? "Updating…" : "Retry update"}
           </button>
         </div>
+      )}
+      {missingSaved && !error && (
+        <p className="meeting-notice" role="alert">
+          Tables that have ended can’t be read right now, so only tables still
+          playing are shown. An officer should run Club › Recheck in the Sheet.
+        </p>
       )}
       {podium.length > 1 && (
         // Drawn for the eye only; the list below still reads every place.
@@ -230,10 +260,10 @@ function LiveTable({
                 change === null
                   ? ["new", "new player", "new"]
                   : change > 0
-                    ? ["up", `up ${change}`, `↑${change}`]
+                    ? ["up", `up ${change}`, change]
                     : change < 0
-                      ? ["down", `down ${-change}`, `↓${-change}`]
-                      : ["same", "no change", "·"];
+                      ? ["down", `down ${-change}`, -change]
+                      : ["same", "no change", null];
               return (
                 <li key={row.id} data-you={row.id === me?.id || undefined}>
                   <PlayerTile id={row.id} />
@@ -252,12 +282,20 @@ function LiveTable({
                   </strong>
                   <span className="live-change">
                     #{row.rank}{" "}
+                    {/* Keyed by the move, so it lands only when it changes. */}
                     <span
                       className="live-move"
                       data-move={move}
-                      aria-label={said}
+                      key={`${move}${shown}`}
                     >
-                      {shown}
+                      {move === "up" && (
+                        <IconTriangleFilled aria-hidden="true" />
+                      )}
+                      {move === "down" && (
+                        <IconTriangleInvertedFilled aria-hidden="true" />
+                      )}
+                      <span aria-hidden="true">{shown}</span>
+                      <span className="sr-only">{said}</span>
                     </span>
                   </span>
                 </li>

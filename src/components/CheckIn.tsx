@@ -135,10 +135,10 @@ function CheckInForm({
   if (!meeting.checkinsOpen)
     return (
       <div className="meeting-closed">
-        <h1>Check-in has closed</h1>
+        <h1>Check-in’s closed for tonight</h1>
         <p>
-          Scores are still open for players already checked in. If you missed
-          check-in, ask an officer.
+          Players already in can still record their tables. Missed it? Ask an
+          officer.
         </p>
         <Link className="meeting-secondary" href={MEETING_PATHS.score}>
           Record a table
@@ -189,7 +189,7 @@ function CheckInForm({
                 Change ID
               </button>
             </div>
-            <label htmlFor="full-name">Full name · officers only</label>
+            <label htmlFor="full-name">Full name</label>
             <input
               id="full-name"
               autoFocus

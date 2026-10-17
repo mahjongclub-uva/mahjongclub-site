@@ -65,7 +65,10 @@ main.meeting-page {
   line-height: 1.2;
   white-space: nowrap;
 }
+/* Grid items won't shrink below their text unless told to, which let a long
+   line run under the menu. */
 .meeting-status :is(small, b) {
+  min-inline-size: 0;
   overflow: clip;
   text-overflow: ellipsis;
 }
@@ -77,25 +80,51 @@ main.meeting-page {
   font: 800 1rem var(--display);
   color: var(--ink);
 }
+/* The menu: a raised pill with your tile, the word and a jade menu icon,
+   so it reads as a button and still shows whose phone it is. */
 .meeting-page .meeting-you {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-inline-size: 0;
-  max-inline-size: 50%;
-  --w: 20px;
-  min-block-size: 44px;
-  padding: 0;
+  gap: 9px;
+  flex-shrink: 0;
+  --w: 22px;
+  min-block-size: 48px;
+  padding: 0 12px;
   border: 0;
-  background: none;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--clay);
   color: var(--ink);
-  font: 600 0.9rem var(--body);
+  font: 800 0.95rem var(--body);
   white-space: nowrap;
 }
-.meeting-you span {
-  min-inline-size: 0;
-  overflow: clip;
-  text-overflow: ellipsis;
+.meeting-you-tile {
+  display: grid;
+  margin-block-end: 4px;
+}
+.meeting-you > svg,
+.go-row svg,
+.meeting-page .back-to-table svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+.meeting-you > svg {
+  margin-inline-start: -2px;
+  color: var(--jade);
+  stroke-width: 2.6;
+}
+@media (hover: hover) and (pointer: fine) {
+  .meeting-page .meeting-you:hover {
+    background: #fff;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meeting-page .meeting-you {
+    transition: transform 110ms var(--ease-out);
+  }
+  .meeting-page .meeting-you:active {
+    transform: translateY(2px);
+  }
 }
 .meeting-rehearsal {
   font-size: 0.75rem;
@@ -222,9 +251,15 @@ main.meeting-page {
 .meeting-notice p + p {
   margin-top: 8px;
 }
+/* Errors are the one thing that must not be missed: bold, on a tint. */
 .meeting-error {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--tile-letter) 10%, var(--paper));
   color: var(--tile-letter);
-  font-size: 0.83rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
   margin: 12px 0 !important;
 }
 .meeting-check {
@@ -391,6 +426,20 @@ main.meeting-page {
 }
 .meeting-calculator::backdrop {
   background: #18261d66;
+}
+.sheet-grabber {
+  display: block;
+  inline-size: 36px;
+  block-size: 5px;
+  margin: -8px auto 12px;
+  border-radius: 3px;
+  background: oklch(0.3 0.02 90 / 0.32);
+}
+@media (min-width: 700px) {
+  /* Centred on big screens, where there is no pull-down. */
+  .sheet-grabber {
+    display: none;
+  }
 }
 .calculator-head {
   display: flex;
@@ -1364,10 +1413,12 @@ main.meeting-page .live-rank {
 .table-square {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  /* Laid out like a map, North at the top, because that is what players
+     expect. A real table runs the other way round. */
   grid-template-areas:
-    ". west ."
-    "north table south"
-    ". east .";
+    ". north ."
+    "west table east"
+    ". south .";
   align-items: center;
   justify-items: center;
   gap: 6px;
@@ -1434,10 +1485,60 @@ main.meeting-page .live-rank {
   color: var(--ink-soft);
   font-weight: 500;
 }
+/* A chair you can take: a jade + on the slot and a "Sit here" chip. */
 button.seat[data-empty] .seat-name {
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 2px 0 var(--rule);
+  color: var(--jade);
+  font-weight: 900;
+}
+button.seat[data-empty] .seat-tile {
+  position: relative;
+}
+button.seat[data-empty] .seat-tile::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -8px;
+  inset-block-start: -7px;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background:
+    linear-gradient(var(--paper), var(--paper)) center / 11px 3px no-repeat,
+    linear-gradient(var(--paper), var(--paper)) center / 3px 11px no-repeat,
+    var(--jade);
+  box-shadow:
+    0 0 0 2.5px var(--paper),
+    0 3px 6px -2px oklch(0.3 0.06 160 / 0.6);
+}
+@media (hover: hover) and (pointer: fine) {
+  button.seat[data-empty]:hover:not(:has([data-sitting])) .player-tile {
+    background: color-mix(in oklch, var(--jade) 10%, var(--paper));
+    color: var(--jade);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button.seat[data-empty] .seat-tile::after {
+    animation: seat-nudge 2.4s var(--ease-out) infinite;
+  }
+  button.seat[data-empty]:active .player-tile {
+    transform: scale(0.94);
+  }
+}
+@keyframes seat-nudge {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  80% {
+    transform: scale(1.18);
+  }
+  90% {
+    transform: scale(0.96);
+  }
 }
 .seat-total {
   display: grid;
@@ -1445,13 +1546,108 @@ button.seat[data-empty] .seat-name {
   font: 900 1.4rem/1.1 var(--display);
   font-variant-numeric: tabular-nums;
 }
-.seat[aria-pressed="true"] .player-tile {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
+/* Your seat wears a charcoal name tag; "you" stays in the text too. */
+.seat-name[data-me] {
+  padding: 1px 8px;
+  /* Round on one line, and still a soft tag if a long name wraps. */
+  border-radius: 0.8em;
+  text-wrap: balance;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 800;
 }
-.seat[aria-pressed="true"] .seat-name {
-  text-decoration: underline 2px var(--tile-letter);
-  text-underline-offset: 4px;
+/* The seat you just tapped shows your tile at once, faded and breathing,
+   until the service says it is yours. */
+.seat-tile[data-sitting] .player-tile {
+  opacity: 0.7;
+}
+/* While it waits, the chair is already yours: no + and no chip, and it
+   stays clear of the dimming on the other seats. */
+.meeting-page button.seat:disabled:has([data-sitting]) {
+  opacity: 1;
+}
+button.seat[data-empty] .seat-tile[data-sitting]::after {
+  display: none;
+}
+button.seat[data-empty]:has([data-sitting]) .seat-name {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  font-weight: 800;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seat-tile[data-sitting] .player-tile {
+    animation: sitting 900ms var(--ease-in-out) infinite alternate;
+  }
+}
+@keyframes sitting {
+  to {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+/* After someone leaves, the players who stay see their round was kept. */
+main.meeting-page .round-saved {
+  text-align: center;
+  font-weight: 700;
+}
+/* Recording a game: the winner first, then what each pays. */
+.pick-prompt {
+  margin: 0 0 14px;
+  text-align: center;
+  font-weight: 800;
+}
+.pick-winner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 18px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  --w: 36px;
+}
+.pick-winner .player-tile {
+  flex-shrink: 0;
+  margin-block-end: 4px;
+}
+.pick-winner strong {
+  flex: 1;
+  min-inline-size: 0;
+  font: 900 1.1rem var(--display);
+  overflow-wrap: anywhere;
+}
+/* Picking the winner: the other three step back, the winner glows and
+   wears a gold tag. Names stay full strength. */
+.table-square:has(.seat[aria-pressed="true"])
+  .seat:not([aria-pressed="true"])
+  .player-tile {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.seat[aria-pressed="true"] .player-tile {
+  filter: drop-shadow(0 0 10px oklch(0.85 0.16 90 / 0.85));
+}
+.seat-won {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: -12px;
+  inset-inline-end: -24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px 2px 5px;
+  border-radius: 999px;
+  background: oklch(0.88 0.15 95);
+  box-shadow: 0 0 0 2px var(--paper);
+  color: var(--ink);
+  font: 900 0.7rem var(--body);
+}
+.seat-won svg {
+  inline-size: 12px;
+  block-size: 12px;
 }
 .delta {
   font-family: var(--body);
@@ -1539,33 +1735,6 @@ button.seat[data-empty] .seat-name {
 .menu-links a:active {
   transform: translateY(2px);
 }
-/* Who this phone plays as, with the way to switch beside it. */
-.menu-you {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: color-mix(in oklch, oklch(0.88 0.15 95) 40%, var(--paper));
-  --w: 40px;
-}
-.menu-you .player-tile {
-  rotate: -6deg;
-}
-.menu-you p {
-  display: grid;
-  flex: 1;
-  min-inline-size: 0;
-}
-.menu-you small {
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-}
-.menu-you strong {
-  font: 900 1.2rem var(--display);
-  overflow-wrap: anywhere;
-}
-
 /* Lobby: the way back to your own table, and the typed-totals fallback. */
 .room-return {
   display: grid;
@@ -1624,18 +1793,26 @@ button.seat[data-empty] .seat-name {
   inline-size: var(--w, 44px);
   aspect-ratio: 3 / 4;
   border-radius: calc(var(--w, 44px) * 0.2);
-  background: #fff;
+  /* An ivory face lit from above, a thin rim, and a two-step edge in the
+     back colour, darker below, so even butter and mint read as thickness. */
+  background: linear-gradient(#fff 0 45%, #f7f2e4);
   color: var(--g);
   font: 700 calc(var(--w, 44px) * 0.58) / 1 var(--han);
   box-shadow:
-    0 calc(var(--w, 44px) * 0.12) 0 var(--b),
-    0 calc(var(--w, 44px) * 0.2) calc(var(--w, 44px) * 0.3) -4px
-      oklch(0.3 0.03 90 / 0.4);
+    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
+    inset 0 calc(var(--w, 44px) * -0.05) 0 var(--tile-face-lo),
+    0 calc(var(--w, 44px) * 0.07) 0 var(--b),
+    0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
+    0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
+      oklch(0.3 0.03 90 / 0.45);
 }
+/* An open chair: an empty place pressed into the table, the shape of a
+   tile, with its wind faint in it. */
 .player-tile[data-empty] {
-  background: none;
-  box-shadow: none;
-  border: 2px dashed color-mix(in oklch, var(--ink-soft) 55%, transparent);
+  background: color-mix(in oklch, var(--ink) 7%, var(--paper));
+  box-shadow:
+    inset 0 3px 5px oklch(0.3 0.03 90 / 0.28),
+    inset 0 -1px 0 oklch(1 0 0 / 0.6);
   color: var(--ink-soft);
   font-size: calc(var(--w, 44px) * 0.45);
 }
@@ -2438,28 +2615,97 @@ main.meeting-page .live-podium .live-points {
 main.meeting-page .live-season .live-list {
   --w: 26px;
 }
+/* Where tonight moves you: a little tile with a caret on its face, edged
+   in green or red. The badge has a fixed width so the ranks beside it line
+   up, and a flat dash says "no change". */
+main.meeting-page .live-season .live-change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  /* Room for "#18" and the badge, so every row's points line up. */
+  min-inline-size: calc(4ch + 52px);
+  font-variant-numeric: tabular-nums;
+}
 .live-move {
-  display: inline-block;
-  min-inline-size: 34px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  text-align: center;
-  font: 800 0.75rem var(--body);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  inline-size: 44px;
+  block-size: 28px;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow:
+    inset 0 -3px 0 var(--tile-face-lo),
+    0 2px 0 var(--edge),
+    0 4px 6px -3px oklch(0.3 0.03 90 / 0.4);
+  font: 900 0.85rem var(--body);
+  --edge: var(--tile-body);
+}
+.live-move svg {
+  inline-size: 12px;
+  block-size: 12px;
 }
 .live-move[data-move="up"] {
-  background: color-mix(in oklch, var(--up) 16%, var(--paper));
   color: var(--up);
+  --edge: color-mix(in oklch, var(--up) 55%, white);
 }
 .live-move[data-move="down"] {
-  background: color-mix(in oklch, var(--tile-letter) 14%, var(--paper));
   color: var(--tile-letter);
+  --edge: color-mix(in oklch, var(--tile-letter) 45%, white);
 }
 .live-move[data-move="new"] {
   background: oklch(0.88 0.15 95);
+  box-shadow:
+    inset 0 -3px 0 oklch(0 0 0 / 0.08),
+    0 2px 0 oklch(0.72 0.14 85),
+    0 4px 6px -3px oklch(0.3 0.03 90 / 0.4);
   color: var(--ink);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 .live-move[data-move="same"] {
-  color: var(--ink-soft);
+  background: none;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--ink-soft) 70%, transparent);
+}
+.live-move[data-move="same"]::before {
+  content: "";
+  inline-size: 12px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: currentColor;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-move[data-move="up"] {
+    animation: move-up 520ms var(--pop) both;
+  }
+  .live-move[data-move="down"] {
+    animation: move-down 520ms var(--pop) both;
+  }
+  .live-move[data-move="new"] {
+    animation: move-new 460ms var(--pop) both;
+  }
+}
+@keyframes move-up {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+@keyframes move-down {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+@keyframes move-new {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
 }
 /* Small phones keep "Tonight's standings" on one line. */
 main.meeting-page .live-title {
@@ -2514,4 +2760,273 @@ main.meeting-page .live-season h2 {
 main.meeting-page .live-season h2 span {
   font: 600 0.85rem var(--body);
   color: var(--ink-soft);
+}
+
+/* Ways around the meeting: rows in the menu with a live line, and a link
+   to the standings once a game is saved. */
+.menu-links a > span {
+  display: grid;
+  min-inline-size: 0;
+}
+.menu-links small {
+  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+}
+.meeting-page .go-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 48px;
+  margin-block-start: 10px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: color-mix(in oklch, var(--jade) 10%, var(--card));
+  color: var(--jade);
+  font: 800 0.95rem var(--body);
+  text-decoration: none;
+}
+.go-row svg {
+  flex-shrink: 0;
+}
+.go-row svg:last-child {
+  margin-inline-start: auto;
+}
+.go-row > span {
+  display: grid;
+}
+.go-row small {
+  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+}
+/* Not at a table: the way to the others, a full-width row like the rest. */
+.meeting-page .go-tables {
+  margin-block-start: 22px;
+  min-block-size: 60px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  color: var(--ink);
+}
+.go-tables > svg:first-child {
+  color: var(--jade);
+}
+/* After your table ends: the standings first, another table second. */
+.meeting-page .ended-next {
+  margin-block: 14px 24px;
+}
+/* From another page, the one tap back to the table you are playing at. */
+.meeting-page .back-to-table {
+  display: flex;
+  inline-size: fit-content;
+  margin-block-end: 16px;
+}
+
+/* The menu: a frosted sheet that floats above the browser's bar, over a
+   light scrim, and rises quickly with no overshoot. */
+.menu-sheet {
+  inset: auto 8px calc(8px + env(safe-area-inset-bottom));
+  width: min(100% - 16px, 480px);
+  max-height: 86dvh;
+  padding: 14px 16px 16px;
+  border-radius: 28px;
+  background: color-mix(in oklch, var(--paper) 86%, transparent);
+  backdrop-filter: blur(22px) saturate(170%);
+  box-shadow:
+    0 22px 44px -14px oklch(0.25 0.03 90 / 0.5),
+    inset 0 1px 0 oklch(1 0 0 / 0.75);
+}
+.menu-sheet::backdrop {
+  background: oklch(0.3 0.02 90 / 0.16);
+}
+.menu-sheet .calculator-head h2 {
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .menu-sheet[open] {
+    animation: menu-rise 240ms var(--ease-drawer);
+  }
+}
+@keyframes menu-rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.97;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .menu-sheet {
+    background: var(--paper);
+    backdrop-filter: none;
+  }
+}
+@media (min-width: 700px) {
+  .menu-sheet {
+    inset: auto auto 24px 50%;
+    transform: translateX(-50%);
+  }
+}
+.menu-sheet .menu-links {
+  gap: 8px;
+  margin-block-start: 10px;
+}
+.menu-sheet .menu-links a {
+  min-block-size: 56px;
+  box-shadow: none;
+}
+/* Your table, or the way to one. */
+.menu-card {
+  margin-block-start: 10px;
+  padding: 14px;
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: 0 6px 14px -8px oklch(0.3 0.03 90 / 0.35);
+}
+.menu-card h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font: 900 1.15rem var(--display);
+}
+.menu-card h3 small {
+  font: 700 0.8rem var(--body);
+  color: var(--ink-soft);
+}
+.menu-card p {
+  margin: 4px 0 12px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.menu-card-seats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  font: 800 0.75rem var(--body);
+  --w: 30px;
+}
+.menu-card-seats li {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-inline-size: 0;
+}
+.menu-card-seats .player-tile {
+  margin-block-end: 5px;
+}
+.menu-card-seats span {
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+.menu-card-seats span[data-me] {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.menu-card-seats b {
+  font: 900 0.95rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.menu-card-open {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.menu-card-open li {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--jade) 12%, var(--card));
+  color: var(--jade);
+  font: 900 0.75rem var(--body);
+}
+/* The way back first and full width; leaving sits apart, below it. */
+.menu-card-actions {
+  display: grid;
+  gap: 8px;
+}
+.menu-sheet .menu-card .meeting-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-block-size: 48px;
+  margin: 0;
+  padding-inline: 12px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.menu-card svg,
+.menu-leave svg {
+  flex-shrink: 0;
+  inline-size: 20px;
+  block-size: 20px;
+}
+/* Leaving takes you out of the game, so it is red and kept apart. */
+.menu-sheet .menu-leave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 2px var(--tile-letter);
+  color: var(--tile-letter);
+  font: 800 0.95rem var(--body);
+}
+/* You, tonight: the same top row on every page, with Switch beside it. */
+.menu-me {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 6px;
+  padding: 12px 8px 12px 14px;
+  border-radius: 22px;
+  background: var(--card);
+  --w: 36px;
+}
+.menu-me .player-tile {
+  flex-shrink: 0;
+  margin-block-end: 4px;
+  rotate: -6deg;
+}
+.menu-me p {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+}
+.menu-me strong {
+  font: 900 1.1rem var(--display);
+  overflow-wrap: anywhere;
+}
+.menu-me small {
+  font: 700 0.85rem var(--body);
+  color: var(--ink-soft);
+}
+.menu-sheet b[data-sign="1"] {
+  color: var(--up);
+}
+.menu-sheet b[data-sign="-1"] {
+  color: var(--tile-letter);
+}
+.menu-sheet .menu-me .meeting-text {
+  min-block-size: 44px;
+  padding: 0 10px;
+  background: none;
+  color: var(--jade);
+  font: 800 0.95rem var(--body);
+}
+
+.table-sheet {
+  overscroll-behavior: contain;
 }
