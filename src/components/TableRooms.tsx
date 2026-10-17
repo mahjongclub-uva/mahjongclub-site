@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import {
   IconArmchair,
   IconArrowBackUp,
   IconArrowRight,
+  IconChevronRight,
   IconCheck,
   IconCrown,
   IconEraser,
@@ -14,6 +15,7 @@ import {
   IconHistory,
   IconPencil,
   IconPlayerPlay,
+  IconTrophy,
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
@@ -155,7 +157,6 @@ function EndedReceipt({
             : `Ended by ${ended.by}`}{" "}
           at {clock(ended.at)} · {ended.games}{" "}
           {ended.games === 1 ? "game" : "games"}
-          {ended.sheetTable && ` · scoresheet Table ${ended.sheetTable}`}
         </span>
       </p>
       <ul>
@@ -291,7 +292,7 @@ function TableSquare({
             </span>
             {cheering && <Cheer you={own} />}
             <span className="seat-name">
-              {seat ? seat.display : canSit && !pick ? "Take seat" : "Open"}
+              {seat ? seat.display : canSit && !pick ? "Sit here" : "Open"}
               {own && <small> you</small>}
             </span>
             {seat && games > 0 && !pick && (
@@ -329,7 +330,7 @@ function TableSquare({
               data-empty
               key={wind}
               disabled={busy}
-              aria-label={`Take the ${wind} seat`}
+              aria-label={`Sit here, ${wind} seat`}
               onClick={() => sit?.(i)}
             >
               {body}
@@ -620,6 +621,13 @@ function SeatedTable({
             </button>
           )}
         </div>
+        {games > 0 && (
+          <Link className="table-standings" href={MEETING_PATHS.tonight}>
+            <IconTrophy aria-hidden="true" />
+            Tonight’s standings
+            <IconChevronRight aria-hidden="true" />
+          </Link>
+        )}
       </div>
 
       {layer === "game" && (
@@ -810,11 +818,6 @@ function SeatedTable({
           )}
           {errorLine}
           <div className="calculator-footer">
-            {games > 0 && (
-              <p className="quiet end-note">
-                These totals go to the official scoresheet.
-              </p>
-            )}
             <button
               type="button"
               className="meeting-primary"
@@ -997,6 +1000,11 @@ function Tables({
     setRooms(state.rooms);
     setRoomsAt(Date.now());
     setRoomsFailed(false);
+    const seated = seatedRoom(state.rooms, player?.id);
+    if (pendingLeave.current && seated) {
+      pendingLeave.current = false;
+      leaveOwn(seated);
+    }
   };
   // Bumped when an action starts and when it finishes, so a refresh that
   // overlapped one is dropped instead of putting older seats back.
@@ -1025,6 +1033,31 @@ function Tables({
           )
           .sort((a, b) => b.ended!.at - a.ended!.at)[0]
       : undefined;
+
+  // Once games are saved, the group changes by ending the table.
+  function leaveOwn(room = mine) {
+    if (room?.hands.length)
+      setError(
+        "Games are saved at this table. End the table to change groups.",
+      );
+    else void act("leave");
+  }
+  // The menu's Leave arrives as #leave, sometimes before the rooms load.
+  const pendingLeave = useRef(false);
+  const leaveFromMenu = useEffectEvent(() => {
+    if (mine) leaveOwn();
+    else pendingLeave.current = true;
+  });
+  useEffect(() => {
+    const check = () => {
+      if (window.location.hash !== "#leave") return;
+      history.replaceState(null, "", window.location.pathname);
+      leaveFromMenu();
+    };
+    check();
+    window.addEventListener("hashchange", check);
+    return () => window.removeEventListener("hashchange", check);
+  }, []);
 
   async function act(action: string, extra: Record<string, unknown> = {}) {
     // A ref, not state: a second tap before the re-render must not send again.
@@ -1154,11 +1187,19 @@ function Tables({
       ) : (
         <div className="room-view">
           {!mine && ended?.ended && (
-            <EndedReceipt
-              ended={ended.ended}
-              room={ended.table}
-              you={player.id}
-            />
+            <>
+              <EndedReceipt
+                ended={ended.ended}
+                room={ended.table}
+                you={player.id}
+              />
+              <Link
+                className="meeting-primary ended-next"
+                href={MEETING_PATHS.tonight}
+              >
+                See tonight’s standings
+              </Link>
+            </>
           )}
           {mine && !here && (
             <p className="meeting-notice">
@@ -1188,13 +1229,7 @@ function Tables({
             busy={busy || roomsFailed}
             cheer={cheer}
             sit={(wind) => void act("join", { table, seat: wind })}
-            tapOwn={() => {
-              if (mine?.hands.length)
-                setError(
-                  "Games are saved at this table. End the table to change groups.",
-                );
-              else void act("leave");
-            }}
+            tapOwn={() => leaveOwn()}
           />
           {here && (
             <SeatedTable
@@ -1210,7 +1245,7 @@ function Tables({
           )}
           {!mine && (
             <Link
-              className={ended?.ended ? "meeting-primary" : "meeting-text"}
+              className={ended?.ended ? "meeting-chip" : "meeting-text"}
               href={MEETING_PATHS.tables}
             >
               Find another table

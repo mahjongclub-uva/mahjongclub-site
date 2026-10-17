@@ -2,10 +2,12 @@
 
 import { useEffect, useReducer, useState, type ReactNode } from "react";
 import {
+  IconArmchair,
   IconArrowsExchange,
-  IconChevronDown,
   IconChevronRight,
+  IconDoorExit,
   IconLayoutGrid,
+  IconMenu2,
   IconTrophy,
 } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
@@ -19,6 +21,8 @@ import {
   rememberPlayer,
   requestError,
   savedPlayer,
+  seatedRoom,
+  WINDS,
   type Meeting,
   type Player,
   type SavedPlayer,
@@ -26,6 +30,7 @@ import {
 } from "@/lib/meeting";
 import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import PlayerTile from "@/components/PlayerTile";
 import { clock, formatShortDate } from "@/lib/format";
@@ -43,6 +48,36 @@ function PlayerSheet({
   player: Player;
   close: () => void;
 }) {
+  // Trailing slashes come and go with the router; the paths keep theirs.
+  const path = usePathname().replace(/\/?$/, "/");
+  const router = useRouter();
+  const mine = seatedRoom(meeting.rooms, player.id);
+  const seat = mine?.seats.find((item) => item.id === player.id);
+  const playing = meeting.rooms?.filter((room) => room.seats.length) ?? [];
+  const open = playing.reduce((n, room) => n + 4 - room.seats.length, 0);
+  const links = [
+    mine &&
+      seat && {
+        href: MEETING_PATHS.table(mine.table),
+        icon: <IconArmchair aria-hidden="true" />,
+        title: `Table ${mine.table}`,
+        note: `${WINDS[seat.wind]} seat`,
+        // Once games are saved, the table changes groups by ending instead.
+        leave: !mine.hands.length && MEETING_PATHS.leave(mine.table),
+      },
+    meeting.rooms && {
+      href: MEETING_PATHS.tables,
+      icon: <IconLayoutGrid aria-hidden="true" />,
+      title: "Tables tonight",
+      note: `${playing.length} playing${open ? ` · ${open} open ${open === 1 ? "seat" : "seats"}` : ""}`,
+    },
+    {
+      href: MEETING_PATHS.tonight,
+      icon: <IconTrophy aria-hidden="true" />,
+      title: "Tonight’s standings",
+      note: "Live",
+    },
+  ].filter((link) => !!link);
   return (
     <Sheet title="Menu" close={close}>
       <div className="menu-you">
@@ -64,22 +99,44 @@ function PlayerSheet({
         </button>
       </div>
       <ul className="menu-links">
-        {meeting.rooms && (
-          <li>
-            <Link href={MEETING_PATHS.tables} onClick={close}>
-              <IconLayoutGrid aria-hidden="true" />
-              Tables tonight
-              <IconChevronRight aria-hidden="true" />
-            </Link>
-          </li>
-        )}
-        <li>
-          <Link href={MEETING_PATHS.tonight} onClick={close}>
-            <IconTrophy aria-hidden="true" />
-            Tonight’s standings
-            <IconChevronRight aria-hidden="true" />
-          </Link>
-        </li>
+        {links.map(({ href, icon, title, note, leave }) => {
+          const here = path === href;
+          return (
+            <li key={href} data-leave={leave || undefined}>
+              <Link
+                href={href}
+                onClick={close}
+                aria-current={here ? "page" : undefined}
+              >
+                {icon}
+                <span>
+                  {title}
+                  <small>{note}</small>
+                </span>
+                {here ? (
+                  <em>You’re here</em>
+                ) : (
+                  <IconChevronRight aria-hidden="true" />
+                )}
+              </Link>
+              {leave && (
+                <button
+                  type="button"
+                  className="meeting-chip"
+                  onClick={() => {
+                    close();
+                    // The table page handles leaving, with its own checks.
+                    if (here) window.location.hash = "leave";
+                    else router.push(leave);
+                  }}
+                >
+                  <IconDoorExit aria-hidden="true" />
+                  Leave
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </Sheet>
   );
@@ -156,10 +213,7 @@ export default function MeetingAccess({
           {meeting?.open && meeting.date ? (
             <>
               <small>Mahjong Club @ UVA</small>
-              <b>
-                {formatShortDate(meeting.date)}
-                {!meeting.checkinsOpen && " · Scores still open"}
-              </b>
+              <b>{formatShortDate(meeting.date)}</b>
             </>
           ) : (
             <b>Mahjong Club @ UVA</b>
@@ -172,9 +226,12 @@ export default function MeetingAccess({
             aria-haspopup="dialog"
             onClick={() => setSheet(true)}
           >
-            <PlayerTile id={player.id} />
-            <span>{player.display}</span>
-            <IconChevronDown size={16} aria-hidden="true" />
+            <span className="meeting-you-tile">
+              <PlayerTile id={player.id} />
+            </span>
+            Menu
+            <IconMenu2 aria-hidden="true" />
+            <span className="sr-only">, playing as {player.display}</span>
           </button>
         )}
       </header>
