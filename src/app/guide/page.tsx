@@ -24,8 +24,7 @@ export default function Guide() {
         <header className={styles.hero}>
           <h1>Learn how to play!</h1>
           <p className={styles.qualifier}>
-            We teach as we play. This is just <strong>one</strong> of the ways
-            to play.
+            <strong>One</strong> of many ways to play.
           </p>
         </header>
         <LessonRack />
