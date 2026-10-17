@@ -15,7 +15,12 @@ import {
   type Results,
   MEETING_PATHS,
 } from "@/lib/meeting";
-import { liveStandings, tonightStandings, tonightTables } from "@/lib/live";
+import {
+  liveStandings,
+  podium,
+  tonightStandings,
+  tonightTables,
+} from "@/lib/live";
 import type { Meeting as ScheduledMeeting, Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
@@ -111,8 +116,8 @@ function LiveTable({
   const season = matching
     ? rows.filter((row) => playedTonight.has(row.id))
     : [];
-  // The top three tonight stand on a podium.
-  const podium = tonight.slice(0, 3);
+  // The top places tonight stand on a podium, step heights by rank.
+  const top = tonight.length > 1 ? podium(tonight) : [];
   return (
     <section>
       {/* Live until an officer publishes tonight, then official. */}
@@ -162,33 +167,32 @@ function LiveTable({
           </button>
         </div>
       )}
-      {podium.length > 1 && (
+      {top.length > 0 && (
         // Drawn for the eye only; the list below still reads every place.
         <div className="live-podium" aria-hidden="true">
-          {[podium[1], podium[0], podium[2]].map(
-            (row, i) =>
-              row && (
-                <div
-                  key={row.id}
-                  data-step={[2, 1, 3][i]}
-                  data-you={row.id === me?.id || undefined}
-                >
-                  <span className="podium-tile">
-                    <PlayerTile id={row.id} />
-                    {i === 1 && (
-                      <span className="seat-crown">
-                        <IconCrown />
-                      </span>
-                    )}
+          {top.map((row, i) => (
+            <div
+              key={row.id}
+              data-step={Math.min(row.rank, 3)}
+              data-you={row.id === me?.id || undefined}
+              // First in the middle, then left, then right.
+              style={{ gridColumn: [2, 1, 3][i] }}
+            >
+              <span className="podium-tile">
+                <PlayerTile id={row.id} />
+                {row.rank === 1 && (
+                  <span className="seat-crown">
+                    <IconCrown />
                   </span>
-                  <span className="podium-name">{row.display}</span>
-                  <strong className={pointsClass(row.net)}>
-                    {signed(row.net)}
-                  </strong>
-                  <span className="podium-step">{row.rank}</span>
-                </div>
-              ),
-          )}
+                )}
+              </span>
+              <span className="podium-name">{row.display}</span>
+              <strong className={pointsClass(row.net)}>
+                {signed(row.net)}
+              </strong>
+              <span className="podium-step">{row.rank}</span>
+            </div>
+          ))}
         </div>
       )}
       <ol className="live-list" aria-label="Tonight’s standings">
@@ -196,9 +200,7 @@ function LiveTable({
           <li
             key={row.id}
             data-you={row.id === me?.id || undefined}
-            className={
-              i < podium.length && podium.length > 1 ? "sr-only" : undefined
-            }
+            className={i < top.length ? "sr-only" : undefined}
           >
             <span className="live-rank" aria-label={`Rank ${row.rank}`}>
               {row.rank}

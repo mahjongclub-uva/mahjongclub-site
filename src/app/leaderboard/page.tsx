@@ -8,6 +8,7 @@ import {
 import { getCurrentSemester } from "@/lib/data";
 import { SEASON_START, type Standing } from "@/lib/schema";
 import { formatDate } from "@/lib/format";
+import { podium } from "@/lib/live";
 import PlayerSearch from "@/components/PlayerSearch";
 import CountUp from "@/components/CountUp";
 import { Delta, RankTile, StandingRow } from "@/components/StandingParts";
@@ -18,6 +19,7 @@ const SHOWN = 9;
 export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
+  const top = podium(shown);
   const seasonNet = semester.scoring_rule === "season-net";
   const score = (player: Standing) =>
     seasonNet ? SEASON_START + player.total_net : player.total_gain;
@@ -50,55 +52,59 @@ export default function Leaderboard() {
             <p className="quiet">No tables played yet this semester.</p>
           ) : (
             <>
-              {/* Top three on the felt, by place: 2, 1, 3 left to right. Ties
-                  share a rank; the steps still follow list order. */}
-              <ol
-                className="lb-podium"
-                aria-label={`${semester.label} top three`}
-              >
-                {shown.slice(0, 3).map((player, i) => (
-                  <li
-                    key={player.id}
-                    className="lb-spot"
-                    data-place={i + 1}
-                    style={{ "--i": i } as CSSProperties}
-                  >
-                    {player.rank === 1 && (
-                      <IconCrownFilled
-                        className="lb-crown"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className="standing-tile">
-                      <RankTile rank={player.rank} />
-                    </span>
-                    <span className="sr-only">Rank {player.rank}: </span>
-                    <span className="lb-name">{player.display}</span>
-                    <span className="lb-score">
-                      <b>
-                        <CountUp value={score(player)} delay={i * 40 + 100} />
-                      </b>
-                      <span className="sr-only"> points</span>
-                    </span>
-                    {seasonNet && <Delta change={player.rank_change} />}
-                    <span className="lb-step" aria-hidden="true">
-                      {player.rank}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+              {/* The top places on the felt, first in the middle, then left,
+                  then right. Step heights follow rank, and a tie is never
+                  split between the felt and the list. */}
+              {top.length > 0 && (
+                <ol
+                  className="lb-podium"
+                  aria-label={`${semester.label} podium`}
+                >
+                  {top.map((player, i) => (
+                    <li
+                      key={player.id}
+                      className="lb-spot"
+                      data-place={i + 1}
+                      data-step={Math.min(player.rank, 3)}
+                      style={{ "--i": i } as CSSProperties}
+                    >
+                      {player.rank === 1 && (
+                        <IconCrownFilled
+                          className="lb-crown"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="standing-tile">
+                        <RankTile rank={player.rank} />
+                      </span>
+                      <span className="sr-only">Rank {player.rank}: </span>
+                      <span className="lb-name">{player.display}</span>
+                      <span className="lb-score">
+                        <b>
+                          <CountUp value={score(player)} delay={i * 40 + 100} />
+                        </b>
+                        <span className="sr-only"> points</span>
+                      </span>
+                      {seasonNet && <Delta change={player.rank_change} />}
+                      <span className="lb-step" aria-hidden="true">
+                        {player.rank}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
 
-              {shown.length > 3 && (
+              {shown.length > top.length && (
                 <ol
                   className="standings"
-                  aria-label={`${semester.label} standings, from fourth`}
+                  aria-label={`${semester.label} standings${top.length ? ", continued" : ""}`}
                 >
-                  {shown.slice(3).map((player, i) => (
+                  {shown.slice(top.length).map((player, i) => (
                     <StandingRow
                       key={player.id}
                       player={player}
                       seasonNet={seasonNet}
-                      index={i + 3}
+                      index={i + top.length}
                     />
                   ))}
                 </ol>
