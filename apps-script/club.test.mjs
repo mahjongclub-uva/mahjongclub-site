@@ -88,10 +88,6 @@ function harness() {
       );
       return this;
     }
-    getNote() {
-      calls.noteReads++;
-      return this.tab.notes[this.row + ":" + this.column] || "";
-    }
     getNotes() {
       calls.noteReads++;
       return Array.from({ length: this.rows }, (_, r) =>
@@ -281,17 +277,6 @@ function harness() {
     CalendarApp: { getCalendarById: () => ({ getEvents: () => events }) },
     ScriptApp: {
       getProjectTriggers: () => triggers,
-      newTrigger: (handler) => ({
-        timeBased() {
-          return this;
-        },
-        everyMinutes() {
-          return this;
-        },
-        create() {
-          triggers.push({ getHandlerFunction: () => handler });
-        },
-      }),
       deleteTrigger: (trigger) => triggers.splice(triggers.indexOf(trigger), 1),
     },
     Utilities: {
@@ -639,7 +624,14 @@ function seatedTable(h, ids = ["p001", "p002", "p003", "p004"]) {
   );
   let lastHandId = null;
   const hand = (winner, each, by = "p001", handId = crypto.randomUUID()) => {
-    const reply = room(by, "hand", { winner, each, handId, lastHandId });
+    const reply = room(by, "hand", {
+      table: 1,
+      session: table().session,
+      winner,
+      each,
+      handId,
+      lastHandId,
+    });
     if (reply.status === 200) lastHandId = handId;
     return reply;
   };
@@ -739,6 +731,8 @@ test("a swap saves the round and keeps the players who stay in their seats", () 
   assert.equal(savedTables(h).length, 1);
   // The empty seat is open to someone new, and the game waits for them.
   const early = t.room("p001", "hand", {
+    table: room.table,
+    session: room.session,
     winner: "p001",
     each: 10,
     handId: crypto.randomUUID(),
@@ -841,6 +835,8 @@ test("two phones recording one game count it once, and undo needs the latest vie
   assert.equal(t.hand("p001", 20, "p001", handId).status, 200);
   assert.equal(
     t.room("p001", "hand", {
+      table: 1,
+      session: 1,
       winner: "p001",
       each: 20,
       handId,
@@ -850,6 +846,8 @@ test("two phones recording one game count it once, and undo needs the latest vie
   );
   assert.equal(
     t.room("p002", "hand", {
+      table: 1,
+      session: 1,
       winner: "p001",
       each: 20,
       handId: crypto.randomUUID(),
@@ -858,8 +856,14 @@ test("two phones recording one game count it once, and undo needs the latest vie
     409,
   );
   assert.equal(t.table().hands.length, 1);
-  assert.equal(t.room("p003", "undo", { lastHandId: null }).status, 409);
-  assert.equal(t.room("p003", "undo", { lastHandId: handId }).status, 200);
+  assert.equal(
+    t.room("p003", "undo", { table: 1, session: 1, lastHandId: null }).status,
+    409,
+  );
+  assert.equal(
+    t.room("p003", "undo", { table: 1, session: 1, lastHandId: handId }).status,
+    200,
+  );
   assert.equal(t.table().hands.length, 0);
   for (const [winner, each] of [
     ["p009", 5],
@@ -868,6 +872,8 @@ test("two phones recording one game count it once, and undo needs the latest vie
   ])
     assert.equal(
       t.room("p001", "hand", {
+        table: 1,
+        session: 1,
         winner,
         each,
         handId: crypto.randomUUID(),
@@ -884,6 +890,77 @@ test("a stale End is refused, and so is ending someone else's table", () => {
   assert.equal(t.end("p001", { lastHandId: null }).status, 409);
   assert.equal(t.end("p005").status, 409);
   assert.equal(t.table().seats.length, 4);
+});
+
+test("game saves and undo stay bound to the table session the phone saw", () => {
+  for (const nextTable of [1, 2]) {
+    const h = harness();
+    const t = seatedTable(h);
+    const original = { table: 1, session: 1 };
+    const delayed = {
+      ...original,
+      winner: "p001",
+      each: 20,
+      handId: crypto.randomUUID(),
+      lastHandId: null,
+    };
+    assert.equal(t.end("p002").status, 200);
+    for (const [seat, id] of ["p001", "p002", "p003", "p004"].entries())
+      assert.equal(t.room(id, "join", { table: nextTable, seat }).status, 200);
+    const current = { table: nextTable, session: nextTable === 1 ? 2 : 1 };
+    const before = JSON.stringify(h.store);
+    assert.equal(t.room("p001", "hand", delayed).status, 409);
+    assert.equal(
+      JSON.stringify(h.store),
+      before,
+      "a stale save writes nothing",
+    );
+
+    const save = { ...delayed, ...current };
+    assert.equal(t.room("p001", "hand", save).status, 200);
+    assert.equal(t.room("p001", "hand", save).status, 200, "retry is safe");
+    const room = () =>
+      h.get({ r: "rooms" }).rooms.find((item) => item.table === nextTable);
+    assert.equal(room().hands.length, 1);
+    assert.deepEqual(
+      room().totals.map((seat) => seat.total),
+      [265, 185, 185, 185],
+    );
+    assert.equal(
+      t.room("p001", "undo", { ...original, lastHandId: save.handId }).status,
+      409,
+    );
+    assert.equal(room().hands.length, 1, "a stale undo leaves the game intact");
+    assert.equal(
+      t.room("p001", "undo", { ...current, lastHandId: save.handId }).status,
+      200,
+    );
+    assert.equal(room().hands.length, 0);
+  }
+});
+
+test("clients must identify the table session before saving or undoing a game", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  const save = {
+    winner: "p001",
+    each: 20,
+    handId: crypto.randomUUID(),
+    lastHandId: null,
+  };
+  for (const partial of [{}, { table: 1 }, { session: 1 }])
+    assert.equal(t.room("p001", "hand", { ...save, ...partial }).status, 409);
+  assert.equal(t.table().hands.length, 0);
+  assert.equal(
+    t.room("p001", "hand", { ...save, table: 1, session: 1 }).status,
+    200,
+  );
+  for (const partial of [{}, { table: 1 }, { session: 1 }])
+    assert.equal(
+      t.room("p001", "undo", { lastHandId: save.handId, ...partial }).status,
+      409,
+    );
+  assert.equal(t.table().hands.length, 1);
 });
 
 test("leaving is allowed only before a game; joining elsewhere needs leaving first", () => {

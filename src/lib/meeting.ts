@@ -284,13 +284,16 @@ export function actionLanded(
   if (action === "leave")
     return answer(!room?.seats.some((seat) => seat.id === sent.playerId));
   if (room?.session !== before.session) return "unsure";
-  if (action === "undo")
-    return answer(
-      Boolean(
-        sent.lastHandId &&
-        !room.hands.some((hand) => hand.id === sent.lastHandId),
-      ),
-    );
+  if (action === "undo") {
+    if (!sent.lastHandId || before.hands.at(-1)?.id !== sent.lastHandId)
+      return "unsure";
+    if (room.hands.some((hand) => hand.id === sent.lastHandId))
+      return "missing";
+    return room.hands.length === before.hands.length - 1 &&
+      room.hands.every((hand, index) => hand.id === before.hands[index].id)
+      ? "landed"
+      : "unsure";
+  }
   return "missing";
 }
 /** Where a checked-in player goes next tonight. The calendar's stand-in

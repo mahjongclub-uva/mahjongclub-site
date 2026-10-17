@@ -54,6 +54,7 @@ def plan_rows(
     """Rows to append, in Roster column order. existing and local map full
     name -> {id, display, opt_out}."""
     seen = {normalize(name) for name in existing}
+    used_ids = {entry["id"] for entry in existing.values()}
     taken = {entry["display"] for entry in [*existing.values(), *local.values()]}
     numbers = [int(e["id"][1:]) for e in [*existing.values(), *local.values()]]
     next_number = max(numbers, default=0) + 1
@@ -62,7 +63,10 @@ def plan_rows(
     for name, entry in sorted(local.items(), key=lambda kv: kv[1]["id"]):
         if normalize(name) in seen:
             continue
+        if entry["id"] in used_ids:
+            build_data.die(f"cannot migrate {entry['id']}: a different player already uses that ID")
         seen.add(normalize(name))
+        used_ids.add(entry["id"])
         rows.append([entry["id"], "", name, entry["display"], bool(entry["opt_out"])])
 
     for name in attendance:

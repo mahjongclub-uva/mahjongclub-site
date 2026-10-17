@@ -57,10 +57,6 @@ class SiteContentTests(unittest.TestCase):
         self.assertEqual(flatten(content)["officer.President"], "Loy Luo")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class ReadSourceRetryTests(unittest.TestCase):
     URL = "https://docs.google.com/spreadsheets/d/e/x/pub?output=csv"
 
@@ -74,8 +70,13 @@ class ReadSourceRetryTests(unittest.TestCase):
 
     def test_does_not_retry_an_unpublished_sheet(self) -> None:
         missing = urllib.error.HTTPError(self.URL, 404, "Not Found", {}, None)
+        self.addCleanup(missing.close)
         with mock.patch("urllib.request.urlopen", side_effect=missing) as urlopen, \
                 mock.patch("time.sleep"):
             with self.assertRaises(urllib.error.HTTPError):
                 read_source(None, self.URL)
         self.assertEqual(urlopen.call_count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

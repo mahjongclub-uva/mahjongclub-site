@@ -600,6 +600,8 @@ function SeatedTable({
     // Judged against the table as it was when this entry began, with the
     // game ID fixed at Review so every retry is recognised as the same game.
     const done = await act("hand", {
+      table: draft.table,
+      session: draft.session,
       winner: draft.winner,
       each: amount,
       handId: draft.handId,
@@ -854,8 +856,14 @@ function SeatedTable({
             <button
               type="button"
               className="meeting-chip"
-              disabled={busy || offline}
-              onClick={() => void act("undo")}
+              disabled={busy || offline || !games}
+              onClick={() =>
+                void act("undo", {
+                  table: room.table,
+                  session: room.session,
+                  lastHandId: last,
+                })
+              }
             >
               <IconArrowBackUp size={18} aria-hidden="true" /> Undo game {games}
             </button>
@@ -1164,6 +1172,7 @@ function Tables({
   const actions = useRef(0);
   const reload = usePoll(
     async (signal) => {
+      if (inFlight.current) return;
       const started = actions.current;
       try {
         const next = await getRooms(MEETING_SERVICE_URL, signal);
@@ -1242,7 +1251,12 @@ function Tables({
         const room = fresh?.rooms.find((item) => item.table === mine.table);
         const newest = room?.hands.at(-1);
         const sent = extra as { winner?: string; each?: number };
-        if (action === "hand" && newest && newest.id !== lastHandId) {
+        if (
+          action === "hand" &&
+          room?.session === extra.session &&
+          newest &&
+          newest.id !== lastHandId
+        ) {
           const seat = room!.seats.find((item) => item.id === newest.winner);
           const what = `${seat?.display ?? "Someone"} won · ${newest.each} each`;
           if (newest.winner === sent.winner && newest.each === sent.each) {
@@ -1285,13 +1299,19 @@ function Tables({
           mine,
           fresh.rooms,
         );
-      if (outcome === "landed") return true;
+      if (outcome === "landed") {
+        if (action === "undo" && mine)
+          setNotice(`Game ${mine.hands.length} was undone.`);
+        return true;
+      }
       setError(
         requestError(failure) +
           (outcome === "missing"
             ? " Nothing was saved; try again."
             : outcome === "unsure"
-              ? " This table was ended meanwhile. Check Tonight’s standings before saving again."
+              ? action === "undo"
+                ? " The game history changed. Check the latest games before undoing again."
+                : " This table was ended meanwhile. Check Tonight’s standings before saving again."
               : " Check the connection before trying again."),
       );
       return false;
