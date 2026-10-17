@@ -89,7 +89,7 @@ svg {
   /* Type. Barlow Condensed gives headings a printed poster character; Public Sans
      keeps instructions and club information easy to scan on a phone. Both
      are self-hosted by next/font. */
-  --body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+  --body: var(--font-body, ui-sans-serif), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;
   --sans: var(--body);
 
@@ -116,7 +116,7 @@ svg {
 
   /* Paper, ink and accent; text colours stay above 4.5:1 on --paper. */
   --paper: #f6f1e8;
-  --display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --display: var(--font-display, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --ink: #292722;
   --ink-soft: #605b52;
   --nav-ink: #292722;
@@ -1618,7 +1618,7 @@ body::before {
   background-repeat: repeat;
 }
 .eyebrow { letter-spacing: 0.1em; }
-.call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
+.call-guide dt .call-character { display: block; margin-block: 0.6rem; font: 700 2rem var(--font-han, sans-serif), sans-serif; color: var(--tile-letter); letter-spacing: 0; }
 
 /* Solid, tile-like controls in the charcoal palette. */
 .page-title, .section-title { font-weight: 700; }

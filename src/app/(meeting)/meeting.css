@@ -20,8 +20,8 @@ body:has(main.meeting-page) {
 }
 main.meeting-page {
   --paper: oklch(0.95 0.025 88);
-  --display: var(--font-meeting), ui-rounded, system-ui, sans-serif;
-  --body: var(--font-meeting), ui-rounded, system-ui, sans-serif;
+  --display: var(--font-meeting, ui-rounded), ui-rounded, system-ui, sans-serif;
+  --body: var(--font-meeting, ui-rounded), ui-rounded, system-ui, sans-serif;
   font-family: var(--body);
 }
 .meeting-page h1 {
