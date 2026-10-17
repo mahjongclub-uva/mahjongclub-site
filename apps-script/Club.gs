@@ -948,6 +948,13 @@ function roomAction(request, meeting) {
     )
       fail(400, "Choose who stays from the players at this table.");
     const staying = room.seats.filter((seat) => keep.includes(seat.id));
+    // Before any game there is no round to save: only the seats change, so
+    // the last round's receipt stays up for the players who are still here.
+    if (request.keep !== undefined && !room.hands.length) {
+      room.seats = staying;
+      writeRoom(room);
+      return reply(null);
+    }
     const saved = endRoom(room, meeting, player.display);
     room.seats = staying;
     writeRoom(room);
