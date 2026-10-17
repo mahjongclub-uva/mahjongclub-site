@@ -961,6 +961,14 @@ function roomAction(request, meeting) {
     return reply(saved);
   }
   if (!mine) fail(409, "Join a table first.");
+  if (
+    (action === "hand" || action === "undo") &&
+    (request.table !== mine.table || request.session !== mine.session)
+  )
+    fail(
+      409,
+      "Your table just changed. Reload before saving or undoing a game.",
+    );
   if (action === "hand") {
     if (
       typeof request.handId !== "string" ||

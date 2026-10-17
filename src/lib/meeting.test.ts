@@ -309,6 +309,13 @@ test("after a lost reply, each table action is recognised only once it took effe
   );
   assert.equal(landed("undo", room(1, ["p001"], ["h1"])), "landed");
   assert.equal(landed("undo", before), "missing");
+  // An absent target alone cannot prove this Undo; more history may have changed.
+  assert.equal(landed("undo", room(1, ["p001"], [])), "unsure");
+  assert.equal(landed("undo", room(1, ["p001"], ["different"])), "unsure");
+  assert.equal(
+    landed("undo", room(1, ["p001"], ["h1"]), { lastHandId: "h1" }),
+    "unsure",
+  );
   // Someone else ended the table and a new session began: this Undo can't tell.
   assert.equal(landed("undo", room(2, ["p001"], [])), "unsure");
   assert.equal(landed("end", room(2, [], []), { session: 1 }), "landed");

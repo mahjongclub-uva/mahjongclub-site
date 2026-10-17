@@ -144,7 +144,10 @@ The workbook has no per-game rows. Games live in Script Properties (one key per 
 - **The Apps Script owns** check-in, table membership, games and saved results. Every write runs under one script lock.
 - **Each phone keeps only conveniences:** who it is (localStorage, scoped to tonight's meeting), whether that was confirmed this visit (sessionStorage), an unfinished game entry, and pending typed-totals saves.
 - **Concurrency rules:**
-  - Each game carries a random ID, so a retry never counts twice.
+  - Each game carries a random ID, so a retry while that game remains in the session never counts twice.
+  - Game saves and Undo name the original physical table and session, so a delayed request cannot land in a new group.
+  - Deploy the frontend before updating Apps Script for this request contract.
+    Older backends accept the extra fields; after the backend update, older open pages must reload before saving or undoing games.
   - Every change sends the last game the phone saw, so a stale screen is refused rather than recorded. (Reads take no lock, so a table ended mid-refresh can show twice in one phone's standings for one refresh; saved results are never duplicated.)
   - End carries the session number, so a repeated End returns the same save even after everyone was released.
   - The workbook submission ID for a session is never sent to phones.
