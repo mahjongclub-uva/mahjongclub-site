@@ -8,6 +8,7 @@ import CallGame from "./CallGame";
 import TurnGame from "./TurnGame";
 import WinningHand from "@/components/WinningHand";
 import TileSet from "@/components/TileSet";
+import BackToTop from "@/components/BackToTop";
 import { SPECIAL_HAND_POST } from "@/lib/site";
 
 export const metadata = {
@@ -21,8 +22,8 @@ export default function Guide() {
     <main className={`guide-page ${styles.page}`}>
       <div className="section-wrap">
         <header className={styles.hero}>
-          <h1>Learn your first hand</h1>
-          <p className={styles.qualifier}>We teach as we play.</p>
+          <h1>Learn how to play!</h1>
+          <p className={styles.qualifier}>One of many ways to play.</p>
         </header>
         <LessonRack />
 
@@ -189,6 +190,7 @@ export default function Guide() {
           </div>
         </Lesson>
       </div>
+      <BackToTop />
     </main>
   );
 }
