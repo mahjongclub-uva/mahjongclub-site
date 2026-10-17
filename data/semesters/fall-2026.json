@@ -15,7 +15,8 @@
       "avg_gain": 79.8,
       "best_table": 265,
       "total_net": 444,
-      "avg_net": 74.0
+      "avg_net": 74.0,
+      "rank_change": 2
     },
     {
       "id": "p020",
@@ -26,7 +27,8 @@
       "avg_gain": 73.8,
       "best_table": 277,
       "total_net": 366,
-      "avg_net": 73.2
+      "avg_net": 73.2,
+      "rank_change": 0
     },
     {
       "id": "p007",
@@ -37,7 +39,8 @@
       "avg_gain": 79.8,
       "best_table": 285,
       "total_net": 264,
-      "avg_net": 66.0
+      "avg_net": 66.0,
+      "rank_change": -2
     },
     {
       "id": "p035",
@@ -48,7 +51,8 @@
       "avg_gain": 63.7,
       "best_table": 95,
       "total_net": 191,
-      "avg_net": 63.7
+      "avg_net": 63.7,
+      "rank_change": 0
     },
     {
       "id": "p010",
@@ -59,7 +63,8 @@
       "avg_gain": 77.5,
       "best_table": 290,
       "total_net": 140,
-      "avg_net": 35.0
+      "avg_net": 35.0,
+      "rank_change": 11
     },
     {
       "id": "p058",
@@ -70,7 +75,8 @@
       "avg_gain": 3.7,
       "best_table": 11,
       "total_net": 5,
-      "avg_net": 1.7
+      "avg_net": 1.7,
+      "rank_change": null
     },
     {
       "id": "p039",
@@ -81,7 +87,8 @@
       "avg_gain": 0.0,
       "best_table": -3,
       "total_net": -3,
-      "avg_net": -3.0
+      "avg_net": -3.0,
+      "rank_change": 1
     },
     {
       "id": "p032",
@@ -92,7 +99,8 @@
       "avg_gain": 0.0,
       "best_table": -12,
       "total_net": -12,
-      "avg_net": -12.0
+      "avg_net": -12.0,
+      "rank_change": 2
     },
     {
       "id": "p060",
@@ -103,7 +111,8 @@
       "avg_gain": 0.0,
       "best_table": -13,
       "total_net": -13,
-      "avg_net": -13.0
+      "avg_net": -13.0,
+      "rank_change": null
     },
     {
       "id": "p034",
@@ -114,7 +123,8 @@
       "avg_gain": 0.0,
       "best_table": -16,
       "total_net": -16,
-      "avg_net": -16.0
+      "avg_net": -16.0,
+      "rank_change": 1
     },
     {
       "id": "p037",
@@ -125,7 +135,8 @@
       "avg_gain": 0.0,
       "best_table": -17,
       "total_net": -17,
-      "avg_net": -17.0
+      "avg_net": -17.0,
+      "rank_change": 1
     },
     {
       "id": "p057",
@@ -136,7 +147,8 @@
       "avg_gain": 9.7,
       "best_table": 29,
       "total_net": -23,
-      "avg_net": -7.7
+      "avg_net": -7.7,
+      "rank_change": -3
     },
     {
       "id": "p027",
@@ -147,7 +159,8 @@
       "avg_gain": 22.4,
       "best_table": 103,
       "total_net": -28,
-      "avg_net": -5.6
+      "avg_net": -5.6,
+      "rank_change": -7
     },
     {
       "id": "p017",
@@ -158,7 +171,8 @@
       "avg_gain": 57.5,
       "best_table": 115,
       "total_net": -48,
-      "avg_net": -24.0
+      "avg_net": -24.0,
+      "rank_change": -1
     },
     {
       "id": "p042",
@@ -169,7 +183,8 @@
       "avg_gain": 0.0,
       "best_table": -22,
       "total_net": -49,
-      "avg_net": -24.5
+      "avg_net": -24.5,
+      "rank_change": -1
     },
     {
       "id": "p043",
@@ -180,7 +195,8 @@
       "avg_gain": 0.0,
       "best_table": -3,
       "total_net": -76,
-      "avg_net": -38.0
+      "avg_net": -38.0,
+      "rank_change": null
     },
     {
       "id": "p024",
@@ -191,7 +207,8 @@
       "avg_gain": 9.0,
       "best_table": 18,
       "total_net": -83,
-      "avg_net": -41.5
+      "avg_net": -41.5,
+      "rank_change": -2
     },
     {
       "id": "p036",
@@ -202,7 +219,8 @@
       "avg_gain": 11.6,
       "best_table": 53,
       "total_net": -117,
-      "avg_net": -16.7
+      "avg_net": -16.7,
+      "rank_change": -13
     },
     {
       "id": "p056",
@@ -213,7 +231,8 @@
       "avg_gain": 15.7,
       "best_table": 42,
       "total_net": -143,
-      "avg_net": -47.7
+      "avg_net": -47.7,
+      "rank_change": -12
     },
     {
       "id": "p033",
@@ -224,7 +243,8 @@
       "avg_gain": 44.0,
       "best_table": 220,
       "total_net": -170,
-      "avg_net": -34.0
+      "avg_net": -34.0,
+      "rank_change": -3
     },
     {
       "id": "p008",
@@ -235,7 +255,8 @@
       "avg_gain": 0.0,
       "best_table": -3,
       "total_net": -612,
-      "avg_net": -87.4
+      "avg_net": -87.4,
+      "rank_change": -3
     }
   ],
   "unranked": [],
