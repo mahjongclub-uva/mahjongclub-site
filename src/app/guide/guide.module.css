@@ -583,3 +583,12 @@
     text-wrap: pretty;
   }
 }
+
+/* The games sit right up to the bottom edge, so Back to top waits at the
+   end of the page instead of floating over Pass and the other controls. */
+.page :global(.back-to-top) {
+  position: static;
+}
+.page :global(.back-to-top a) {
+  animation: none;
+}
