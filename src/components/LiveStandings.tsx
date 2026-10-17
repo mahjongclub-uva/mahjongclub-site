@@ -132,7 +132,7 @@ function LiveTable({
     <section>
       {me && meeting.rooms && (
         <Link
-          className="meeting-chip standings-back"
+          className="meeting-chip back-to-table"
           href={myTable ? MEETING_PATHS.table(myTable) : MEETING_PATHS.tables}
         >
           <IconArrowLeft aria-hidden="true" />
