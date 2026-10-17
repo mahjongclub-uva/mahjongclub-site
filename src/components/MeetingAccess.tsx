@@ -3,16 +3,15 @@
 import { useEffect, useReducer, useState, type ReactNode } from "react";
 import {
   IconArmchair,
-  IconArrowsExchange,
   IconChevronRight,
   IconDoorExit,
-  IconLayoutGrid,
   IconMenu2,
   IconTrophy,
 } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
 import {
   getMeeting,
+  getRooms,
   keepMeeting,
   latestMeeting,
   playerConfirmed,
@@ -22,7 +21,6 @@ import {
   requestError,
   savedPlayer,
   seatedRoom,
-  WINDS,
   type Meeting,
   type Player,
   type SavedPlayer,
@@ -33,12 +31,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import PlayerTile from "@/components/PlayerTile";
-import { clock, formatShortDate } from "@/lib/format";
-import type { Meeting as ScheduledMeeting } from "@/lib/schema";
+import { clock, formatShortDate, signed } from "@/lib/format";
+import { tonightStandings, tonightTables } from "@/lib/live";
+import { SEASON_START, type Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
 
-/** Who this phone is playing as, and the two things that belong to them:
- * tonight's standings and switching player. */
+// Net from 0, signed and coloured, like the standings.
+const NetScore = ({ net }: { net: number }) => (
+  <b data-sign={Math.sign(net)}>{signed(net)}</b>
+);
+
+const ordinals = new Intl.PluralRules("en", { type: "ordinal" });
+const SUFFIX = { one: "st", two: "nd", few: "rd", other: "th" } as Record<
+  string,
+  string
+>;
+const ORDINAL = (n: number) => `${n}${SUFFIX[ordinals.select(n)]}`;
+
+/** The menu: your table first (or a way to find one), the other places
+ * tonight, and who this phone is playing as. */
 function PlayerSheet({
   meeting,
   player,
@@ -52,92 +63,163 @@ function PlayerSheet({
   const path = usePathname().replace(/\/?$/, "/");
   const router = useRouter();
   const mine = seatedRoom(meeting.rooms, player.id);
-  const seat = mine?.seats.find((item) => item.id === player.id);
-  const playing = meeting.rooms?.filter((room) => room.seats.length) ?? [];
-  const open = playing.reduce((n, room) => n + 4 - room.seats.length, 0);
-  const links = [
-    mine &&
-      seat && {
-        href: MEETING_PATHS.table(mine.table),
-        icon: <IconArmchair aria-hidden="true" />,
-        title: `Table ${mine.table}`,
-        note: `${WINDS[seat.wind]} seat`,
-        // Once games are saved, the table changes groups by ending instead.
-        leave: !mine.hands.length && MEETING_PATHS.leave(mine.table),
-      },
-    meeting.rooms && {
-      href: MEETING_PATHS.tables,
-      icon: <IconLayoutGrid aria-hidden="true" />,
-      title: "Tables tonight",
-      note: `${playing.length} playing${open ? ` · ${open} open ${open === 1 ? "seat" : "seats"}` : ""}`,
-    },
-    {
-      href: MEETING_PATHS.tonight,
-      icon: <IconTrophy aria-hidden="true" />,
-      title: "Tonight’s standings",
-      note: "Live",
-    },
-  ].filter((link) => !!link);
+  const tablePath = mine && MEETING_PATHS.table(mine.table);
+  // The table page does the leaving, and asks first once games are saved.
+  const leave = mine && MEETING_PATHS.leave(mine.table);
+  const openTables = (meeting.rooms ?? []).filter(
+    (room) => room.seats.length < 4,
+  );
+  // The menu only offers what the page you're on doesn't already show.
+  const findCard = !mine && meeting.rooms && path !== MEETING_PATHS.tables;
+  const standings = path !== MEETING_PATHS.tonight;
+  const leaveHere = leave && path === tablePath;
+  // Your night so far, across every table, read once when the menu opens.
+  const [night, setNight] = useState<ReturnType<
+    typeof tonightStandings
+  > | null>(null);
+  const hasRooms = !!meeting.rooms;
+  useEffect(() => {
+    if (!hasRooms) return;
+    const controller = new AbortController();
+    getRooms(MEETING_SERVICE_URL, controller.signal, true)
+      .then((state) =>
+        setNight(tonightStandings(tonightTables(state.results, state.rooms))),
+      )
+      .catch(() => {});
+    return () => controller.abort();
+  }, [hasRooms]);
+  const me = night?.find((row) => row.id === player.id);
+  const tonight = !hasRooms
+    ? null
+    : !night
+      ? "Tonight’s score…"
+      : me
+        ? `tonight · ${ORDINAL(me.rank)} of ${night.length}`
+        : "No games yet tonight";
   return (
-    <Sheet title="Menu" close={close}>
-      <div className="menu-you">
+    <Sheet title="Menu" close={close} className="menu-sheet">
+      <div className="menu-me">
         <PlayerTile id={player.id} />
         <p>
-          <small>Playing as</small>
           <strong>{player.display}</strong>
+          {tonight && (
+            <small>
+              {me && <NetScore net={me.net} />} {tonight}
+            </small>
+          )}
         </p>
         <button
           type="button"
-          className="meeting-chip"
+          className="meeting-text"
           onClick={() => {
             rememberPlayer(meeting, null);
             window.location.assign(MEETING_PATHS.checkin);
           }}
         >
-          <IconArrowsExchange aria-hidden="true" /> Switch
-          <span className="sr-only"> player</span>
+          Switch<span className="sr-only"> player</span>
         </button>
       </div>
-      <ul className="menu-links">
-        {links.map(({ href, icon, title, note, leave }) => {
-          const here = path === href;
-          return (
-            <li key={href} data-leave={leave || undefined}>
-              <Link
-                href={href}
-                onClick={close}
-                aria-current={here ? "page" : undefined}
+      {mine && path !== tablePath && (
+        // Away from your table: its four players and scores, and the way back.
+        <section className="menu-card" aria-label={`Table ${mine.table}`}>
+          <h3>
+            Table {mine.table}
+            <small>Game {mine.hands.length + 1}</small>
+          </h3>
+          <ul className="menu-card-seats">
+            {mine.seats
+              .toSorted((a, b) => a.wind - b.wind)
+              .map((item) => (
+                <li key={item.id}>
+                  <PlayerTile id={item.id} />
+                  <span data-me={item.id === player.id || undefined}>
+                    {item.id === player.id ? "You" : item.display}
+                  </span>
+                  <NetScore
+                    net={
+                      (mine.totals.find((total) => total.id === item.id)
+                        ?.total ?? SEASON_START) - SEASON_START
+                    }
+                  />
+                </li>
+              ))}
+          </ul>
+          <div className="menu-card-actions">
+            <Link className="meeting-primary" href={tablePath!} onClick={close}>
+              <IconArmchair aria-hidden="true" />
+              Go to table
+            </Link>
+            {leave && (
+              <button
+                type="button"
+                className="menu-leave"
+                onClick={() => {
+                  close();
+                  // The table page handles leaving, with its own checks.
+                  router.push(leave);
+                }}
               >
-                {icon}
+                <IconDoorExit aria-hidden="true" />
+                Leave table
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+      {findCard && (
+        <section className="menu-card" aria-label="Find a table">
+          <h3>Find a table</h3>
+          <p>You’re checked in. Sit at any open seat to start playing.</p>
+          {openTables.length > 0 && (
+            <ul className="menu-card-open">
+              {openTables.slice(0, 3).map((room) => (
+                <li key={room.table}>
+                  Table {room.table} · {4 - room.seats.length} open
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            className="meeting-primary"
+            href={MEETING_PATHS.tables}
+            onClick={close}
+          >
+            <IconArmchair aria-hidden="true" />
+            Find a table
+          </Link>
+        </section>
+      )}
+      {(standings || leaveHere) && (
+        <ul className="menu-links">
+          {standings && (
+            <li>
+              <Link href={MEETING_PATHS.tonight} onClick={close}>
+                <IconTrophy aria-hidden="true" />
                 <span>
-                  {title}
-                  <small>{note}</small>
+                  Tonight’s standings
+                  <small>Live</small>
                 </span>
-                {here ? (
-                  <em>You’re here</em>
-                ) : (
-                  <IconChevronRight aria-hidden="true" />
-                )}
+                <IconChevronRight aria-hidden="true" />
               </Link>
-              {leave && (
-                <button
-                  type="button"
-                  className="meeting-chip"
-                  onClick={() => {
-                    close();
-                    // The table page handles leaving, with its own checks.
-                    if (here) window.location.hash = "leave";
-                    else router.push(leave);
-                  }}
-                >
-                  <IconDoorExit aria-hidden="true" />
-                  Leave
-                </button>
-              )}
             </li>
-          );
-        })}
-      </ul>
+          )}
+          {leaveHere && (
+            <li>
+              <button
+                type="button"
+                className="menu-leave"
+                onClick={() => {
+                  close();
+                  window.location.hash = "leave";
+                }}
+              >
+                <IconDoorExit aria-hidden="true" />
+                Leave table
+              </button>
+            </li>
+          )}
+        </ul>
+      )}
     </Sheet>
   );
 }
