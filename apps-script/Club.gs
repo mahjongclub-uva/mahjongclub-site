@@ -754,7 +754,8 @@ function publicRoom(room) {
 }
 
 // Ends the session: saves its totals when there were games, releases every
-// seat, and starts a new session at the same physical table.
+// seat, and starts a new session at the same physical table. A swap then
+// puts back the players who stay.
 function endRoom(room, meeting, by) {
   let sheetTable = null;
   if (room.hands.length)
@@ -829,8 +830,12 @@ function roomsState(meeting, withResults) {
     let tables = null;
     try {
       tables = results(meeting, at).tables;
-    } catch {
+    } catch (error) {
       // The rooms still load; standings wait for an officer to fix the sheet.
+      // Logged, since the site only learns that the saved tables are missing.
+      console.error(
+        "Tonight's saved tables could not be read: " + error.message,
+      );
     }
     const rooms = readRooms(meeting.id).map(publicRoom);
     if (saves() === at || attempt >= 5) return { rooms, results: tables };
@@ -935,7 +940,16 @@ function roomAction(request, meeting) {
     if (room.session !== request.session)
       fail(409, "Your table just changed. Check the latest scores.");
     expectSeen(room);
+    // A swap: the players who stay keep their seats for the next round.
+    const keep = request.keep === undefined ? [] : request.keep;
+    if (
+      !Array.isArray(keep) ||
+      keep.some((id) => !room.seats.some((seat) => seat.id === id))
+    )
+      fail(400, "Choose who stays from the players at this table.");
+    const staying = room.seats.filter((seat) => keep.includes(seat.id));
     const saved = endRoom(room, meeting, player.display);
+    room.seats = staying;
     writeRoom(room);
     return reply(saved);
   }

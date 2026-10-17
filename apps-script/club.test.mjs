@@ -700,6 +700,55 @@ test("a game pays the winner three times each, and End saves one table and relea
   assert.equal(t.room("p001", "join", { table: 2, seat: 0 }).status, 200);
 });
 
+test("a swap saves the round and keeps the players who stay in their seats", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  const session = t.table().session;
+  // Only ids seated at this table can stay.
+  assert.equal(t.end("p004", { keep: ["p001", "p009"] }).status, 400);
+  assert.equal(t.end("p004", { keep: "p001" }).status, 400);
+  const ended = t.end("p004", { keep: ["p001", "p002", "p003"] });
+  assert.equal(ended.status, 200);
+  assert.equal(ended.saved, 1);
+  const room = t.table();
+  assert.equal(room.session, session + 1);
+  assert.deepEqual(
+    room.seats.map((seat) => [seat.id, seat.wind]),
+    [
+      ["p001", 0],
+      ["p002", 1],
+      ["p003", 2],
+    ],
+  );
+  assert.deepEqual(room.hands, []);
+  // The saved round is the whole group, and the next round starts at 205.
+  assert.equal(room.ended.totals.length, 4);
+  assert.equal(room.ended.totals[3].display, "Player p004");
+  assert.deepEqual(
+    h.get({ r: "results" }).tables[0].seats.map((seat) => seat.total),
+    [265, 185, 185, 185],
+  );
+  assert.deepEqual(
+    room.totals.map((seat) => seat.total),
+    [205, 205, 205],
+  );
+  // A retried swap changes nothing.
+  assert.equal(t.end("p004", { session, keep: ["p001"] }).saved, 1);
+  assert.equal(t.table().seats.length, 3);
+  assert.equal(savedTables(h).length, 1);
+  // The empty seat is open to someone new, and the game waits for them.
+  const early = t.room("p001", "hand", {
+    winner: "p001",
+    each: 10,
+    handId: crypto.randomUUID(),
+    lastHandId: null,
+  });
+  assert.equal(early.status, 409);
+  assert.match(early.message, /four players/);
+  assert.equal(t.room("p004", "join", { table: 1, seat: 3 }).status, 200);
+});
+
 test("table requests never read the sheets", () => {
   const h = harness();
   h.get({ r: "meeting" });
