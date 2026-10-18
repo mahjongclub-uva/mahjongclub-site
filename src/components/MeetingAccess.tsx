@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useReducer, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useReducer,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import {
   IconArmchair,
   IconChevronRight,
@@ -340,12 +346,21 @@ export default function MeetingAccess({
       )}
       {!meeting && !error && (
         <div className="meeting-loading" role="status">
+          <span className="sr-only">Loading tonight’s meeting</span>
           <span aria-hidden="true">
-            <i />
-            <i />
-            <i />
+            {[..."LOADING"].map((letter, i) => (
+              <span
+                className="loading-drop"
+                key={i}
+                style={{ "--i": i } as CSSProperties}
+              >
+                <span className="loading-turn">
+                  <span className="loading-face">{letter}</span>
+                  <span className="loading-back" />
+                </span>
+              </span>
+            ))}
           </span>
-          Checking tonight’s meeting…
         </div>
       )}
       {meeting && !meeting.open && (
