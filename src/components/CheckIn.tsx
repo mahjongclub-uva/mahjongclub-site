@@ -137,14 +137,11 @@ function CheckInForm({
         return;
       }
       if (reply.status >= 400) {
-        await refuse(
-          reply.message || "Ask an officer to check your attendance.",
-        );
+        await refuse(reply.message || "Ask an officer to check you in.");
         if (reply.status === 423) refresh();
         return;
       }
-      if (!reply.player)
-        throw new Error("Could not confirm check-in. Please retry.");
+      if (!reply.player) throw new Error("Didn’t go through. Try again.");
       // The pung, and one short buzz where phones allow it.
       setOutcome("won");
       navigator.vibrate?.(10);
@@ -223,11 +220,8 @@ function CheckInForm({
   if (!meeting.checkinsOpen)
     return (
       <div className="meeting-closed">
-        <h1>Check-in’s closed for tonight</h1>
-        <p>
-          Players already in can still record their tables. Missed it? Ask an
-          officer.
-        </p>
+        <h1>Check-in closed</h1>
+        <p>Missed it? Ask an officer.</p>
         <Link className="meeting-secondary" href={MEETING_PATHS.score}>
           Record a table
         </Link>
@@ -245,7 +239,7 @@ function CheckInForm({
     >
       {register ? (
         <h1>
-          Hi! What’s your <span className="meeting-accent">name?</span>
+          <span className="meeting-accent">Welcome!</span>
         </h1>
       ) : (
         <h1>
@@ -274,7 +268,7 @@ function CheckInForm({
                   );
                 }}
               >
-                Change ID
+                Edit<span className="sr-only"> computing ID</span>
               </button>
             </div>
             <label htmlFor="full-name">Full name</label>
@@ -311,12 +305,8 @@ function CheckInForm({
                   : "computing-id-hint"
               }
             />
-            <p className="field-hint" id="computing-id-hint">
-              No ID? Ask an officer.
-              <span className="sr-only">
-                {" "}
-                Your computing ID is the part before @virginia.edu.
-              </span>
+            <p className="sr-only" id="computing-id-hint">
+              Your computing ID is the part before @virginia.edu.
             </p>
             {idError && (
               <p className="meeting-error" id="computing-id-error">
@@ -337,7 +327,6 @@ function CheckInForm({
                 ? `Are you ${suggestions[0].display}?`
                 : "Is one of these you?"}
             </h2>
-            <p className="quiet">Keep your past scores.</p>
             <div className="meeting-actions">
               {suggestions.map((suggestion) => (
                 <button
@@ -371,7 +360,7 @@ function CheckInForm({
             className="meeting-primary"
             data-waiting={isWaiting("form") || undefined}
           >
-            {waiting("form", register ? "Join & check in" : "Let’s play")}
+            {waiting("form", register ? "Join the club" : "Let’s play")}
           </button>
         )}
       </fieldset>

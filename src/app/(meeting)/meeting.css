@@ -177,11 +177,6 @@ main.meeting-page {
   font: inherit;
   color: var(--ink);
 }
-.meeting-page .field-hint {
-  margin-block: -4px 8px;
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-}
 .meeting-form input::placeholder {
   color: #686156;
   opacity: 1;
@@ -2023,10 +2018,6 @@ main.meeting-page .round-saved {
 .id-stickers:has([aria-invalid="true"]) > span > span {
   outline: 2px solid var(--tile-letter);
   outline-offset: 2px;
-}
-.id-stickers + .field-hint {
-  margin-block: 12px 0;
-  font-size: 0.85rem;
 }
 .meeting-form .id-stickers input {
   position: absolute;
