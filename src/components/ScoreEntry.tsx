@@ -2,17 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  IconCards,
-  IconCheck,
-  IconMinus,
-  IconPlus,
-  IconPlusMinus,
-} from "@tabler/icons-react";
+import { IconArrowRight, IconCheck, IconPlusMinus } from "@tabler/icons-react";
 import { z } from "zod";
 import MeetingAccess from "@/components/MeetingAccess";
+import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
 import {
-  CARD_VALUES,
   PENDING_STORAGE,
   DRAFT_STORAGE,
   postMeeting,
@@ -37,157 +31,18 @@ const receiptSchema = draftSchema.extend({
 const TABLE_TOTAL = 820;
 const STEPS = ["Players", "Final totals", "Review"] as const;
 
-const cardLabel = (card: number) =>
-  card === 50 ? "J / Q / K" : card === 1 ? "A" : String(card);
-
 /** What is still wrong with the table, in words, before the server checks it. */
 function balance(totals: number[]) {
   const missing = totals.filter((total) => !Number.isFinite(total)).length;
   if (missing)
     return {
       state: "missing",
-      text: `${missing} ${missing === 1 ? "player still needs" : "players still need"} a final total`,
+      text: `${missing} to go`,
     };
   const gap = TABLE_TOTAL - totals.reduce((sum, total) => sum + total, 0);
   if (gap > 0) return { state: "short", text: `${gap} points missing` };
   if (gap < 0) return { state: "over", text: `${-gap} points extra` };
-  return { state: "ok", text: "Balanced, ready to review" };
-}
-
-function CardCalculator({
-  name,
-  counts: initial,
-  replacing,
-  apply,
-  close,
-}: {
-  name: string;
-  counts: Record<number, number>;
-  replacing: string;
-  apply: (total: number, counts: Record<number, number>) => void;
-  close: () => void;
-}) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [counts, setCounts] = useState(initial);
-  const count = (card: number) => counts[card] || 0;
-  const total = CARD_VALUES.reduce((sum, card) => sum + card * count(card), 0);
-  const cards = CARD_VALUES.reduce((sum, card) => sum + count(card), 0);
-  const set = (card: number, next: number) =>
-    setCounts({ ...counts, [card]: Math.max(0, Math.min(99, next)) });
-  useEffect(() => {
-    const element = dialog.current!;
-    element.showModal();
-    return () => element.close();
-  }, []);
-  return (
-    <dialog
-      ref={dialog}
-      className="meeting-calculator"
-      aria-labelledby="calculator-name"
-      onCancel={close}
-      onClick={(event) => {
-        if (event.target !== event.currentTarget) return;
-        const r = event.currentTarget.getBoundingClientRect();
-        if (
-          event.clientX < r.left ||
-          event.clientX > r.right ||
-          event.clientY < r.top ||
-          event.clientY > r.bottom
-        )
-          close();
-      }}
-    >
-      <div className="calculator-head">
-        <div>
-          <p className="eyebrow">Count the cards</p>
-          <h2 id="calculator-name">{name}</h2>
-        </div>
-        <button
-          className="meeting-text"
-          type="button"
-          onClick={close}
-          aria-label="Close calculator"
-        >
-          ×
-        </button>
-      </div>
-      <p className="quiet">
-        Set how many of each card {name.split(" ")[0]} is holding.
-      </p>
-      <ul className="card-counter" aria-label="Cards held">
-        {CARD_VALUES.map((card) => (
-          <li key={card} data-counted={count(card) > 0}>
-            <span className="card-face" aria-hidden="true">
-              {cardLabel(card)}
-            </span>
-            <span className="card-worth">
-              {card === 1 ? "1 pt" : `${card} pts`}
-            </span>
-            <span className="card-stepper">
-              <button
-                type="button"
-                aria-label={`One fewer ${cardLabel(card)}`}
-                disabled={!count(card)}
-                onClick={() => set(card, count(card) - 1)}
-              >
-                <IconMinus size={18} aria-hidden="true" />
-              </button>
-              <input
-                aria-label={`How many ${cardLabel(card)} cards`}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={count(card) || ""}
-                placeholder="0"
-                onChange={(event) =>
-                  set(card, Number(event.target.value.replace(/\D/g, "")) || 0)
-                }
-              />
-              <button
-                type="button"
-                aria-label={`One more ${cardLabel(card)}`}
-                onClick={() => set(card, count(card) + 1)}
-              >
-                <IconPlus size={18} aria-hidden="true" />
-              </button>
-            </span>
-            <output className="card-subtotal" key={count(card)}>
-              {count(card) ? card * count(card) : ""}
-            </output>
-          </li>
-        ))}
-      </ul>
-      <div className="calculator-footer">
-        <p className="calculator-sum" role="status">
-          <span>
-            {cards} {cards === 1 ? "card" : "cards"}
-          </span>
-          <strong key={total}>{total}</strong>
-          <span>points</span>
-        </p>
-        {replacing && cards > 0 && (
-          <p className="quiet">This replaces the total of {replacing}.</p>
-        )}
-        <div className="meeting-quiet-actions">
-          <button
-            className="meeting-text"
-            type="button"
-            disabled={!cards}
-            onClick={() => setCounts({})}
-          >
-            Clear cards
-          </button>
-        </div>
-        <button
-          type="button"
-          className="meeting-primary"
-          disabled={!cards}
-          onClick={() => apply(total, counts)}
-        >
-          {cards ? `Use ${total} for ${name.split(" ")[0]}` : "Add some cards"}
-        </button>
-      </div>
-    </dialog>
-  );
+  return { state: "ok", text: "Adds up to 820" };
 }
 
 function Steps({ current }: { current: number }) {
@@ -222,12 +77,7 @@ function ScoreForm({
 }) {
   const [ids, setIds] = useState(["", "", "", ""]);
   const [totals, setTotals] = useState(["", "", "", ""]);
-  // Keyed by player, so swapping who sits in a seat never inherits their cards.
-  const [cardCounts, setCardCounts] = useState<
-    Record<string, Record<number, number>>
-  >({});
   const [phase, setPhase] = useState<"pick" | "score" | "review">("pick");
-  const [active, setActive] = useState<number | null>(null);
   const [pending, setPending] = useState<Submission | null>(null);
   const [ready, setReady] = useState(false);
   const [restoreFailed, setRestoreFailed] = useState(false);
@@ -239,11 +89,6 @@ function ScoreForm({
     savedAt: string;
   } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
-  const calculatorTrigger = useRef<HTMLButtonElement | null>(null);
-  function closeCalculator() {
-    setActive(null);
-    requestAnimationFrame(() => calculatorTrigger.current?.focus());
-  }
   const players = meeting.players || [];
   const seatedAt = (id: string) => seatedRoom(meeting.rooms, id)?.table;
   const seats = ids.map((id, i) => ({
@@ -260,11 +105,6 @@ function ScoreForm({
   const stage = pending ? "review" : phase;
   const name = (id: string) =>
     players.find((p) => p.id === id)?.display || `Player ${id}`;
-  const avatar = (display: string) => (
-    <span className="meeting-avatar" aria-hidden="true">
-      {display[0]}
-    </span>
-  );
   function changePhase(next: typeof phase) {
     setPhase(next);
     heading.current?.focus({ preventScroll: true });
@@ -283,9 +123,7 @@ function ScoreForm({
           setIds(parsed.seats.map((s) => s.id));
           setTotals(parsed.seats.map((s) => String(s.total)));
           setPhase("review");
-          setError(
-            "There is an unconfirmed save. Retry it before recording another table.",
-          );
+          setError("A save wasn’t confirmed. Try it again first.");
         } else {
           const kept = receiptSchema.safeParse(
             JSON.parse(sessionStorage.getItem(RECEIPT_STORAGE) || "null"),
@@ -307,7 +145,7 @@ function ScoreForm({
       } catch {
         setRestoreFailed(true);
         setError(
-          "Could not restore the previous save. Ask an officer to check before submitting another table.",
+          "Couldn’t restore the last save. Ask an officer before saving another table.",
         );
       }
       setReady(true);
@@ -342,7 +180,7 @@ function ScoreForm({
       sessionStorage.setItem(PENDING_STORAGE, JSON.stringify(submission));
     } catch {
       setError(
-        "Your browser could not keep a safe retry receipt. Enable browser storage or ask an officer to record this table.",
+        "This browser can’t keep a retry copy. Turn on storage or ask an officer.",
       );
       return;
     }
@@ -353,8 +191,7 @@ function ScoreForm({
       const reply = await postMeeting(MEETING_SERVICE_URL, submission);
       if (reply.status >= 400) {
         setError(
-          reply.message ||
-            "Could not confirm the save. Retry this table or ask an officer.",
+          reply.message || "Save not confirmed. Try again or ask an officer.",
         );
         if (reply.status === 400) {
           sessionStorage.removeItem(PENDING_STORAGE);
@@ -364,7 +201,7 @@ function ScoreForm({
         return;
       }
       if (![200, 201].includes(reply.status) || !reply.table)
-        throw new Error("Could not confirm the save. Retry this table.");
+        throw new Error("Save not confirmed. Try again.");
       sessionStorage.removeItem(PENDING_STORAGE);
       setPending(null);
       // The time this browser received the confirmation, not a server clock.
@@ -389,10 +226,7 @@ function ScoreForm({
       sessionStorage.removeItem(DRAFT_STORAGE);
       refresh();
     } catch (failure) {
-      setError(
-        requestError(failure) +
-          " Retry this same table; its submission ID is kept.",
-      );
+      setError(requestError(failure) + " Try again; it won’t save twice.");
     } finally {
       setBusy(false);
     }
@@ -403,7 +237,6 @@ function ScoreForm({
     setReceipt(null);
     setIds(["", "", "", ""]);
     setTotals(["", "", "", ""]);
-    setCardCounts({});
     setError("");
     setPhase("pick");
     refresh();
@@ -417,7 +250,7 @@ function ScoreForm({
             key={id}
             style={{ "--i": i } as React.CSSProperties}
           >
-            {avatar(name(id))}
+            <PlayerTile id={id} />
             <span className="score-name">
               {name(id)}
               <span
@@ -425,7 +258,7 @@ function ScoreForm({
                 data-sign={Math.sign(seats[i].total - START)}
               >
                 {Number.isFinite(seats[i].total)
-                  ? `${signed(seats[i].total - START)} this table`
+                  ? signed(seats[i].total - START)
                   : ""}
               </span>
             </span>
@@ -443,14 +276,12 @@ function ScoreForm({
         <span className="meeting-check" aria-hidden="true">
           <IconCheck size={34} stroke={3} />
         </span>
-        <p className="eyebrow">
-          Scoresheet Table {receipt.table} · saved at {receipt.savedAt}
-        </p>
         <h1 tabIndex={-1} ref={heading}>
-          Table recorded.
+          Table {receipt.table} saved
         </h1>
         <p className="meeting-intro" role="status">
-          All four final totals are in the club’s scoresheet.
+          <span className="sr-only">Saved to the club’s scoresheet at </span>
+          {receipt.savedAt}
         </p>
         {resultRows}
         <div className="meeting-actions">
@@ -479,18 +310,18 @@ function ScoreForm({
       )}
       <h1 tabIndex={-1} ref={heading}>
         {stage === "pick"
-          ? "Who played at this table?"
+          ? "Who played?"
           : stage === "score"
-            ? "Final card totals."
-            : "One last look."}
+            ? "Final totals"
+            : "All correct?"}
       </h1>
-      <p className="meeting-intro">
-        {stage === "pick"
-          ? "Tap the four people who played. Only players checked in tonight are listed."
-          : stage === "score"
-            ? "After your last game, type each player’s final total, or count their cards. All four add up to 820."
-            : "Check these numbers with your table before you save."}
-      </p>
+      {stage !== "review" && (
+        <p className="meeting-intro">
+          {stage === "pick"
+            ? "Tap all four."
+            : "Type each total. All four make 820."}
+        </p>
+      )}
       {stage === "pick" ? (
         <>
           <ol className="meeting-seats" aria-label="Seats at this table">
@@ -516,15 +347,13 @@ function ScoreForm({
                       );
                     }}
                   >
-                    {avatar(name(id))}
+                    <PlayerTile id={id} />
                     <span>{name(id)}</span>
                     <small aria-hidden="true">Remove ×</small>
                   </button>
                 ) : (
                   <>
-                    <span className="meeting-avatar empty" aria-hidden="true">
-                      {i + 1}
-                    </span>
+                    <EmptyTile glyph={String(i + 1)} />
                     <span>Open seat</span>
                   </>
                 )}
@@ -544,17 +373,14 @@ function ScoreForm({
             </button>
           </div>
           {meeting.rooms && meeting.rooms.length > 0 && (
-            <p className="meeting-notice">
-              Playing at a table on{" "}
-              <Link href={MEETING_PATHS.tables}>Tables</Link>? Its hands are
-              already saved there. Use this form only for tables played without
-              one.
-            </p>
+            // Tables played in the app are saved there; typing them in here
+            // would count them twice.
+            <p className="meeting-notice">Only for tables not in the app.</p>
           )}
           {players.length < 4 && (
             <p className="meeting-notice">
-              Four players need to check in first.{" "}
-              <Link href={MEETING_PATHS.checkin}>Check in a player</Link>.
+              Needs four players checked in.{" "}
+              <Link href={MEETING_PATHS.checkin}>Check in</Link>
             </p>
           )}
           <div className="player-chips" role="group" aria-label="Table players">
@@ -578,7 +404,7 @@ function ScoreForm({
                   setTotals(totals.map((n, i) => (i === slot ? "" : n)));
                 }}
               >
-                {avatar(player.display)}
+                <PlayerTile id={player.id} />
                 <span>
                   {player.display}
                   {seatedAt(player.id) && (
@@ -600,9 +426,13 @@ function ScoreForm({
               disabled={locked || !ids.every(Boolean)}
               onClick={() => changePhase("score")}
             >
-              {ids.every(Boolean)
-                ? "Enter final totals →"
-                : `Pick ${4 - ids.filter(Boolean).length} more`}
+              {ids.every(Boolean) ? (
+                <>
+                  Next <IconArrowRight aria-hidden="true" />
+                </>
+              ) : (
+                `Pick ${4 - ids.filter(Boolean).length} more`
+              )}
             </button>
           </div>
         </>
@@ -615,16 +445,14 @@ function ScoreForm({
                 const total = seats[i].total;
                 return (
                   <li className="score-row editing" key={id}>
-                    {avatar(name(id))}
+                    <PlayerTile id={id} />
                     <label className="score-name" htmlFor={`total-${i}`}>
                       {name(id)}
                       <span
                         className="score-net"
                         data-sign={Math.sign(total - START)}
                       >
-                        {Number.isFinite(total)
-                          ? `${signed(total - START)} this table`
-                          : "Final total?"}
+                        {Number.isFinite(total) ? signed(total - START) : "—"}
                       </span>
                     </label>
                     <span className="total-field">
@@ -665,18 +493,6 @@ function ScoreForm({
                             document.getElementById(`total-${i + 1}`)?.focus();
                         }}
                       />
-                      <button
-                        type="button"
-                        className="count-cards"
-                        aria-label={`Count cards for ${name(id)}`}
-                        disabled={locked}
-                        onClick={(event) => {
-                          calculatorTrigger.current = event.currentTarget;
-                          setActive(i);
-                        }}
-                      >
-                        <IconCards size={20} aria-hidden="true" />
-                      </button>
                     </span>
                   </li>
                 );
@@ -716,12 +532,7 @@ function ScoreForm({
                 role="status"
                 className="score-balance-text"
               >
-                {check.state !== "ok"
-                  ? check.text
-                  : validation ||
-                    (stage === "review"
-                      ? "Balanced, ready to save"
-                      : check.text)}
+                {check.state !== "ok" ? check.text : validation || check.text}
               </p>
             </div>
             {stage === "score" ? (
@@ -731,7 +542,7 @@ function ScoreForm({
                 disabled={locked || Boolean(validation)}
                 onClick={() => changePhase("review")}
               >
-                Review →
+                Review <IconArrowRight aria-hidden="true" />
               </button>
             ) : (
               <button
@@ -746,11 +557,7 @@ function ScoreForm({
                 }
                 onClick={() => void submit()}
               >
-                {busy
-                  ? "Saving table…"
-                  : pending
-                    ? "Retry this save"
-                    : "Save table"}
+                {busy ? "Saving…" : pending ? "Try again" : "Save table"}
               </button>
             )}
           </div>
@@ -758,16 +565,14 @@ function ScoreForm({
       )}
       {draftError && (
         <p className="quiet" role="status">
-          Your browser cannot keep this draft. Keep this page open while
-          entering scores.
+          This browser can’t keep a draft. Keep this page open.
         </p>
       )}
       {pending && (
         <p className="meeting-notice">
-          Finish the unconfirmed save first. The same table will be sent again
-          to prevent a duplicate.
+          Finish this save first. It resends the same table, so nothing doubles.
           {pending.meetingId !== meeting.meetingId &&
-            " This save belongs to a previous meeting; ask an officer to check it."}
+            " It’s from an earlier meeting; ask an officer."}
         </p>
       )}
       {error && (
@@ -778,10 +583,7 @@ function ScoreForm({
       {(pending || restoreFailed) && !busy && (
         <details className="meeting-recovery">
           <summary>An officer has checked this save</summary>
-          <p>
-            Only start over after an officer confirms whether this table was
-            recorded.
-          </p>
+          <p>Start over only once an officer confirms whether it saved.</p>
           <button
             type="button"
             onClick={() => {
@@ -794,20 +596,6 @@ function ScoreForm({
             Officer checked; start a new table
           </button>
         </details>
-      )}
-      {active !== null && (
-        <CardCalculator
-          key={ids[active]}
-          name={name(ids[active])}
-          counts={cardCounts[ids[active]] || {}}
-          replacing={totals[active]}
-          close={closeCalculator}
-          apply={(total, counts) => {
-            setTotal(active, String(total));
-            setCardCounts({ ...cardCounts, [ids[active]]: counts });
-            closeCalculator();
-          }}
-        />
       )}
     </div>
   );

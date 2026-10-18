@@ -28,13 +28,11 @@ export function tableError(seats: Seat[], players: Player[]): string | null {
   if (new Set(seats.map((seat) => seat.id)).size !== 4)
     return "Choose four different players.";
   if (seats.some((seat) => !Number.isSafeInteger(seat.total)))
-    return "Enter whole totals for all four players. Negative totals are allowed.";
+    return "Enter whole totals for all four players.";
   if (seats.reduce((sum, seat) => sum + seat.total, 0) !== 820)
     return "The four totals must add up to 820.";
   return null;
 }
-
-export const CARD_VALUES = [50, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 async function readResponse(
   url: string,

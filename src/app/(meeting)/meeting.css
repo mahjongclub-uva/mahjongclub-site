@@ -233,13 +233,6 @@ main.meeting-page {
   gap: 12px;
   margin-top: 30px;
 }
-.meeting-quiet-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 .meeting-page .meeting-notice {
   padding: 4px 0 4px 14px;
   border-inline-start: 3px solid var(--tile-letter);
@@ -275,19 +268,6 @@ main.meeting-page {
   transform: rotate(-5deg);
   color: var(--jade);
   font-size: 2rem;
-}
-.meeting-avatar {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--rule);
-  border-bottom: 3px solid #cabda5;
-  border-radius: 9px;
-  background: var(--tile-face-hi);
-  color: var(--jade);
-  font: 700 1.3rem var(--display);
-  flex-shrink: 0;
 }
 
 .meeting-seats {
@@ -525,10 +505,6 @@ main.meeting-page :focus-visible {
   .player-chips button {
     padding: 8px;
     gap: 6px;
-  }
-  .player-chips .meeting-avatar {
-    width: 28px;
-    height: 32px;
   }
   .score-row {
     padding: 12px;
@@ -802,7 +778,7 @@ main.meeting-page .live-rank {
   }
 }
 
-/* Recording a table: steps, signed totals, a live balance and a card counter. */
+/* Recording a table: steps, signed totals and a live balance. */
 .meeting-page {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -908,7 +884,7 @@ main.meeting-page .live-rank {
 }
 .total-field {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) 46px;
+  grid-template-columns: 46px minmax(0, 1fr);
   gap: 6px;
 }
 .total-field button {
@@ -985,104 +961,8 @@ main.meeting-page .live-rank {
   margin-block-start: 24px;
 }
 
-/* The card counter: one row per card value, typed or stepped. */
-.card-counter {
-  list-style: none;
-  padding: 0;
-  margin-block: 14px 0;
-}
-.card-counter li {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  grid-template-areas:
-    "face stepper subtotal"
-    "worth stepper subtotal";
-  align-items: center;
-  column-gap: 12px;
-  padding-block: 6px;
-}
-.card-counter li + li {
-  border-block-start: 1px solid var(--rule);
-}
-.card-face {
-  grid-area: face;
-  justify-self: start;
-  min-inline-size: 40px;
-  padding: 2px 6px;
-  border: 1px solid var(--rule);
-  border-block-end-width: 3px;
-  border-radius: 6px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 700 1rem var(--display);
-  text-align: center;
-  white-space: nowrap;
-}
-.card-counter li[data-counted="true"] .card-face {
-  border-color: var(--short);
-  background: color-mix(in oklch, var(--short) 10%, var(--tile-face-hi));
-  color: var(--short);
-}
-.card-worth {
-  grid-area: worth;
-  font-size: 0.68rem;
-  color: var(--ink-soft);
-}
-.card-stepper {
-  grid-area: stepper;
-  display: grid;
-  grid-template-columns: 44px 56px 44px;
-  gap: 4px;
-  justify-self: start;
-}
-.card-stepper button {
-  display: grid;
-  place-items: center;
-  min-block-size: 44px;
-  border: 1px solid var(--rule);
-  border-radius: var(--control-radius);
-  background: var(--paper);
-  color: var(--ink);
-}
-.meeting-calculator .card-stepper input {
-  min-block-size: 44px;
-  padding: 4px;
-  border-radius: 10px;
-  text-align: center;
-  font: 700 max(16px, 1.05rem) var(--body);
-  font-variant-numeric: tabular-nums;
-}
-.card-subtotal {
-  grid-area: subtotal;
-  min-inline-size: 36px;
-  text-align: end;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--short);
-}
-.calculator-sum {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-  margin-block-end: 6px;
-}
-.calculator-sum span:first-child {
-  margin-inline-end: auto;
-}
-.calculator-sum strong {
-  display: inline-block;
-  font: 700 2.2rem var(--display);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-.calculator-footer .meeting-quiet-actions {
-  margin-block: 2px 8px;
-}
 @media (hover: hover) and (pointer: fine) {
-  .total-field button:hover:not(:disabled),
-  .card-stepper button:hover:not(:disabled) {
+  .total-field button:hover:not(:disabled) {
     border-color: var(--ink-soft);
   }
 }
@@ -1114,9 +994,7 @@ main.meeting-page .live-rank {
       background-color 200ms ease;
   }
   .score-net,
-  .score-sum strong,
-  .card-subtotal,
-  .calculator-sum strong {
+  .score-sum strong {
     animation: score-pop 180ms var(--ease-out);
   }
   .score-form[data-stage] .score-rows > li,
@@ -1133,21 +1011,11 @@ main.meeting-page .live-rank {
   .score-form .score-row.editing:nth-child(4) {
     --i: 3;
   }
-  .total-field button,
-  .card-stepper button {
+  .total-field button {
     transition:
       border-color 120ms ease,
       background-color 120ms ease,
       transform 120ms var(--ease-out);
-  }
-}
-@media (max-width: 374px) {
-  .card-counter li {
-    grid-template-columns: 46px minmax(0, 1fr) auto;
-    column-gap: 8px;
-  }
-  .card-stepper {
-    grid-template-columns: 44px 48px 44px;
   }
 }
 /* While the page asks whether a meeting is open: tiles drawn like the tile
@@ -1534,9 +1402,6 @@ main.meeting-page .live-rank {
 .result-card li strong {
   text-align: end;
   font-variant-numeric: tabular-nums;
-}
-.meeting-avatar.empty {
-  color: var(--ink-soft);
 }
 .meeting-page .hand-each {
   inline-size: 100%;
@@ -3188,4 +3053,58 @@ main.meeting-page .live-season h2 span {
 
 .table-sheet {
   overscroll-behavior: contain;
+}
+
+/* Recording a table, in the table pages' look: player tiles, raised cream
+   cards for what can be tapped, a flat card for the four seats. */
+main.meeting-page .meeting-seats {
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: 22px;
+  background: color-mix(in oklch, var(--card) 45%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--ink) 8%, transparent);
+  --w: 40px;
+}
+main.meeting-page .meeting-seat {
+  min-block-size: 0;
+  border: 0;
+  font-weight: 700;
+}
+main.meeting-page .meeting-seat:not(.filled) {
+  color: var(--ink-soft);
+}
+main.meeting-page .player-chips {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 8px;
+  --w: 30px;
+}
+main.meeting-page .player-chips button {
+  border: 0;
+  border-radius: 16px;
+  padding: 8px 10px;
+  background: var(--card);
+  box-shadow: var(--clay);
+  font-weight: 700;
+}
+/* Picked: a soft jade glow and a tint, with the check carrying the state. */
+main.meeting-page .player-chips [aria-pressed="true"] {
+  background: color-mix(in oklch, var(--jade) 8%, var(--card));
+  box-shadow:
+    0 0 0 2px color-mix(in oklch, var(--jade) 30%, transparent),
+    0 6px 16px -6px color-mix(in oklch, var(--jade) 65%, transparent);
+}
+main.meeting-page .player-chips button:disabled:not([aria-pressed="true"]) {
+  background: color-mix(in oklch, var(--card) 45%, transparent);
+  box-shadow: none;
+  color: var(--ink-soft);
+}
+main.meeting-page .player-chips small {
+  color: var(--jade);
+}
+main.meeting-page .score-rows {
+  --w: 34px;
+}
+.score-foot .meeting-primary svg {
+  inline-size: 20px;
+  block-size: 20px;
 }
