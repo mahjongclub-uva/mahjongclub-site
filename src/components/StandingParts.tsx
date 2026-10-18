@@ -121,8 +121,9 @@ export function StandingRow({
           )}
         </span>
         <span className="lb-tables">
-          {player.tables_played}{" "}
-          {player.tables_played === 1 ? "table" : "tables"} played
+          {player.games_played
+            ? `${player.games_played} ${player.games_played === 1 ? "game" : "games"}`
+            : `${player.tables_played} ${player.tables_played === 1 ? "table" : "tables"} played`}
         </span>
       </span>
       <span className="standing-score">

@@ -53,6 +53,27 @@ class ScoreImportTests(unittest.TestCase):
         build_data.check_tables(tables)
         self.assertEqual([seat[1:] for seat in tables[0].seats], [(205, 0)] * 4)
 
+    def test_games_sum_per_player_over_counted_tables(self):
+        grid = self.grid("205", "0")
+        grid[1, 6] = "12"
+        self.assertEqual(build_data.parse_tables(grid)[0].games, 12)
+        for bad in ("0", "2.5", "twelve"):
+            with self.subTest(games=bad):
+                grid[1, 6] = bad
+                with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                    build_data.parse_tables(grid)
+
+        counted = build_data.Table(1, "2026-10-23", 12)
+        counted.seats = [("A", 205, 0), ("B", 205, 0), ("C", 205, 0), ("D", 205, 0)]
+        uncounted = build_data.Table(2, "2026-10-23")
+        uncounted.seats = [("A", 205, 0), ("E", 205, 0), ("F", 205, 0), ("G", 205, 0)]
+        roster = {name: {"id": f"p{i:03d}", "display": name, "opt_out": False}
+                  for i, name in enumerate("ABCDEFG", 1)}
+        standings, _ = build_data.aggregate([counted, uncounted], roster, 1, "season-net")
+        games = {p["display"]: p.get("games_played") for p in standings}
+
+        self.assertEqual((games["A"], games["B"], games["E"]), (12, 12, None))
+
 
 class PrivateLogTests(unittest.TestCase):
     def test_missing_date_warning_does_not_print_player_names(self):
