@@ -1254,6 +1254,97 @@ main.meeting-page .live-rank {
   }
 }
 
+/* Check-in's "…": three small tiles after "Checking in", the loader's tiles
+   at button size. The lip is the mint a step lighter, so the tiles' edge
+   still reads on jade. A waiting button keeps its colour; only the rest of
+   the form dims. */
+.wait-tiles {
+  display: inline-flex;
+  gap: 3px;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+  perspective: 300px;
+}
+.wait-tile {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 18px;
+  aspect-ratio: 3 / 4;
+  border-radius: 4px;
+  background: #fff;
+  color: oklch(0.55 0.2 28);
+  font: 600 11px / 1 var(--han);
+  /* A hairline and the loader's mint lip, so a white tile has an edge on
+     the cream buttons. */
+  box-shadow:
+    inset 0 0 0 1px oklch(0 0 0 / 0.12),
+    0 2px 0 oklch(0.78 0.12 160);
+}
+.meeting-primary .wait-tile:not([data-down]) {
+  box-shadow: 0 2px 0 oklch(0.86 0.1 160);
+}
+.wait-tile[data-down] {
+  background:
+    radial-gradient(90% 60% at 30% 12%, #ffffff59, transparent 60%),
+    oklch(0.78 0.12 160);
+  box-shadow:
+    inset 0 0 0 1.5px #ffffff4d,
+    0 2px 0 oklch(0.86 0.1 160);
+}
+.meeting-page button[data-waiting]:disabled {
+  opacity: 1;
+}
+.meeting-page .meeting-primary[data-waiting]:disabled {
+  background: var(--jade);
+  color: var(--paper);
+  box-shadow:
+    0 8px 18px -6px oklch(0.32 0.05 200 / 0.35),
+    inset 0 -4px 0 oklch(0 0 0 / 0.08);
+}
+@keyframes wait-flip {
+  from {
+    transform: rotateY(-90deg);
+  }
+}
+@keyframes wait-pop {
+  50% {
+    transform: scale(1.35) translateY(-3px);
+  }
+}
+@keyframes wait-shake {
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wait-tile {
+    animation: wait-flip 160ms var(--ease-out) backwards;
+  }
+  /* The pung and the refusal arrive one tile after another. */
+  .wait-tiles[data-outcome="lost"] .wait-tile {
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .wait-tiles[data-outcome="won"] .wait-tile {
+    animation:
+      wait-flip 160ms var(--ease-out) backwards,
+      wait-pop 320ms var(--pop);
+    animation-delay: calc(var(--i) * 70ms), calc(var(--i) * 70ms + 160ms);
+  }
+  /* Over by 400ms, when the error replaces it. */
+  .wait-tiles[data-outcome="lost"] {
+    animation: wait-shake 240ms ease-out 160ms;
+  }
+}
+
 .meeting-page .meeting-here h2 {
   display: flex;
   align-items: center;
