@@ -28,13 +28,11 @@ export function tableError(seats: Seat[], players: Player[]): string | null {
   if (new Set(seats.map((seat) => seat.id)).size !== 4)
     return "Choose four different players.";
   if (seats.some((seat) => !Number.isSafeInteger(seat.total)))
-    return "Enter whole totals for all four players. Negative totals are allowed.";
+    return "Enter whole totals for all four players.";
   if (seats.reduce((sum, seat) => sum + seat.total, 0) !== 820)
     return "The four totals must add up to 820.";
   return null;
 }
-
-export const CARD_VALUES = [50, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 async function readResponse(
   url: string,
@@ -51,10 +49,7 @@ async function readResponse(
       [init.signal, AbortSignal.timeout(timeout)].filter((s) => s != null),
     ),
   });
-  if (!response.ok)
-    throw new Error(
-      "Could not reach the meeting. Please retry or ask an officer.",
-    );
+  if (!response.ok) throw new Error("Can’t reach the club. Check your signal.");
   const body: unknown = await response.json();
   const reply = (await parsers).replySchema.parse(body);
   return { body, reply };
@@ -111,7 +106,7 @@ export async function getRooms(
     10000,
   );
   if (reply.status !== 200 || !reply.rooms)
-    throw new Error(reply.message || "Could not load the tables.");
+    throw new Error(reply.message || "Can’t load the tables.");
   return { rooms: reply.rooms, results: reply.results ?? null };
 }
 export async function postMeeting(url: string, data: object) {
@@ -128,7 +123,7 @@ export function requestError(error: unknown): string {
     error.name !== "TimeoutError" &&
     error.name !== "TypeError"
     ? error.message
-    : "Could not confirm the request. Please retry or ask an officer.";
+    : "Can’t reach the club. Check your signal.";
 }
 
 // Who checked in on this phone. Survives closing the tab, but only for this
@@ -331,7 +326,7 @@ export async function getResults(
     cache: "no-store",
   });
   if (reply.status !== 200)
-    throw new Error(reply.message || "Could not load tonight’s scores.");
+    throw new Error(reply.message || "Can’t load tonight’s scores.");
   return (await schemas()).resultsSchema.parse(body);
 }
 
@@ -341,8 +336,7 @@ export function cleanComputingId(raw: string) {
 }
 export function computingIdError(id: string): string | null {
   if (!id) return "Enter your computing ID.";
-  if (id.includes("@"))
-    return "Use only the part before @virginia.edu, for example abc2de.";
+  if (id.includes("@")) return "Just the part before @virginia.edu";
   if (!/^[a-z][a-z0-9]*$/i.test(id))
     return "A computing ID starts with letters, then numbers, for example abc2de.";
   return null;

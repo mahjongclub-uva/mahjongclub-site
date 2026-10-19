@@ -74,3 +74,23 @@ export const minus = (value: number) => String(value).replace("-", "−");
 /** A clock time on this phone, such as "6:42 PM". */
 export const clock = (at = Date.now()) =>
   new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+/** The names under a group of tiles: a "First L." name shows as just the
+ * first name, unless someone else in the group shares it. Handles and other
+ * shapes show as they are. */
+export function tileNames(
+  players: { id: string; display: string }[],
+): Map<string, string> {
+  const first = (display: string) => /^(\S+) \S\.$/.exec(display)?.[1] ?? null;
+  const count = new Map<string, number>();
+  for (const { display } of players) {
+    const name = first(display)?.toLowerCase();
+    if (name) count.set(name, (count.get(name) ?? 0) + 1);
+  }
+  return new Map(
+    players.map(({ id, display }) => {
+      const name = first(display);
+      return [id, name && count.get(name.toLowerCase()) === 1 ? name : display];
+    }),
+  );
+}

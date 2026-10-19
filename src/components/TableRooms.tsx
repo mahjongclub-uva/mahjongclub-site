@@ -23,7 +23,7 @@ import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers from "@/components/IdStickers";
 import Sheet from "@/components/Sheet";
-import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
+import PlayerTile, { EmptyTile, TileName } from "@/components/PlayerTile";
 import { BACKS } from "@/lib/avatar";
 import {
   cleanComputingId,
@@ -43,7 +43,7 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
-import { clock, minus, signed } from "@/lib/format";
+import { clock, minus, signed, tileNames } from "@/lib/format";
 
 const START = 205;
 // Unsaved game entry, restored only if the table has not changed since.
@@ -71,11 +71,11 @@ function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
         computingId: id,
       });
       if (reply.status === 404) {
-        setError("That ID isn’t in the club yet. Check in first to join.");
+        setError("Not checked in yet.");
         return;
       }
       if (reply.status >= 400 || !reply.player) {
-        setError(reply.message || "Ask an officer to check your attendance.");
+        setError(reply.message || "Ask an officer to check you in.");
         return;
       }
       choose(reply.player);
@@ -93,7 +93,7 @@ function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
         void submit();
       }}
     >
-      <h1>Who’s playing on this phone?</h1>
+      <h1>Who’s playing?</h1>
       <fieldset disabled={busy}>
         <legend className="sr-only">Your player</legend>
         <label htmlFor="tables-computing-id">
@@ -110,12 +110,8 @@ function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
               : "tables-computing-id-hint"
           }
         />
-        <p className="field-hint" id="tables-computing-id-hint">
-          No ID? Ask an officer.
-          <span className="sr-only">
-            {" "}
-            Your computing ID is the part before @virginia.edu.
-          </span>
+        <p className="sr-only" id="tables-computing-id-hint">
+          Your computing ID is the part before @virginia.edu.
         </p>
         {error && (
           <p
@@ -131,7 +127,7 @@ function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
         </button>
       </fieldset>
       <Link className="meeting-text" href={MEETING_PATHS.checkin}>
-        New to the club? Check in first
+        Not checked in? Check in
       </Link>
     </form>
   );
@@ -149,11 +145,16 @@ function EndedReceipt({
   room: number;
   you: string;
 }) {
+  const names = tileNames(ended.totals);
   return (
     <section className="result-card" aria-label="Your last table">
       <p className="result-head">
         <strong>Table {room} ended</strong>
-        <span>
+        <span aria-hidden="true">
+          {ended.games} {ended.games === 1 ? "game" : "games"} · {ended.by} ·{" "}
+          {clock(ended.at)}
+        </span>
+        <span className="sr-only">
           {ended.by === "Scoring closed"
             ? "Scoring closed"
             : `Ended by ${ended.by}`}{" "}
@@ -164,9 +165,15 @@ function EndedReceipt({
       <ul>
         {ended.totals.map((seat) => (
           <li key={seat.id} data-you={seat.id === you || undefined}>
+            <PlayerTile id={seat.id} />
             <span>
-              {seat.display}
-              {seat.id === you && <small> (you)</small>}
+              {seat.id === you ? (
+                <span className="you-pill">
+                  You<span className="sr-only">, {seat.display}</span>
+                </span>
+              ) : (
+                <TileName name={names.get(seat.id)!} full={seat.display} />
+              )}
             </span>
             <span className="delta" data-sign={Math.sign(seat.total - START)}>
               {signed(seat.total - START)}
@@ -246,6 +253,7 @@ function TableSquare({
 }) {
   const latest = room?.hands.at(-1);
   const games = room?.hands.length ?? 0;
+  const names = tileNames(room?.seats ?? []);
   const totalOf = (id: string) =>
     room?.totals.find((item) => item.id === id)?.total ?? START;
   // The crown goes to whoever is ahead; nobody wears it while all are level.
@@ -311,13 +319,15 @@ function TableSquare({
             </span>
             {cheering && <Cheer you={own} />}
             <span className="seat-name" data-me={own || undefined}>
-              {seat
-                ? seat.display
-                : sitting
-                  ? "Sitting…"
-                  : canSit && !pick
-                    ? "Sit here"
-                    : "Open"}
+              {seat ? (
+                <TileName name={names.get(seat.id)!} full={seat.display} />
+              ) : sitting ? (
+                "Sitting…"
+              ) : canSit && !pick ? (
+                "Sit here"
+              ) : (
+                "Open"
+              )}
               {/* The tag is the visible mark; the word is for screen readers. */}
               {own && <span className="sr-only"> (you)</span>}
             </span>
@@ -630,13 +640,13 @@ function SeatedTable({
           </span>
         </p>
       ) : (
-        <p className="table-latest">
-          <span>
-            {ready
-              ? "Table’s full. Record each game as it ends."
-              : `${4 - room.seats.length} more ${4 - room.seats.length === 1 ? "player" : "players"} to go. Tap your tile to leave.`}
-          </span>
-        </p>
+        !ready && (
+          <p className="table-latest">
+            <span className="waiting-pill">
+              Waiting for {4 - room.seats.length}
+            </span>
+          </p>
+        )
       )}
       {!games &&
         (room.ended?.games ?? 0) > 0 &&
@@ -647,8 +657,7 @@ function SeatedTable({
         )}
       {stale && (
         <p className="quiet" role="status">
-          Another phone saved a game while you were away, so your unsaved entry
-          was cleared.
+          Another phone saved this game. Yours was cleared.
         </p>
       )}
       <div className="table-actions">
@@ -661,7 +670,7 @@ function SeatedTable({
             setLayer("game");
           }}
         >
-          {entering ? "Finish recording" : "Record results"}
+          {entering ? `Finish game ${games + 1}` : `Record game ${games + 1}`}
         </button>
         <div className="table-links">
           {games > 0 && (
@@ -695,10 +704,7 @@ function SeatedTable({
       </div>
 
       {layer === "game" && (
-        <Sheet
-          title={step === "review" ? "Confirm" : `Game ${games + 1}`}
-          close={() => setLayer(null)}
-        >
+        <Sheet title={`Game ${games + 1}`} close={() => setLayer(null)}>
           {step === "winner" ? (
             <>
               <p className="pick-prompt">Who won? Tap their tile.</p>
@@ -734,14 +740,15 @@ function SeatedTable({
               <div className="pick-winner">
                 <PlayerTile id={draft.winner} />
                 <strong>
-                  {draft.winner === player.id ? "You" : name(draft.winner)} won
+                  <small>Winner</small>
+                  {draft.winner === player.id ? "You" : name(draft.winner)}
                 </strong>
                 <button
                   type="button"
                   className="meeting-chip"
                   onClick={() => setStep("winner")}
                 >
-                  Change
+                  Change<span className="sr-only"> winner</span>
                 </button>
               </div>
               <label htmlFor="hand-each">Each other player pays</label>
@@ -776,7 +783,7 @@ function SeatedTable({
                     setStep("review");
                   }}
                 >
-                  {amount ? "Review game" : "Enter what each pays"}
+                  Review game
                 </button>
                 <button
                   type="button"
@@ -818,7 +825,7 @@ function SeatedTable({
                     ? "Saving game…"
                     : offline
                       ? "Waiting for connection"
-                      : "Save results"}
+                      : `Save game ${games + 1}`}
                 </button>
                 <button
                   type="button"
@@ -839,11 +846,13 @@ function SeatedTable({
           <ol className="game-rows" reversed>
             {[...room.hands].reverse().map((hand, i) => (
               <li key={hand.id}>
-                <span className="game-number">Game {games - i}</span>
                 <PlayerTile id={hand.winner} />
                 <span className="game-winner">
-                  {hand.winner === player.id ? "You" : name(hand.winner)}
-                  <small>won {hand.each} from each</small>
+                  <span>
+                    Game {games - i} ·{" "}
+                    {hand.winner === player.id ? "You" : name(hand.winner)}
+                  </span>
+                  <small>{hand.each} each</small>
                 </span>
                 <strong className="delta" data-sign="1">
                   +{3 * hand.each}
@@ -875,7 +884,7 @@ function SeatedTable({
         <Sheet title={`End Table ${room.table}?`} close={() => setLayer(null)}>
           {entering && (
             <div className="end-unsaved" role="status">
-              <p>A game on this phone isn’t saved yet.</p>
+              <p>Game {games + 1} isn’t saved.</p>
               <div>
                 <button
                   type="button"
@@ -904,20 +913,18 @@ function SeatedTable({
                   id={topOfTable.id}
                   title={
                     topOfTable.id === player.id
-                      ? "You top the table!"
-                      : `${name(topOfTable.id)} tops the table!`
+                      ? "You’re on top"
+                      : `${name(topOfTable.id)} on top`
                   }
                   gain={topOfTable.total - START}
                 >
-                  {` after ${games} ${games === 1 ? "game" : "games"}`}
+                  {` · ${games} ${games === 1 ? "game" : "games"}`}
                 </WinCard>
               )}
               <ChangeRows room={room} ranked />
             </>
           ) : (
-            <p className="quiet end-note">
-              Nothing to save. Everyone leaves the table.
-            </p>
+            <p className="quiet end-note">No games yet. Everyone leaves.</p>
           )}
           {errorLine}
           <div className="calculator-footer">
@@ -955,19 +962,19 @@ function SeatedTable({
           title={
             leaving.id === player.id
               ? `Leave Table ${room.table}?`
-              : `Remove ${leaving.display}?`
+              : `Remove ${tileNames(room.seats).get(leaving.id)}?`
           }
           close={() => setLayer(null)}
         >
           {entering && (
             <p className="meeting-error" role="alert">
-              Save or clear the game on this phone first.
+              Save or clear game {games + 1} first.
             </p>
           )}
           <p className="quiet end-note">
             {games
-              ? "This round is saved. Everyone else stays seated, and the seat opens for someone new."
-              : "No games yet. The seat opens for someone new."}
+              ? "Games stay saved. The seat opens up."
+              : "The seat opens up."}
           </p>
           {games > 0 && <ChangeRows room={room} ranked />}
           {errorLine}
@@ -994,7 +1001,7 @@ function SeatedTable({
                 ? "Saving…"
                 : leaving.id === player.id
                   ? "Leave table"
-                  : `Remove ${leaving.display}`}
+                  : `Remove ${tileNames(room.seats).get(leaving.id)}`}
             </button>
             <button
               type="button"
@@ -1023,6 +1030,8 @@ function Lobby({
   you: string;
 }) {
   const open = rooms.filter((room) => room.seats.length);
+  // One map for the whole lobby, so a Chris at each of two tables both get an initial.
+  const names = tileNames(open.flatMap((room) => room.seats));
   const taken = new Set(open.map((room) => room.table));
   const next = Array.from({ length: MAX_TABLES }, (_, i) => i + 1).find(
     (table) => !taken.has(table),
@@ -1032,12 +1041,11 @@ function Lobby({
       <h1>Tables tonight</h1>
       {mine ? (
         <div className="room-return">
-          <p>You’re seated at Table {mine.table}.</p>
           <Link
             className="meeting-primary"
             href={MEETING_PATHS.table(mine.table)}
           >
-            Return to Table {mine.table}
+            Back to Table {mine.table}
           </Link>
         </div>
       ) : (
@@ -1060,8 +1068,8 @@ function Lobby({
                   <strong>Table {room.table}</strong>
                   <span className="room-status" data-open={!full}>
                     {full
-                      ? `Playing · ${room.hands.length} ${room.hands.length === 1 ? "game" : "games"}`
-                      : `${4 - room.seats.length} ${room.seats.length === 3 ? "seat" : "seats"} open`}
+                      ? `Game ${room.hands.length + 1}`
+                      : `${4 - room.seats.length} open`}
                   </span>
                 </div>
                 <ul className="room-seats">
@@ -1078,7 +1086,12 @@ function Lobby({
                         </span>
                         <span>
                           <span className="sr-only">{wind}: </span>
-                          {seat?.display || (
+                          {seat ? (
+                            <TileName
+                              name={names.get(seat.id)!}
+                              full={seat.display}
+                            />
+                          ) : (
                             <span className="sr-only">open</span>
                           )}
                         </span>
@@ -1114,9 +1127,7 @@ function Lobby({
           })}
         </ul>
       ) : (
-        <p className="meeting-notice">
-          No tables yet. Open the first one and the others can join you.
-        </p>
+        <p className="meeting-notice">No tables yet.</p>
       )}
       {next && !mine && (
         <Link className="meeting-primary" href={MEETING_PATHS.table(next)}>
@@ -1124,7 +1135,7 @@ function Lobby({
         </Link>
       )}
       <Link className="meeting-text lobby-fallback" href={MEETING_PATHS.score}>
-        Played without a table? Enter final totals
+        No app table? Enter totals
       </Link>
     </>
   );
@@ -1261,24 +1272,23 @@ function Tables({
           const what = `${seat?.display ?? "Someone"} won · ${newest.each} each`;
           if (newest.winner === sent.winner && newest.each === sent.each) {
             // The same game from another phone: treat it as done.
-            setNotice(`Another phone already saved this game: ${what}.`);
+            setNotice(`Already saved on another phone: ${what}.`);
             return true;
           }
           setError(
-            `Another phone just saved a game (${what}). Save yours only if it was a different game.`,
+            `Another phone just saved a game: ${what}. Save yours only if it’s a different game.`,
           );
           return false;
         }
         setError(
           action === "undo"
-            ? "Another phone just changed this table. Check the games below before undoing."
-            : reply.message ||
-                "Your table just changed. Check the latest scores.",
+            ? "Table changed. Check the games first."
+            : reply.message || "Table changed. Check the scores.",
         );
         return false;
       }
       if (reply.status >= 400) {
-        setError(reply.message || "Could not update the table. Retry.");
+        setError(reply.message || "Didn’t go through. Try again.");
         if (reply.status === 409) reload();
         if (reply.status === 423) refresh();
         return false;
@@ -1307,12 +1317,12 @@ function Tables({
       setError(
         requestError(failure) +
           (outcome === "missing"
-            ? " Nothing was saved; try again."
+            ? " Nothing saved. Try again."
             : outcome === "unsure"
               ? action === "undo"
-                ? " The game history changed. Check the latest games before undoing again."
-                : " This table was ended meanwhile. Check Tonight’s standings before saving again."
-              : " Check the connection before trying again."),
+                ? " Table changed. Check the games first."
+                : " This table ended. Check standings first."
+              : ""),
       );
       return false;
     } finally {
@@ -1347,11 +1357,14 @@ function Tables({
       {roomsFailed && (
         <p className="room-stale" role="status">
           <span>
-            Reconnecting… Last updated {clock(roomsAt)}. Saving waits until the
-            connection is back.
+            Reconnecting… · {clock(roomsAt)}
+            <span className="sr-only">
+              {" "}
+              is the last update. Saving waits for the signal.
+            </span>
           </span>
           <button type="button" className="meeting-text" onClick={reload}>
-            Retry
+            Try again
           </button>
         </p>
       )}
@@ -1365,7 +1378,19 @@ function Tables({
         <Lobby rooms={rooms} mine={mine} ended={ended} you={player.id} />
       ) : (
         <div className="room-view">
-          {!mine && ended?.ended && (
+          {mine && !here && (
+            <Link
+              className="meeting-chip back-to-table"
+              href={MEETING_PATHS.table(mine.table)}
+            >
+              <IconArrowLeft aria-hidden="true" />
+              Back to Table {mine.table}
+            </Link>
+          )}
+          <h1 className="meeting-title" tabIndex={-1}>
+            Table {table}
+          </h1>
+          {!mine && ended?.ended && ended.table === table && (
             <>
               <EndedReceipt
                 ended={ended.ended}
@@ -1380,24 +1405,12 @@ function Tables({
               </Link>
             </>
           )}
-          {mine && !here && (
-            <Link
-              className="meeting-chip back-to-table"
-              href={MEETING_PATHS.table(mine.table)}
-            >
-              <IconArrowLeft aria-hidden="true" />
-              Back to Table {mine.table}
-            </Link>
-          )}
-          <h1 className="meeting-title" tabIndex={-1}>
-            Table {table}
-          </h1>
           {!here && (
             <p className="meeting-intro">
               {(room?.seats.length ?? 0) >= 4
                 ? "This table is full."
                 : mine
-                  ? "You can sit here after your own table ends."
+                  ? `Finish Table ${mine.table} first.`
                   : "Tap the wind tile where you’re sitting."}
             </p>
           )}

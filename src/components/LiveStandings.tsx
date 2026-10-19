@@ -30,7 +30,7 @@ import {
 import type { Meeting as ScheduledMeeting, Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
-import { clock, minus, signed } from "@/lib/format";
+import { clock, minus, signed, tileNames } from "@/lib/format";
 
 // Tonight's tables, asked for alongside the meeting check rather than after
 // it, during the meeting's window only. Taken once by the first update;
@@ -133,6 +133,7 @@ function LiveTable({
     : [];
   // The top places tonight stand on a podium, step heights by rank.
   const top = tonight.length > 1 ? podium(tonight) : [];
+  const podiumNames = tileNames(tonight);
   return (
     <section>
       {me && meeting.rooms && (
@@ -141,7 +142,7 @@ function LiveTable({
           href={myTable ? MEETING_PATHS.table(myTable) : MEETING_PATHS.tables}
         >
           <IconArrowLeft aria-hidden="true" />
-          {myTable ? `Back to Table ${myTable}` : "Tables tonight"}
+          {myTable ? `Back to Table ${myTable}` : "All tables"}
         </Link>
       )}
       {/* Live until an officer publishes tonight, then official. */}
@@ -152,7 +153,7 @@ function LiveTable({
       >
         {!matching || alreadyCounted ? "Official" : "Live"}
       </p>
-      <h1 className="meeting-title live-title">Tonight’s standings</h1>
+      <h1 className="meeting-title live-title">Standings</h1>
       <p
         // The badge says live or official; only loading and delays still
         // need words.
@@ -161,25 +162,24 @@ function LiveTable({
       >
         {!results && matching
           ? error
-            ? "Season scores only"
-            : "Loading tonight’s scores…"
+            ? "Scores unavailable"
+            : "Loading…"
           : matching && !alreadyCounted
             ? error
-              ? "Last received scores · Update delayed"
+              ? "Delayed"
               : "Awaiting review"
             : "Official standings"}
         {results && (
           <span>
-            · {results.tables.length}{" "}
-            {results.tables.length === 1 ? "table" : "tables"} tonight
+            · <span className="sr-only">Updated </span>
+            {updatedAt}
           </span>
         )}
-        {results && <span>· Updated {updatedAt}</span>}
       </p>
       {error && (
         <div className="meeting-notice" role="alert">
           <p>
-            {error} {results && "Showing the last scores received."}
+            {error} {results && "Showing the last scores."}
           </p>
           <button
             className="meeting-secondary"
@@ -187,14 +187,13 @@ function LiveTable({
             onClick={retry}
             disabled={updating}
           >
-            {updating ? "Updating…" : "Retry update"}
+            {updating ? "Trying…" : "Try again"}
           </button>
         </div>
       )}
       {missingSaved && !error && (
         <p className="meeting-notice" role="alert">
-          Tables that have ended can’t be read right now, so only tables still
-          playing are shown. An officer should run Club › Recheck in the Sheet.
+          Ended tables are missing. Officers: run Club › Recheck.
         </p>
       )}
       {top.length > 0 && (
@@ -216,7 +215,7 @@ function LiveTable({
                   </span>
                 )}
               </span>
-              <span className="podium-name">{row.display}</span>
+              <span className="podium-name">{podiumNames.get(row.id)}</span>
               <strong className={pointsClass(row.net)}>
                 {signed(row.net)}
               </strong>
@@ -250,7 +249,7 @@ function LiveTable({
       {season.length > 0 && (
         <section className="live-season" aria-labelledby="season-after">
           <h2 id="season-after">
-            Semester leaderboard <span>after tonight</span>
+            Season <span>after tonight</span>
           </h2>
           <ol
             className="live-list"
@@ -307,10 +306,7 @@ function LiveTable({
         </section>
       )}
       {results && !tonight.length && (
-        <p className="meeting-notice">
-          No tables saved yet tonight. Check back after the first table is
-          saved.
-        </p>
+        <p className="meeting-notice">No scores yet tonight.</p>
       )}
       {!meeting.rooms && (
         <div className="meeting-actions">
@@ -324,7 +320,7 @@ function LiveTable({
       {/* A phone with no player has no menu, so it gets its own way back. */}
       {meeting.rooms && !me && (
         <Link className="meeting-text" href={MEETING_PATHS.tables}>
-          See tonight’s tables
+          All tables
         </Link>
       )}
     </section>

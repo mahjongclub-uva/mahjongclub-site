@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useReducer, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useReducer,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import {
   IconArmchair,
   IconChevronRight,
   IconDoorExit,
   IconMenu2,
+  IconRefresh,
   IconTrophy,
 } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
@@ -30,8 +37,8 @@ import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import PlayerTile from "@/components/PlayerTile";
-import { clock, formatShortDate, signed } from "@/lib/format";
+import PlayerTile, { TileName } from "@/components/PlayerTile";
+import { clock, formatShortDate, signed, tileNames } from "@/lib/format";
 import { tonightStandings, tonightTables } from "@/lib/live";
 import { SEASON_START, type Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
@@ -63,6 +70,7 @@ function PlayerSheet({
   const path = usePathname().replace(/\/?$/, "/");
   const router = useRouter();
   const mine = seatedRoom(meeting.rooms, player.id);
+  const seatNames = tileNames(mine?.seats ?? []);
   const tablePath = mine && MEETING_PATHS.table(mine.table);
   // The table page does the leaving, and asks first once games are saved.
   const leave = mine && MEETING_PATHS.leave(mine.table);
@@ -92,10 +100,10 @@ function PlayerSheet({
   const tonight = !hasRooms
     ? null
     : !night
-      ? "Tonight’s score…"
+      ? "…"
       : me
-        ? `tonight · ${ORDINAL(me.rank)} of ${night.length}`
-        : "No games yet tonight";
+        ? `· ${ORDINAL(me.rank)} tonight`
+        : "No games yet";
   return (
     <Sheet title="Menu" close={close} className="menu-sheet">
       <div className="menu-me">
@@ -133,7 +141,14 @@ function PlayerSheet({
                 <li key={item.id}>
                   <PlayerTile id={item.id} />
                   <span data-me={item.id === player.id || undefined}>
-                    {item.id === player.id ? "You" : item.display}
+                    {item.id === player.id ? (
+                      "You"
+                    ) : (
+                      <TileName
+                        name={seatNames.get(item.id)!}
+                        full={item.display}
+                      />
+                    )}
                   </span>
                   <NetScore
                     net={
@@ -147,7 +162,7 @@ function PlayerSheet({
           <div className="menu-card-actions">
             <Link className="meeting-primary" href={tablePath!} onClick={close}>
               <IconArmchair aria-hidden="true" />
-              Go to table
+              Back to table
             </Link>
             {leave && (
               <button
@@ -168,8 +183,7 @@ function PlayerSheet({
       )}
       {findCard && (
         <section className="menu-card" aria-label="Find a table">
-          <h3>Find a table</h3>
-          <p>You’re checked in. Sit at any open seat to start playing.</p>
+          <h3>Open seats</h3>
           {openTables.length > 0 && (
             <ul className="menu-card-open">
               {openTables.slice(0, 3).map((room) => (
@@ -195,10 +209,7 @@ function PlayerSheet({
             <li>
               <Link href={MEETING_PATHS.tonight} onClick={close}>
                 <IconTrophy aria-hidden="true" />
-                <span>
-                  Tonight’s standings
-                  <small>Live</small>
-                </span>
+                <span>Tonight’s standings</span>
                 <IconChevronRight aria-hidden="true" />
               </Link>
             </li>
@@ -294,7 +305,7 @@ export default function MeetingAccess({
         <p className="meeting-status">
           {meeting?.open && meeting.date ? (
             <>
-              <small>Mahjong Club @ UVA</small>
+              {!player && <small>Mahjong Club @ UVA</small>}
               <b>{formatShortDate(meeting.date)}</b>
             </>
           ) : (
@@ -333,37 +344,45 @@ export default function MeetingAccess({
             onClick={refresh}
             disabled={checking}
           >
-            {checking ? "Connecting…" : "Retry connection"}
+            {checking ? "Trying…" : "Try again"}
           </button>
-          <p>An officer can help with attendance and scores.</p>
+          <p>Still stuck? An officer can check you in.</p>
         </div>
       )}
       {!meeting && !error && (
         <div className="meeting-loading" role="status">
+          <span className="sr-only">Loading tonight’s meeting</span>
           <span aria-hidden="true">
-            <i />
-            <i />
-            <i />
+            {[..."LOADING"].map((letter, i) => (
+              <span
+                className="loading-drop"
+                key={i}
+                style={{ "--i": i } as CSSProperties}
+              >
+                <span className="loading-turn">
+                  <span className="loading-face">{letter}</span>
+                  <span className="loading-back" />
+                </span>
+              </span>
+            ))}
           </span>
-          Checking tonight’s meeting…
         </div>
       )}
       {meeting && !meeting.open && (
         <div className="meeting-closed">
-          <h1>See you at the table.</h1>
-          <p>
-            Check-in opens during club meetings. Already here? Ask an officer to
-            open it.
-          </p>
+          <h1>No meeting yet</h1>
+          <p>Here? Ask an officer to open it.</p>
           <button
-            className="meeting-secondary"
+            className="meeting-chip check-again"
             type="button"
             onClick={refresh}
             disabled={checking}
           >
+            <IconRefresh aria-hidden="true" data-spin={checking || undefined} />
             {checking ? "Checking…" : "Check again"}
           </button>
-          <p className="quiet" role="status">
+          {/* Spoken, not shown: the button already shows when it's checking. */}
+          <p className="sr-only" role="status">
             {checking
               ? "Checking for an open meeting…"
               : `Last checked at ${checkedAt}.`}
@@ -376,15 +395,11 @@ export default function MeetingAccess({
       {meeting?.open && meeting.players && children(meeting, refresh)}
       {meeting?.open && !meeting.players && !error && (
         <p role="alert">
-          The meeting service needs an update. Ask an officer to record
-          attendance and scores for now.
+          This page needs an update. Ask an officer to record scores.
         </p>
       )}
       <noscript>
-        <p>
-          Enable JavaScript to check in or submit a score. An officer can also
-          record your attendance and result in the Sheet.
-        </p>
+        <p>Turn on JavaScript to check in, or ask an officer.</p>
       </noscript>
     </div>
   );
