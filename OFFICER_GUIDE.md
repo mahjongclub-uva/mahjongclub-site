@@ -91,6 +91,7 @@ The script stays bound to the workbook, while Set up stores the workbook ID so w
 The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onward, checkbox cells, and at least one member row with a `# Meets` formula.
 Points Tracking needs distinct `Table N` blocks in B:E, a `Player | Points | Net | date` header, and four player rows.
 An empty block can have existing Net formulas evaluating to -205; those formulas are preserved.
+F of each `Table N` row holds how many games that table played; keep it empty in templates.
 Columns G onward are never written.
 When all templates are full, an officer must add another correctly numbered block.
 
@@ -173,7 +174,8 @@ Players without a computing ID still check in through an officer in the Sheet.
 Players sit at a numbered table and take the wind seat they are sitting in.
 After each game, any of the four taps who won and what each other player pays; the app works out everyone's change.
 When the group is done, or someone has to leave, one of them taps **End table**.
-That saves the group's four totals as one `Table N` block in Points Tracking and frees all four seats for the next group.
+That saves the group's four totals as one `Table N` block in Points Tracking, with the number of games in F beside `Table N`, and frees all four seats for the next group.
+When you type a table in by hand, put just the number of games (for example `12`) in that cell if you know it; the leaderboard counts games only from tables that have one.
 Ending a table with no games saves nothing.
 If scoring closes with a table still in play, its totals are saved automatically.
 

@@ -72,6 +72,9 @@ const standingsEntry = z
     // Season-net only: places moved at the latest session (positive is up),
     // null for a player new to the board.
     rank_change: z.number().int().nullable().optional(),
+    // Games over the tables that had a count, which began with the table
+    // pages writing one; absent until a player has some.
+    games_played: z.number().int().positive().optional(),
   })
   // Reject unknown keys. A field the pipeline invents is a contract change,
   // and it should be noticed here rather than silently ignored.

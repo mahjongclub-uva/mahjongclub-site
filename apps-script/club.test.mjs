@@ -387,6 +387,8 @@ test("results fill existing table templates and stop without changes when full",
       total: [255, 205, 185, 175][index],
     })),
   };
+  // A template copied from a filled block, its old game count left behind.
+  h.tabs.Points.grid[0][5] = 9;
   for (let number = 1; number <= 3; number++) {
     const submission = {
       ...request,
@@ -407,6 +409,8 @@ test("results fill existing table templates and stop without changes when full",
       ],
     );
   }
+  // Whole-table results have no count, so the stale one is cleared.
+  assert.equal(h.tabs.Points.grid[0][5], "");
   const before = JSON.stringify(h.tabs.Points);
   const full = h.post({ ...request, submissionId: "template-test-0004" });
   assert.equal(full.status, 503);
@@ -669,6 +673,9 @@ test("a game pays the winner three times each, and End saves one table and relea
   assert.equal(room.ended.games, 2);
   assert.equal(room.ended.sheetTable, 1);
   assert.equal("tableId" in room, false);
+  // The game count goes beside "Table 1", in F of the block's own row.
+  assert.equal(h.tabs.Points.grid[0][1], "Table 1");
+  assert.equal(h.tabs.Points.grid[0][5], 2);
   assert.deepEqual(
     room.ended.totals.map((seat) => [seat.display, seat.total]),
     [
@@ -690,6 +697,21 @@ test("a game pays the winner three times each, and End saves one table and relea
   assert.equal("results" in h.get({ r: "rooms", results: "0" }), false);
   // Everyone can join another table, which starts at 205.
   assert.equal(t.room("p001", "join", { table: 2, seat: 0 }).status, 200);
+});
+
+test("a game count that cannot be written never blocks the table's save", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(t.hand("p001", 20).status, 200);
+  // As if F were merged or protected: the count fails, the scores still save.
+  const getRange = h.tabs.Points.getRange;
+  h.tabs.Points.getRange = function (row, column, ...rest) {
+    if (column === 6) throw new Error("Merged cell");
+    return getRange.call(this, row, column, ...rest);
+  };
+  assert.equal(t.end("p002").saved, 1);
+  assert.equal(h.tabs.Points.grid[0][5] ?? "", "");
+  assert.equal(savedTables(h).length, 1);
 });
 
 test("a swap saves the round and keeps the players who stay in their seats", () => {

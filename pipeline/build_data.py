@@ -122,7 +122,7 @@ def read_excel_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
 
 
 def read_sheets_grid(
-    spreadsheet_id: str, tab: str, columns: str = "B:E"
+    spreadsheet_id: str, tab: str, columns: str = "B:F"
 ) -> dict[tuple[int, int], str]:
     """Read some columns of one private Google Sheet tab using local OAuth."""
     try:
@@ -207,10 +207,11 @@ def parse_date(serial: str | None) -> str | None:
 # ---------------------------------------------------------------------------
 # Understanding the layout.
 #
-# The Points Tracking tab is a stack of blocks in columns B to E:
+# The Points Tracking tab is a stack of blocks in columns B to F:
 #
-#     B            C        D      E
-#     Table 3                             <- block starts
+#     B            C        D      E      F
+#     Table 3                             12 games  <- block starts; F is
+#                                                      how many games it ran
 #     Player       Points   Net    <date> <- the session date lives here
 #     Kevin Jiang  154      -51
 #     Loy Luo      178      -27
@@ -224,13 +225,16 @@ def parse_date(serial: str | None) -> str | None:
 # can't reach the website.
 # ---------------------------------------------------------------------------
 
-COL_NAME, COL_POINTS, COL_NET, COL_DATE = 2, 3, 4, 5
+COL_NAME, COL_POINTS, COL_NET, COL_DATE, COL_GAMES = 2, 3, 4, 5, 6
 
 
 class Table:
-    def __init__(self, number: int, date: str | None):
+    def __init__(self, number: int, date: str | None, games: int | None = None):
         self.number = number
         self.date = date
+        # None when nobody counted: tables typed in by hand, or from before
+        # the table pages wrote it.
+        self.games = games
         self.seats: list[tuple[str, int, int]] = []  # (name, points, net)
 
     def __repr__(self) -> str:
@@ -249,7 +253,10 @@ def parse_tables(grid: dict[tuple[int, int], str]) -> list[Table]:
 
         heading = re.fullmatch(r"Table (\d+)", label)
         if heading:
-            current = Table(int(heading.group(1)), None)
+            games = grid.get((row, COL_GAMES))
+            if games is not None and not re.fullmatch(r"[1-9]\d*(\.0+)?", games):
+                die(f"Table {heading.group(1)} needs a whole number of games in column F")
+            current = Table(int(heading.group(1)), None, games and int(float(games)))
             tables.append(current)
             continue
 
@@ -454,8 +461,10 @@ def aggregate(
             if roster[name]["opt_out"]:
                 continue
             player = totals.setdefault(
-                name, {"gain": 0, "net": 0, "tables": 0, "best": None}
+                name,
+                {"gain": 0, "net": 0, "tables": 0, "best": None, "games": 0},
             )
+            player["games"] += table.games or 0
             player["gain"] += max(net, 0)
             player["net"] += net
             player["tables"] += 1
@@ -501,6 +510,10 @@ def aggregate(
                 "avg_net": round1(player["net"] / player["tables"]),
             }
         )
+        # Games are counted from when the table pages started writing them,
+        # so this is left out until a player has some.
+        if player["games"]:
+            standings[-1]["games_played"] = player["games"]
 
     unranked = sorted(
         (

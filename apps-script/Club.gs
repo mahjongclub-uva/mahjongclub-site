@@ -560,7 +560,8 @@ function checkIn(request, meeting, listed) {
   return markAttendance(meeting, player, players, plannedAttendance);
 }
 
-function submitResult(request, meeting) {
+// `games` comes only from a table ending, never from the request.
+function submitResult(request, meeting, games) {
   if (
     typeof request.submissionId !== "string" ||
     !/^[a-zA-Z0-9-]{16,80}$/.test(request.submissionId)
@@ -646,6 +647,18 @@ function submitResult(request, meeting) {
         "",
       ]),
     ]);
+  // The game count beside "Table N", after the scores so it can never block
+  // them; a missing one only leaves that table's games uncounted. Cleared
+  // when there is none, so a template copied from a filled block cannot
+  // publish a stale count.
+  try {
+    tab
+      .getRange(block.row, 6)
+      .setValue(games || "")
+      .setNumberFormat('[=1]0 "game";0 "games"');
+  } catch (error) {
+    console.error("Table " + block.number + "'s game count: " + error.message);
+  }
   CacheService.getScriptCache().remove("results:" + meeting.id);
   return {
     status: 201,
@@ -766,6 +779,7 @@ function endRoom(room, meeting, by) {
         seats: roomTotals(room),
       },
       meeting,
+      room.hands.length,
     ).table;
   room.ended = {
     session: room.session,
