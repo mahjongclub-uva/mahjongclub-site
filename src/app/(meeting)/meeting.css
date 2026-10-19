@@ -1303,6 +1303,96 @@ main.meeting-page .meeting-matches .meeting-text {
   }
 }
 
+/* The tile maker: arrows either side change the picture, ink and back, one
+   row each, and the dice in the corner rolls a random tile. */
+.tile-maker {
+  display: grid;
+  grid-template-columns: 44px auto 44px;
+  grid-template-rows: repeat(3, 44px);
+  gap: 6px 18px;
+  justify-content: center;
+  align-items: center;
+  margin-block: 26px 34px;
+}
+.tile-maker .meeting-hero-tile {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / 4;
+  margin: 0;
+}
+.tile-maker-step,
+.tile-maker-dice {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.tile-maker-step {
+  border-radius: var(--control-radius);
+  background: none;
+  color: var(--ink-soft);
+}
+.tile-maker-step:active {
+  color: var(--ink);
+}
+.tile-maker-step svg {
+  inline-size: 28px;
+  block-size: 28px;
+}
+.tile-maker-dice {
+  position: absolute;
+  /* On the tile's corner, clear of the arrows beside it. */
+  inset-block-start: -14px;
+  inset-inline-end: -12px;
+  border-radius: 50%;
+  background: oklch(0.88 0.15 95);
+  color: var(--ink);
+  box-shadow: var(--clay);
+}
+.tile-maker-dice svg {
+  inline-size: 22px;
+  block-size: 22px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tile-maker-step:hover {
+    color: var(--ink);
+  }
+}
+@keyframes tile-bump-0 {
+  40% {
+    scale: 0.88 1.06;
+  }
+}
+/* The same squish under a second name, so the next tap restarts it. */
+@keyframes tile-bump-1 {
+  40% {
+    scale: 0.88 1.06;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile-maker-step,
+  .tile-maker-dice {
+    transition:
+      scale 120ms var(--ease-out),
+      rotate 200ms var(--ease-out);
+  }
+  .tile-maker-step:active {
+    scale: 0.88;
+  }
+  .tile-maker-dice:active {
+    rotate: 90deg;
+  }
+  .tile-maker [data-bump="0"] .player-tile {
+    animation: tile-bump-0 260ms var(--pop);
+  }
+  .tile-maker [data-bump="1"] .player-tile {
+    animation: tile-bump-1 260ms var(--pop);
+  }
+}
+
 /* Tables: a lobby of open tables, and a room that records hand by hand. */
 .room-list {
   list-style: none;
@@ -1811,6 +1901,10 @@ main.meeting-page .round-saved {
     0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
     0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
       oklch(0.3 0.03 90 / 0.45);
+}
+.player-tile svg {
+  inline-size: 64%;
+  block-size: auto;
 }
 /* An open chair: an empty place pressed into the table, the shape of a
    tile, with its wind faint in it. */

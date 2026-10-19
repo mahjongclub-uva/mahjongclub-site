@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import {
+  IconCaretLeftFilled,
+  IconCaretRightFilled,
+  IconDice5Filled,
+} from "@tabler/icons-react";
 import PlayerTile, { TileName } from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
@@ -19,7 +24,112 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { tileNames } from "@/lib/format";
+import { PARTS, parseTile, tileCode, type Avatar } from "@/lib/avatar";
+import {
+  addTonightTiles,
+  chooseTile,
+  chosenTile,
+  madeHere,
+  serviceTile,
+} from "@/lib/tiles";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
+
+const SAY: Record<string, string> = {
+  east: "east wind",
+  south: "south wind",
+  west: "west wind",
+  north: "north wind",
+  zhong: "red dragon",
+  fa: "green dragon",
+};
+const STEPS = [
+  ["face", "picture"],
+  ["ink", "ink"],
+  ["back", "back"],
+] as const;
+
+/** Sends the tile this phone made, so the rest of the meeting sees it. Fire
+ * and forget: a service without tiles answers 404 and nothing changes. */
+function shareTile(id: string) {
+  const tile = madeHere(id);
+  if (!tile || tile === serviceTile(id)) return;
+  postMeeting(MEETING_SERVICE_URL, { r: "tile", playerId: id, tile })
+    .then((reply) => {
+      if (reply.status === 200) addTonightTiles({ [id]: tile });
+    })
+    .catch(() => {});
+}
+
+/** The player's tile with arrows to change its picture, ink and back, and a
+ * dice for a random one. Kept on this phone until Find a table shares it. */
+function TileMaker({ id }: { id: string }) {
+  const [bump, setBump] = useState(0);
+  const [said, setSaid] = useState("");
+  useEffect(() => shareTile(id), [id]);
+  const pick = (tile: Avatar) => {
+    chooseTile(id, tileCode(tile));
+    setBump((n) => n + 1);
+    setSaid([SAY[tile.face] ?? tile.face, tile.ink, tile.back].join(", "));
+  };
+  const step = (part: keyof Avatar, by: 1 | -1) => {
+    const tile = parseTile(chosenTile(id), id);
+    const list: readonly string[] = PARTS[part];
+    const next =
+      list[(list.indexOf(tile[part]) + by + list.length) % list.length];
+    pick({ ...tile, [part]: next });
+  };
+  const roll = () => {
+    const tile = parseTile(chosenTile(id), id);
+    const any = <T,>(list: readonly T[], not: T): T => {
+      const others = list.filter((item) => item !== not);
+      return others[Math.floor(Math.random() * others.length)];
+    };
+    pick({
+      face: any(PARTS.face, tile.face),
+      ink: any(PARTS.ink, tile.ink),
+      back: any(PARTS.back, tile.back),
+    });
+  };
+  return (
+    <div className="tile-maker" role="group" aria-label="Your tile">
+      {STEPS.map(([part, name], row) =>
+        ([-1, 1] as const).map((by) => (
+          <button
+            key={part + by}
+            type="button"
+            className="tile-maker-step"
+            style={{ gridRow: row + 1, gridColumn: by < 0 ? 1 : 3 }}
+            aria-label={`${by < 0 ? "Previous" : "Next"} ${name}`}
+            onClick={() => step(part, by)}
+          >
+            {by < 0 ? (
+              <IconCaretLeftFilled aria-hidden="true" />
+            ) : (
+              <IconCaretRightFilled aria-hidden="true" />
+            )}
+          </button>
+        )),
+      )}
+      <span
+        className="meeting-hero-tile"
+        data-bump={bump ? bump % 2 : undefined}
+      >
+        <PlayerTile id={id} />
+        <button
+          type="button"
+          className="tile-maker-dice"
+          aria-label="Random tile"
+          onClick={roll}
+        >
+          <IconDice5Filled aria-hidden="true" />
+        </button>
+      </span>
+      <p className="sr-only" role="status">
+        {said}
+      </p>
+    </div>
+  );
+}
 
 // Whole tiles in one character, so every face that turns up is a real tile.
 const FACES = ["東", "南", "西", "北", "中", "發", "白"];
@@ -179,9 +289,7 @@ function CheckInForm({
     const next = playerNext(meeting, player.id);
     return (
       <div className="meeting-receipt">
-        <span className="meeting-hero-tile">
-          <PlayerTile id={player.id} />
-        </span>
+        <TileMaker id={player.id} />
         <p className="sr-only" role="status">
           You’re checked in.
         </p>
@@ -191,7 +299,11 @@ function CheckInForm({
             {player.display.split(" ")[0]}!
           </span>
         </h1>
-        <Link className="meeting-primary" href={next.href}>
+        <Link
+          className="meeting-primary"
+          href={next.href}
+          onClick={() => shareTile(player.id)}
+        >
           {next.label}
         </Link>
         {here.length > 0 && (

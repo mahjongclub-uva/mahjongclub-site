@@ -55,6 +55,10 @@ const roomSchema = z.object({
     .nullable(),
 });
 export type Room = z.infer<typeof roomSchema>;
+// Tiles players made tonight, by player id, as "face.ink.back".
+const tilesSchema = z
+  .record(playerSchema.shape.id, z.string().max(40))
+  .optional();
 export const replySchema = z.object({
   status: z.number().int(),
   message: z.string().optional(),
@@ -66,6 +70,7 @@ export const replySchema = z.object({
   rooms: z.array(roomSchema).optional(),
   // Tonight's saved tables, read together with the rooms.
   results: z.array(resultTableSchema).nullable().optional(),
+  tiles: tilesSchema,
 });
 export const meetingSchema = z.object({
   status: z.literal(200),
@@ -77,6 +82,7 @@ export const meetingSchema = z.object({
   players: z.array(playerSchema).optional(),
   // Absent until the Apps Script with table rooms is deployed.
   rooms: z.array(roomSchema).optional(),
+  tiles: tilesSchema,
 });
 export type Player = z.infer<typeof playerSchema>;
 export type Meeting = z.infer<typeof meetingSchema>;

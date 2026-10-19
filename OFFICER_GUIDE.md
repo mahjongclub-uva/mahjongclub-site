@@ -132,14 +132,15 @@ Also try one unscheduled date and one newcomer.
 Every response is JSON with a numeric `status`; read that field even when transport status is 200.
 Send POST bodies as `text/plain` to avoid a browser preflight.
 
-| Request                                                               | Fields and response                                                                                                  |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `GET ?r=meeting`                                                      | Public `open`, `checkinsOpen`, `meetingId`, `date`, `semester`; includes the checked-in lobby during an open meeting |
-| `GET ?r=results`                                                      | Tonight's tables, opaque ids, short names, totals and nets; cached for 30 seconds                                    |
-| `POST {r:"checkins", computingId}`                                    | Returning-player check-in; 404 means the name registration form is needed                                            |
-| `POST {r:"players", computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                |
-| `POST {r:"players", computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                            |
-| `POST {r:"results", meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                   |
+| Request                                                               | Fields and response                                                                                                                |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `GET ?r=meeting`                                                      | Public `open`, `checkinsOpen`, `meetingId`, `date`, `semester`; includes the checked-in lobby during an open meeting               |
+| `GET ?r=results`                                                      | Tonight's tables, opaque ids, short names, totals and nets; cached for 30 seconds                                                  |
+| `POST {r:"checkins", computingId}`                                    | Returning-player check-in; 404 means the name registration form is needed                                                          |
+| `POST {r:"players", computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                              |
+| `POST {r:"players", computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                                          |
+| `POST {r:"results", meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                                 |
+| `POST {r:"tile", playerId, tile:"face.ink.back"}`                     | A checked-in player's tile for tonight, returned as `tiles` with the lobby and the rooms; no lock, nothing written to the workbook |
 
 Use one random submission ID per table and retain it until the receipt arrives.
 Receipts reserve a Table N block using its heading cell note before writing, so a retry after a write failure uses the same block.
