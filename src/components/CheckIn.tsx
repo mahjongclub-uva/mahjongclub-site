@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import PlayerTile from "@/components/PlayerTile";
+import PlayerTile, { TileName } from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers, { IdBadge } from "@/components/IdStickers";
@@ -18,6 +18,7 @@ import {
   savedPlayer,
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
+import { tileNames } from "@/lib/format";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
 // Whole tiles in one character, so every face that turns up is a real tile.
@@ -174,6 +175,7 @@ function CheckInForm({
   if (prompt) return prompt;
   if (player) {
     const here = meeting.players || [];
+    const names = tileNames(here);
     const next = playerNext(meeting, player.id);
     return (
       <div className="meeting-receipt">
@@ -204,9 +206,12 @@ function CheckInForm({
                 >
                   <PlayerTile id={p.id} />
                   <span>
-                    {p.display}
-                    {p.id === player.id && (
-                      <span className="sr-only"> (you)</span>
+                    {p.id === player.id ? (
+                      <>
+                        You<span className="sr-only">, {p.display}</span>
+                      </>
+                    ) : (
+                      <TileName name={names.get(p.id)!} full={p.display} />
                     )}
                   </span>
                 </li>

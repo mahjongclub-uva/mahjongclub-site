@@ -30,7 +30,7 @@ import {
 import type { Meeting as ScheduledMeeting, Semester } from "@/lib/schema";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
-import { clock, minus, signed } from "@/lib/format";
+import { clock, minus, signed, tileNames } from "@/lib/format";
 
 // Tonight's tables, asked for alongside the meeting check rather than after
 // it, during the meeting's window only. Taken once by the first update;
@@ -133,6 +133,7 @@ function LiveTable({
     : [];
   // The top places tonight stand on a podium, step heights by rank.
   const top = tonight.length > 1 ? podium(tonight) : [];
+  const podiumNames = tileNames(tonight);
   return (
     <section>
       {me && meeting.rooms && (
@@ -214,7 +215,7 @@ function LiveTable({
                   </span>
                 )}
               </span>
-              <span className="podium-name">{row.display}</span>
+              <span className="podium-name">{podiumNames.get(row.id)}</span>
               <strong className={pointsClass(row.net)}>
                 {signed(row.net)}
               </strong>

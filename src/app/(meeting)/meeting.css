@@ -40,7 +40,7 @@ main.meeting-page {
   --t-control: 800 var(--s-control) / 1.25 var(--body);
   --t-label: 700 var(--s-label) / 1.3 var(--body);
   --t-meta: 700 var(--s-meta) / 1.3 var(--body);
-  /* Uppercase pills only (LIVE, NEW, Won). */
+  /* Pills and badges: LIVE, NEW, Won, "3 open", "Waiting for 2". */
   --t-badge: 900 var(--s-badge) / 1.2 var(--body);
   --t-score: 900 var(--s-score) / 1.1 var(--display);
   --t-score-sm: 900 var(--s-score-sm) / 1.1 var(--display);
@@ -688,8 +688,11 @@ main.meeting-page .live-rank {
 
 .meeting-matches {
   margin-top: 22px;
-  padding: 18px 0 0;
-  border-top: 2px solid #d9af75;
+}
+/* "No, I'm new" is the way out, so it carries no fill beside "Yes". */
+main.meeting-page .meeting-matches .meeting-text {
+  background: none;
+  color: var(--jade);
 }
 .meeting-matches .meeting-actions {
   margin-top: 14px;
@@ -1262,8 +1265,12 @@ main.meeting-page .live-rank {
 .meeting-here li:nth-child(3n) .player-tile {
   rotate: 5deg;
 }
-.meeting-here li[data-you] {
-  color: var(--tile-letter);
+/* Your own name wears the dark pill, as it does in the menu and receipt. */
+.meeting-here li[data-you] > span:last-child {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
   font-weight: 800;
 }
 .meeting-hero-tile {
@@ -1370,8 +1377,11 @@ main.meeting-page .live-rank {
 }
 .result-card {
   margin-block: 16px 8px;
-  padding-block: 12px;
-  border-block: 1px solid var(--rule);
+  padding: 16px 16px 10px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  box-shadow: var(--clay);
+  --w: 28px;
 }
 .result-head {
   display: grid;
@@ -1393,16 +1403,23 @@ main.meeting-page .live-rank {
 }
 .result-card li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 3.5ch;
+  grid-template-columns: auto minmax(0, 1fr) auto 3.5ch;
   align-items: center;
-  gap: 8px;
-  padding-block: 5px;
+  gap: 10px;
+  padding-block: 6px;
   font: var(--t-label);
+}
+.result-card .you-pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 800;
 }
 .result-card li + li {
   border-block-start: 1px solid var(--rule);
 }
-.result-card li span:first-child {
+.result-card li > span:nth-child(2) {
   overflow-wrap: anywhere;
 }
 .result-card li[data-you] {
@@ -1516,7 +1533,7 @@ main.meeting-page .live-rank {
   color: var(--ink-soft);
   font-weight: 500;
 }
-/* A chair you can take: a jade + on the slot and a "Sit here" chip. */
+/* A chair you can take: a "Sit here" chip under the slot. */
 button.seat[data-empty] .seat-name {
   padding: 3px 10px;
   border-radius: 999px;
@@ -1525,25 +1542,6 @@ button.seat[data-empty] .seat-name {
   color: var(--jade);
   font-weight: 800;
 }
-button.seat[data-empty] .seat-tile {
-  position: relative;
-}
-button.seat[data-empty] .seat-tile::after {
-  content: "";
-  position: absolute;
-  inset-inline-end: -8px;
-  inset-block-start: -7px;
-  inline-size: 22px;
-  block-size: 22px;
-  border-radius: 50%;
-  background:
-    linear-gradient(var(--paper), var(--paper)) center / 11px 3px no-repeat,
-    linear-gradient(var(--paper), var(--paper)) center / 3px 11px no-repeat,
-    var(--jade);
-  box-shadow:
-    0 0 0 2.5px var(--paper),
-    0 3px 6px -2px oklch(0.3 0.06 160 / 0.6);
-}
 @media (hover: hover) and (pointer: fine) {
   button.seat[data-empty]:hover:not(:has([data-sitting])) .player-tile {
     background: color-mix(in oklch, var(--jade) 10%, var(--paper));
@@ -1551,24 +1549,8 @@ button.seat[data-empty] .seat-tile::after {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  button.seat[data-empty] .seat-tile::after {
-    animation: seat-nudge 2.4s var(--ease-out) infinite;
-  }
   button.seat[data-empty]:active .player-tile {
     transform: scale(0.94);
-  }
-}
-@keyframes seat-nudge {
-  0%,
-  70%,
-  100% {
-    transform: none;
-  }
-  80% {
-    transform: scale(1.18);
-  }
-  90% {
-    transform: scale(0.96);
   }
 }
 .seat-total {
@@ -1592,13 +1574,10 @@ button.seat[data-empty] .seat-tile::after {
 .seat-tile[data-sitting] .player-tile {
   opacity: 0.7;
 }
-/* While it waits, the chair is already yours: no + and no chip, and it
+/* While it waits, the chair is already yours: no chip, and it
    stays clear of the dimming on the other seats. */
 .meeting-page button.seat:disabled:has([data-sitting]) {
   opacity: 1;
-}
-button.seat[data-empty] .seat-tile[data-sitting]::after {
-  display: none;
 }
 button.seat[data-empty]:has([data-sitting]) .seat-name {
   padding: 0;
@@ -1645,10 +1624,15 @@ main.meeting-page .round-saved {
   margin-block-end: 4px;
 }
 .pick-winner strong {
+  display: grid;
   flex: 1;
   min-inline-size: 0;
   font: var(--t-heading);
   overflow-wrap: anywhere;
+}
+.pick-winner small {
+  font: var(--t-meta);
+  color: var(--ink-soft);
 }
 /* Picking the winner: the other three step back, the winner glows and
    wears a gold tag. Names stay full strength. */
@@ -1783,18 +1767,13 @@ main.meeting-page .round-saved {
 }
 .game-rows li {
   display: grid;
-  grid-template-columns: 4.2rem auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   padding-block: 10px;
 }
 .game-rows li + li {
   border-block-start: 1px solid var(--rule);
-}
-.game-number {
-  font: var(--t-meta);
-  color: var(--ink-soft);
-  white-space: nowrap;
 }
 .game-winner {
   display: grid;
@@ -2064,6 +2043,10 @@ main.meeting-page .round-saved {
   gap: 12px;
   margin-block: 18px 4px;
 }
+.id-chosen .meeting-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .id-badge {
   display: inline-flex;
   gap: 4px;
@@ -2252,8 +2235,16 @@ main.meeting-page .room-status {
   font: var(--t-meta);
   color: var(--ink-soft);
 }
-main.meeting-page .room-status[data-open="true"] {
+/* Open seats and a table still filling up are tinted pills: badges, not
+   sentences. */
+main.meeting-page .room-status[data-open="true"],
+main.meeting-page .waiting-pill {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--jade) 12%, var(--paper));
   color: var(--jade);
+  font: var(--t-badge);
+  white-space: nowrap;
 }
 main.meeting-page .room-seats .seat-tile {
   --w: 40px;
@@ -2820,6 +2811,23 @@ main.meeting-page .live-season h2 span {
   color: var(--jade);
 }
 /* After your table ends: the standings first, another table second. */
+.meeting-closed .check-again {
+  display: flex;
+  min-inline-size: 11rem;
+}
+.check-again:disabled {
+  opacity: 0.75;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .check-again svg[data-spin] {
+    animation: check-spin 0.9s linear infinite;
+  }
+}
+@keyframes check-spin {
+  to {
+    rotate: 1turn;
+  }
+}
 .meeting-page .ended-next {
   margin-block: 14px 24px;
 }

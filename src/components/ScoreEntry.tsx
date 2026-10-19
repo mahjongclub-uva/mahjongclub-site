@@ -5,7 +5,7 @@ import Link from "next/link";
 import { IconArrowRight, IconCheck, IconPlusMinus } from "@tabler/icons-react";
 import { z } from "zod";
 import MeetingAccess from "@/components/MeetingAccess";
-import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
+import PlayerTile, { EmptyTile, TileName } from "@/components/PlayerTile";
 import {
   PENDING_STORAGE,
   DRAFT_STORAGE,
@@ -19,7 +19,7 @@ import {
 } from "@/lib/meeting";
 import { draftSchema, pendingSchema } from "@/lib/meetingSchemas";
 import { MEETING_SERVICE_URL } from "@/lib/site";
-import { clock, signed } from "@/lib/format";
+import { clock, signed, tileNames } from "@/lib/format";
 
 const START = 205;
 // The last confirmed save, so a reload shows the receipt instead of an empty form.
@@ -105,6 +105,9 @@ function ScoreForm({
   const stage = pending ? "review" : phase;
   const name = (id: string) =>
     players.find((p) => p.id === id)?.display || `Player ${id}`;
+  const seatNames = tileNames(
+    ids.filter(Boolean).map((id) => ({ id, display: name(id) })),
+  );
   function changePhase(next: typeof phase) {
     setPhase(next);
     heading.current?.focus({ preventScroll: true });
@@ -348,7 +351,9 @@ function ScoreForm({
                     }}
                   >
                     <PlayerTile id={id} />
-                    <span>{name(id)}</span>
+                    <span>
+                      <TileName name={seatNames.get(id)!} full={name(id)} />
+                    </span>
                     <small aria-hidden="true">Remove ×</small>
                   </button>
                 ) : (

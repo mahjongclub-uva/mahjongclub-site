@@ -27,3 +27,14 @@ export function EmptyTile({ glyph }: { glyph: string }) {
     </span>
   );
 }
+
+/** The short name under a tile (see tileNames); screen readers hear it in full. */
+export function TileName({ name, full }: { name: string; full: string }) {
+  if (name === full) return full;
+  return (
+    <>
+      <span aria-hidden="true">{name}</span>
+      <span className="sr-only">{full}</span>
+    </>
+  );
+}

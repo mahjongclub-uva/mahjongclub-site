@@ -23,7 +23,7 @@ import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers from "@/components/IdStickers";
 import Sheet from "@/components/Sheet";
-import PlayerTile, { EmptyTile } from "@/components/PlayerTile";
+import PlayerTile, { EmptyTile, TileName } from "@/components/PlayerTile";
 import { BACKS } from "@/lib/avatar";
 import {
   cleanComputingId,
@@ -43,7 +43,7 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
-import { clock, minus, signed } from "@/lib/format";
+import { clock, minus, signed, tileNames } from "@/lib/format";
 
 const START = 205;
 // Unsaved game entry, restored only if the table has not changed since.
@@ -145,11 +145,16 @@ function EndedReceipt({
   room: number;
   you: string;
 }) {
+  const names = tileNames(ended.totals);
   return (
     <section className="result-card" aria-label="Your last table">
       <p className="result-head">
         <strong>Table {room} ended</strong>
-        <span>
+        <span aria-hidden="true">
+          {ended.games} {ended.games === 1 ? "game" : "games"} · {ended.by} ·{" "}
+          {clock(ended.at)}
+        </span>
+        <span className="sr-only">
           {ended.by === "Scoring closed"
             ? "Scoring closed"
             : `Ended by ${ended.by}`}{" "}
@@ -160,9 +165,15 @@ function EndedReceipt({
       <ul>
         {ended.totals.map((seat) => (
           <li key={seat.id} data-you={seat.id === you || undefined}>
+            <PlayerTile id={seat.id} />
             <span>
-              {seat.display}
-              {seat.id === you && <small> (you)</small>}
+              {seat.id === you ? (
+                <span className="you-pill">
+                  You<span className="sr-only">, {seat.display}</span>
+                </span>
+              ) : (
+                <TileName name={names.get(seat.id)!} full={seat.display} />
+              )}
             </span>
             <span className="delta" data-sign={Math.sign(seat.total - START)}>
               {signed(seat.total - START)}
@@ -242,6 +253,7 @@ function TableSquare({
 }) {
   const latest = room?.hands.at(-1);
   const games = room?.hands.length ?? 0;
+  const names = tileNames(room?.seats ?? []);
   const totalOf = (id: string) =>
     room?.totals.find((item) => item.id === id)?.total ?? START;
   // The crown goes to whoever is ahead; nobody wears it while all are level.
@@ -307,13 +319,15 @@ function TableSquare({
             </span>
             {cheering && <Cheer you={own} />}
             <span className="seat-name" data-me={own || undefined}>
-              {seat
-                ? seat.display
-                : sitting
-                  ? "Sitting…"
-                  : canSit && !pick
-                    ? "Sit here"
-                    : "Open"}
+              {seat ? (
+                <TileName name={names.get(seat.id)!} full={seat.display} />
+              ) : sitting ? (
+                "Sitting…"
+              ) : canSit && !pick ? (
+                "Sit here"
+              ) : (
+                "Open"
+              )}
               {/* The tag is the visible mark; the word is for screen readers. */}
               {own && <span className="sr-only"> (you)</span>}
             </span>
@@ -628,7 +642,9 @@ function SeatedTable({
       ) : (
         !ready && (
           <p className="table-latest">
-            <span>Waiting for {4 - room.seats.length}</span>
+            <span className="waiting-pill">
+              Waiting for {4 - room.seats.length}
+            </span>
           </p>
         )
       )}
@@ -724,14 +740,15 @@ function SeatedTable({
               <div className="pick-winner">
                 <PlayerTile id={draft.winner} />
                 <strong>
-                  {draft.winner === player.id ? "You" : name(draft.winner)} won
+                  <small>Winner</small>
+                  {draft.winner === player.id ? "You" : name(draft.winner)}
                 </strong>
                 <button
                   type="button"
                   className="meeting-chip"
                   onClick={() => setStep("winner")}
                 >
-                  Change
+                  Change<span className="sr-only"> winner</span>
                 </button>
               </div>
               <label htmlFor="hand-each">Each other player pays</label>
@@ -829,11 +846,13 @@ function SeatedTable({
           <ol className="game-rows" reversed>
             {[...room.hands].reverse().map((hand, i) => (
               <li key={hand.id}>
-                <span className="game-number">Game {games - i}</span>
                 <PlayerTile id={hand.winner} />
                 <span className="game-winner">
-                  {hand.winner === player.id ? "You" : name(hand.winner)}
-                  <small>won {hand.each} from each</small>
+                  <span>
+                    Game {games - i} ·{" "}
+                    {hand.winner === player.id ? "You" : name(hand.winner)}
+                  </span>
+                  <small>{hand.each} each</small>
                 </span>
                 <strong className="delta" data-sign="1">
                   +{3 * hand.each}
@@ -943,7 +962,7 @@ function SeatedTable({
           title={
             leaving.id === player.id
               ? `Leave Table ${room.table}?`
-              : `Remove ${leaving.display}?`
+              : `Remove ${tileNames(room.seats).get(leaving.id)}?`
           }
           close={() => setLayer(null)}
         >
@@ -982,7 +1001,7 @@ function SeatedTable({
                 ? "Saving…"
                 : leaving.id === player.id
                   ? "Leave table"
-                  : `Remove ${leaving.display}`}
+                  : `Remove ${tileNames(room.seats).get(leaving.id)}`}
             </button>
             <button
               type="button"
@@ -1011,6 +1030,8 @@ function Lobby({
   you: string;
 }) {
   const open = rooms.filter((room) => room.seats.length);
+  // One map for the whole lobby, so a Chris at each of two tables both get an initial.
+  const names = tileNames(open.flatMap((room) => room.seats));
   const taken = new Set(open.map((room) => room.table));
   const next = Array.from({ length: MAX_TABLES }, (_, i) => i + 1).find(
     (table) => !taken.has(table),
@@ -1065,7 +1086,12 @@ function Lobby({
                         </span>
                         <span>
                           <span className="sr-only">{wind}: </span>
-                          {seat?.display || (
+                          {seat ? (
+                            <TileName
+                              name={names.get(seat.id)!}
+                              full={seat.display}
+                            />
+                          ) : (
                             <span className="sr-only">open</span>
                           )}
                         </span>
@@ -1352,7 +1378,19 @@ function Tables({
         <Lobby rooms={rooms} mine={mine} ended={ended} you={player.id} />
       ) : (
         <div className="room-view">
-          {!mine && ended?.ended && (
+          {mine && !here && (
+            <Link
+              className="meeting-chip back-to-table"
+              href={MEETING_PATHS.table(mine.table)}
+            >
+              <IconArrowLeft aria-hidden="true" />
+              Back to Table {mine.table}
+            </Link>
+          )}
+          <h1 className="meeting-title" tabIndex={-1}>
+            Table {table}
+          </h1>
+          {!mine && ended?.ended && ended.table === table && (
             <>
               <EndedReceipt
                 ended={ended.ended}
@@ -1367,18 +1405,6 @@ function Tables({
               </Link>
             </>
           )}
-          {mine && !here && (
-            <Link
-              className="meeting-chip back-to-table"
-              href={MEETING_PATHS.table(mine.table)}
-            >
-              <IconArrowLeft aria-hidden="true" />
-              Back to Table {mine.table}
-            </Link>
-          )}
-          <h1 className="meeting-title" tabIndex={-1}>
-            Table {table}
-          </h1>
           {!here && (
             <p className="meeting-intro">
               {(room?.seats.length ?? 0) >= 4

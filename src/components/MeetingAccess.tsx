@@ -12,6 +12,7 @@ import {
   IconChevronRight,
   IconDoorExit,
   IconMenu2,
+  IconRefresh,
   IconTrophy,
 } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
@@ -36,8 +37,8 @@ import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import PlayerTile from "@/components/PlayerTile";
-import { clock, formatShortDate, signed } from "@/lib/format";
+import PlayerTile, { TileName } from "@/components/PlayerTile";
+import { clock, formatShortDate, signed, tileNames } from "@/lib/format";
 import { tonightStandings, tonightTables } from "@/lib/live";
 import { SEASON_START, type Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
@@ -69,6 +70,7 @@ function PlayerSheet({
   const path = usePathname().replace(/\/?$/, "/");
   const router = useRouter();
   const mine = seatedRoom(meeting.rooms, player.id);
+  const seatNames = tileNames(mine?.seats ?? []);
   const tablePath = mine && MEETING_PATHS.table(mine.table);
   // The table page does the leaving, and asks first once games are saved.
   const leave = mine && MEETING_PATHS.leave(mine.table);
@@ -139,7 +141,14 @@ function PlayerSheet({
                 <li key={item.id}>
                   <PlayerTile id={item.id} />
                   <span data-me={item.id === player.id || undefined}>
-                    {item.id === player.id ? "You" : item.display}
+                    {item.id === player.id ? (
+                      "You"
+                    ) : (
+                      <TileName
+                        name={seatNames.get(item.id)!}
+                        full={item.display}
+                      />
+                    )}
                   </span>
                   <NetScore
                     net={
@@ -296,7 +305,7 @@ export default function MeetingAccess({
         <p className="meeting-status">
           {meeting?.open && meeting.date ? (
             <>
-              <small>Mahjong Club @ UVA</small>
+              {!player && <small>Mahjong Club @ UVA</small>}
               <b>{formatShortDate(meeting.date)}</b>
             </>
           ) : (
@@ -364,11 +373,12 @@ export default function MeetingAccess({
           <h1>No meeting yet</h1>
           <p>Here? Ask an officer to open it.</p>
           <button
-            className="meeting-secondary"
+            className="meeting-chip check-again"
             type="button"
             onClick={refresh}
             disabled={checking}
           >
+            <IconRefresh aria-hidden="true" data-spin={checking || undefined} />
             {checking ? "Checking…" : "Check again"}
           </button>
           {/* Spoken, not shown: the button already shows when it's checking. */}
