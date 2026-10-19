@@ -97,9 +97,12 @@ When all templates are full, an officer must add another correctly numbered bloc
 
 **Club > Open now** opens a two-hour manual meeting, followed by the configured score grace period.
 **Club > Close now** immediately closes check-in and scores and prevents the same calendar event reopening.
+Closing saves every table that still has games. If one cannot be saved, for example because every template block is full, Close names it with each player's total. Fix the cause and run Close again; do not type the totals in, because the script keeps retrying and would save the table twice.
+Only for a table that can never save: check Points first, enter it by hand, then delete its `room:<meetingId>:<table>` entry under Project Settings › Script properties.
 For a visitor without a computing ID, add a unique `player_id`, full name, short name and opt-out checkbox to Roster, select that row, and choose **Club > Check in selected member**.
 You can also select their existing Attendance row.
 **Club > Recheck** validates filled tables against roster names, attendance, whole totals, the 820 total, and Net values, and highlights invalid blocks in pale red.
+Recheck also lists any table whose games were never saved, including one left from an earlier meeting, with each player's total.
 Recheck does not alter scores or start publishing.
 
 ### Public-name suggestions

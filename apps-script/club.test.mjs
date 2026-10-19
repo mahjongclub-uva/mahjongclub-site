@@ -1103,6 +1103,86 @@ test("a table that cannot save keeps its players and games", () => {
   assert.equal(room.hands.length, 1);
 });
 
+// Fills the three template blocks, so the next table save has nowhere to go.
+function fillSheet(h) {
+  for (let n = 1; n <= 3; n++)
+    h.post({
+      r: "results",
+      meetingId: h.meeting.id,
+      submissionId: "fill-template-000" + n,
+      seats: ["p001", "p002", "p003", "p004"].map((id) => ({ id, total: 205 })),
+    });
+}
+
+function alerts(h) {
+  const shown = [];
+  h.context.SpreadsheetApp.getUi = () => ({
+    alert: (message) => shown.push(message),
+  });
+  return shown;
+}
+
+test("Close names a table it could not save, with totals, and keeps it", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  fillSheet(h);
+  const shown = alerts(h);
+  h.context.clubClose();
+  assert.match(shown[0], /Table 1 wasn’t saved/);
+  assert.match(shown[0], /235/);
+  assert.doesNotMatch(shown[0], /Saved tables publish/);
+  const kept = Object.keys(h.store).filter((key) => key.startsWith("room:"));
+  assert.equal(kept.length, 1);
+  assert.equal(JSON.parse(h.store[kept[0]]).hands.length, 1);
+});
+
+test("a table that failed at close saves once after the cause is fixed", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  const save = h.context.submitResult;
+  h.context.submitResult = () => {
+    throw new Error("Sheet timed out.");
+  };
+  h.context.clubClose();
+  assert.equal(savedTables(h).length, 0);
+  h.context.submitResult = save;
+  // A page load retries it, then an officer's second Close finds nothing left.
+  h.get({ r: "meeting" });
+  h.context.clubClose();
+  assert.equal(savedTables(h).length, 1);
+});
+
+test("Recheck lists unsaved tables, even from an earlier meeting", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  fillSheet(h);
+  const shown = alerts(h);
+  h.context.clubClose();
+  const key = Object.keys(h.store).find((item) => item.startsWith("room:"));
+  h.store[key] = JSON.stringify({
+    ...JSON.parse(h.store[key]),
+    meetingId: "event:" + Date.UTC(2026, 9, 9, 23),
+  });
+  h.context.clubRecheck();
+  assert.match(shown.at(-1), /Table 1 wasn’t saved: from 2026-10-09/);
+});
+
+test("a table with games but not four seats is reported at close, not deleted", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  const key = Object.keys(h.store).find((item) => item.startsWith("room:"));
+  const room = JSON.parse(h.store[key]);
+  h.store[key] = JSON.stringify({ ...room, seats: room.seats.slice(0, 3) });
+  const shown = alerts(h);
+  h.context.clubClose();
+  assert.match(shown[0], /Table 1 wasn’t saved/);
+  assert.ok(h.store[key]);
+});
+
 test("officers can end a stuck table from the Club menu, saving its games", () => {
   const h = harness();
   const t = seatedTable(h);

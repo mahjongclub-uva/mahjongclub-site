@@ -802,29 +802,49 @@ function endRoom(room, meeting, by) {
   return sheetTable;
 }
 
+// Returns a line for each table it could not save. Those stay in Script
+// Properties, so the next request, Close or Recheck tries or lists them again.
 function settleRooms(meeting) {
+  const unsaved = [];
   for (const room of readRooms(meeting.id)) {
     try {
-      if (room.hands.length && room.seats.length === 4)
+      if (room.hands.length) {
+        if (room.seats.length !== 4)
+          fail(409, "Not all four seats are filled.");
         endRoom(room, meeting, "Scoring closed");
+      }
       properties().deleteProperty(roomKey(room));
     } catch (error) {
-      // ponytail: an unsaved room stays in Script Properties for an officer to copy by hand.
-      console.error(
-        "Table " +
-          room.table +
-          " could not be saved (" +
-          error.message +
-          "): " +
-          JSON.stringify(
-            roomTotals(room).map((seat, i) => [
-              room.seats[i].display,
-              seat.total,
-            ]),
-          ),
-      );
+      const line = unsavedLine(room, error.message);
+      console.error(line);
+      unsaved.push(line);
     }
   }
+  return unsaved;
+}
+
+// The totals go in the line as a record of what is waiting to save.
+function unsavedLine(room, reason) {
+  const totals = roomTotals(room).map(
+    (seat, i) => room.seats[i].display + " " + seat.total,
+  );
+  return (
+    "Table " +
+    room.table +
+    " wasn’t saved: " +
+    reason +
+    " Totals: " +
+    totals.join(", ") +
+    "."
+  );
+}
+
+// Calendar meeting ids end in their start time; manual ones carry no date.
+function meetingLabel(meetingId) {
+  const start = Number(meetingId.split(":").pop());
+  return meetingId.startsWith("manual:") || !Number.isFinite(start)
+    ? "still waiting to save."
+    : "from " + dateKey(new Date(start)) + ", still waiting to save.";
 }
 
 // The rooms, and with `withResults` tonight's saved tables, for Tonight's
@@ -1299,7 +1319,7 @@ function clubClose() {
       if (!meeting) return "There is no meeting to close.";
       meeting.closed = true;
       saveMeeting(meeting);
-      settleRooms(meeting);
+      const unsaved = settleRooms(meeting);
       if (!meeting.id.startsWith("manual:"))
         properties().setProperty("closedCalendarEvent", meeting.id);
       else {
@@ -1307,7 +1327,11 @@ function clubClose() {
         if (events.length === 1)
           properties().setProperty("closedCalendarEvent", events[0].id);
       }
-      return "Meeting closed. Saved tables publish with the next score update.";
+      return unsaved.length
+        ? "Meeting closed, but:\n" +
+            unsaved.join("\n") +
+            "\nFix the cause and run Close again. Don’t type these in: it keeps trying, and would save them twice."
+        : "Meeting closed. Saved tables publish with the next score update.";
     }),
   );
 }
@@ -1383,6 +1407,18 @@ function clubRecheck() {
       const meeting = readMeeting();
       if (meeting)
         CacheService.getScriptCache().remove("results:" + meeting.id);
+      // Games no open meeting will save: a failed close, or an older meeting.
+      const all = properties().getProperties();
+      for (const key of Object.keys(all).filter((item) =>
+        item.startsWith("room:"),
+      )) {
+        const room = JSON.parse(all[key]);
+        if (
+          room.hands.length &&
+          (room.meetingId !== meeting?.id || meeting.closed)
+        )
+          errors.push(unsavedLine(room, meetingLabel(room.meetingId)));
+      }
       return errors.length
         ? errors.join("\n")
         : "All filled tables passed validation.";
