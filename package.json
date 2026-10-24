@@ -13,6 +13,7 @@
     "test:pipeline": "python3 -m unittest pipeline/test_*.py",
     "photos:prepare": "node scripts/photos.mjs prepare",
     "photos:check": "node scripts/photos.mjs check",
+    "deploy:apps-script": "node scripts/deploy-apps-script.mjs",
     "hooks:install": "git config core.hooksPath .githooks",
     "data": "python3 pipeline/build_data.py",
     "data:meetings": "python3 pipeline/build_meetings.py",

@@ -88,6 +88,15 @@ Overlapping meeting windows are refused.
 Set up is safe to repeat. It removes the every-minute `clubTick` timer that earlier versions created and leaves other timers alone.
 The script stays bound to the workbook, while Set up stores the workbook ID so web requests can open it explicitly.
 
+### Updating the script
+
+After a change to `apps-script/` merges, deploy it outside a meeting from a computer with this repository.
+
+1. Once per computer: turn on **Google Apps Script API** at script.google.com/home/usersettings, run `npx @google/clasp@3.4.1 login` as the account that owns the deployment, and put the Script ID from **Project Settings** in the editor into a file named `.apps-script-id` in the repository root. Git ignores that file. Run this from macOS or Linux.
+2. Run `npm run deploy:apps-script`. It deploys `origin/main`, never your working copy, refuses while a meeting is open, shows what the push will replace, and asks before it pushes. The push replaces every file in the script project with `Rules`, `Club`, `Settings` and `appsscript.json`, and the deployment keeps its `/exec` URL.
+
+Without clasp, paste each file from `origin/main` into the editor, then use **Deploy > Manage deployments**, edit the web app, and choose **New version**.
+
 The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onward, checkbox cells, and at least one member row with a `# Meets` formula.
 Points Tracking needs distinct `Table N` blocks in B:E, a `Player | Points | Net | date` header, and four player rows.
 An empty block can have existing Net formulas evaluating to -205; those formulas are preserved.
