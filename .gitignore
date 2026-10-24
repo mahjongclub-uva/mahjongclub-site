@@ -31,6 +31,9 @@ yarn-error.log*
 # env files
 .env*
 
+# Each officer's own Apps Script project link, for npm run deploy:apps-script.
+/.apps-script-id
+
 # Originals stay local. `npm run photos:prepare` writes clean public copies.
 /photo-inbox/
 
