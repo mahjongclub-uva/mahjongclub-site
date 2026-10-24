@@ -3,7 +3,7 @@ import io
 import unittest
 
 from pipeline import build_data
-from pipeline.migrate_roster import derive_display, likely_duplicates, plan_rows
+from pipeline.migrate_roster import derive_display, likely_duplicates, plan_rows, respelled
 
 
 class MigrateRosterTests(unittest.TestCase):
@@ -23,6 +23,10 @@ class MigrateRosterTests(unittest.TestCase):
         self.assertEqual(rows, [["p003", "", "Ann Long", "Ann Lo.", False]])
         self.assertEqual(plan_rows({**existing, "Ann Long": {
             "id": "p003", "display": "Ann Lo.", "opt_out": False}}, ["Ann Long"]), [])
+
+    def test_points_names_matching_only_loosely_are_flagged_by_id(self):
+        existing = {"Ann Lee": {"id": "p002", "display": "Ann L.", "opt_out": False}}
+        self.assertEqual(respelled(existing, ["ann  LEE", "Ann Lee", "Bo Kim"]), ["p002"])
 
     def test_flags_similar_names_by_id_only(self):
         self.assertEqual(
