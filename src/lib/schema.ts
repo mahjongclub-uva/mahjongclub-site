@@ -15,7 +15,7 @@ export { SEASON_START } from "./format.ts";
  * none, but not an id missing here (no template for it). To add one: list
  * the id here, emit it from the pipeline, render it.
  */
-export const AWARD_IDS = ["biggest-win"] as const;
+const AWARD_IDS = ["biggest-win"] as const;
 
 /** e.g. "fall-2025". Never derived from anything private. */
 const semesterId = z

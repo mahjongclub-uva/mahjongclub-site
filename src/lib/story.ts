@@ -12,7 +12,7 @@ export type StoryEntry = {
 };
 
 /** No chip at all when the data predates places moved. */
-export function storyMove(change: number | null | undefined): Move | null {
+function storyMove(change: number | null | undefined): Move | null {
   if (change === undefined) return null;
   if (change === null) return { dir: "new", text: "NEW" };
   if (change === 0) return { dir: "held", text: "HELD" };
