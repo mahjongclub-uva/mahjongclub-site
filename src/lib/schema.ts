@@ -61,16 +61,13 @@ const standingsEntry = z
     rank: z.number().int().positive(),
     display: displayName,
     tables_played: z.number().int().positive(),
-    // gain floors each table at zero, so a total can never be negative.
-    total_gain: z.number().nonnegative(),
-    avg_gain: oneDecimal.nonnegative(),
     // The best single table is a raw net, so it can be negative for a player
     // who never won one.
     best_table: z.number(),
     total_net: z.number(),
     avg_net: oneDecimal,
-    // Season-net only: places moved at the latest session (positive is up),
-    // null for a player new to the board.
+    // Places moved at the latest session (positive is up), null for a player
+    // new to the board.
     rank_change: z.number().int().nullable().optional(),
     // Games over the tables that had a count, which began with the table
     // pages writing one; absent until a player has some.
@@ -80,44 +77,11 @@ const standingsEntry = z
   // and it should be noticed here rather than silently ignored.
   .strict()
   .superRefine((p, ctx) => {
-    if (!isCorrectAverage(p.avg_gain, p.total_gain, p.tables_played)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["avg_gain"],
-        message: `${p.avg_gain} is not ${p.total_gain} / ${p.tables_played}`,
-      });
-    }
     if (!isCorrectAverage(p.avg_net, p.total_net, p.tables_played)) {
       ctx.addIssue({
         code: "custom",
         path: ["avg_net"],
         message: `${p.avg_net} is not ${p.total_net} / ${p.tables_played}`,
-      });
-    }
-    // gain is the sum of max(net, 0) over the same tables that produced net,
-    // so it is always at least net.
-    if (p.total_gain < p.total_net) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["total_gain"],
-        message: `total_gain ${p.total_gain} is below total_net ${p.total_net}`,
-      });
-    }
-    // A player whose best table was a loss has won nothing, so their gain is
-    // exactly zero. A player who won at least once has gain of at least that
-    // table.
-    if (p.best_table > 0 && p.total_gain < p.best_table) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["total_gain"],
-        message: `total_gain ${p.total_gain} is below best_table ${p.best_table}`,
-      });
-    }
-    if (p.best_table <= 0 && p.total_gain !== 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["total_gain"],
-        message: `best_table ${p.best_table} was not a win, so total_gain must be 0`,
       });
     }
   });
@@ -150,7 +114,6 @@ export const semesterSchema = z
     sessions: z.number().int().nonnegative(),
     last_session: z.iso.date().nullable(),
     min_tables_to_rank: z.number().int().positive(),
-    scoring_rule: z.enum(["season-net"]).optional(),
     standings: z.array(standingsEntry),
     unranked: z.array(unrankedEntry),
     awards: z.array(award),
@@ -205,8 +168,7 @@ export const semesterSchema = z
       seen.add(p.id);
     }
 
-    // Fall 2026 uses the starting score plus cumulative net. Earlier data
-    // keeps its existing gain-based ranking until its history is revisited.
+    // Ranked by cumulative net, then fewest tables.
     s.standings.forEach((cur, i) => {
       if (i === 0) {
         if (cur.rank !== 1) {
@@ -223,20 +185,10 @@ export const semesterSchema = z
 
       let ordered: boolean;
       let tied = false;
-      if (s.scoring_rule === "season-net" && prev.total_net !== cur.total_net) {
+      if (prev.total_net !== cur.total_net) {
         ordered = prev.total_net > cur.total_net;
-      } else if (
-        s.scoring_rule !== "season-net" &&
-        prev.total_gain !== cur.total_gain
-      ) {
-        ordered = prev.total_gain > cur.total_gain;
       } else if (prev.tables_played !== cur.tables_played) {
         ordered = prev.tables_played < cur.tables_played;
-      } else if (
-        s.scoring_rule !== "season-net" &&
-        prev.total_net !== cur.total_net
-      ) {
-        ordered = prev.total_net > cur.total_net;
       } else {
         ordered = true;
         tied = true;
@@ -248,9 +200,8 @@ export const semesterSchema = z
           path: [...where],
           message:
             `${cur.display} is ranked below ${prev.display} but sorts above it ` +
-            `(gain ${cur.total_gain} vs ${prev.total_gain}, ` +
-            `tables ${cur.tables_played} vs ${prev.tables_played}, ` +
-            `net ${cur.total_net} vs ${prev.total_net})`,
+            `(net ${cur.total_net} vs ${prev.total_net}, ` +
+            `tables ${cur.tables_played} vs ${prev.tables_played})`,
         });
       }
 

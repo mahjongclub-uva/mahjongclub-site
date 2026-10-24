@@ -84,19 +84,17 @@ export function Delta({ change }: { change?: number | null }) {
  */
 export function StandingRow({
   player,
-  seasonNet,
   index,
   match,
 }: {
   player: Standing;
-  seasonNet: boolean;
   index?: number;
   /** Search text to mark in the name, already lowercased. */
   match?: string;
 }) {
   const name = player.display;
   const at = match ? name.toLocaleLowerCase().indexOf(match) : -1;
-  const score = seasonNet ? SEASON_START + player.total_net : player.total_gain;
+  const score = SEASON_START + player.total_net;
   return (
     <li
       className="standing"
@@ -135,7 +133,7 @@ export function StandingRow({
           )}
         </b>
         <span className="sr-only"> points</span>
-        {seasonNet && <Delta change={player.rank_change} />}
+        <Delta change={player.rank_change} />
       </span>
     </li>
   );

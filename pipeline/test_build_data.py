@@ -65,7 +65,7 @@ class ScoreImportTests(unittest.TestCase):
         uncounted.seats = [("A", 205, 0), ("E", 205, 0), ("F", 205, 0), ("G", 205, 0)]
         roster = {name: {"id": f"p{i:03d}", "display": name, "opt_out": False}
                   for i, name in enumerate("ABCDEFG", 1)}
-        standings, _ = build_data.aggregate([counted, uncounted], roster, 1, "season-net")
+        standings, _ = build_data.aggregate([counted, uncounted], roster, 1)
         games = {p["display"]: p.get("games_played") for p in standings}
 
         self.assertEqual((games["A"], games["B"], games["E"]), (12, 12, None))
@@ -94,7 +94,7 @@ class PrivateLogTests(unittest.TestCase):
         roster = {name: {"id": f"p{i:03d}", "display": name, "opt_out": False}
                   for i, name in enumerate("ABCDEFG", 1)}
 
-        standings, unranked = build_data.aggregate([first, second], roster, 1, "season-net")
+        standings, unranked = build_data.aggregate([first, second], roster, 1)
 
         self.assertEqual(unranked, [])
         self.assertLess(next(p["rank"] for p in standings if p["display"] == "C"),
@@ -112,7 +112,7 @@ class PrivateLogTests(unittest.TestCase):
                   for i, name in enumerate("ABCDEFG", 1)}
         tables = [earlier, latest, undated]
 
-        standings, _ = build_data.aggregate(tables, roster, 1, "season-net")
+        standings, _ = build_data.aggregate(tables, roster, 1)
         build_data.add_rank_changes(standings, tables, roster, 1)
         moved = {p["display"]: (p["rank"], p["rank_change"]) for p in standings}
 
