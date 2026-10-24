@@ -9,12 +9,10 @@ import { StandingRow } from "@/components/StandingParts";
 export default function PlayerSearch({
   standings,
   unranked,
-  seasonNet,
   minTables,
 }: {
   standings: Standing[];
   unranked: Unranked[];
-  seasonNet: boolean;
   minTables: number;
 }) {
   const [query, setQuery] = useState("");
@@ -97,12 +95,7 @@ export default function PlayerSearch({
           {count > 0 && (
             <ul className="standings">
               {ranked.map((player) => (
-                <StandingRow
-                  key={player.id}
-                  player={player}
-                  seasonNet={seasonNet}
-                  match={term}
-                />
+                <StandingRow key={player.id} player={player} match={term} />
               ))}
               {waiting.map((player) => (
                 <li key={player.id} className="standing">

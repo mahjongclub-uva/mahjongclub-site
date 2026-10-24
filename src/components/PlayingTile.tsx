@@ -2,8 +2,8 @@ import { Bamboo, Dots, BLUE, GREEN, RED } from "@/components/TileArtwork";
 import { GLYPHS } from "@/components/glyphs";
 import { Traced } from "@/components/TracedArt";
 import type { ReactNode } from "react";
+import { NUMERALS } from "@/lib/format";
 
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
 export type Suit = "bamboo" | "dots" | "characters";
 
 /** The illustrated tile's artwork: an 88 x 124 face with its celadon edge. */

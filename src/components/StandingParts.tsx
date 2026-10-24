@@ -8,10 +8,7 @@ import { RED } from "@/components/TileArtwork";
 import RankTileFlip from "@/components/RankTileFlip";
 import CountUp from "@/components/CountUp";
 import { SEASON_START, type Standing } from "@/lib/schema";
-import { formatPoints } from "@/lib/format";
-
-/** 一 through 九, with 伍 for five as on the guide's tiles. */
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
+import { NUMERALS, formatPoints } from "@/lib/format";
 
 /**
  * A rank as the guide's character tile, turning over to show the number for
@@ -84,19 +81,17 @@ export function Delta({ change }: { change?: number | null }) {
  */
 export function StandingRow({
   player,
-  seasonNet,
   index,
   match,
 }: {
   player: Standing;
-  seasonNet: boolean;
   index?: number;
   /** Search text to mark in the name, already lowercased. */
   match?: string;
 }) {
   const name = player.display;
   const at = match ? name.toLocaleLowerCase().indexOf(match) : -1;
-  const score = seasonNet ? SEASON_START + player.total_net : player.total_gain;
+  const score = SEASON_START + player.total_net;
   return (
     <li
       className="standing"
@@ -135,7 +130,7 @@ export function StandingRow({
           )}
         </b>
         <span className="sr-only"> points</span>
-        {seasonNet && <Delta change={player.rank_change} />}
+        <Delta change={player.rank_change} />
       </span>
     </li>
   );
