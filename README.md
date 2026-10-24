@@ -102,8 +102,6 @@ Review the changes under `data/` and open a pull request. Merging it publishes t
 
 An OAuth app left in Google's Testing status issues tokens that expire after seven days, so expect to sign in again weekly unless it is published.
 
-Fall 2025 is test data on an older rule and still reads names from the gitignored `pipeline/roster.local.json`. Leave it alone.
-
 ## Meeting nights
 
 Players scan a QR code to [mahjongclubuva.org/checkin/](https://mahjongclubuva.org/checkin/), which opens check-in directly; the other meeting pages live under `/meeting/`. These pages are unlisted and not indexed.

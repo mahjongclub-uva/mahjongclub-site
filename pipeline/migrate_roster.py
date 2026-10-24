@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_data  # noqa: E402
 
+ROSTER_PATH = Path(__file__).resolve().parent / "roster.local.json"
 WRITE_TOKEN = build_data.OAUTH_TOKEN.with_name("google-token-write.json")
 WRITE_SCOPE = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -137,7 +138,7 @@ def main() -> None:
             args.spreadsheet_id, build_data.ROSTER_TAB, "A:E"))
         if has_tab else {}
     )
-    local = json.loads(build_data.ROSTER_PATH.read_text())["players"] if build_data.ROSTER_PATH.exists() else {}
+    local = json.loads(ROSTER_PATH.read_text())["players"] if ROSTER_PATH.exists() else {}
     attendance_grid = build_data.read_sheets_grid(args.spreadsheet_id, args.attendance_tab, "A:A")
     attendance = [text for (row, _), text in sorted(attendance_grid.items()) if row >= 3]
 

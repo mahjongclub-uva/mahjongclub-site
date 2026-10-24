@@ -1,10 +1,6 @@
 import contextlib
 import io
-import json
-import os
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from pipeline import build_data
@@ -23,9 +19,9 @@ class ScoreImportTests(unittest.TestCase):
         # Truncation used to turn an unbalanced 823.6-point table into 820.
         output = io.StringIO()
         with (
-            patch("sys.argv", ["build_data.py"]),
-            patch.object(build_data, "read_excel_grid", return_value=self.grid("205.9", "0.9")),
-            patch.object(build_data, "load_roster") as load_roster,
+            patch("sys.argv", ["build_data.py", "--spreadsheet-id", "test"]),
+            patch.object(build_data, "read_sheets_grid", return_value=self.grid("205.9", "0.9")),
+            patch.object(build_data, "read_roster_tab") as read_roster_tab,
             patch.object(build_data, "write_json") as write_json,
             contextlib.redirect_stdout(io.StringIO()),
             contextlib.redirect_stderr(output),
@@ -33,7 +29,7 @@ class ScoreImportTests(unittest.TestCase):
         ):
             build_data.main()
 
-        load_roster.assert_not_called()
+        read_roster_tab.assert_not_called()
         write_json.assert_not_called()
         self.assertIn("Table 1 row 3", output.getvalue())
         self.assertNotIn("Private Player", output.getvalue())
@@ -137,33 +133,6 @@ class PrivateLogTests(unittest.TestCase):
 
         self.assertIn("Table 3", output.getvalue())
         self.assertNotIn("Private Player", output.getvalue())
-
-    def test_ci_requires_all_players_in_the_private_roster(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            roster_path = Path(temp_dir) / "roster.local.json"
-            output = io.StringIO()
-            with (
-                patch.object(build_data, "ROSTER_PATH", roster_path),
-                patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}),
-                contextlib.redirect_stderr(output),
-                self.assertRaises(SystemExit),
-            ):
-                build_data.load_roster(["Private Player"])
-
-        self.assertIn("missing 1 player", output.getvalue())
-        self.assertNotIn("Private Player", output.getvalue())
-
-    def test_new_local_players_are_opted_out_until_approved(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            roster_path = Path(temp_dir) / "roster.local.json"
-            with (
-                patch.object(build_data, "ROSTER_PATH", roster_path),
-                patch.dict(os.environ, {"GITHUB_ACTIONS": "false"}),
-            ):
-                roster = build_data.load_roster(["Private Player"])
-
-            self.assertTrue(roster["Private Player"]["opt_out"])
-            self.assertTrue(json.loads(roster_path.read_text())["players"]["Private Player"]["opt_out"])
 
 
 if __name__ == "__main__":

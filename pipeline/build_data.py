@@ -8,15 +8,14 @@ Reads the Points Tracking tab, checks every table adds up, works out the
 standings, and writes data/meta.json and data/semesters/*.json.
 
 Never writes to the sheet (read-only), and never publishes a legal name.
-Legal names live only in the workbook's Roster tab (or, for the Excel
-fallback, pipeline/roster.local.json, not committed); only short display
+Legal names live only in the workbook's Roster tab; only short display
 names like "Eddie Z." reach the website.
 
 If a table's points don't add up, this stops with an error naming the table
 and writes nothing, so the site keeps showing the last good (stale but
 correct) data instead of something wrong.
 
-Excel imports use the standard library. Google Sheets imports use the optional packages in requirements.txt.
+It reads the Google Sheet with the packages in requirements.txt.
 """
 
 from __future__ import annotations
@@ -26,9 +25,7 @@ import json
 import os
 import re
 import sys
-import zipfile
 import datetime as dt
-import xml.etree.ElementTree as ET
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -39,8 +36,6 @@ from pathlib import Path
 
 PIPELINE_VERSION = "0.1.0"
 
-# Downloaded workbook remains available as a fallback source.
-WORKBOOK = Path.home() / "Documents" / "mahjongclub" / "Copy of ATTENDANCE 25-26.xlsx"
 OAUTH_CLIENT = Path.home() / ".config" / "mahjongclub-site" / "google-oauth-client.json"
 OAUTH_TOKEN = Path.home() / ".config" / "mahjongclub-site" / "google-token.json"
 SHEETS_SCOPE = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
@@ -48,7 +43,6 @@ SHEETS_SCOPE = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 # Each semester has its own source tab and qualification rule. Import one
 # semester at a time so a new private Sheet need not contain older seasons.
 SEMESTERS = [
-    {"id": "fall-2025", "label": "Fall 2025", "tab": "Fall Points Tracking", "min_tables": 2},
     {
         "id": "fall-2026",
         "label": "Fall 2026",
@@ -68,58 +62,12 @@ START_AMOUNT = 205
 SEATS_PER_TABLE = 4
 
 REPO = Path(__file__).resolve().parent.parent
-ROSTER_PATH = REPO / "pipeline" / "roster.local.json"
 DATA_DIR = REPO / "data"
 
 
 # ---------------------------------------------------------------------------
-# Reading source data. Both readers produce the same grid, so the scoring
-# logic below does not depend on whether data came from Excel or Sheets.
+# Reading source data.
 # ---------------------------------------------------------------------------
-
-_NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-_REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
-
-
-def read_excel_grid(workbook: Path, tab: str) -> dict[tuple[int, int], str]:
-    """Return one tab as {(row, column): text}, both 1-based. Blanks are absent."""
-    if not workbook.exists():
-        die(f"cannot find the workbook at {workbook}")
-
-    archive = zipfile.ZipFile(workbook)
-
-    # Cell text is pooled in one shared table and referenced by index.
-    shared: list[str] = []
-    if "xl/sharedStrings.xml" in archive.namelist():
-        for entry in ET.fromstring(archive.read("xl/sharedStrings.xml")):
-            shared.append("".join(t.text or "" for t in entry.iter(_NS + "t")))
-
-    targets = {
-        rel.get("Id"): rel.get("Target").lstrip("/")
-        for rel in ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    }
-
-    path = None
-    tabs = []
-    for sheet in ET.fromstring(archive.read("xl/workbook.xml")).iter(_NS + "sheet"):
-        tabs.append(sheet.get("name"))
-        if sheet.get("name") == tab:
-            path = targets[sheet.get(_REL + "id")]
-    if path is None:
-        die(f"no tab named {tab!r}. The workbook has: {', '.join(tabs)}")
-    if not path.startswith("xl/"):
-        path = "xl/" + path
-
-    grid: dict[tuple[int, int], str] = {}
-    for cell in ET.fromstring(archive.read(path)).iter(_NS + "c"):
-        value = cell.find(_NS + "v")
-        if value is None or value.text is None:
-            continue
-        text = shared[int(value.text)] if cell.get("t") == "s" else value.text
-        if text.strip():
-            grid[cell_ref(cell.get("r"))] = text.strip()
-    return grid
-
 
 def read_sheets_grid(
     spreadsheet_id: str, tab: str, columns: str = "B:F"
@@ -341,15 +289,7 @@ def check_tables(tables: list[Table]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def default_display(name: str) -> str:
-    parts = name.split()
-    if len(parts) == 1:
-        return parts[0]
-    return f"{parts[0]} {parts[-1][0]}."
-
-
-# The Roster tab in the score workbook replaces roster.local.json when reading
-# from Google Sheets. Row 1 is this header; full_name is spelled exactly as in
+# The Roster tab in the score workbook. Row 1 is this header; full_name is spelled exactly as in
 # Points Tracking. The pipeline only reads it: new rows come from check-in
 # sign-up or pipeline/migrate_roster.py.
 ROSTER_TAB = "Roster"
@@ -391,51 +331,6 @@ def read_roster_tab(spreadsheet_id: str, names: list[str]) -> dict[str, dict]:
             f"the {ROSTER_TAB} tab is missing {len(missing)} player(s) who appear in "
             "Points Tracking; add them (python3 pipeline/migrate_roster.py) and rerun"
         )
-    return roster
-
-
-def load_roster(names: list[str]) -> dict[str, dict]:
-    roster: dict[str, dict] = {}
-    if ROSTER_PATH.exists():
-        roster = json.loads(ROSTER_PATH.read_text())["players"]
-
-    used = {entry["id"] for entry in roster.values()}
-    missing = [name for name in names if name not in roster]
-    if missing and os.environ.get("GITHUB_ACTIONS") == "true":
-        die(
-            f"the private roster is missing {len(missing)} player(s); "
-            "update the SCORES_ROSTER_JSON secret before rerunning"
-        )
-
-    added = []
-    for name in missing:
-        if name in roster:
-            continue
-        number = 1
-        while f"p{number:03d}" in used:
-            number += 1
-        new_id = f"p{number:03d}"
-        used.add(new_id)
-        # New names stay private until an officer confirms public display.
-        roster[name] = {"id": new_id, "display": default_display(name), "opt_out": True}
-        added.append(f"{new_id} {roster[name]['display']}")
-
-    ROSTER_PATH.parent.mkdir(parents=True, exist_ok=True)
-    ROSTER_PATH.write_text(
-        json.dumps(
-            {
-                "_comment": "Not committed: this file maps real names to site names. "
-                            "Edit 'display' for a nickname, set 'opt_out' to remove someone.",
-                "players": dict(sorted(roster.items(), key=lambda kv: kv[1]["id"])),
-            },
-            indent=2,
-            ensure_ascii=False,
-        )
-        + "\n"
-    )
-
-    if added:
-        print(f"  added {len(added)} player(s) to the local roster")
     return roster
 
 
@@ -597,25 +492,22 @@ def die(message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=("excel", "sheets"), default="excel")
+    # Sheets is the only source; the flag stays so existing callers still work.
+    parser.add_argument("--source", choices=("sheets",), default="sheets")
     parser.add_argument("--spreadsheet-id", default=None)
     parser.add_argument(
-        "--semester", choices=[s["id"] for s in SEMESTERS], default="fall-2025"
+        "--semester", choices=[s["id"] for s in SEMESTERS], default=CURRENT_SEMESTER
     )
     args = parser.parse_args()
 
     spreadsheet_id = args.spreadsheet_id or os.environ.get("SCORES_SPREADSHEET_ID")
-    if args.source == "sheets" and not spreadsheet_id:
+    if not spreadsheet_id:
         die("pass --spreadsheet-id or set SCORES_SPREADSHEET_ID")
-    print("Reading the private Google Sheet" if args.source == "sheets" else f"Reading {WORKBOOK.name}")
+    print("Reading the private Google Sheet")
 
     config = next(s for s in SEMESTERS if s["id"] == args.semester)
     summaries = []
-    grid = (
-        read_sheets_grid(spreadsheet_id, config["tab"])
-        if args.source == "sheets"
-        else read_excel_grid(WORKBOOK, config["tab"])
-    )
+    grid = read_sheets_grid(spreadsheet_id, config["tab"])
     tables = parse_tables(grid)
     if not tables:
         print(f"  {config['label']}: no tables played yet")
@@ -623,11 +515,7 @@ def main() -> None:
     check_tables(tables)
 
     names = sorted({name for table in tables for name, _, _ in table.seats})
-    roster = (
-        read_roster_tab(spreadsheet_id, names)
-        if args.source == "sheets"
-        else load_roster(names)
-    )
+    roster = read_roster_tab(spreadsheet_id, names)
 
     standings, unranked = aggregate(
         tables, roster, config["min_tables"], config.get("scoring_rule")
@@ -681,11 +569,7 @@ def main() -> None:
             .isoformat()
             .replace("+00:00", "Z"),
             "pipeline_version": PIPELINE_VERSION,
-            "current_semester": (
-                CURRENT_SEMESTER
-                if any(s["id"] == CURRENT_SEMESTER for s in summaries)
-                else "fall-2025"
-            ),
+            "current_semester": CURRENT_SEMESTER,
             "semesters": summaries,
         },
     )
