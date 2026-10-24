@@ -1352,6 +1352,8 @@ function clubRecheck() {
         const blocks = pointsLayout(grid);
         // Read once per semester; each block only picks its date's column.
         const ticks = sheet(semester.attendanceTab).getDataRange().getValues();
+        // Colours go in two writes per tab, not one per table.
+        const marks = { red: [], clear: [] };
         blocks.forEach((block) => {
           let message = "";
           if (!block.empty) {
@@ -1374,14 +1376,18 @@ function clubRecheck() {
                 : "Invalid date or table cells.";
             }
           }
-          tab
-            .getRange(block.row + 1, 2, 5, 3)
-            .setBackground(message ? "#fce8e6" : null);
+          marks[message ? "red" : "clear"].push(
+            "B" + (block.row + 1) + ":D" + (block.row + 5),
+          );
           if (message)
             errors.push(
               semester.id + " Table " + block.number + ": " + message,
             );
         });
+        if (marks.red.length)
+          tab.getRangeList(marks.red).setBackground("#fce8e6");
+        if (marks.clear.length)
+          tab.getRangeList(marks.clear).setBackground(null);
       });
       const meeting = readMeeting();
       if (meeting)
