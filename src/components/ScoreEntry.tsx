@@ -19,9 +19,8 @@ import {
 } from "@/lib/meeting";
 import { draftSchema, pendingSchema } from "@/lib/meetingSchemas";
 import { MEETING_SERVICE_URL } from "@/lib/site";
-import { clock, signed, tileNames } from "@/lib/format";
+import { SEASON_START as START, clock, signed, tileNames } from "@/lib/format";
 
-const START = 205;
 // The last confirmed save, so a reload shows the receipt instead of an empty form.
 const RECEIPT_STORAGE = "club-table-receipt";
 const receiptSchema = draftSchema.extend({
