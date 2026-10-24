@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-Fills the score workbook's Roster tab, once, before check-in goes live.
+Adds Attendance names that are missing from the score workbook's Roster tab.
 
     python3 pipeline/migrate_roster.py --spreadsheet-id <id>           # dry run
     python3 pipeline/migrate_roster.py --spreadsheet-id <id> --write
 
-Adds every player from pipeline/roster.local.json, keeping their id, display
-name and opt-out, then every other name in the Attendance tab as a new player.
-Nobody has a computing ID yet: each person links theirs at their first check-in.
+Each new name becomes a new player with no computing ID yet: they link theirs
+at their first check-in.
 
 Safe to rerun: a name already in the tab (ignoring case and spacing) is left
 alone. It prints counts and opaque ids only, never names, and it is the one
@@ -17,16 +16,13 @@ script here that writes to the workbook, so it uses its own write-scoped token.
 from __future__ import annotations
 
 import argparse
-import json
 import os
-import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_data  # noqa: E402
 
-ROSTER_PATH = Path(__file__).resolve().parent / "roster.local.json"
 WRITE_TOKEN = build_data.OAUTH_TOKEN.with_name("google-token-write.json")
 WRITE_SCOPE = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -49,26 +45,14 @@ def derive_display(name: str, taken: set[str]) -> str | None:
     return None
 
 
-def plan_rows(
-    existing: dict[str, dict], local: dict[str, dict], attendance: list[str]
-) -> list[list]:
-    """Rows to append, in Roster column order. existing and local map full
+def plan_rows(existing: dict[str, dict], attendance: list[str]) -> list[list]:
+    """Rows to append, in Roster column order. existing maps full
     name -> {id, display, opt_out}."""
     seen = {normalize(name) for name in existing}
-    used_ids = {entry["id"] for entry in existing.values()}
-    taken = {entry["display"] for entry in [*existing.values(), *local.values()]}
-    numbers = [int(e["id"][1:]) for e in [*existing.values(), *local.values()]]
+    taken = {entry["display"] for entry in existing.values()}
+    numbers = [int(e["id"][1:]) for e in existing.values()]
     next_number = max(numbers, default=0) + 1
     rows: list[list] = []
-
-    for name, entry in sorted(local.items(), key=lambda kv: kv[1]["id"]):
-        if normalize(name) in seen:
-            continue
-        if entry["id"] in used_ids:
-            build_data.die(f"cannot migrate {entry['id']}: a different player already uses that ID")
-        seen.add(normalize(name))
-        used_ids.add(entry["id"])
-        rows.append([entry["id"], "", name, entry["display"], bool(entry["opt_out"])])
 
     for name in attendance:
         name = " ".join(name.split())
@@ -138,16 +122,14 @@ def main() -> None:
             args.spreadsheet_id, build_data.ROSTER_TAB, "A:E"))
         if has_tab else {}
     )
-    local = json.loads(ROSTER_PATH.read_text())["players"] if ROSTER_PATH.exists() else {}
     attendance_grid = build_data.read_sheets_grid(args.spreadsheet_id, args.attendance_tab, "A:A")
     attendance = [text for (row, _), text in sorted(attendance_grid.items()) if row >= 3]
 
-    rows = plan_rows(existing, local, attendance)
-    from_local = sum(1 for row in rows if row[2] in local)
+    rows = plan_rows(existing, attendance)
     everyone = {**{n: e["id"] for n, e in existing.items()}, **{row[2]: row[0] for row in rows}}
 
     print(f"Roster tab: {'exists, ' + str(len(existing)) + ' players' if has_tab else 'not created yet'}")
-    print(f"To add: {from_local} from roster.local.json, {len(rows) - from_local} from {args.attendance_tab}")
+    print(f"To add: {len(rows)} from {args.attendance_tab}")
     for row in rows:
         if row[3].startswith("CHECK"):
             print(f"  {row[0]} needs a display name set by hand (short name already taken)")

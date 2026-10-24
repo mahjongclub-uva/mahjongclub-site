@@ -13,41 +13,22 @@ class MigrateRosterTests(unittest.TestCase):
         self.assertIsNone(derive_display("Kevin J", {"Kevin J."}))
 
     def test_rerun_keeps_existing_rows_and_ids(self):
-        local = {"Ann Lee": {"id": "p002", "display": "Ann L.", "opt_out": True}}
-        existing = {"Bo Kim": {"id": "p001", "display": "Bo K.", "opt_out": False}}
-        rows = plan_rows(existing, local, ["ann  LEE", "Bo Kim", "Ann Long"])
-        # Ann Lee comes from the local roster with her id and opt-out, the
-        # attendance spellings of known names are skipped, and a newcomer
+        existing = {
+            "Bo Kim": {"id": "p001", "display": "Bo K.", "opt_out": False},
+            "Ann Lee": {"id": "p002", "display": "Ann L.", "opt_out": True},
+        }
+        rows = plan_rows(existing, ["ann  LEE", "Bo Kim", "Ann Long"])
+        # Attendance spellings of known names are skipped, and a newcomer
         # continues the numbering with a short name that doesn't collide.
-        self.assertEqual(rows, [
-            ["p002", "", "Ann Lee", "Ann L.", True],
-            ["p003", "", "Ann Long", "Ann Lo.", False],
-        ])
-        self.assertEqual(plan_rows({**existing, "Ann Lee": local["Ann Lee"], "Ann Long": {
-            "id": "p003", "display": "Ann Lo.", "opt_out": False}}, local, ["Ann Long"]), [])
+        self.assertEqual(rows, [["p003", "", "Ann Long", "Ann Lo.", False]])
+        self.assertEqual(plan_rows({**existing, "Ann Long": {
+            "id": "p003", "display": "Ann Lo.", "opt_out": False}}, ["Ann Long"]), [])
 
     def test_flags_similar_names_by_id_only(self):
         self.assertEqual(
             likely_duplicates({"Ben Liu": "p004", "Benjamin Liu": "p001", "Ben Wu": "p002"}),
             [("p001", "p004")],
         )
-
-    def test_local_id_cannot_replace_a_different_existing_player(self):
-        existing = {"Private Existing": {"id": "p001", "display": "E.", "opt_out": False}}
-        local = {"Private Local": {"id": "p001", "display": "L.", "opt_out": True}}
-        output = io.StringIO()
-        with contextlib.redirect_stderr(output), self.assertRaises(SystemExit):
-            plan_rows(existing, local, [])
-        self.assertIn("cannot migrate p001", output.getvalue())
-        self.assertNotIn("Private", output.getvalue())
-
-    def test_duplicate_local_ids_are_rejected_before_migration(self):
-        local = {
-            "Private First": {"id": "p001", "display": "F.", "opt_out": False},
-            "Private Second": {"id": "p001", "display": "S.", "opt_out": False},
-        }
-        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
-            plan_rows({}, local, [])
 
     def test_roster_tab_rejects_a_repeated_id(self):
         grid = {(1, c + 1): h for c, h in enumerate(build_data.ROSTER_COLUMNS)}
