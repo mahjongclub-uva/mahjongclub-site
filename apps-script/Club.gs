@@ -49,10 +49,9 @@ function validateSettings(value) {
     typeof value.calendarId !== "string" ||
     !value.calendarId ||
     !Array.isArray(value.semesters) ||
-    !value.semesters.length ||
-    !Array.isArray(value.publishedPlayers)
+    !value.semesters.length
   )
-    fail(400, "Settings need calendarId, semesters and publishedPlayers.");
+    fail(400, "Settings need calendarId and semesters.");
   for (const key of ["checkinMinutesBefore", "scoreMinutesAfter"]) {
     if (!Number.isInteger(value[key]) || value[key] < 0 || value[key] > 1440)
       fail(400, "Meeting margins must be whole minutes from 0 to 1440.");
@@ -85,19 +84,6 @@ function validateSettings(value) {
     )
       fail(400, "Semester ids must be unique and dates must not overlap.");
   });
-  if (
-    value.publishedPlayers.some(
-      (player) =>
-        !player ||
-        !/^p\d{3,}$/.test(player.id) ||
-        typeof player.display !== "string" ||
-        !player.display,
-    )
-  )
-    fail(
-      400,
-      "publishedPlayers must contain only ids and short names from the published leaderboard.",
-    );
   return value;
 }
 
@@ -485,6 +471,20 @@ function onEdit(event) {
     CacheService.getScriptCache().remove("results:" + meeting.id);
 }
 
+// A Points tab an officer is mid-edit on must not block sign-ups, so a read
+// that fails suggests nobody.
+function scoredNames() {
+  try {
+    return [...new Set(settings().semesters.map((item) => item.pointsTab))]
+      .flatMap((tab) => pointsLayout(sheet(tab).getDataRange().getValues()))
+      .flatMap((block) => block.seats.map(([seat]) => normalize(String(seat))))
+      .filter(Boolean);
+  } catch (error) {
+    console.error("Points Tracking could not be read: " + error.message);
+    return [];
+  }
+}
+
 // `listed` is the Roster if it was read before the lock. A known player's row
 // never moves, so it is safe to use; signing up rereads it, since it adds rows.
 function checkIn(request, meeting, listed) {
@@ -497,13 +497,14 @@ function checkIn(request, meeting, listed) {
   const name = text(request.fullName, "full name", 120);
   let player = players.find((item) => normalize(item.name) === normalize(name));
   if (player?.computingId) fail(409, "That name is taken. Ask an officer.");
-  const published = settings().publishedPlayers;
-  const suggestions = players.filter(
-    (item) =>
-      !item.computingId &&
-      !item.optOut &&
-      published.some((publicEntry) => publicEntry.id === item.id) &&
-      closeNames(name, item.name),
+  // Only published names are suggested: anyone in Points Tracking, since
+  // playing a scored game is what publishes a player.
+  const close = players.filter(
+    (item) => !item.computingId && !item.optOut && closeNames(name, item.name),
+  );
+  const scored = close.length ? scoredNames() : [];
+  const suggestions = close.filter((item) =>
+    scored.includes(normalize(item.name)),
   );
   if (!player && request.matchId) {
     player = suggestions.find((item) => item.id === request.matchId);
@@ -512,9 +513,7 @@ function checkIn(request, meeting, listed) {
   if (!player && suggestions.length && request.createNew !== true) {
     return {
       status: 409,
-      suggestions: suggestions.map((item) =>
-        published.find((entry) => entry.id === item.id),
-      ),
+      suggestions: suggestions.map(publicPlayer),
     };
   }
   const roster = sheet("Roster");
@@ -1230,7 +1229,6 @@ function clubReadSettings() {
           pointsTab: "Fall Points Tracking",
         },
       ],
-      publishedPlayers: [],
     }
   );
 }
@@ -1239,8 +1237,6 @@ function clubSaveSettings(value) {
   return withLock(() => {
     if (meetingWindow(readMeeting(), Date.now()).open)
       fail(409, "Close the meeting before changing settings.");
-    // Published-name suggestions are installed by the maintainer, never inferred from private rows.
-    value.publishedPlayers = clubReadSettings().publishedPlayers;
     properties().setProperty(
       "settings",
       JSON.stringify(validateSettings(value)),
