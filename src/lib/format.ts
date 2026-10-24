@@ -1,6 +1,9 @@
 /** Everyone starts a season at 205 (re-exported by schema.ts). */
 export const SEASON_START = 205;
 
+/** 一 through 九 by index, with 伍 for five as on the guide's tiles. */
+export const NUMERALS = ["", ..."一二三四伍六七八九"];
+
 /** A score with a real minus sign, which a season below zero can need. */
 export const formatPoints = (points: number) =>
   String(points).replace("-", "−");
