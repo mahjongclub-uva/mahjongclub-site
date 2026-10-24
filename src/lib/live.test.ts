@@ -12,7 +12,6 @@ test("live scores use season nets, dense ties, qualification and official rank m
     sessions: 1,
     last_session: "2026-09-25",
     min_tables_to_rank: 1,
-    scoring_rule: "season-net",
     awards: [],
     unranked: [],
     standings: [
@@ -23,8 +22,6 @@ test("live scores use season nets, dense ties, qualification and official rank m
         tables_played: 1,
         total_net: 10,
         avg_net: 10,
-        total_gain: 10,
-        avg_gain: 10,
         best_table: 10,
       },
       {
@@ -34,8 +31,6 @@ test("live scores use season nets, dense ties, qualification and official rank m
         tables_played: 1,
         total_net: 0,
         avg_net: 0,
-        total_gain: 0,
-        avg_gain: 0,
         best_table: 0,
       },
     ],

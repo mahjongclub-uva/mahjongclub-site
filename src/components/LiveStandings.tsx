@@ -64,8 +64,7 @@ function LiveTable({
   const [missingSaved, setMissingSaved] = useState(false);
   const previousPoints = useRef<Map<string, number> | null>(null);
   const [scoreChanges, setScoreChanges] = useState<Record<string, number>>({});
-  const matching =
-    meeting.semester === semester.id && semester.scoring_rule === "season-net";
+  const matching = meeting.semester === semester.id;
   const retry = usePoll(
     async (signal) => {
       setUpdating(true);
