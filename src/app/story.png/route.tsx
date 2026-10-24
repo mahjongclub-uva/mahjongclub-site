@@ -10,13 +10,12 @@ import path from "node:path";
 import { ImageResponse } from "next/og";
 import { GLYPHS } from "@/components/glyphs";
 import { getCurrentSemester } from "@/lib/data";
-import { formatPoints } from "@/lib/format";
+import { NUMERALS, formatPoints } from "@/lib/format";
 import { FULL_NAME } from "@/lib/site";
 import { storyBoard, type Move, type StoryEntry } from "@/lib/story";
 
 export const dynamic = "force-static";
 
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
 const INK = "#2e2e2c";
 const CHIP: Record<Move["dir"], [string, string]> = {
   up: ["#dce8df", "#1f4d3d"],

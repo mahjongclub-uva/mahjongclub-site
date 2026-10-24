@@ -8,10 +8,7 @@ import { RED } from "@/components/TileArtwork";
 import RankTileFlip from "@/components/RankTileFlip";
 import CountUp from "@/components/CountUp";
 import { SEASON_START, type Standing } from "@/lib/schema";
-import { formatPoints } from "@/lib/format";
-
-/** 一 through 九, with 伍 for five as on the guide's tiles. */
-const NUMERALS = ["", "一", "二", "三", "四", "伍", "六", "七", "八", "九"];
+import { NUMERALS, formatPoints } from "@/lib/format";
 
 /**
  * A rank as the guide's character tile, turning over to show the number for
