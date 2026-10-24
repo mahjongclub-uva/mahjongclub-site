@@ -53,7 +53,7 @@ function validateResult(seats, checkedIn) {
     fail(400, "Choose four different players.");
   }
   if (seats.some((seat) => !checkedIn.includes(seat.id)))
-    fail(400, "Every player must check in tonight.");
+    fail(400, "All four must be checked in tonight.");
   if (
     seats.some((seat) => !Number.isSafeInteger(seat.total)) ||
     seats.reduce((sum, seat) => sum + seat.total, 0) !== 820

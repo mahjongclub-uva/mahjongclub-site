@@ -23,7 +23,7 @@ function withLock(action) {
   const waiting = Date.now();
   const locked = lock.tryLock(10000);
   if (timing) timing.lockMs = Date.now() - waiting;
-  if (!locked) fail(503, "Another write is finishing. Please retry.");
+  if (!locked) fail(503, "Busy for a moment. Try again.");
   try {
     return action();
   } finally {
@@ -218,8 +218,7 @@ function updateMeeting() {
   if (meeting && !meeting.closed) return meeting;
   if (meeting) settleRooms(meeting);
   const events = calendarMeetings(now);
-  if (events.length > 1)
-    fail(503, "Calendar meetings overlap. An officer must correct them.");
+  if (events.length > 1) fail(503, "Two meetings overlap. Ask an officer.");
   if (events.length === 1) {
     const event = events[0];
     if (
@@ -419,7 +418,7 @@ function checkinId(request) {
     32,
   ).toLowerCase();
   if (!/^[a-z][a-z0-9]*$/.test(computingId))
-    fail(400, "Use letters and digits for the computing ID.");
+    fail(400, "Use only letters and numbers.");
   return computingId;
 }
 
@@ -497,8 +496,7 @@ function checkIn(request, meeting, listed) {
   if (listed) players = rosterPlayers();
   const name = text(request.fullName, "full name", 120);
   let player = players.find((item) => normalize(item.name) === normalize(name));
-  if (player?.computingId)
-    fail(409, "That name is already claimed. Ask an officer for help.");
+  if (player?.computingId) fail(409, "That name is taken. Ask an officer.");
   const published = settings().publishedPlayers;
   const suggestions = players.filter(
     (item) =>
@@ -509,8 +507,7 @@ function checkIn(request, meeting, listed) {
   );
   if (!player && request.matchId) {
     player = suggestions.find((item) => item.id === request.matchId);
-    if (!player)
-      fail(409, "That suggestion is no longer available. Try again.");
+    if (!player) fail(409, "That name was just claimed. Try again.");
   }
   if (!player && suggestions.length && request.createNew !== true) {
     return {
@@ -537,11 +534,7 @@ function checkIn(request, meeting, listed) {
       name,
       players.map((item) => item.display),
     );
-    if (!display)
-      fail(
-        409,
-        "That short name is taken. Ask an officer to set a nickname in Roster.",
-      );
+    if (!display) fail(409, "Your short name is taken. Ask an officer.");
     const id =
       "p" +
       String(
@@ -568,7 +561,7 @@ function submitResult(request, meeting, games) {
   )
     fail(400, "A valid submission ID is required.");
   if (request.meetingId !== meeting.id)
-    fail(409, "The meeting changed. Reload before submitting.");
+    fail(409, "The meeting changed. Reload the page.");
   const players = rosterLayout(sheet("Roster").getDataRange().getValues());
   const seats = validateResult(
     request.seats,
@@ -597,7 +590,7 @@ function submitResult(request, meeting, games) {
   let block;
   if (existing >= 0) {
     if (notes[existing] !== receipt)
-      fail(409, "This submission ID was already used for a different result.");
+      fail(409, "This save was used for different totals. Ask an officer.");
     block = blocks[existing];
     if (!block.empty) {
       const expected = seats.map((seat) => [
@@ -609,10 +602,7 @@ function submitResult(request, meeting, games) {
         JSON.stringify(block.seats) !== JSON.stringify(expected) ||
         dateKey(block.date) !== meeting.date
       )
-        fail(
-          409,
-          "This result has been changed in the Sheet. Ask an officer to check it.",
-        );
+        fail(409, "This table was edited in the Sheet. Ask an officer.");
       return {
         status: 200,
         table: block.number,
@@ -622,11 +612,7 @@ function submitResult(request, meeting, games) {
   } else {
     block = blocks.find((item, index) => item.empty && !notes[index]);
   }
-  if (!block)
-    fail(
-      503,
-      "No empty Table N template is available. Ask an officer to add one.",
-    );
+  if (!block) fail(503, "Add a Table N block in Points Tracking.");
   startSave();
   // Reserve the same block on retries, including a failure between the note and values write.
   tab.getRange(block.row, 2).setNote(receipt);
@@ -882,7 +868,7 @@ function roomAction(request, meeting) {
   const player = hereIncluding(meeting, [request.playerId]).find(
     (item) => item.id === request.playerId,
   );
-  if (!player) fail(409, "Check in before joining a table.");
+  if (!player) fail(409, "Check in first.");
   const rooms = readRooms(meeting.id);
   const mine = rooms.find((room) =>
     room.seats.some((seat) => seat.id === player.id),
@@ -936,8 +922,7 @@ function roomAction(request, meeting) {
       // Changing seats at your own table is fine until a game is saved.
       const seat = mine.seats.find((item) => item.id === player.id);
       if (request.seat === undefined || seat.wind === wind) return reply(null);
-      if (mine.hands.length)
-        fail(409, "Seats are fixed once a game is saved at this table.");
+      if (mine.hands.length) fail(409, "Seats are fixed once a game is saved.");
       if (taken(wind)) fail(409, WINDS[wind] + " was just taken.");
       seat.wind = wind;
       writeRoom(mine);
@@ -953,10 +938,7 @@ function roomAction(request, meeting) {
   if (action === "leave") {
     if (!mine) return reply(null);
     if (mine.hands.length)
-      fail(
-        409,
-        "Games are saved at this table. End the table to leave; it ends for all four players.",
-      );
+      fail(409, "Games are saved here. End the table to leave.");
     mine.seats = mine.seats.filter((seat) => seat.id !== player.id);
     writeRoom(mine);
     return reply(null);
@@ -970,7 +952,7 @@ function roomAction(request, meeting) {
       room.ended.lastHandId === (request.lastHandId || null)
     )
       return reply(room.ended.sheetTable);
-    if (!room || mine !== room) fail(409, "You're not seated at this table.");
+    if (!room || mine !== room) fail(409, "You're not at this table.");
     if (room.session !== request.session)
       fail(409, "Your table just changed. Check the latest scores.");
     expectSeen(room);
@@ -999,10 +981,7 @@ function roomAction(request, meeting) {
     (action === "hand" || action === "undo") &&
     (request.table !== mine.table || request.session !== mine.session)
   )
-    fail(
-      409,
-      "Your table just changed. Reload before saving or undoing a game.",
-    );
+    fail(409, "Your table just changed. Reload first.");
   if (action === "hand") {
     if (
       typeof request.handId !== "string" ||
@@ -1012,8 +991,7 @@ function roomAction(request, meeting) {
     if (mine.hands.some((hand) => hand.id === request.handId))
       return reply(null);
     expectSeen(mine);
-    if (mine.seats.length !== 4)
-      fail(409, "A game needs four players at the table.");
+    if (mine.seats.length !== 4) fail(409, "A game needs four players.");
     if (!mine.seats.some((seat) => seat.id === request.winner))
       fail(400, "Choose the winner from this table.");
     if (
@@ -1021,7 +999,7 @@ function roomAction(request, meeting) {
       request.each < 1 ||
       request.each > 9999
     )
-      fail(400, "Enter what each player pays, as a whole number above 0.");
+      fail(400, "Each pays a whole number above 0.");
     if (mine.hands.length >= MAX_HANDS)
       fail(409, "End this table to keep recording games.");
     mine.hands.push({

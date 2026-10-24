@@ -414,7 +414,7 @@ test("results fill existing table templates and stop without changes when full",
   const before = JSON.stringify(h.tabs.Points);
   const full = h.post({ ...request, submissionId: "template-test-0004" });
   assert.equal(full.status, 503);
-  assert.match(full.message, /No empty Table N template/);
+  assert.match(full.message, /Add a Table N block/);
   assert.equal(JSON.stringify(h.tabs.Points), before);
   assert.equal(h.get({ r: "results" }).tables.length, 3);
 });
@@ -539,6 +539,19 @@ test("name derivation matches migration, and layout changes fail before writing"
     503,
   );
   assert.equal(JSON.stringify(incomplete.tabs.Roster.grid), before);
+});
+
+test("a newcomer claims the Roster row an officer added with a nickname", () => {
+  const h = harness();
+  h.tabs.Roster.grid[7] = ["p007", "", "Kevin Jones", "Kev J.", false];
+  const reply = h.post({
+    r: "players",
+    computingId: "kj9",
+    fullName: "Kevin Jones",
+  });
+  assert.equal(reply.player.id, "p007");
+  assert.equal(reply.player.display, "Kev J.");
+  assert.equal(h.tabs.Roster.grid[7][1], "kj9");
 });
 
 test("an unscheduled meeting inserts a date inside the formula range", () => {

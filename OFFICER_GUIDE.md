@@ -110,6 +110,7 @@ Closing saves every table that still has games. If one cannot be saved, for exam
 Only for a table that can never save: check Points first, enter it by hand, then delete its `room:<meetingId>:<table>` entry under Project Settings › Script properties.
 For a visitor without a computing ID, add a unique `player_id`, full name, short name and opt-out checkbox to Roster, select that row, and choose **Club > Check in selected member**.
 You can also select their existing Attendance row.
+If a newcomer sees "Your short name is taken", add a Roster row with a unique `player_id`, their full name exactly as they type it, and a short name nobody else has, such as a nickname. Leave `computing_id` empty: their next **Join the club** with that name claims the row.
 **Club > Recheck** validates filled tables against roster names, attendance, whole totals, the 820 total, and Net values, and highlights invalid blocks in pale red.
 Recheck also lists any table whose games were never saved, including one left from an earlier meeting, with each player's total.
 Recheck does not alter scores or start publishing.
