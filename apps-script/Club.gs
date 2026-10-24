@@ -991,7 +991,8 @@ function roomAction(request, meeting) {
     if (mine.hands.some((hand) => hand.id === request.handId))
       return reply(null);
     expectSeen(mine);
-    if (mine.seats.length !== 4) fail(409, "A game needs four players at the table.");
+    if (mine.seats.length !== 4)
+      fail(409, "A game needs four players at the table.");
     if (!mine.seats.some((seat) => seat.id === request.winner))
       fail(400, "Choose the winner from this table.");
     if (
