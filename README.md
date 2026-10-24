@@ -81,7 +81,7 @@ Scores are counted with playing cards at the table and recorded in the private s
 The automatic Friday-night sync (`.github/workflows/sync-scores.yml`, 9:05pm Eastern) is not switched on yet, so a maintainer updates the leaderboard by hand:
 
 ```bash
-python3 pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id <spreadsheet-id>
+python3 pipeline/build_data.py --semester fall-2026 --spreadsheet-id <spreadsheet-id>
 ```
 
 Review the changes under `data/` and open a pull request. Merging it publishes the new standings.

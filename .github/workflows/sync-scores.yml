@@ -103,7 +103,7 @@ jobs:
           SCORES_SPREADSHEET_ID: ${{ vars.SCORES_SPREADSHEET_ID }}
         run: |
           set -o pipefail
-          python pipeline/build_data.py --source sheets --semester fall-2026 --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
+          python pipeline/build_data.py --semester fall-2026 --spreadsheet-id "$SCORES_SPREADSHEET_ID" 2>&1 \
             | tee "$RUNNER_TEMP/score-update.log"
 
       # npm runs third-party code next, so the Google credential leaves the

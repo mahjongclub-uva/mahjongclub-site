@@ -480,8 +480,6 @@ def die(message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    # Sheets is the only source; the flag stays so existing callers still work.
-    parser.add_argument("--source", choices=("sheets",), default="sheets")
     parser.add_argument("--spreadsheet-id", default=None)
     parser.add_argument(
         "--semester", choices=[s["id"] for s in SEMESTERS], default=CURRENT_SEMESTER
