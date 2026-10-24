@@ -534,7 +534,7 @@ function checkIn(request, meeting, listed) {
       name,
       players.map((item) => item.display),
     );
-    if (!display) fail(409, "Your short name is taken. Ask an officer.");
+    if (!display) fail(409, "Your name is taken. Ask an officer.");
     const id =
       "p" +
       String(
@@ -952,7 +952,7 @@ function roomAction(request, meeting) {
       room.ended.lastHandId === (request.lastHandId || null)
     )
       return reply(room.ended.sheetTable);
-    if (!room || mine !== room) fail(409, "You're not at this table.");
+    if (!room || mine !== room) fail(409, "You're not seated at this table.");
     if (room.session !== request.session)
       fail(409, "Your table just changed. Check the latest scores.");
     expectSeen(room);
@@ -991,7 +991,7 @@ function roomAction(request, meeting) {
     if (mine.hands.some((hand) => hand.id === request.handId))
       return reply(null);
     expectSeen(mine);
-    if (mine.seats.length !== 4) fail(409, "A game needs four players.");
+    if (mine.seats.length !== 4) fail(409, "A game needs four players at the table.");
     if (!mine.seats.some((seat) => seat.id === request.winner))
       fail(400, "Choose the winner from this table.");
     if (
@@ -999,7 +999,7 @@ function roomAction(request, meeting) {
       request.each < 1 ||
       request.each > 9999
     )
-      fail(400, "Each pays a whole number above 0.");
+      fail(400, "Enter what each player pays, as a whole number above 0.");
     if (mine.hands.length >= MAX_HANDS)
       fail(409, "End this table to keep recording games.");
     mine.hands.push({
