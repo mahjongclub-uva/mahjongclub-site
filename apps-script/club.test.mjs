@@ -200,7 +200,6 @@ function harness() {
         pointsTab: "Points",
       },
     ],
-    publishedPlayers: [{ id: "p005", display: "Benjamin E." }],
   };
   const meeting = {
     id: "fake-meeting",
@@ -433,7 +432,7 @@ test("an interrupted result write retries into its reserved table", () => {
   assert.equal(h.post(request).table, 1);
 });
 
-test("a player in Points Tracking is suggested without being in the snapshot", () => {
+test("only a player in Points Tracking is suggested", () => {
   const ask = (h) =>
     h.post({ r: "players", computingId: "new7", fullName: "Benjamin Fern" })
       .suggestions;
@@ -441,13 +440,14 @@ test("a player in Points Tracking is suggested without being in the snapshot", (
   const h = harness();
   h.tabs.Points.grid[2][1] = "Ben Fern";
   assert.deepEqual(ask(h), [{ id: "p006", display: "Ben F." }]);
-  // A broken Points tab leaves sign-up working, on the snapshot alone.
+  // A broken Points tab leaves sign-up working, with no suggestions.
   h.tabs.Points.grid[1][1] = "";
   assert.equal(ask(h), undefined);
 });
 
 test("signup claims history, limits suggestions to published players, and inserts before blank checkboxes", () => {
   const h = harness();
+  h.tabs.Points.grid[2][1] = "Benjamin Elm";
   const suggestion = h.post({
     r: "players",
     computingId: "new1",
