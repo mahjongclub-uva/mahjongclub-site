@@ -138,7 +138,8 @@ function harness() {
     insertCheckboxes() {
       return this.setValue(false);
     }
-    setBackground() {
+    setBackground(color) {
+      this.tab.backgrounds.push([[this.row], color]);
       return this;
     }
   }
@@ -151,6 +152,12 @@ function harness() {
       name,
       grid,
       notes: {},
+      backgrounds: [],
+      getRangeList(list) {
+        return {
+          setBackground: (color) => this.backgrounds.push([list, color]),
+        };
+      },
       formulas:
         name === "Points"
           ? Object.fromEntries(
@@ -1560,6 +1567,21 @@ test("a made-up player ID cannot force tonight's list to be rebuilt", () => {
   });
   assert.equal(reply.status, 409);
   assert.equal(h.fullReads.Attendance, reads);
+});
+
+test("Recheck colours every table in at most two Sheet writes", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  t.hand("p001", 10);
+  t.end();
+  h.tabs.Points.grid[2][3] = 999;
+  h.tabs.Points.backgrounds = [];
+  h.context.clubRecheck();
+  // JSON round-trip: the script's arrays come from another realm.
+  assert.deepEqual(JSON.parse(JSON.stringify(h.tabs.Points.backgrounds)), [
+    [["B2:D6"], "#fce8e6"],
+    [["B9:D13", "B16:D20"], null],
+  ]);
 });
 
 test("Recheck reads Attendance once per semester, and Points edits refresh results", () => {
