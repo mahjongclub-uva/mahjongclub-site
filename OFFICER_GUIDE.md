@@ -117,9 +117,9 @@ Recheck does not alter scores or start publishing.
 
 ### Public-name suggestions
 
-Suggestions are disabled until a maintainer installs a snapshot of published short names.
+Suggestions offer only names that are already public: anyone who appears in a semester's Points Tracking, since playing a scored game is what publishes a player, plus a snapshot of published players for semesters whose scores live outside the workbook, such as Fall 2025.
 They never use private Roster rows alone as evidence that someone is public.
-Generate that snapshot from the committed public leaderboard data:
+Fall 2025 is finished, so its snapshot needs installing once. Generate it from the committed public leaderboard data:
 
 ```bash
 node --input-type=module - <<'JS'
@@ -137,7 +137,6 @@ JS
 
 With the meeting closed, edit the `settings` Script property in **Project Settings** and replace only its `publishedPlayers` array with this output.
 Use fake published players for the rehearsal, never the real roster.
-Refresh the snapshot after new official standings are published.
 Current opt-outs and claimed rows are excluded even if they appear in an older snapshot.
 
 ### Rehearsal and request contract

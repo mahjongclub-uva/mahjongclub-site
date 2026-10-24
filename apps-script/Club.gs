@@ -485,6 +485,20 @@ function onEdit(event) {
     CacheService.getScriptCache().remove("results:" + meeting.id);
 }
 
+// A Points tab an officer is mid-edit on must not block sign-ups, so a read
+// that fails falls back to the snapshot alone.
+function scoredNames() {
+  try {
+    return [...new Set(settings().semesters.map((item) => item.pointsTab))]
+      .flatMap((tab) => pointsLayout(sheet(tab).getDataRange().getValues()))
+      .flatMap((block) => block.seats.map(([seat]) => normalize(String(seat))))
+      .filter(Boolean);
+  } catch (error) {
+    console.error("Points Tracking could not be read: " + error.message);
+    return [];
+  }
+}
+
 // `listed` is the Roster if it was read before the lock. A known player's row
 // never moves, so it is safe to use; signing up rereads it, since it adds rows.
 function checkIn(request, meeting, listed) {
@@ -497,13 +511,18 @@ function checkIn(request, meeting, listed) {
   const name = text(request.fullName, "full name", 120);
   let player = players.find((item) => normalize(item.name) === normalize(name));
   if (player?.computingId) fail(409, "That name is taken. Ask an officer.");
-  const published = settings().publishedPlayers;
-  const suggestions = players.filter(
+  // Only published names are suggested: the Fall 2025 snapshot, or anyone in
+  // Points Tracking, since playing a scored game is what publishes a player.
+  const published = settings().publishedPlayers.map((entry) => entry.id);
+  const close = players.filter(
+    (item) => !item.computingId && !item.optOut && closeNames(name, item.name),
+  );
+  const scored = close.some((item) => !published.includes(item.id))
+    ? scoredNames()
+    : [];
+  const suggestions = close.filter(
     (item) =>
-      !item.computingId &&
-      !item.optOut &&
-      published.some((publicEntry) => publicEntry.id === item.id) &&
-      closeNames(name, item.name),
+      published.includes(item.id) || scored.includes(normalize(item.name)),
   );
   if (!player && request.matchId) {
     player = suggestions.find((item) => item.id === request.matchId);
@@ -512,9 +531,7 @@ function checkIn(request, meeting, listed) {
   if (!player && suggestions.length && request.createNew !== true) {
     return {
       status: 409,
-      suggestions: suggestions.map((item) =>
-        published.find((entry) => entry.id === item.id),
-      ),
+      suggestions: suggestions.map(publicPlayer),
     };
   }
   const roster = sheet("Roster");
@@ -1239,7 +1256,7 @@ function clubSaveSettings(value) {
   return withLock(() => {
     if (meetingWindow(readMeeting(), Date.now()).open)
       fail(409, "Close the meeting before changing settings.");
-    // Published-name suggestions are installed by the maintainer, never inferred from private rows.
+    // The snapshot covers semesters outside the workbook; Settings can't edit it.
     value.publishedPlayers = clubReadSettings().publishedPlayers;
     properties().setProperty(
       "settings",
