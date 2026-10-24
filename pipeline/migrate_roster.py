@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Adds Attendance names that are missing from the score workbook's Roster tab.
+Adds Attendance and Points Tracking names that are missing from the score
+workbook's Roster tab.
 
     python3 pipeline/migrate_roster.py --spreadsheet-id <id>           # dry run
     python3 pipeline/migrate_roster.py --spreadsheet-id <id> --write
@@ -68,6 +69,14 @@ def plan_rows(existing: dict[str, dict], attendance: list[str]) -> list[list]:
     return rows
 
 
+def respelled(existing: dict[str, dict], names: list[str]) -> list[str]:
+    """Ids of Roster rows that a name matches only after ignoring case and
+    spacing. The pipeline matches names exactly, so these need one spelling."""
+    by_key = {normalize(name): entry["id"] for name, entry in existing.items()}
+    return sorted({by_key[normalize(name)] for name in names
+                   if name not in existing and normalize(name) in by_key})
+
+
 def likely_duplicates(names_to_ids: dict[str, str]) -> list[tuple[str, str]]:
     """Pairs sharing a surname where one first name starts the other
     ('Ben Liu' and 'Benjamin Liu'), for an officer to check by eye."""
@@ -108,6 +117,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spreadsheet-id", default=os.environ.get("SCORES_SPREADSHEET_ID"))
     parser.add_argument("--attendance-tab", default="Fall Attendance")
+    parser.add_argument("--points-tab", default=next(
+        s["tab"] for s in build_data.SEMESTERS if s["id"] == build_data.CURRENT_SEMESTER))
     parser.add_argument("--write", action="store_true", help="change the workbook")
     args = parser.parse_args()
     if not args.spreadsheet_id:
@@ -125,11 +136,16 @@ def main() -> None:
     attendance_grid = build_data.read_sheets_grid(args.spreadsheet_id, args.attendance_tab, "A:A")
     attendance = [text for (row, _), text in sorted(attendance_grid.items()) if row >= 3]
 
-    rows = plan_rows(existing, attendance)
+    points = sorted({name for table in build_data.parse_tables(build_data.read_sheets_grid(
+        args.spreadsheet_id, args.points_tab)) for name, _, _ in table.seats})
+
+    rows = plan_rows(existing, attendance + points)
     everyone = {**{n: e["id"] for n, e in existing.items()}, **{row[2]: row[0] for row in rows}}
 
     print(f"Roster tab: {'exists, ' + str(len(existing)) + ' players' if has_tab else 'not created yet'}")
-    print(f"To add: {len(rows)} from {args.attendance_tab}")
+    print(f"To add: {len(rows)} from {args.attendance_tab} and {args.points_tab}")
+    for player_id in respelled(existing, points):
+        print(f"  {player_id} is spelled differently in {args.points_tab}; make the two match")
     for row in rows:
         if row[3].startswith("CHECK"):
             print(f"  {row[0]} needs a display name set by hand (short name already taken)")
