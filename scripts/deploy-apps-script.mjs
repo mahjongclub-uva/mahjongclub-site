@@ -1,7 +1,13 @@
 // Deploys origin/main's apps-script/ to the live web app, keeping its /exec
 // URL. Never reads the working copy, so a branch's unmerged script can't ship.
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
@@ -33,7 +39,8 @@ const url = git("show", "origin/main:src/lib/site.ts").match(
 );
 if (!url) stop("No meeting service URL in src/lib/site.ts.");
 
-const dir = mkdtempSync(join(tmpdir(), "club-deploy-"));
+// macOS temp lives under /var, a symlink clasp refuses to work through.
+const dir = realpathSync(mkdtempSync(join(tmpdir(), "club-deploy-")));
 const project = (name) => {
   mkdirSync(join(dir, name));
   const file = join(dir, name + ".json");
