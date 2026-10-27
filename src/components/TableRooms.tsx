@@ -43,9 +43,14 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { usePoll } from "@/lib/usePoll";
-import { clock, minus, signed, tileNames } from "@/lib/format";
+import {
+  SEASON_START as START,
+  clock,
+  minus,
+  signed,
+  tileNames,
+} from "@/lib/format";
 
-const START = 205;
 // Unsaved game entry, restored only if the table has not changed since.
 const GAME_DRAFT = "club-game-draft";
 

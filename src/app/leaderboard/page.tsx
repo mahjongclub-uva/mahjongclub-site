@@ -20,9 +20,7 @@ export default function Leaderboard() {
   const semester = getCurrentSemester();
   const shown = semester.standings.slice(0, SHOWN);
   const top = podium(shown);
-  const seasonNet = semester.scoring_rule === "season-net";
-  const score = (player: Standing) =>
-    seasonNet ? SEASON_START + player.total_net : player.total_gain;
+  const score = (player: Standing) => SEASON_START + player.total_net;
   const tables = semester.min_tables_to_rank;
 
   return (
@@ -85,7 +83,7 @@ export default function Leaderboard() {
                         </b>
                         <span className="sr-only"> points</span>
                       </span>
-                      {seasonNet && <Delta change={player.rank_change} />}
+                      <Delta change={player.rank_change} />
                       <span className="lb-step" aria-hidden="true">
                         {player.rank}
                       </span>
@@ -103,7 +101,6 @@ export default function Leaderboard() {
                     <StandingRow
                       key={player.id}
                       player={player}
-                      seasonNet={seasonNet}
                       index={i + top.length}
                     />
                   ))}
@@ -121,7 +118,6 @@ export default function Leaderboard() {
       <PlayerSearch
         standings={semester.standings}
         unranked={semester.unranked}
-        seasonNet={seasonNet}
         minTables={tables}
       />
 
@@ -130,34 +126,27 @@ export default function Leaderboard() {
           {/* After the table, not before: most visitors just want a name and a number. */}
           <div className="scoring-note" id="score-explained">
             <h2>How the score works</h2>
-            {seasonNet ? (
-              <ul className="lb-facts">
+            <ul className="lb-facts">
+              <li>
+                <b>{SEASON_START}</b> to start
+              </li>
+              <li>
+                <b>±</b> each table
+              </li>
+              {/* At one table, the search note already says everyone who played shows up. */}
+              {tables > 1 && (
                 <li>
-                  <b>{SEASON_START}</b> to start
+                  <b>{tables}</b> tables to rank
                 </li>
-                <li>
-                  <b>±</b> each table
-                </li>
-                {/* At one table, the search note already says everyone who played shows up. */}
-                {tables > 1 && (
-                  <li>
-                    <b>{tables}</b> tables to rank
-                  </li>
-                )}
-                <li>
-                  <b aria-hidden="true">
-                    <IconTriangleFilled />
-                    <IconTriangleInvertedFilled />
-                  </b>
-                  places moved
-                </li>
-              </ul>
-            ) : (
-              <p>
-                Only winning tables count; losses don’t take points away. Play{" "}
-                {tables} {tables === 1 ? "table" : "tables"} to be ranked.
-              </p>
-            )}
+              )}
+              <li>
+                <b aria-hidden="true">
+                  <IconTriangleFilled />
+                  <IconTriangleInvertedFilled />
+                </b>
+                places moved
+              </li>
+            </ul>
             <p>
               Points come from wins, special hands, and flower and gold
               combinations.

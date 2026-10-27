@@ -48,7 +48,6 @@ SEMESTERS = [
         "label": "Fall 2026",
         "tab": "Fall Points Tracking",
         "min_tables": 1,
-        "scoring_rule": "season-net",
     },
 ]
 
@@ -336,8 +335,8 @@ def read_roster_tab(spreadsheet_id: str, names: list[str]) -> dict[str, dict]:
 
 # ---------------------------------------------------------------------------
 # Standings. "net" is a table result minus the 205 starting points (can be
-# negative). Fall 2026 ranks by cumulative net, with 205 added only once when
-# displayed. Older data retains its positive-gain ranking until revisited.
+# negative). Players rank by cumulative net, with 205 added only once when
+# displayed.
 # ---------------------------------------------------------------------------
 
 
@@ -346,8 +345,7 @@ def round1(value: float) -> float:
 
 
 def aggregate(
-    tables: list[Table], roster: dict[str, dict], min_tables: int = 2,
-    scoring_rule: str | None = None,
+    tables: list[Table], roster: dict[str, dict], min_tables: int
 ) -> tuple[list[dict], list[dict]]:
     totals: dict[str, dict] = {}
 
@@ -357,10 +355,9 @@ def aggregate(
                 continue
             player = totals.setdefault(
                 name,
-                {"gain": 0, "net": 0, "tables": 0, "best": None, "games": 0},
+                {"net": 0, "tables": 0, "best": None, "games": 0},
             )
             player["games"] += table.games or 0
-            player["gain"] += max(net, 0)
             player["net"] += net
             player["tables"] += 1
             player["best"] = net if player["best"] is None else max(player["best"], net)
@@ -371,11 +368,7 @@ def aggregate(
             for name in totals
             if totals[name]["tables"] >= min_tables
         ),
-        key=(
-            (lambda item: (-item[1]["net"], item[1]["tables"]))
-            if scoring_rule == "season-net"
-            else (lambda item: (-item[1]["gain"], item[1]["tables"], -item[1]["net"]))
-        ),
+        key=lambda item: (-item[1]["net"], item[1]["tables"]),
     )
 
     standings = []
@@ -388,8 +381,6 @@ def aggregate(
                 previous["net"] == player["net"]
                 and previous["tables"] == player["tables"]
             )
-            if scoring_rule != "season-net":
-                same = same and previous["gain"] == player["gain"]
             rank = standings[-1]["rank"] if same else standings[-1]["rank"] + 1
 
         standings.append(
@@ -398,8 +389,6 @@ def aggregate(
                 "rank": rank,
                 "display": roster[name]["display"],
                 "tables_played": player["tables"],
-                "total_gain": player["gain"],
-                "avg_gain": round1(player["gain"] / player["tables"]),
                 "best_table": player["best"],
                 "total_net": player["net"],
                 "avg_net": round1(player["net"] / player["tables"]),
@@ -437,7 +426,7 @@ def add_rank_changes(
         return
     before, _ = aggregate(
         [table for table in tables if table.date != dates[-1]],
-        roster, min_tables, "season-net",
+        roster, min_tables,
     )
     previous = {player["id"]: player["rank"] for player in before}
     for player in standings:
@@ -447,9 +436,8 @@ def add_rank_changes(
 
 
 def build_awards(tables: list[Table], roster: dict[str, dict]) -> list[dict]:
-    """Awards use raw net, not gain (a win is a win regardless of ranking),
-    and ignore the minimum-tables threshold. No winner means the award is
-    left out entirely, never rendered empty."""
+    """Awards use raw net and ignore the minimum-tables threshold. No winner
+    means the award is left out entirely, never rendered empty."""
     awards = []
 
     best = None
@@ -492,8 +480,6 @@ def die(message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    # Sheets is the only source; the flag stays so existing callers still work.
-    parser.add_argument("--source", choices=("sheets",), default="sheets")
     parser.add_argument("--spreadsheet-id", default=None)
     parser.add_argument(
         "--semester", choices=[s["id"] for s in SEMESTERS], default=CURRENT_SEMESTER
@@ -517,11 +503,8 @@ def main() -> None:
     names = sorted({name for table in tables for name, _, _ in table.seats})
     roster = read_roster_tab(spreadsheet_id, names)
 
-    standings, unranked = aggregate(
-        tables, roster, config["min_tables"], config.get("scoring_rule")
-    )
-    if config.get("scoring_rule") == "season-net":
-        add_rank_changes(standings, tables, roster, config["min_tables"])
+    standings, unranked = aggregate(tables, roster, config["min_tables"])
+    add_rank_changes(standings, tables, roster, config["min_tables"])
     # Only tables with a date count as a session. An undated table still
     # counts toward the standings; see check_tables.
     dates = sorted({table.date for table in tables if table.date})
@@ -537,8 +520,6 @@ def main() -> None:
         "unranked": unranked,
         "awards": build_awards(tables, roster),
     }
-    if config.get("scoring_rule"):
-        semester_data["scoring_rule"] = config["scoring_rule"]
     write_json(
         DATA_DIR / "semesters" / f"{config['id']}.json",
         semester_data,

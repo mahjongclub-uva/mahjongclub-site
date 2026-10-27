@@ -13,7 +13,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { metaSchema, semesterSchema } from "./schema.ts";
 
-/** Known-good Fall 2025 data, trimmed to three players. */
+/** Known-good data, trimmed to three players. */
 function validSemester() {
   return {
     schema_version: 1,
@@ -28,8 +28,6 @@ function validSemester() {
         rank: 1,
         display: "Eddie Z.",
         tables_played: 7,
-        total_gain: 648,
-        avg_gain: 92.6,
         best_table: 288,
         total_net: 542,
         avg_net: 77.4,
@@ -39,8 +37,6 @@ function validSemester() {
         rank: 2,
         display: "Kevin J.",
         tables_played: 12,
-        total_gain: 647,
-        avg_gain: 53.9,
         best_table: 209,
         total_net: 392,
         avg_net: 32.7,
@@ -50,8 +46,6 @@ function validSemester() {
         rank: 3,
         display: "Bailee N.",
         tables_played: 2,
-        total_gain: 0,
-        avg_gain: 0,
         best_table: -15,
         total_net: -55,
         avg_net: -27.5,
@@ -129,7 +123,7 @@ rejects("a gap in the ranks", () => {
   return s;
 });
 
-rejects("a player with less gain ranked above one with more", () => {
+rejects("a player with less net ranked above one with more", () => {
   const s = validSemester();
   [s.standings[0], s.standings[1]] = [s.standings[1], s.standings[0]];
   s.standings[0].rank = 1;
@@ -137,16 +131,15 @@ rejects("a player with less gain ranked above one with more", () => {
   return s;
 });
 
-rejects("the tiebreak running the wrong way on equal gain", () => {
-  // Equal gain, so the player with FEWER tables must rank higher.
+rejects("the tiebreak running the wrong way on equal net", () => {
+  // Equal net, so the player with FEWER tables must rank higher.
   const s = validSemester();
-  s.standings[1].total_gain = 648;
-  s.standings[1].avg_gain = 54;
+  s.standings[1].total_net = 542;
+  s.standings[1].avg_net = 45.2;
   s.standings[0].tables_played = 12;
-  s.standings[0].avg_gain = 54;
   s.standings[0].avg_net = 45.2;
   s.standings[1].tables_played = 7;
-  s.standings[1].avg_net = 56;
+  s.standings[1].avg_net = 77.4;
   return s;
 });
 
@@ -157,7 +150,7 @@ rejects("a shared rank between players who are not fully tied", () => {
   return s;
 });
 
-test("accepts a shared rank when gain, tables and net are all equal", () => {
+test("accepts a shared rank when net and tables are both equal", () => {
   const s = validSemester();
   const tied = { ...s.standings[2], id: "p005", display: "Jun I.", rank: 3 };
   s.standings.push(tied);
@@ -169,50 +162,17 @@ test("accepts a shared rank when gain, tables and net are all equal", () => {
   );
 });
 
-test("Fall 2026 ranks by cumulative net even when gain suggests another order", () => {
-  const s = {
-    ...validSemester(),
-    id: "fall-2026",
-    label: "Fall 2026",
-    min_tables_to_rank: 1,
-    scoring_rule: "season-net" as const,
-    unranked: [],
-  };
-  s.standings[1].total_gain = 649;
-  s.standings[1].avg_gain = 54.1;
-  assert.equal(semesterSchema.safeParse(s).success, true);
-
-  [s.standings[0], s.standings[1]] = [s.standings[1], s.standings[0]];
-  s.standings[0].rank = 1;
-  s.standings[1].rank = 2;
-  assert.equal(semesterSchema.safeParse(s).success, false);
-});
-
 // --- arithmetic ------------------------------------------------------------
 
 rejects("an average that does not match its total", () => {
   const s = validSemester();
-  s.standings[0].avg_gain = 80;
+  s.standings[0].avg_net = 70;
   return s;
 });
 
 rejects("an average carrying two decimal places", () => {
   const s = validSemester();
-  s.standings[0].avg_gain = 92.57;
-  return s;
-});
-
-rejects("total_gain below total_net", () => {
-  const s = validSemester();
-  s.standings[0].total_gain = 100;
-  s.standings[0].avg_gain = 14.3;
-  return s;
-});
-
-rejects("nonzero gain for a player whose best table was a loss", () => {
-  const s = validSemester();
-  s.standings[2].total_gain = 10;
-  s.standings[2].avg_gain = 5;
+  s.standings[0].avg_net = 77.43;
   return s;
 });
 
@@ -233,7 +193,6 @@ rejects("the same player id twice", () => {
 rejects("a ranked player below the tables threshold", () => {
   const s = validSemester();
   s.standings[2].tables_played = 1;
-  s.standings[2].avg_gain = 0;
   s.standings[2].avg_net = -55;
   return s;
 });
@@ -246,7 +205,7 @@ rejects("unranked tables_needed that does not match", () => {
 
 rejects("a numeric field sent as a string", () => {
   const s = validSemester();
-  (s.standings[0] as Record<string, unknown>).total_gain = "648";
+  (s.standings[0] as Record<string, unknown>).total_net = "542";
   return s;
 });
 
