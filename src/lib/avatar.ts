@@ -29,7 +29,7 @@ const PICTURES = {
   crown: "oklch(0.48 0.16 305)", // royal purple
   cloud: "oklch(0.82 0.07 235)", // baby blue
   apple: RED,
-  peach: "oklch(0.74 0.13 38)", // for long life
+  peach: "oklch(0.74 0.13 28)", // for long life
   mandarin: "oklch(0.7 0.17 58)", // orange, for luck at New Year
   coin: "oklch(0.55 0.11 88)", // gold
   sprout: "oklch(0.58 0.15 135)", // leaf green
@@ -54,7 +54,7 @@ export const RIMS: Partial<Record<Face, string>> = {
   sun: "oklch(0.6 0.15 55)",
   flower: "oklch(0.6 0.13 355)",
   cloud: "oklch(0.6 0.1 240)",
-  peach: "oklch(0.58 0.13 32)",
+  peach: "oklch(0.58 0.13 24)",
   mandarin: "oklch(0.55 0.15 45)",
 };
 const SEASONAL = Object.keys(HALLOWEEN) as Face[];

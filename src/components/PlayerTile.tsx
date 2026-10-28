@@ -53,20 +53,24 @@ export function PumpkinFilled() {
 const LEAF = "oklch(0.56 0.14 140)";
 const STEM = "oklch(0.42 0.07 55)";
 const VEIN = "oklch(0.42 0.11 145)";
-// A peach, for long life: round, dipped at the top where two leaves grow,
-// with a crease from the dip to its foot.
+// A peach, for long life: a rounded heart with broad shoulders, dipped where
+// the stem grows and softly pointed at the foot, its crease sweeping down so
+// the near cheek is the larger, and one leaf beside the stem.
 function PeachFilled() {
   return (
-    <svg viewBox="3 2.6 18 19.4" fill="currentColor">
-      <path d="M12 7.6C8.4 6 3.8 8.6 3.8 13.4S7.4 21.4 12 21.4 20.2 18.2 20.2 13.4 15.6 6 12 7.6z" />
-      <path className="tile-crease" d="M12 7.9C10.9 11.2 11 16.8 12.4 21" />
+    <svg viewBox="3 2.6 18 19.2" fill="currentColor">
+      <path d="M12.6 8.4C15 6.6 20.6 7.4 20.6 12.8 20.6 17 16.2 20.2 12.6 21.3 12.2 21.4 11.8 21.4 11.4 21.3 7.8 20.2 3.4 17 3.4 12.8 3.4 7.4 9.8 6.4 12.6 8.4z" />
+      <path className="tile-crease" d="M12.9 8.8C16 9.8 17.2 14.2 15.8 17.6" />
       <path
-        fill={LEAF}
-        d="M12 7.5C12.6 4.6 15.1 3 18.3 3.2 17.3 6.1 14.9 7.7 12 7.5z"
+        fill="none"
+        stroke={VEIN}
+        strokeWidth="0.95"
+        strokeLinecap="round"
+        d="M12.6 8.2C12.6 6.6 12.3 5.3 11.6 4.2"
       />
       <path
         fill={LEAF}
-        d="M11.8 7.3C10.6 5.3 8.6 4.5 6.6 5 7.4 7 9.4 7.9 11.8 7.3z"
+        d="M12.6 5.8C13.8 3.6 16.8 2.7 19.6 3.4 18.6 5.9 15.7 6.9 12.6 5.8z"
       />
     </svg>
   );
