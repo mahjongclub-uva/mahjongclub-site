@@ -898,18 +898,18 @@ const TILE_PARTS = {
     "fa",
   ],
   back: [
-    "jade",
+    "vermilion",
+    "tangerine",
+    "gold",
+    "bamboo",
     "mint",
+    "jade",
     "sea",
     "sky",
     "cobalt",
     "midnight",
     "plum",
     "peony",
-    "vermilion",
-    "tangerine",
-    "gold",
-    "bamboo",
   ],
 };
 

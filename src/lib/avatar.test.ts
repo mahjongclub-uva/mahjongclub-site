@@ -86,9 +86,10 @@ function luminance(ink: string) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
 }
 
-test("every ink reads on the ivory face: 3:1 for pictures, 4.5:1 for characters", () => {
-  // The face's middle tone, #f8f6ee, where the picture sits.
-  const face = 0.2126 * 0.9387 + 0.7152 * 0.9216 + 0.0722 * 0.855;
+test("every ink reads on the face and the page: 3:1 for pictures, 4.5:1 for characters", () => {
+  // The Icon rack shows faces bare on the meeting page, which is darker than
+  // a tile's face: its oklch(0.95 0.025 88) a step deeper, for the grain.
+  const face = luminance("oklch(0.93 0.025 88)");
   for (const [name, ink] of Object.entries(INKS)) {
     const ratio = (face + 0.05) / (luminance(ink) + 0.05);
     const floor = name in CHARACTERS ? 4.5 : 3;

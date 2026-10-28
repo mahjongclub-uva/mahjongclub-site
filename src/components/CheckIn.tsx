@@ -170,7 +170,7 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
                   className="player-tile tile-rack-swatch"
                   style={{ "--b": BACKS[back] } as React.CSSProperties}
                 />
-                {back}
+                <span className="sr-only">{back}</span>
               </label>
             ))}
           </div>

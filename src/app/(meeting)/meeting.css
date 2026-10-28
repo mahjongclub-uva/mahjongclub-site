@@ -1304,8 +1304,8 @@ main.meeting-page .meeting-matches .meeting-text {
 }
 
 /* The tile maker: the player's tile with a dice on its corner, and under
-   the Icon and Color tabs a rack of faces, the chosen one lifted as if about
-   to be played, or a rack of face-down backs. */
+   the Icon and Color tabs a rack of bare icons or of face-down backs, the
+   chosen one on a ringed card. */
 .tile-maker {
   display: grid;
   justify-items: start;
@@ -1371,35 +1371,37 @@ main.meeting-page .meeting-matches .meeting-text {
   padding: 0;
   border: 0;
 }
+/* Icons on their own, without a tile under them, so each picture reads at
+   its full size and ink. */
 .tile-rack-faces {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
-  gap: 8px 6px;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 4px;
   justify-items: center;
-  --w: 38px;
+  --w: 50px;
+}
+.tile-rack-faces .player-tile {
+  aspect-ratio: 1;
+  background: none;
+  box-shadow: none;
 }
 .tile-rack-backs {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 6px 4px;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 4px;
+  justify-items: center;
 }
 .tile-rack label {
   display: grid;
   place-items: center;
-  min-inline-size: 44px;
-  min-block-size: 54px;
-  border-radius: 10px;
+  min-inline-size: 48px;
+  min-block-size: 52px;
+  border-radius: 14px;
   cursor: pointer;
-}
-.tile-rack-backs label {
-  gap: 8px;
-  padding: 8px 2px 6px;
-  font: var(--t-meta);
-  text-transform: capitalize;
 }
 /* A face-down tile: its back colour all over, lit from the top left. */
 .tile-rack-swatch.player-tile {
-  --w: 30px;
+  --w: 32px;
   background: radial-gradient(
     120% 90% at 30% 15%,
     color-mix(in oklch, var(--b), white 22%),
@@ -1412,17 +1414,14 @@ main.meeting-page .meeting-matches .meeting-text {
     0 4px 0 #e4dcc8,
     0 5px 4px rgb(45 34 24 / 0.18);
 }
-/* Chosen: the face rises out of the rack with a jade ring; the colour gets an
-   ink outline and a bold name, so neither choice is shown by colour alone. */
-.tile-rack-faces label:has(:checked) .player-tile {
-  translate: 0 -6px;
-  outline: 3px solid var(--jade);
-  outline-offset: 2px;
+/* Chosen: a card with a ring behind it, jade for the icon and ink for the
+   colour, so neither choice is shown by colour alone. */
+.tile-rack label:has(:checked) {
+  background: var(--card);
+  box-shadow: inset 0 0 0 3px var(--jade);
 }
 .tile-rack-backs label:has(:checked) {
-  background: var(--card);
-  box-shadow: inset 0 0 0 2px var(--ink);
-  font-weight: 900;
+  box-shadow: inset 0 0 0 3px var(--ink);
 }
 .tile-rack label:has(:focus-visible) {
   outline: 2px solid var(--ink);
@@ -1445,9 +1444,6 @@ main.meeting-page .meeting-matches .meeting-text {
   }
   .tile-maker-dice:active {
     rotate: 90deg;
-  }
-  .tile-rack-faces .player-tile {
-    transition: translate 120ms var(--ease-out);
   }
   .tile-maker [data-bump="0"] .player-tile {
     animation: tile-bump-0 260ms var(--pop);

@@ -7,29 +7,30 @@
  */
 import { halloweenWeek } from "./season.ts";
 
-const RED = "oklch(0.55 0.2 28)";
-const GREEN = "oklch(0.5 0.14 160)";
+const RED = "oklch(0.52 0.2 28)";
+const GREEN = "oklch(0.48 0.14 160)";
 const INK = "oklch(0.27 0.03 270)";
 const ORANGE = "oklch(0.6 0.17 50)";
 
 // Each face keeps one ink, as a real tile does: 中 is always red. Each is
-// its own colour, and every one reaches 3:1 on the ivory face (avatar.test).
+// its own colour, and every one reaches 3:1 on the ivory face and on the
+// meeting page, where the Icon rack shows it bare (avatar.test).
 const PICTURES = {
   paw: "oklch(0.45 0.07 50)", // brown
-  star: "oklch(0.62 0.14 82)", // gold
+  star: "oklch(0.59 0.14 82)", // gold
   heart: "oklch(0.57 0.2 12)", // rose
   moon: "oklch(0.45 0.13 275)", // indigo
-  sun: "oklch(0.64 0.17 58)", // amber
+  sun: "oklch(0.61 0.17 58)", // amber
   flower: "oklch(0.55 0.19 345)", // magenta
   clover: "oklch(0.5 0.14 155)", // deep green
   cherry: "oklch(0.5 0.19 22)", // crimson
   crown: "oklch(0.48 0.16 305)", // royal purple
-  cloud: "oklch(0.62 0.12 238)", // sky
+  cloud: "oklch(0.59 0.12 238)", // sky
   apple: RED,
-  peach: "oklch(0.64 0.15 28)", // for long life
-  mandarin: "oklch(0.64 0.17 55)", // for luck at New Year
+  peach: "oklch(0.61 0.15 28)", // for long life
+  mandarin: "oklch(0.61 0.17 55)", // for luck at New Year
   coin: "oklch(0.57 0.11 78)", // old gold
-  sprout: "oklch(0.6 0.15 135)", // leaf green
+  sprout: "oklch(0.58 0.15 135)", // leaf green
 } as const;
 // Two of the dragons, as they appear on the tiles. The winds stay off player
 // tiles, since the table page marks each seat with its wind.
@@ -53,18 +54,19 @@ export const facesOn = (now: Date) => (halloweenWeek(now) ? ALL_FACES : FACES);
 // Backs from the game and the club: each one at least 2:1 against the ivory
 // face (avatar.test), so a tile's edge never melts into its face.
 export const BACKS = {
-  jade: "oklch(0.48 0.08 170)", // the club's own tile backs
+  // In hue order, round the colour wheel, as the picker lays them out.
+  vermilion: "oklch(0.6 0.19 32)", // the ink of 中
+  tangerine: "oklch(0.73 0.17 55)",
+  gold: "oklch(0.76 0.15 82)", // Fuzhou's wildcard
+  bamboo: "oklch(0.72 0.17 130)",
   mint: "oklch(0.74 0.13 165)",
+  jade: "oklch(0.48 0.08 170)", // the club's own tile backs
   sea: "oklch(0.66 0.1 205)", // a deeper celadon glaze
   sky: "oklch(0.7 0.13 240)",
   cobalt: "oklch(0.5 0.17 262)", // blue-and-white porcelain
   midnight: "oklch(0.34 0.07 285)",
   plum: "oklch(0.48 0.15 330)", // plum and peony are flower tiles
   peony: "oklch(0.7 0.17 355)",
-  vermilion: "oklch(0.6 0.19 32)", // the ink of 中
-  tangerine: "oklch(0.73 0.17 55)",
-  gold: "oklch(0.76 0.15 82)", // Fuzhou's wildcard
-  bamboo: "oklch(0.72 0.17 130)",
 } as const;
 
 export type Avatar = { face: Face; back: keyof typeof BACKS };
