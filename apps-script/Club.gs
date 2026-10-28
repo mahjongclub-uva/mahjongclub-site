@@ -711,8 +711,8 @@ function roomKey(room) {
   return "room:" + room.meetingId + ":" + room.table;
 }
 
-function readRooms(meetingId) {
-  const all = properties().getProperties();
+// `all` lets a reply that also needs tiles read the store once.
+function readRooms(meetingId, all = properties().getProperties()) {
   return Object.keys(all)
     .filter((key) => key.startsWith("room:"))
     .map((key) => JSON.parse(all[key]))
@@ -838,8 +838,9 @@ function meetingLabel(meetingId) {
 // again (see `saves`).
 function roomsState(meeting, withResults) {
   if (!withResults) {
-    const rooms = readRooms(meeting.id).map(publicRoom);
-    return { rooms, tiles: seatedTiles(meeting, rooms) };
+    const all = properties().getProperties();
+    const rooms = readRooms(meeting.id, all).map(publicRoom);
+    return { rooms, tiles: seatedTiles(meeting, rooms, null, all) };
   }
   for (let attempt = 1; ; attempt++) {
     const at = saves();
@@ -859,12 +860,13 @@ function roomsState(meeting, withResults) {
         "Tonight's saved tables could not be read: " + error.message,
       );
     }
-    const rooms = readRooms(meeting.id).map(publicRoom);
+    const all = properties().getProperties();
+    const rooms = readRooms(meeting.id, all).map(publicRoom);
     if (saves() === at || attempt >= 5)
       return {
         rooms,
         results: tables,
-        tiles: seatedTiles(meeting, rooms, tables),
+        tiles: seatedTiles(meeting, rooms, tables, all),
       };
   }
 }
@@ -922,17 +924,17 @@ function saveTile(request) {
 
 // Both room paths return these, or tiles vanish from the table pages; saved
 // tables count too, or Tonight's standings lose a tile once its table saves.
-function seatedTiles(meeting, rooms, tables) {
+function seatedTiles(meeting, rooms, tables, all) {
   return tonightTiles(
     meeting,
     [...rooms, ...(tables || [])].flatMap((room) =>
       room.seats.map((seat) => seat.id),
     ),
+    all,
   );
 }
 
-function tonightTiles(meeting, ids) {
-  const all = properties().getProperties();
+function tonightTiles(meeting, ids, all = properties().getProperties()) {
   const tiles = {};
   for (const id of ids) {
     const [meetingId, code] = (all["tile:" + id] || "").split(" ");
@@ -1156,10 +1158,12 @@ function doGet(event) {
       };
       if (state.open) {
         response.players = hereTonight(meeting).map(publicPlayer);
-        response.rooms = readRooms(meeting.id).map(publicRoom);
+        const all = properties().getProperties();
+        response.rooms = readRooms(meeting.id, all).map(publicRoom);
         response.tiles = tonightTiles(
           meeting,
           response.players.map((player) => player.id),
+          all,
         );
       }
       return response;

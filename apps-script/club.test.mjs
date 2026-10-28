@@ -16,6 +16,7 @@ function harness() {
     quickLocks: 0,
     noteReads: 0,
     zones: 0,
+    propertyReads: 0,
   };
   const roster = [
     ["player_id", "computing_id", "full_name", "display", "opt_out"],
@@ -243,7 +244,10 @@ function harness() {
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => store[key] || null,
-        getProperties: () => ({ ...store }),
+        getProperties: () => {
+          calls.propertyReads++;
+          return { ...store };
+        },
         setProperty: (key, value) => {
           store[key] = value;
         },
@@ -1137,6 +1141,20 @@ test("a saved table keeps its players' tiles on Tonight's standings", () => {
   const state = h.get({ r: "rooms" });
   assert.equal(state.results.length, 1);
   assert.equal(state.tiles.p002, "sun.gold.mint");
+});
+
+test("a reply with rooms and tiles reads the Script Properties once", () => {
+  const h = harness();
+  seatedTable(h);
+  for (const request of [
+    { r: "meeting" },
+    { r: "rooms", results: "0" },
+    { r: "rooms" },
+  ]) {
+    h.calls.propertyReads = 0;
+    assert.equal(h.get(request).status, 200);
+    assert.equal(h.calls.propertyReads, 1, JSON.stringify(request));
+  }
 });
 
 test("closing the meeting saves every room with games", () => {
