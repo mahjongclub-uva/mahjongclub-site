@@ -8,7 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { IconDice5Filled } from "@tabler/icons-react";
+import { IconPaletteFilled, IconDice5Filled } from "@tabler/icons-react";
+import Sheet from "@/components/Sheet";
 import Cobweb from "@/components/Cobweb";
 import PlayerTile, { AvatarTile, TileName } from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
@@ -65,13 +66,13 @@ function shareTile(id: string) {
     .catch(() => {});
 }
 
-/** The player's tile, a dice for a random one, and two tabs, Icon and
- * Color, each opening its own rack in one tap. Both start closed, so a
- * player who just wants a table never scrolls past them. Kept on this
- * phone until the player moves on; `children` (the greeting) sits between
- * the tile and the tabs. */
+/** The greeting, then the player's tile with a dice for a random one and
+ * Customize beside it, which opens a sheet with two tabs, Icon and Color,
+ * so a player takes one choice at a time; the page underneath keeps the way
+ * to a table on screen. Kept on this phone until the player moves on. */
 function TileMaker({ id, children }: { id: string; children: ReactNode }) {
-  const [open, setOpen] = useState<"face" | "back" | null>(null);
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"face" | "back">("face");
   const [bump, setBump] = useState(0);
   const [said, setSaid] = useState("");
   useSyncExternalStore(subscribeTiles, tilesVersion, () => -1);
@@ -97,8 +98,60 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
       back: any(BACK_NAMES, tile.back),
     });
   };
+  const status = (
+    <p className="sr-only" role="status">
+      {said}
+    </p>
+  );
+  // Both racks stay in place, the other one hidden, so the sheet keeps one
+  // height whichever tab is open.
+  const rack = (
+    <div className="tile-rack-panels">
+      <fieldset className="tile-rack" inert={tab !== "face"}>
+        <legend className="sr-only">Icon</legend>
+        <div className="tile-rack-faces">
+          {faces.map((face) => (
+            <label key={face}>
+              <input
+                type="radio"
+                name="tile-face"
+                className="sr-only"
+                checked={tile.face === face}
+                onChange={() => pick({ ...tile, face })}
+              />
+              <AvatarTile tile={{ ...tile, face }} />
+              <span className="sr-only">{SAY[face] ?? face}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="tile-rack" inert={tab !== "back"}>
+        <legend className="sr-only">Color</legend>
+        <div className="tile-rack-backs">
+          {BACK_NAMES.map((back) => (
+            <label key={back}>
+              <input
+                type="radio"
+                name="tile-back"
+                className="sr-only"
+                checked={tile.back === back}
+                onChange={() => pick({ ...tile, back })}
+              />
+              {/* A tile lying face down, which shows only its back. */}
+              <span
+                className="player-tile tile-rack-swatch"
+                style={{ "--b": BACKS[back] } as React.CSSProperties}
+              />
+              <span className="sr-only">{back}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  );
   return (
     <>
+      {children}
       <div className="tile-maker">
         <span
           className="meeting-hero-tile"
@@ -114,67 +167,53 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
             <IconDice5Filled aria-hidden="true" />
           </button>
         </span>
-        <p className="sr-only" role="status">
-          {said}
-        </p>
+        <button
+          type="button"
+          className="meeting-chip tile-customize"
+          onClick={() => {
+            setTab("face");
+            setOpen(true);
+          }}
+        >
+          <IconPaletteFilled aria-hidden="true" />
+          Customize
+        </button>
+        {!open && status}
       </div>
-      {children}
-      <div className="tile-rack-tabs">
-        {(["face", "back"] as const).map((part) => (
-          <button
-            key={part}
-            type="button"
-            aria-expanded={open === part}
-            aria-controls="tile-rack"
-            onClick={() => setOpen((was) => (was === part ? null : part))}
+      {open && (
+        <Sheet
+          title="Your tile"
+          close={() => setOpen(false)}
+          className="tile-sheet"
+        >
+          <span
+            className="tile-sheet-preview"
+            data-bump={bump ? bump % 2 : undefined}
           >
-            {part === "face" ? "Icon" : "Color"}
+            <PlayerTile id={id} />
+          </span>
+          <div className="tile-rack-tabs">
+            {(["face", "back"] as const).map((part) => (
+              <button
+                key={part}
+                type="button"
+                aria-pressed={tab === part}
+                onClick={() => setTab(part)}
+              >
+                {part === "face" ? "Icon" : "Color"}
+              </button>
+            ))}
+          </div>
+          {rack}
+          {status}
+          <button
+            type="button"
+            className="meeting-primary"
+            onClick={() => setOpen(false)}
+          >
+            Done
           </button>
-        ))}
-      </div>
-      {open === "face" && (
-        <fieldset className="tile-rack" id="tile-rack">
-          <legend className="sr-only">Icon</legend>
-          <div className="tile-rack-faces">
-            {faces.map((face) => (
-              <label key={face}>
-                <input
-                  type="radio"
-                  name="tile-face"
-                  className="sr-only"
-                  checked={tile.face === face}
-                  onChange={() => pick({ ...tile, face })}
-                />
-                <AvatarTile tile={{ ...tile, face }} />
-                <span className="sr-only">{SAY[face] ?? face}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
-      {open === "back" && (
-        <fieldset className="tile-rack" id="tile-rack">
-          <legend className="sr-only">Color</legend>
-          <div className="tile-rack-backs">
-            {BACK_NAMES.map((back) => (
-              <label key={back}>
-                <input
-                  type="radio"
-                  name="tile-back"
-                  className="sr-only"
-                  checked={tile.back === back}
-                  onChange={() => pick({ ...tile, back })}
-                />
-                {/* A tile lying face down, which shows only its back. */}
-                <span
-                  className="player-tile tile-rack-swatch"
-                  style={{ "--b": BACKS[back] } as React.CSSProperties}
-                />
-                <span className="sr-only">{back}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        </Sheet>
       )}
     </>
   );

@@ -1303,13 +1303,16 @@ main.meeting-page .meeting-matches .meeting-text {
   }
 }
 
-/* The tile maker: the player's tile with a dice on its corner, and under
-   the Icon and Color tabs a rack of bare icons or of face-down backs, the
-   chosen one on a ringed card. */
+/* The tile maker: the player's tile with a dice on its corner and Customize
+   beside it, which opens a sheet with two tabs, bare icons and face-down
+   backs, the chosen one on a ringed card. */
 .tile-maker {
+  /* The tile and the button that changes it, side by side. */
   display: grid;
-  justify-items: start;
-  margin-block: 26px 20px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  margin-block: 8px 20px;
 }
 .tile-maker .meeting-hero-tile {
   position: relative;
@@ -1336,12 +1339,27 @@ main.meeting-page .meeting-matches .meeting-text {
   inline-size: 22px;
   block-size: 22px;
 }
-/* Icon | Color: one track, the open tab filled in ink. */
+/* Customize, beside the tile; it opens the tile sheet. */
+.tile-customize {
+  justify-self: start;
+}
+.tile-customize svg {
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--jade);
+}
+/* The sheet: the tile up top, changing as you pick, then the tabs. */
+.tile-sheet-preview {
+  display: grid;
+  justify-items: center;
+  margin-block: 4px 18px;
+  --w: 72px;
+}
+/* Icon | Color: the open tab filled in ink, the other bare. */
 .tile-rack-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
-  max-inline-size: 320px;
   margin-block-end: 14px;
   padding: 4px;
   border-radius: 999px;
@@ -1357,13 +1375,25 @@ main.meeting-page .meeting-matches .meeting-text {
   font: var(--t-control);
   cursor: pointer;
 }
-.tile-rack-tabs [aria-expanded="true"] {
+.tile-rack-tabs [aria-pressed="true"] {
   background: var(--ink);
   color: var(--card);
 }
 .tile-rack-tabs button:focus-visible {
   outline: 2px solid var(--jade);
   outline-offset: 2px;
+}
+.tile-rack-panels {
+  display: grid;
+}
+.tile-rack-panels > * {
+  grid-area: 1 / 1;
+}
+.tile-rack[inert] {
+  visibility: hidden;
+}
+.tile-sheet .meeting-primary {
+  inline-size: 100%;
 }
 .tile-rack {
   min-inline-size: 0;
@@ -1391,17 +1421,25 @@ main.meeting-page .meeting-matches .meeting-text {
   gap: 4px;
   justify-items: center;
 }
+/* Tall enough to hold the chosen tile's ring, clear of the focus outline. */
+.tile-rack .tile-rack-backs label {
+  min-block-size: 66px;
+}
 .tile-rack label {
   display: grid;
   place-items: center;
+  /* Not the sheet's form labels: these are the choices themselves. */
+  margin: 0;
   min-inline-size: 48px;
   min-block-size: 52px;
   border-radius: 14px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 /* A face-down tile: its back colour all over, lit from the top left. */
 .tile-rack-swatch.player-tile {
   --w: 32px;
+  position: relative;
   background: radial-gradient(
     120% 90% at 30% 15%,
     color-mix(in oklch, var(--b), white 22%),
@@ -1414,15 +1452,23 @@ main.meeting-page .meeting-matches .meeting-text {
     0 4px 0 #e4dcc8,
     0 5px 4px rgb(45 34 24 / 0.18);
 }
-/* Chosen: a card with a ring behind it, jade for the icon and ink for the
-   colour, so neither choice is shown by colour alone. */
-.tile-rack label:has(:checked) {
-  background: var(--card);
+/* Chosen: the icon on a jade-ringed disc, and the colour inside a ring that
+   follows the tile's corners and side, past a gap of ivory, in a deep shade
+   of that colour, so it shows on midnight as well as gold. Both are shapes,
+   so neither choice is shown by colour alone. */
+.tile-rack-faces label:has(:checked) .player-tile {
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--jade), var(--card) 86%);
   box-shadow: inset 0 0 0 3px var(--jade);
 }
-.tile-rack-backs label:has(:checked) {
-  box-shadow: inset 0 0 0 3px var(--ink);
+.tile-rack-backs label:has(:checked) .tile-rack-swatch::after {
+  content: "";
+  position: absolute;
+  inset: -6px -6px -10px;
+  border: 3px solid color-mix(in oklch, var(--b), black 35%);
+  border-radius: calc(var(--w) * 0.2 + 6px);
 }
+/* Focus is an outline round the whole choice, outside either ring. */
 .tile-rack label:has(:focus-visible) {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -1445,10 +1491,17 @@ main.meeting-page .meeting-matches .meeting-text {
   .tile-maker-dice:active {
     rotate: 90deg;
   }
-  .tile-maker [data-bump="0"] .player-tile {
+  /* A tap squashes what was touched. */
+  .tile-rack label > .player-tile {
+    transition: scale 140ms var(--ease-out);
+  }
+  .tile-rack label:active > .player-tile {
+    scale: 0.88;
+  }
+  :is(.tile-maker, .tile-sheet) [data-bump="0"] .player-tile {
     animation: tile-bump-0 260ms var(--pop);
   }
-  .tile-maker [data-bump="1"] .player-tile {
+  :is(.tile-maker, .tile-sheet) [data-bump="1"] .player-tile {
     animation: tile-bump-1 260ms var(--pop);
   }
 }
@@ -2208,6 +2261,10 @@ main.meeting-page .round-saved {
    thread. Clipped to the corner, so a scared spider runs out of sight. */
 .meeting-receipt {
   position: relative;
+}
+/* The greeting leaves the web its corner. */
+.meeting-receipt:has(.cobweb) h1 {
+  padding-inline-end: 84px;
 }
 .cobweb {
   position: absolute;
