@@ -59,12 +59,9 @@ svg {
   --control-depth: 4px;
   --control-press: 3px;
   --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  /* The header's three beats. Read by the wordmark and by the tagline that
-     follows it — which is why they live at the root rather than on .wordmark:
-     .tagline is a sibling, not a descendant, and cannot see a variable scoped
-     to an element it isn't inside. */
-  --rise-duration: 550ms;
-  --rise-stagger: 70ms;
+  /* The 3D flip's timing (TileScene.tsx), so the name and tagline fade in as
+     the last tile lands. Change both together. At the root because .tagline
+     is a sibling of the wordmark, not inside it. */
   --flip-start: 520ms;
   --flip-stagger: 150ms;
   --flip-duration: 900ms;
@@ -197,9 +194,7 @@ main {
   border-radius: 1px;
 }
 
-/* 4. Hero and tiles =======================================================
-   .tile-scene moves, .tile rotates. See Wordmark.tsx for why.
-   ======================================================================== */
+/* 4. Hero and tiles ======================================================= */
 
 /* Navigation ------------------------------------------------------------- */
 
@@ -346,12 +341,6 @@ main {
   height: 100% !important;
 }
 
-/* The CSS name remains readable while the decorative canvas loads. */
-.wordmark-tiles {
-  opacity: 1;
-  transition: opacity 420ms ease;
-}
-
 /* No canvas coming — because motion is reduced, WebGL is unavailable, or the
    scene never drew a frame. The flat wordmark is the wordmark. */
 .hero-stage[data-scene="fallback"] .wordmark-tiles {
@@ -381,7 +370,7 @@ main {
   justify-content: center;
   /* At 360px the page leaves ~305px. Seven tiles plus six gaps must fit
      inside that, which is why both are fluid. A fixed 44px tile overflows. */
-  gap: clamp(2px, 0.7vw, 9px);
+  gap: clamp(2px, 0.45vw, 5px);
   /* Every level between the rotated element and the faces has to preserve 3D.
      One `flat` anywhere in the chain collapses the whole box into a plane —
      which is exactly what made the tiles look two-dimensional. */
@@ -396,11 +385,12 @@ main {
      20 x 30 x 15mm — genuinely chunky — but a fifth of the width reads as
      solid without turning the wordmark into a row of bricks. */
   --tile-w: clamp(29px, 9.8vw, 66px);
-  --tile-depth: calc(var(--tile-w) * 0.15);
-  --tile-radius: calc(var(--tile-w) * 0.11);
+  --tile-depth: calc(var(--tile-w) * 0.12);
+  --tile-radius: calc(var(--tile-w) * 0.07);
 
   width: var(--tile-w);
-  aspect-ratio: 44 / 62;
+  /* Matches the 3D tile as its camera sees it, so both headers look alike. */
+  aspect-ratio: 1 / 1.33;
   transform-style: preserve-3d;
 }
 
@@ -415,14 +405,12 @@ main {
   transform-style: preserve-3d;
 }
 
-.tile-back,
 .tile-face {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   border-radius: var(--tile-radius);
-  backface-visibility: hidden;
 }
 
 /* The box occupies z from 0 (face) back to -depth (reverse). Each wall is
@@ -434,12 +422,12 @@ main {
      a wall meets the rounded face. It cannot follow the curve — a flat plane
      never can — but it stops the joint reading as a hard corner. */
   border-radius: 2px;
-  /* Starts at the exact colour the face's edge ends on, so the seam reads as
-     one piece of material rather than two. */
+  /* Starts at the exact colour the face ends on, so the seam reads as one
+     piece of material rather than two. Greys sampled from the 3D tiles. */
   background: linear-gradient(
     to bottom,
-    var(--tile-face-lo) 0%,
-    #ddd3ba 62%,
+    #e4e3df 0%,
+    #d6d4ce 62%,
     var(--tile-edge) 100%
   );
 }
@@ -480,39 +468,35 @@ main {
   bottom: 100%;
   transform-origin: center bottom;
   transform: rotateX(90deg);
-  background: linear-gradient(to bottom, var(--tile-face-lo), var(--tile-face));
+  background: linear-gradient(to bottom, #d6d4ce, #ecebe8);
 }
 
 .tile-side-b {
   top: 100%;
   transform-origin: center top;
   transform: rotateX(-90deg);
-  background: var(--tile-edge);
-}
-
-/* The artwork fills the box; the letter sits on top of it. */
-.tile-art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  background: linear-gradient(to bottom, #d0cec7 65%, var(--tile-edge));
 }
 
 .tile-face {
   color: var(--tile-letter);
-  filter: drop-shadow(0 5px 10px rgba(35, 40, 31, 0.18));
+}
+
+/* One drawn face for the hero's flat tiles and the Instagram tile's
+   fallback, in greys sampled from the 3D tiles. */
+.tile-face,
+.ig-tile[data-scene="fallback"] {
+  background: linear-gradient(to bottom, #ecebe8, #e4e3df);
+  box-shadow:
+    inset 0 -2px 0 #d3d1ca,
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  filter: drop-shadow(0 4px 6px rgba(35, 40, 31, 0.14));
 }
 
 .tile-letter {
   position: relative;
-  font-size: clamp(1rem, 4.2vw, 1.6rem);
+  font-size: calc(var(--tile-w) * 0.5);
   line-height: 1;
-}
-
-.tile-back {
-  /* rotateY first, so the translate runs along the flipped local axis and
-     lands the reverse at z = -depth. */
-  transform: rotateY(180deg) translateZ(var(--tile-depth));
 }
 
 .wordmark-sub {
@@ -644,7 +628,6 @@ main {
 
 /* Reuses the wordmark's wall classes, which only need these three custom
    properties to size themselves. */
-/* No CSS box: the artwork is the tile. Only sizing and the lean live here. */
 /* Two layers, as the hero is: the drawn tile underneath, the 3D one over it. */
 .ig-tile {
   position: relative;
@@ -653,12 +636,13 @@ main {
   place-items: center;
   width: 64px;
   aspect-ratio: 44 / 62;
+  border-radius: 5px;
 }
 
 .ig-mark {
   position: relative;
-  width: 27px;
-  height: 27px;
+  width: 36px;
+  height: 36px;
   color: var(--tile-letter);
 }
 
@@ -682,12 +666,10 @@ main {
 
 /* The drawn tile ships hidden so a snapshot of it never flashes before the
    canvas arrives. It appears only if the scene never turns up. */
-.ig-tile .tile-art,
 .ig-tile .ig-mark {
   opacity: 0;
 }
 
-.ig-tile[data-scene="fallback"] .tile-art,
 .ig-tile[data-scene="fallback"] .ig-mark {
   opacity: 1;
 }
@@ -890,8 +872,6 @@ main {
   gap: var(--space-4);
 }
 
-.hero-stage[data-scene="waiting"] .tile-scene,
-.hero-stage[data-scene="waiting"] .tile { animation: none; }
 .hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
 
 .club-notes { margin-top: 2rem; }
@@ -908,20 +888,8 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .tile-scene {
-    animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
-      backwards;
-    animation-delay: calc(var(--i) * var(--rise-stagger));
-  }
-
-  .tile {
-    animation: tile-flip var(--flip-duration) cubic-bezier(0.65, 0, 0.35, 1)
-      backwards;
-    animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
-  }
-
-  /* Derived from the cascade rather than hardcoded, so retuning the tiles
-     above cannot leave the name out of step. */
+  /* Derived from the flip timing rather than hardcoded, so retuning it
+     cannot leave the name out of step. */
   .wordmark-sub,
   .tagline {
     animation: settle-in var(--sub-duration) ease-out backwards;
@@ -982,19 +950,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
       animation-range: entry calc(6% + var(--i) * 9%) entry
         calc(58% + var(--i) * 9%);
     }
-  }
-}
-
-@keyframes tile-rise {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.9) rotateX(-20deg);
-  }
-}
-
-@keyframes tile-flip {
-  from {
-    transform: rotateY(-180deg);
   }
 }
 
@@ -1291,17 +1246,11 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .photo-slot:nth-child(2n) { padding-top: 0; }
   .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }}
 @media (prefers-reduced-motion: reduce) {
-  .wordmark-tiles { transition: none; }
   .section-title-reveal { clip-path: none; }
 }
 
 .home-page .tagline { max-width: 46ch; }
 .nav a:active { background: #d2decc; }
-
-/* The hero's flat tiles hold still once the 3D scene or its fallback is up. */
-.hero-stage .wordmark-tiles { transition: none; }
-.hero-stage[data-scene="fallback"] .tile,
-.hero-stage[data-scene="fallback"] .tile-scene { animation: none; }
 
 /* Club photography replaces the interactive tile display. */
 .club-photos { margin-top: -7rem; min-width: 0; }
