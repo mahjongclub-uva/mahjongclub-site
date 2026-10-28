@@ -25,13 +25,13 @@ const PICTURES = {
   sun: "oklch(0.8 0.16 72)", // golden
   flower: "oklch(0.83 0.08 355)", // sakura pink
   clover: "oklch(0.5 0.14 155)", // deep green
-  cherry: "oklch(0.5 0.19 22)", // crimson
-  crown: "oklch(0.48 0.16 305)", // royal purple
+  banana: "oklch(0.86 0.15 100)", // yellow
+  crown: "oklch(0.78 0.15 82)", // gold
   cloud: "oklch(0.82 0.07 235)", // baby blue
   apple: RED,
   peach: "oklch(0.74 0.13 28)", // for long life
   mandarin: "oklch(0.7 0.17 58)", // orange, for luck at New Year
-  coin: "oklch(0.55 0.11 88)", // gold
+  coin: "oklch(0.6 0.1 62)", // bronze, as old cash coins are
   sprout: "oklch(0.58 0.15 135)", // leaf green
 } as const;
 // Two of the dragons, as they appear on the tiles, and 福 for fortune, as
@@ -39,7 +39,14 @@ const PICTURES = {
 // table page marks each seat with its wind.
 export const CHARACTERS = { zhong: "中", fa: "發", fu: "福" } as const;
 // Offered only in Halloween week, first in the rack, and never a starter.
-const HALLOWEEN = { pumpkin: ORANGE, ghost: INK, spider: INK } as const;
+const HALLOWEEN = {
+  pumpkin: ORANGE,
+  ghost: INK,
+  spider: INK,
+  bat: "oklch(0.36 0.09 295)", // deep violet
+  hat: INK, // a witch's, with an orange band
+  potion: "oklch(0.58 0.12 185)", // teal
+} as const;
 export type Face =
   keyof typeof PICTURES | keyof typeof CHARACTERS | keyof typeof HALLOWEEN;
 export const INKS: Record<Face, string> = {
@@ -51,6 +58,8 @@ export const INKS: Record<Face, string> = {
 };
 export const RIMS: Partial<Record<Face, string>> = {
   star: "oklch(0.6 0.13 80)",
+  banana: "oklch(0.6 0.12 88)",
+  crown: "oklch(0.58 0.12 72)",
   sun: "oklch(0.6 0.15 55)",
   flower: "oklch(0.6 0.13 355)",
   cloud: "oklch(0.6 0.1 240)",

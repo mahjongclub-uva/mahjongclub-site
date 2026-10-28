@@ -619,26 +619,38 @@ main {
   stroke-width: 0.75;
   stroke-linecap: round;
 }
-:is([data-face="crown"], [data-face="cloud"]) svg {
-  --fit: 0.64;
+/* Sized so each puts down about the same ink as the median face, measured
+   in the rack: solid, wide shapes come in, thin and spiky ones go out. */
+:is([data-face="cloud"], [data-face="flower"]) svg {
+  --fit: 0.6;
 }
-[data-face="coin"] svg {
-  --fit: 0.61;
+:is([data-face="coin"], [data-face="star"]) svg {
+  --fit: 0.57;
+}
+:is([data-face="mandarin"], [data-face="peach"], [data-face="ghost"]) svg {
+  --fit: 0.56;
 }
 [data-face="clover"] svg {
   --fit: 0.53;
 }
-[data-face="flower"] svg {
+:is([data-face="spider"], [data-face="sprout"]) svg {
+  --fit: 0.61;
+}
+:is([data-face="bat"], [data-face="hat"]) svg {
   --fit: 0.6;
 }
-[data-face="star"] svg {
-  --fit: 0.55;
+[data-face="potion"] svg {
+  --fit: 0.64;
+}
+[data-face="banana"] svg {
+  --fit: 0.66;
 }
 [data-face="heart"] svg {
   --fit: 0.55;
   --dy: 0.02;
 }
 [data-face="apple"] svg {
+  --fit: 0.55;
   --dy: -0.02;
 }
 [data-face="moon"] svg {

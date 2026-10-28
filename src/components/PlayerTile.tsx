@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import {
-  IconCherryFilled,
   IconCloudFilled,
   IconCloverFilled,
   IconCrownFilled,
@@ -116,6 +115,23 @@ function MandarinFilled() {
     </svg>
   );
 }
+// A banana, curved from its stem down to a brown tip, with a ridge along it.
+function BananaFilled() {
+  return (
+    <svg viewBox="4.2 3.2 15.6 16.6" fill="currentColor">
+      <path d="M15.8 6.6C17 5.9 17.9 6.1 18.2 6.6 20.2 11.4 16.8 19 7.6 19.6 6.3 19.7 5.3 19.3 4.9 18.6 7.6 16.8 14 14.2 15.8 6.6z" />
+      <path
+        className="tile-crease"
+        d="M17.3 7.6C17.9 12.4 14.4 17.2 7.8 18.5"
+      />
+      <path
+        fill="oklch(0.5 0.08 110)"
+        d="M16.4 6.8 16.9 3.6 18.1 3.8 17.9 6.9z"
+      />
+      <circle cx="5.3" cy="18.7" r="0.8" fill={STEM} />
+    </svg>
+  );
+}
 // A cherry blossom: five notched petals round a deeper centre.
 const PETAL =
   "M12 12C9.6 9.6 9.4 5.8 10.9 3.8L12 5l1.1-1.2c1.5 2 1.3 5.8-1.1 8.2z";
@@ -126,6 +142,51 @@ function SakuraFilled() {
         <path key={turn} d={PETAL} transform={`rotate(${turn} 12 12)`} />
       ))}
       <circle cx="12" cy="12" r="1.7" fill="oklch(0.62 0.16 0)" />
+    </svg>
+  );
+}
+// Halloween's bat, witch's hat and potion, drawn as the pumpkin is.
+function BatFilled() {
+  return (
+    <svg viewBox="1.2 5.8 21.6 12.6" fill="currentColor">
+      <path d="M12 8.2 10.7 6.2 10.3 8.8C8.4 7.4 5 7 1.6 8.2 3.2 9.8 3.4 12 2.8 14.4 4.6 13.4 6.4 13.6 7.4 15.2 8.6 14 10 14.4 10.8 16.4 11.2 17.4 11.6 18 12 18S12.8 17.4 13.2 16.4C14 14.4 15.4 14 16.6 15.2 17.6 13.6 19.4 13.4 21.2 14.4 20.6 12 20.8 9.8 22.4 8.2 19 7 15.6 7.4 13.7 8.8L13.3 6.2z" />
+    </svg>
+  );
+}
+function HatFilled() {
+  return (
+    <svg viewBox="2.4 2.8 19.2 17.6" fill="currentColor">
+      <path d="M7.4 17C8.4 13 9.6 9.6 11.4 6.4 12.6 4.4 14.4 3 17 3.2 15.2 4.2 14.4 5.6 14.4 7.6 14.8 10.8 15.8 14 16.6 17z" />
+      <ellipse cx="12" cy="17.6" rx="9.4" ry="2.6" />
+      <path
+        fill="oklch(0.58 0.175 42)"
+        d="M8.2 13.9C10.6 14.5 13.4 14.5 15.8 13.9L16.3 15.8C13.6 16.5 10.4 16.5 7.7 15.8z"
+      />
+      <rect
+        x="10.9"
+        y="14.25"
+        width="2.2"
+        height="1.9"
+        rx="0.3"
+        fill="none"
+        stroke="oklch(0.8 0.14 85)"
+        strokeWidth="0.6"
+      />
+    </svg>
+  );
+}
+function PotionFilled() {
+  return (
+    <svg viewBox="5.4 2.4 13.2 19" fill="currentColor">
+      <circle cx="12" cy="15" r="6" />
+      <path d="M10.3 6.6h3.4v5h-3.4z" />
+      <rect x="9.6" y="5.6" width="4.8" height="1.6" rx="0.8" />
+      <path fill={STEM} d="M10.6 2.8h2.8v3h-2.8z" />
+      <g fill="oklch(0.45 0.1 185)">
+        <circle cx="10" cy="14" r="1.1" />
+        <circle cx="13.6" cy="16.6" r="0.8" />
+        <circle cx="12.6" cy="12.6" r="0.55" />
+      </g>
     </svg>
   );
 }
@@ -142,7 +203,7 @@ const PICTURES: Record<
   sun: <IconSunFilled viewBox="1.6 1.6 20.8 20.8" />,
   flower: <SakuraFilled />,
   clover: <IconCloverFilled viewBox="1.6 1.6 20.8 20.8" />,
-  cherry: <IconCherryFilled viewBox="2.6 2.6 18.8 19.8" />,
+  banana: <BananaFilled />,
   crown: <IconCrownFilled viewBox="1.6 4.5 20.7 14.9" />,
   cloud: <IconCloudFilled viewBox="0.6 3.6 22.8 15.8" />,
   apple: <AppleFilled />,
@@ -153,6 +214,9 @@ const PICTURES: Record<
   pumpkin: <PumpkinFilled />,
   ghost: <IconGhost2Filled viewBox="0.6 1.6 22.8 20.8" />,
   spider: <IconSpiderFilled viewBox="1.1 2.6 21.8 17.8" />,
+  bat: <BatFilled />,
+  hat: <HatFilled />,
+  potion: <PotionFilled />,
 };
 
 /** A tile drawn as given, for the tile maker. */

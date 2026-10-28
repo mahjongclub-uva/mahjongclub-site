@@ -54,6 +54,7 @@ const SAY: Partial<Record<Face, string>> = {
   fa: "green dragon",
   fu: "fortune",
   flower: "cherry blossom",
+  hat: "witch's hat",
 };
 
 /** Sends the tile this phone made, so the rest of the meeting sees it. Fire
