@@ -24,13 +24,25 @@ const body = Public_Sans({
   display: "swap",
 });
 
+const description = `Fuzhou-style 16-tile mahjong at the University of Virginia. ${TAGLINE}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ||
       "https://mahjongclub-uva.github.io/mahjongclub-site",
   ),
   title: FULL_NAME,
-  description: `Fuzhou-style 16-tile mahjong at the University of Virginia. ${TAGLINE}`,
+  description,
+  // The card a pasted link shows in chats; the image is drawn by ./og.png.
+  openGraph: {
+    type: "website",
+    url: "./",
+    siteName: FULL_NAME,
+    title: FULL_NAME,
+    description,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: FULL_NAME }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
