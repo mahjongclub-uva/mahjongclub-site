@@ -4,8 +4,6 @@ import { useSyncExternalStore } from "react";
 import {
   IconCloudFilled,
   IconCloverFilled,
-  IconCrownFilled,
-  IconGhost2Filled,
   IconHeartFilled,
   IconMoonFilled,
   IconPawFilled,
@@ -40,10 +38,24 @@ function CoinFilled() {
 export function PumpkinFilled() {
   return (
     <svg viewBox="2.4 2.2 19.2 18.6" fill="currentColor">
-      <path d="M11.3 7.4c-.1-2.2.7-3.9 2.6-4.8l.9 1.4c-1.2.6-1.7 1.8-1.6 3.4z" />
+      <path
+        className="tile-stem"
+        d="M11.3 7.4c-.1-2.2.7-3.9 2.6-4.8l.9 1.4c-1.2.6-1.7 1.8-1.6 3.4z"
+      />
       <path
         fillRule="evenodd"
         d="M12 7.6c-1.2-.9-2.9-1.2-4.4-.8C4.6 7.6 2.8 10.4 2.8 13.8c0 3.6 2.4 6.6 5.6 6.6 1.4 0 2.6-.5 3.6-1.3 1 .8 2.2 1.3 3.6 1.3 3.2 0 5.6-3 5.6-6.6 0-3.4-1.8-6.2-4.8-7-1.5-.4-3.2-.1-4.4.8zM7 13.4l1.8-2.6 1.8 2.6zm6.4 0l1.8-2.6 1.8 2.6zM7.2 15.4h9.6l-1.3 2.3-1.6-.9-1.9 1-1.9-1-1.6.9z"
+      />
+    </svg>
+  );
+}
+// A sheet ghost: round head, wavy hem, eyes and an "oo" mouth cut through.
+function GhostFilled() {
+  return (
+    <svg viewBox="4.6 2.6 14.8 18.8" fill="currentColor">
+      <path
+        fillRule="evenodd"
+        d="M12 3C7.6 3 5 6.2 5 10.4v9.4c0 .8.8 1.2 1.4.6l1.4-1.2 1.6 1.4c.4.4 1 .4 1.4 0l1.2-1.2 1.2 1.2c.4.4 1 .4 1.4 0l1.6-1.4 1.4 1.2c.6.6 1.4.2 1.4-.6v-9.4C19 6.2 16.4 3 12 3zM8.7 10.4a1.1 1.5 0 1 0 2.2 0 1.1 1.5 0 1 0-2.2 0zm4.4 0a1.1 1.5 0 1 0 2.2 0 1.1 1.5 0 1 0-2.2 0zm-2 3.8a.9 1.1 0 1 0 1.8 0 .9 1.1 0 1 0-1.8 0z"
       />
     </svg>
   );
@@ -202,7 +214,13 @@ const PICTURES: Record<
   flower: <SakuraFilled />,
   clover: <IconCloverFilled viewBox="1.6 1.6 20.8 20.8" />,
   banana: <BananaFilled />,
-  crown: <IconCrownFilled viewBox="1.6 4.5 20.7 14.9" />,
+  crown: (
+    <svg viewBox="1.6 4.5 20.7 14.9" fill="currentColor">
+      <path d="M19 19h-14c-.5 0 -.9 -.3 -1 -.8l-2 -10c0 -.4 .1 -.8 .5 -1.1c.4 -.2 .8 -.2 1.1 0l4.1 3.3l3.4 -5.1c.4 -.6 1.3 -.6 1.7 0l3.4 5.1l4.1 -3.3c.3 -.3 .8 -.3 1.1 0c.4 .2 .5 .6 .5 1.1l-2 10c0 .5 -.5 .8 -1 .8z" />
+      {/* The band round its base. */}
+      <path className="tile-crease" d="M4.9 16.2h14.2" />
+    </svg>
+  ),
   cloud: <IconCloudFilled viewBox="0.6 3.6 22.8 15.8" />,
   apple: <AppleFilled />,
   peach: <PeachFilled />,
@@ -210,7 +228,7 @@ const PICTURES: Record<
   coin: <CoinFilled />,
   sprout: <IconSeedlingFilled viewBox="1.6 2.6 20.8 18.8" />,
   pumpkin: <PumpkinFilled />,
-  ghost: <IconGhost2Filled viewBox="0.6 1.6 22.8 20.8" />,
+  ghost: <GhostFilled />,
   spider: <IconSpiderFilled viewBox="1.1 2.6 21.8 17.8" />,
   bat: <BatFilled />,
   hat: <HatFilled />,
