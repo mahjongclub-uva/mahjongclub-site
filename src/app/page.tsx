@@ -8,6 +8,7 @@ import { HomeMeeting } from "@/components/MeetingLinks";
 import { getMeetings } from "@/lib/data";
 import Photos, { ClubPhoto } from "@/components/Photos";
 import FollowUs from "@/components/FollowUs";
+import PinnedPost from "@/components/PinnedPost";
 import Section from "@/components/Section";
 import RevealSection from "@/components/RevealSection";
 
@@ -78,6 +79,7 @@ export default function Home() {
 
       <Section id="follow" title="Keep up with us!">
         <FollowUs />
+        <PinnedPost />
       </Section>
     </main>
   );

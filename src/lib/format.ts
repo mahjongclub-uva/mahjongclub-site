@@ -32,6 +32,10 @@ export function formatShortDate(iso: string): string {
  * GitHub runner in UTC and meeting times must render in the club's zone. */
 export const CLUB_TZ = "America/New_York";
 
+/** The club's calendar date at `now`, as "2026-10-30". */
+export const clubDate = (now: Date) =>
+  now.toLocaleDateString("en-CA", { timeZone: CLUB_TZ });
+
 /** "2026-09-18T17:30:00-04:00" -> "Friday 18 September". */
 export function formatMeetingDay(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", {

@@ -11,9 +11,10 @@ How to keep the club website current. No coding needed.
 | Meeting time or room                    | Club Google Calendar   | The site updates within a day |
 | Scores                                  | Private score workbook | A maintainer runs the update  |
 | Photos                                  | Private photo inbox    | A maintainer prepares them    |
+| Pinned Instagram post                   | Ask a maintainer       | It hides after its last day   |
 | Layout, colours, animations, Guide page | Website code           | Ask a maintainer              |
 
-The Sheet is the only place to change wording.
+The Sheet is the only place to change wording, except a pinned Instagram post, which a maintainer adds.
 If you're unsure where something belongs, ask before putting it anywhere public.
 
 ## Edit the Sheet
@@ -190,6 +191,13 @@ If the site is unavailable, an officer records attendance and results directly i
 
 Get permission from everyone identifiable before a photo goes up.
 Originals stay private; a maintainer strips their metadata before publishing.
+
+## Pinned Instagram post
+
+One post can sit under "Keep up with us!" with its photo, for a themed night or an event with another club.
+Send a maintainer the post's link, one short line for the caption, the photo, and the last day it should show.
+The photo follows the rules above, and neither the caption nor the photo's description may include anyone's full name.
+Within a day after its last day, the site's daily update takes it down; with nothing pinned, only the Instagram link shows.
 
 ## Keep private
 

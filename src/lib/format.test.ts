@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { tileNames } from "./format.ts";
+import { clubDate, tileNames } from "./format.ts";
 
 test("tile names drop the initial unless a first name clashes, and leave handles alone", () => {
   const names = tileNames([
@@ -17,4 +17,9 @@ test("tile names drop the initial unless a first name clashes, and leave handles
     p4: "tilequeen",
     p5: "Mary Ann K.",
   });
+});
+
+test("the club's date turns over at midnight in Charlottesville, not UTC", () => {
+  assert.equal(clubDate(new Date("2026-10-31T03:59:00Z")), "2026-10-30");
+  assert.equal(clubDate(new Date("2026-10-31T04:00:00Z")), "2026-10-31");
 });

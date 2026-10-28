@@ -725,6 +725,61 @@ main {
   border-radius: 4px;
 }
 
+/* A pinned Instagram post: the photo wide on top on a phone, beside the
+   caption once there's room. */
+.pinned {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 34rem;
+  padding: var(--space-3);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  box-shadow: 0 0 0 1px #0000000d, 0 12px 26px -16px #0005;
+}
+
+.pinned-photo {
+  margin: 0;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: var(--r-md);
+}
+
+.pinned-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pinned-body {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.pinned-label {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.pinned-caption {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--ink);
+}
+
+@media (min-width: 560px) {
+  .pinned {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .pinned-photo {
+    aspect-ratio: 4 / 5;
+  }
+}
+
 /* 9. Calendar ============================================================= */
 
 .calendar-frame {
@@ -1395,6 +1450,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
 /* Keep the social heading and linked account at a consistent scale. */
 .home-page .section:has(#follow) .section-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 4rem; align-items: center; }
 .home-page #follow { max-width: 16ch; margin: 0; }
+.home-page .pinned { grid-column: 2; }
 .home-page .ig { width: 100%; min-width: 0; margin: 0; padding: 1.25rem 0; gap: 1.25rem; }
 .home-page .ig-body { min-width: 0; }
 .home-page .ig-handle { font-size: clamp(1.1rem, 2vw, 1.5rem); overflow-wrap: anywhere; }
@@ -1444,6 +1500,7 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .club-photos { margin-top: 0; }
   .home-page .section:has(#follow) .section-wrap { grid-template-columns: 1fr; gap: 1rem; }
   .home-page #follow { max-width: 20ch; }
+  .home-page .pinned { grid-column: auto; }
   .home-page .ig { padding: 0; gap: 1rem; }
 }
 @media (max-width: 560px) {

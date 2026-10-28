@@ -116,6 +116,20 @@ export const ABOUT_PHOTO: Photo = {
 };
 
 /**
+ * One Instagram post pinned under "Keep up with us!", with its photo. Its
+ * last day is `until` ("2026-10-30"); the next daily deploy hides it. The
+ * caption and photo follow the photo rules in OFFICER_GUIDE.md: permission
+ * from everyone shown, and no full names in the caption or alt text.
+ */
+export type PinnedPost = {
+  url: string;
+  caption: string;
+  until: string;
+  photo: Photo;
+};
+export const PINNED_POST: PinnedPost | null = null;
+
+/**
  * Officers, in About-page order. name: null renders as "To be announced" for
  * an unfilled role. This is the one place the site shows more than a first
  * name + last initial, so use whatever each officer is comfortable being
