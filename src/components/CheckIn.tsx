@@ -61,11 +61,15 @@ function shareTile(id: string) {
 }
 
 /** The player's tile with arrows to change its picture, ink and back, and a
- * dice for a random one. Kept on this phone until Find a table shares it. */
+ * dice for a random one. Kept on this phone until the player moves on. */
 function TileMaker({ id }: { id: string }) {
   const [bump, setBump] = useState(0);
   const [said, setSaid] = useState("");
-  useEffect(() => shareTile(id), [id]);
+  // Shared on the way out, whichever way the player leaves "You're in".
+  useEffect(() => {
+    shareTile(id);
+    return () => shareTile(id);
+  }, [id]);
   const pick = (tile: Avatar) => {
     chooseTile(id, tileCode(tile));
     setBump((n) => n + 1);
@@ -299,11 +303,7 @@ function CheckInForm({
             {player.display.split(" ")[0]}!
           </span>
         </h1>
-        <Link
-          className="meeting-primary"
-          href={next.href}
-          onClick={() => shareTile(player.id)}
-        >
+        <Link className="meeting-primary" href={next.href}>
           {next.label}
         </Link>
         {here.length > 0 && (
