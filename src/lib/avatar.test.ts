@@ -2,7 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { PARTS, parseTile, starterAvatar, tileCode } from "./avatar.ts";
+import {
+  ALL_FACES,
+  BACK_NAMES,
+  facesOn,
+  parseTile,
+  starterAvatar,
+  tileCode,
+} from "./avatar.ts";
 
 test("a player's starter tile is the same on every phone and varies between players", () => {
   assert.deepEqual(starterAvatar("p014"), starterAvatar("p014"));
@@ -38,6 +45,25 @@ test("the Apps Script accepts exactly the tiles this site can draw", () => {
   assert.ok(listed, "TILE_PARTS is missing from Club.gs");
   assert.deepEqual(
     JSON.parse(JSON.stringify(vm.runInNewContext(`(${listed[1]})`))),
-    { face: PARTS.face, back: PARTS.back },
+    { face: ALL_FACES, back: BACK_NAMES },
   );
+});
+
+test("Halloween's faces are offered that week only and are never a starter", () => {
+  const halloween = new Date(2026, 9, 30, 18);
+  const after = new Date(2026, 10, 6, 18);
+  assert.ok(facesOn(halloween).includes("ghost"));
+  assert.ok(!facesOn(after).includes("ghost"));
+  assert.ok(!facesOn(new Date(2026, 9, 23)).includes("ghost"));
+  for (let i = 1; i <= 200; i++)
+    assert.ok(
+      facesOn(after).includes(
+        starterAvatar(`p${String(i).padStart(3, "0")}`).face,
+      ),
+    );
+  assert.equal(parseTile("ghost.midnight", "p014", halloween).face, "ghost");
+  assert.deepEqual(parseTile("ghost.midnight", "p014", after), {
+    face: starterAvatar("p014").face,
+    back: "midnight",
+  });
 });

@@ -28,7 +28,8 @@ import { MEETING_SERVICE_URL } from "@/lib/site";
 import { tileNames } from "@/lib/format";
 import {
   BACKS,
-  PARTS,
+  BACK_NAMES,
+  facesOn,
   parseTile,
   tileCode,
   type Avatar,
@@ -73,6 +74,7 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
   const [said, setSaid] = useState("");
   useSyncExternalStore(subscribeTiles, tilesVersion, () => -1);
   const tile = parseTile(chosenTile(id), id);
+  const faces = facesOn(new Date());
   // Shared on the way out, whichever way the player leaves "You're in".
   useEffect(() => {
     shareTile(id);
@@ -89,8 +91,8 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
       return others[Math.floor(Math.random() * others.length)];
     };
     pick({
-      face: any(PARTS.face, tile.face),
-      back: any(PARTS.back, tile.back),
+      face: any(faces, tile.face),
+      back: any(BACK_NAMES, tile.back),
     });
   };
   return (
@@ -129,7 +131,7 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
           <fieldset>
             <legend>Picture</legend>
             <div className="tile-rack-faces">
-              {PARTS.face.map((face) => (
+              {faces.map((face) => (
                 <label key={face}>
                   <input
                     type="radio"
@@ -147,7 +149,7 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
           <fieldset>
             <legend>Back</legend>
             <div className="tile-rack-backs">
-              {PARTS.back.map((back) => (
+              {BACK_NAMES.map((back) => (
                 <label key={back}>
                   <input
                     type="radio"

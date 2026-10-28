@@ -871,9 +871,14 @@ function roomsState(meeting, withResults) {
   }
 }
 
-// The tiles a player can make, matching src/lib/avatar.ts (its test compares them).
+// The tiles a player can make, matching src/lib/avatar.ts (its test compares
+// them). Halloween's faces are always accepted; the site offers them only that
+// week and draws a starter in their place after it.
 const TILE_PARTS = {
   face: [
+    "pumpkin",
+    "ghost",
+    "spider",
     "paw",
     "star",
     "heart",
