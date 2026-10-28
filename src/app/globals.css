@@ -601,6 +601,13 @@ main {
   translate: calc(var(--w, 44px) * var(--dx, 0))
     calc(var(--w, 44px) * var(--dy, 0));
 }
+/* A pale face's darker rim, drawn under its fill so it shows outside it. */
+.player-tile svg * {
+  stroke: var(--rim, none);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
 :is([data-face="crown"], [data-face="cloud"]) svg {
   --fit: 0.64;
 }

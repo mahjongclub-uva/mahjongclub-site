@@ -8,6 +8,7 @@ import {
   BACK_NAMES,
   CHARACTERS,
   INKS,
+  RIMS,
   facesOn,
   parseTile,
   starterAvatar,
@@ -91,7 +92,9 @@ test("every ink reads on the face and the page: 3:1 for pictures, 4.5:1 for char
   // a tile's face: its oklch(0.95 0.025 88) a step deeper, for the grain.
   const face = luminance("oklch(0.93 0.025 88)");
   for (const [name, ink] of Object.entries(INKS)) {
-    const ratio = (face + 0.05) / (luminance(ink) + 0.05);
+    // A pale face is read by its rim.
+    const edge = RIMS[name as keyof typeof RIMS] ?? ink;
+    const ratio = (face + 0.05) / (luminance(edge) + 0.05);
     const floor = name in CHARACTERS ? 4.5 : 3;
     assert.ok(ratio >= floor, `${name} is ${ratio.toFixed(2)}:1`);
   }

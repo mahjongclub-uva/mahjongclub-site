@@ -10,26 +10,28 @@ import { halloweenWeek } from "./season.ts";
 const RED = "oklch(0.52 0.2 28)";
 const GREEN = "oklch(0.48 0.14 160)";
 const INK = "oklch(0.27 0.03 270)";
-const ORANGE = "oklch(0.6 0.17 50)";
+const ORANGE = "oklch(0.58 0.175 42)"; // pumpkin, the reddest orange
 
 // Each face keeps one ink, as a real tile does: 中 is always red. Each is
 // its own colour, and every one reaches 3:1 on the ivory face and on the
-// meeting page, where the Icon rack shows it bare (avatar.test).
+// meeting page, where the Icon rack shows it bare (avatar.test). A face too
+// pale to reach it, like a real peach, keeps its colour and gets a darker
+// rim (RIMS) that does.
 const PICTURES = {
   paw: "oklch(0.45 0.07 50)", // brown
-  star: "oklch(0.59 0.14 82)", // gold
+  star: "oklch(0.86 0.16 95)", // yellow
   heart: "oklch(0.57 0.2 12)", // rose
   moon: "oklch(0.45 0.13 275)", // indigo
-  sun: "oklch(0.61 0.17 58)", // amber
+  sun: "oklch(0.8 0.16 72)", // golden
   flower: "oklch(0.55 0.19 345)", // magenta
   clover: "oklch(0.5 0.14 155)", // deep green
   cherry: "oklch(0.5 0.19 22)", // crimson
   crown: "oklch(0.48 0.16 305)", // royal purple
   cloud: "oklch(0.59 0.12 238)", // sky
   apple: RED,
-  peach: "oklch(0.61 0.15 28)", // for long life
-  mandarin: "oklch(0.61 0.17 55)", // for luck at New Year
-  coin: "oklch(0.57 0.11 78)", // old gold
+  peach: "oklch(0.82 0.1 50)", // for long life
+  mandarin: "oklch(0.62 0.145 60)", // orange, for luck at New Year
+  coin: "oklch(0.55 0.11 88)", // gold
   sprout: "oklch(0.58 0.15 135)", // leaf green
 } as const;
 // Two of the dragons, as they appear on the tiles. The winds stay off player
@@ -44,6 +46,11 @@ export const INKS: Record<Face, string> = {
   ...PICTURES,
   zhong: RED,
   fa: GREEN,
+};
+export const RIMS: Partial<Record<Face, string>> = {
+  star: "oklch(0.6 0.13 80)",
+  sun: "oklch(0.6 0.15 55)",
+  peach: "oklch(0.6 0.12 38)",
 };
 const SEASONAL = Object.keys(HALLOWEEN) as Face[];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */

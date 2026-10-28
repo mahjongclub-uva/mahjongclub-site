@@ -21,6 +21,7 @@ import {
   BACKS,
   CHARACTERS,
   INKS,
+  RIMS,
   parseTile,
   type Avatar,
   type Face,
@@ -107,6 +108,7 @@ export function AvatarTile({ tile }: { tile: Avatar }) {
       style={
         {
           "--g": INKS[tile.face],
+          "--rim": RIMS[tile.face],
           "--b": BACKS[tile.back],
         } as React.CSSProperties
       }
