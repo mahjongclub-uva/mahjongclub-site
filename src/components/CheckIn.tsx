@@ -9,6 +9,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { IconDice5Filled } from "@tabler/icons-react";
+import Cobweb from "@/components/Cobweb";
 import PlayerTile, { AvatarTile, TileName } from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
@@ -370,6 +371,8 @@ function CheckInForm({
             </ul>
           </section>
         )}
+        {/* Last, so the spider is the last thing tabbed to. */}
+        <Cobweb />
       </div>
     );
   }

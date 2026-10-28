@@ -2204,6 +2204,83 @@ main.meeting-page .round-saved {
 .meeting-receipt > .meeting-primary {
   margin-block-end: 28px;
 }
+
+/* Halloween week: a web in the corner beside the tile, and a spider on its
+   thread. Clipped to the corner, so a scared spider runs out of sight. */
+.meeting-receipt {
+  position: relative;
+}
+.cobweb {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: -12px;
+  inline-size: 88px;
+  block-size: 140px;
+  overflow: clip;
+  pointer-events: none;
+}
+.cobweb-web {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: 64px;
+  color: oklch(0.3 0.03 90 / 0.3);
+}
+.cobweb-spider {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 22px;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: 50% -40px;
+  translate: 0 56px;
+}
+.cobweb-spider[data-scared] {
+  translate: 0 -48px;
+}
+/* The thread runs from the spider up past the top of the corner. */
+.cobweb-spider::before {
+  content: "";
+  position: absolute;
+  inset-block-end: 60%;
+  inset-inline-start: 50%;
+  inline-size: 1px;
+  block-size: 120px;
+  background: oklch(0.3 0.03 90 / 0.35);
+}
+.cobweb-spider svg {
+  position: relative;
+  inline-size: 26px;
+  block-size: 26px;
+}
+.cobweb-spider:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 0;
+}
+@keyframes cobweb-sway {
+  50% {
+    rotate: 7deg;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cobweb-spider {
+    animation: cobweb-sway 3.2s ease-in-out infinite;
+    transition: translate 1.2s var(--pop);
+  }
+  .cobweb-spider[data-scared] {
+    animation: none;
+    transition: translate 0.25s ease-in;
+  }
+}
 main.meeting-page .table-latest {
   justify-items: center;
   padding-block: 2px 14px;
