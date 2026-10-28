@@ -17,13 +17,17 @@ export function subscribeTiles(listener: () => void) {
 }
 export const tilesVersion = () => version;
 
+// Read from storage once: every tile on the page asks on every render.
+let saved: Record<string, string> | undefined;
 function mine(): Record<string, string> {
+  if (saved) return saved;
   try {
-    const saved = JSON.parse(localStorage.getItem(MINE) || "{}");
-    return saved && typeof saved === "object" ? saved : {};
+    const stored = JSON.parse(localStorage.getItem(MINE) || "{}");
+    saved = stored && typeof stored === "object" ? stored : {};
   } catch {
-    return {};
+    saved = {};
   }
+  return saved!;
 }
 
 /** The code this player chose here, or the one the service has for them. */
@@ -33,11 +37,11 @@ export const madeHere = (id: string): string | undefined => mine()[id];
 export const serviceTile = (id: string): string | undefined => tonight[id];
 
 export function chooseTile(id: string, code: string) {
+  saved = { ...mine(), [id]: code };
   try {
-    localStorage.setItem(MINE, JSON.stringify({ ...mine(), [id]: code }));
+    localStorage.setItem(MINE, JSON.stringify(saved));
   } catch {
     // Private mode: the tile still shows until the page reloads.
-    tonight = { ...tonight, [id]: code };
   }
   changed();
 }
