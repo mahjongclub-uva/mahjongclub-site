@@ -881,21 +881,16 @@ const TILE_PARTS = {
     "sun",
     "flower",
     "clover",
-    "butterfly",
-    "flame",
+    "cherry",
+    "crown",
     "cloud",
     "apple",
     "coin",
     "sprout",
-    "east",
-    "south",
-    "west",
-    "north",
     "zhong",
     "fa",
   ],
-  ink: ["red", "blue", "green", "ink", "gold"],
-  back: ["coral", "sky", "butter", "lilac", "mint"],
+  back: ["coral", "sky", "butter", "lilac", "mint", "midnight"],
 };
 
 // A tile a player made for tonight: one property each, "meetingId code", so a
@@ -907,10 +902,8 @@ function saveTile(request) {
     fail(423, "The meeting is closed.");
   const parts = typeof request.tile === "string" ? request.tile.split(".") : [];
   if (
-    parts.length !== 3 ||
-    !["face", "ink", "back"].every((part, i) =>
-      TILE_PARTS[part].includes(parts[i]),
-    )
+    parts.length !== 2 ||
+    !["face", "back"].every((part, i) => TILE_PARTS[part].includes(parts[i]))
   )
     fail(400, "Unknown tile.");
   if (!hereTonight(meeting).some((player) => player.id === request.playerId))

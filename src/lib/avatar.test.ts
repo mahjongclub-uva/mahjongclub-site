@@ -18,14 +18,13 @@ test("a player's starter tile is the same on every phone and varies between play
 
 test("a code with a part this site does not know keeps the starter's part", () => {
   const starter = starterAvatar("p014");
-  assert.deepEqual(parseTile("sun.gold.mint", "p014"), {
+  assert.deepEqual(parseTile("sun.mint", "p014"), {
     face: "sun",
-    ink: "gold",
     back: "mint",
   });
-  assert.deepEqual(parseTile("unicorn.gold.plaid", "p014"), {
+  assert.deepEqual(parseTile("unicorn.mint", "p014"), {
     ...starter,
-    ink: "gold",
+    back: "mint",
   });
   assert.deepEqual(parseTile(undefined, "p014"), starter);
 });
@@ -39,10 +38,6 @@ test("the Apps Script accepts exactly the tiles this site can draw", () => {
   assert.ok(listed, "TILE_PARTS is missing from Club.gs");
   assert.deepEqual(
     JSON.parse(JSON.stringify(vm.runInNewContext(`(${listed[1]})`))),
-    {
-      face: PARTS.face,
-      ink: PARTS.ink,
-      back: PARTS.back,
-    },
+    { face: PARTS.face, back: PARTS.back },
   );
 });

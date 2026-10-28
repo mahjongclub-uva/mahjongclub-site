@@ -1097,12 +1097,13 @@ test("a checked-in player's tile shows for tonight only, and nothing else is sto
   const h = harness();
   const tile = (playerId, code) =>
     h.post({ r: "tile", playerId, tile: code }).status;
-  assert.equal(tile("p001", "sun.gold.mint"), 200);
-  assert.equal(tile("p001", "unicorn.gold.mint"), 400);
-  assert.equal(tile("p001", "sun.gold"), 400);
-  assert.equal(tile("p001", ["sun", "gold", "mint"]), 400);
-  assert.equal(tile("p099", "sun.gold.mint"), 403);
-  assert.deepEqual(h.get({ r: "meeting" }).tiles, { p001: "sun.gold.mint" });
+  assert.equal(tile("p001", "sun.mint"), 200);
+  assert.equal(tile("p001", "unicorn.mint"), 400);
+  assert.equal(tile("p001", "sun.gold.mint"), 400);
+  assert.equal(tile("p001", "sun"), 400);
+  assert.equal(tile("p001", ["sun", "mint"]), 400);
+  assert.equal(tile("p099", "sun.mint"), 403);
+  assert.deepEqual(h.get({ r: "meeting" }).tiles, { p001: "sun.mint" });
   assert.equal(
     h.post({
       r: "rooms",
@@ -1111,36 +1112,36 @@ test("a checked-in player's tile shows for tonight only, and nothing else is sto
       playerId: "p001",
       table: 1,
     }).tiles.p001,
-    "sun.gold.mint",
+    "sun.mint",
   );
-  assert.deepEqual(h.get({ r: "rooms" }).tiles, { p001: "sun.gold.mint" });
+  assert.deepEqual(h.get({ r: "rooms" }).tiles, { p001: "sun.mint" });
   // Table pages read rooms without results; their seats keep the tile too.
   assert.deepEqual(h.get({ r: "rooms", results: "0" }).tiles, {
-    p001: "sun.gold.mint",
+    p001: "sun.mint",
   });
   assert.equal(
     Object.keys(h.store).filter((key) => key.startsWith("tile:")).length,
     1,
   );
   // Next week's meeting starts every player from their own tile again.
-  h.store["tile:p001"] = "last-week sun.gold.mint";
+  h.store["tile:p001"] = "last-week sun.mint";
   assert.deepEqual(h.get({ r: "meeting" }).tiles, {});
   h.store.meeting = JSON.stringify({ ...h.meeting, closed: true });
-  assert.equal(tile("p001", "sun.gold.mint"), 423);
+  assert.equal(tile("p001", "sun.mint"), 423);
 });
 
 test("a saved table keeps its players' tiles on Tonight's standings", () => {
   const h = harness();
   const t = seatedTable(h);
   assert.equal(
-    h.post({ r: "tile", playerId: "p002", tile: "sun.gold.mint" }).status,
+    h.post({ r: "tile", playerId: "p002", tile: "sun.mint" }).status,
     200,
   );
   assert.equal(t.hand("p001", 20).status, 200);
   assert.equal(t.end().status, 200);
   const state = h.get({ r: "rooms" });
   assert.equal(state.results.length, 1);
-  assert.equal(state.tiles.p002, "sun.gold.mint");
+  assert.equal(state.tiles.p002, "sun.mint");
 });
 
 test("a reply with rooms and tiles reads the Script Properties once", () => {

@@ -3,10 +3,10 @@
 import { useSyncExternalStore } from "react";
 import {
   IconAppleFilled,
-  IconButterfly,
+  IconCherryFilled,
   IconCloudFilled,
   IconCloverFilled,
-  IconFlameFilled,
+  IconCrownFilled,
   IconFlowerFilled,
   IconHeartFilled,
   IconMoonFilled,
@@ -47,9 +47,8 @@ const PICTURES: Record<
   sun: <IconSunFilled />,
   flower: <IconFlowerFilled />,
   clover: <IconCloverFilled />,
-  // The filled butterfly has no body, so this one is the outline.
-  butterfly: <IconButterfly stroke={2.25} />,
-  flame: <IconFlameFilled />,
+  cherry: <IconCherryFilled />,
+  crown: <IconCrownFilled />,
   cloud: <IconCloudFilled />,
   apple: <IconAppleFilled />,
   coin: <CoinFilled />,
@@ -57,14 +56,14 @@ const PICTURES: Record<
 };
 
 /** A tile drawn as given, for the tile maker. */
-export function TileFace({ tile }: { tile: Avatar }) {
+export function AvatarTile({ tile }: { tile: Avatar }) {
   return (
     <span
       className="player-tile"
       aria-hidden="true"
       style={
         {
-          "--g": INKS[tile.ink],
+          "--g": INKS[tile.face],
           "--b": BACKS[tile.back],
         } as React.CSSProperties
       }
@@ -81,7 +80,7 @@ export default function PlayerTile({ id }: { id: string }) {
   // -1 while hydrating, so the first client render matches the static HTML.
   const ready = useSyncExternalStore(subscribeTiles, tilesVersion, () => -1);
   return (
-    <TileFace tile={parseTile(ready < 0 ? undefined : chosenTile(id), id)} />
+    <AvatarTile tile={parseTile(ready < 0 ? undefined : chosenTile(id), id)} />
   );
 }
 

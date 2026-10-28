@@ -55,7 +55,7 @@ const roomSchema = z.object({
     .nullable(),
 });
 export type Room = z.infer<typeof roomSchema>;
-// Tiles players made tonight, by player id, as "face.ink.back".
+// Tiles players made tonight, by player id, as "face.back".
 const tilesSchema = z
   .record(playerSchema.shape.id, z.string().max(40))
   .optional();

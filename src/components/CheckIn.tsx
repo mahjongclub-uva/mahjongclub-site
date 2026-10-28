@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import {
-  IconCaretLeftFilled,
-  IconCaretRightFilled,
-  IconDice5Filled,
-} from "@tabler/icons-react";
-import PlayerTile, { TileName } from "@/components/PlayerTile";
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import Link from "next/link";
+import { IconDice5Filled } from "@tabler/icons-react";
+import PlayerTile, { AvatarTile, TileName } from "@/components/PlayerTile";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers, { IdBadge } from "@/components/IdStickers";
@@ -24,29 +26,30 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { tileNames } from "@/lib/format";
-import { PARTS, parseTile, tileCode, type Avatar } from "@/lib/avatar";
+import {
+  BACKS,
+  PARTS,
+  parseTile,
+  tileCode,
+  type Avatar,
+  type Face,
+} from "@/lib/avatar";
 import {
   addTonightTiles,
   chooseTile,
   chosenTile,
   madeHere,
   serviceTile,
+  subscribeTiles,
+  tilesVersion,
 } from "@/lib/tiles";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
-const SAY: Record<string, string> = {
-  east: "east wind",
-  south: "south wind",
-  west: "west wind",
-  north: "north wind",
+// What a screen reader hears for a face whose id isn't a word.
+const SAY: Partial<Record<Face, string>> = {
   zhong: "red dragon",
   fa: "green dragon",
 };
-const STEPS = [
-  ["face", "picture"],
-  ["ink", "ink"],
-  ["back", "back"],
-] as const;
 
 /** Sends the tile this phone made, so the rest of the meeting sees it. Fire
  * and forget: a service without tiles answers 404 and nothing changes. */
@@ -60,78 +63,111 @@ function shareTile(id: string) {
     .catch(() => {});
 }
 
-/** The player's tile with arrows to change its picture, ink and back, and a
- * dice for a random one. Kept on this phone until the player moves on. */
-function TileMaker({ id }: { id: string }) {
+/** The player's tile, a dice for a random one, and behind "Change your
+ * tile" a rack of every face and a row of backs, so a player who just wants
+ * a table never waits on it. Kept on this phone until the player moves on;
+ * `children` (the greeting) sits between the tile and the rack. */
+function TileMaker({ id, children }: { id: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
   const [bump, setBump] = useState(0);
   const [said, setSaid] = useState("");
+  useSyncExternalStore(subscribeTiles, tilesVersion, () => -1);
+  const tile = parseTile(chosenTile(id), id);
   // Shared on the way out, whichever way the player leaves "You're in".
   useEffect(() => {
     shareTile(id);
     return () => shareTile(id);
   }, [id]);
-  const pick = (tile: Avatar) => {
-    chooseTile(id, tileCode(tile));
+  const pick = (next: Avatar) => {
+    chooseTile(id, tileCode(next));
     setBump((n) => n + 1);
-    setSaid([SAY[tile.face] ?? tile.face, tile.ink, tile.back].join(", "));
-  };
-  const step = (part: keyof Avatar, by: 1 | -1) => {
-    const tile = parseTile(chosenTile(id), id);
-    const list: readonly string[] = PARTS[part];
-    const next =
-      list[(list.indexOf(tile[part]) + by + list.length) % list.length];
-    pick({ ...tile, [part]: next });
+    setSaid(`${SAY[next.face] ?? next.face} on ${next.back}`);
   };
   const roll = () => {
-    const tile = parseTile(chosenTile(id), id);
     const any = <T,>(list: readonly T[], not: T): T => {
       const others = list.filter((item) => item !== not);
       return others[Math.floor(Math.random() * others.length)];
     };
     pick({
       face: any(PARTS.face, tile.face),
-      ink: any(PARTS.ink, tile.ink),
       back: any(PARTS.back, tile.back),
     });
   };
   return (
-    <div className="tile-maker" role="group" aria-label="Your tile">
-      {STEPS.map(([part, name], row) =>
-        ([-1, 1] as const).map((by) => (
-          <button
-            key={part + by}
-            type="button"
-            className="tile-maker-step"
-            style={{ gridRow: row + 1, gridColumn: by < 0 ? 1 : 3 }}
-            aria-label={`${by < 0 ? "Previous" : "Next"} ${name}`}
-            onClick={() => step(part, by)}
-          >
-            {by < 0 ? (
-              <IconCaretLeftFilled aria-hidden="true" />
-            ) : (
-              <IconCaretRightFilled aria-hidden="true" />
-            )}
-          </button>
-        )),
-      )}
-      <span
-        className="meeting-hero-tile"
-        data-bump={bump ? bump % 2 : undefined}
-      >
-        <PlayerTile id={id} />
-        <button
-          type="button"
-          className="tile-maker-dice"
-          aria-label="Random tile"
-          onClick={roll}
+    <>
+      <div className="tile-maker">
+        <span
+          className="meeting-hero-tile"
+          data-bump={bump ? bump % 2 : undefined}
         >
-          <IconDice5Filled aria-hidden="true" />
-        </button>
-      </span>
-      <p className="sr-only" role="status">
-        {said}
-      </p>
-    </div>
+          <PlayerTile id={id} />
+          <button
+            type="button"
+            className="tile-maker-dice"
+            aria-label="Random tile"
+            onClick={roll}
+          >
+            <IconDice5Filled aria-hidden="true" />
+          </button>
+        </span>
+        <p className="sr-only" role="status">
+          {said}
+        </p>
+      </div>
+      {children}
+      <button
+        type="button"
+        className="meeting-chip tile-rack-toggle"
+        aria-expanded={open}
+        aria-controls="tile-rack"
+        onClick={() => setOpen((was) => !was)}
+      >
+        {open ? "Done" : "Change your tile"}
+      </button>
+      {open && (
+        <div className="tile-rack" id="tile-rack">
+          <fieldset>
+            <legend>Picture</legend>
+            <div className="tile-rack-faces">
+              {PARTS.face.map((face) => (
+                <label key={face}>
+                  <input
+                    type="radio"
+                    name="tile-face"
+                    className="sr-only"
+                    checked={tile.face === face}
+                    onChange={() => pick({ ...tile, face })}
+                  />
+                  <AvatarTile tile={{ ...tile, face }} />
+                  <span className="sr-only">{SAY[face] ?? face}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Back</legend>
+            <div className="tile-rack-backs">
+              {PARTS.back.map((back) => (
+                <label key={back}>
+                  <input
+                    type="radio"
+                    name="tile-back"
+                    className="sr-only"
+                    checked={tile.back === back}
+                    onChange={() => pick({ ...tile, back })}
+                  />
+                  <span
+                    className="tile-rack-swatch"
+                    style={{ background: BACKS[back] }}
+                  />
+                  <span className="sr-only">{back}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -293,16 +329,17 @@ function CheckInForm({
     const next = playerNext(meeting, player.id);
     return (
       <div className="meeting-receipt">
-        <TileMaker id={player.id} />
         <p className="sr-only" role="status">
           You’re checked in.
         </p>
-        <h1>
-          You’re in,{" "}
-          <span className="meeting-accent">
-            {player.display.split(" ")[0]}!
-          </span>
-        </h1>
+        <TileMaker id={player.id}>
+          <h1>
+            You’re in,{" "}
+            <span className="meeting-accent">
+              {player.display.split(" ")[0]}!
+            </span>
+          </h1>
+        </TileMaker>
         <Link className="meeting-primary" href={next.href}>
           {next.label}
         </Link>

@@ -140,7 +140,7 @@ Send POST bodies as `text/plain` to avoid a browser preflight.
 | `POST {r:"players", computingId, fullName}`                           | Claims an exact unclaimed name or creates a player; 409 with `suggestions` asks the player to confirm                              |
 | `POST {r:"players", computingId, fullName, matchId}`                  | Confirms one offered public suggestion; `createNew:true` declines the suggestions instead                                          |
 | `POST {r:"results", meetingId, submissionId, seats:[{id,total},...]}` | Four checked-in players, whole totals summing to 820; 201 on first save, 200 on an identical retry                                 |
-| `POST {r:"tile", playerId, tile:"face.ink.back"}`                     | A checked-in player's tile for tonight, returned as `tiles` with the lobby and the rooms; no lock, nothing written to the workbook |
+| `POST {r:"tile", playerId, tile:"face.back"}`                         | A checked-in player's tile for tonight, returned as `tiles` with the lobby and the rooms; no lock, nothing written to the workbook |
 
 Use one random submission ID per table and retain it until the receipt arrives.
 Receipts reserve a Table N block using its heading cell note before writing, so a retry after a write failure uses the same block.
