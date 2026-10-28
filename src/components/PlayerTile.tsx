@@ -39,7 +39,7 @@ function CoinFilled() {
   );
 }
 // A jack-o'-lantern; Tabler's pumpkin is an outline.
-function PumpkinFilled() {
+export function PumpkinFilled() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
       <path d="M11.3 7.4c-.1-2.2.7-3.9 2.6-4.8l.9 1.4c-1.2.6-1.7 1.8-1.6 3.4z" />

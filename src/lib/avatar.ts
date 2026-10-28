@@ -5,6 +5,8 @@
  * own for the night. A tile travels as a code, "face.back"; the Apps Script
  * keeps the same lists in TILE_PARTS.
  */
+import { halloweenWeek } from "./season.ts";
+
 const RED = "oklch(0.55 0.2 28)";
 const BLUE = "oklch(0.48 0.16 255)";
 const GREEN = "oklch(0.5 0.14 160)";
@@ -46,9 +48,8 @@ const SEASONAL = Object.keys(HALLOWEEN) as Face[];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */
 export const ALL_FACES = Object.keys(INKS) as Face[];
 const FACES = ALL_FACES.filter((face) => !SEASONAL.includes(face));
-/** The faces a player can pick at `now`: Halloween's from Oct 24 to 31. */
-export const facesOn = (now: Date) =>
-  now.getMonth() === 9 && now.getDate() >= 24 ? ALL_FACES : FACES;
+/** The faces a player can pick at `now`: Halloween's in Halloween week. */
+export const facesOn = (now: Date) => (halloweenWeek(now) ? ALL_FACES : FACES);
 export const BACKS = {
   coral: "oklch(0.74 0.16 30)",
   sky: "oklch(0.8 0.1 230)",
