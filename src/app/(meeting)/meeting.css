@@ -2214,8 +2214,8 @@ main.meeting-page .round-saved {
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: -12px;
-  inline-size: 88px;
-  block-size: 140px;
+  inline-size: 112px;
+  block-size: 150px;
   overflow: clip;
   pointer-events: none;
 }
@@ -2223,13 +2223,40 @@ main.meeting-page .round-saved {
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: 0;
-  inline-size: 64px;
-  color: oklch(0.3 0.03 90 / 0.3);
+  inline-size: 96px;
+  overflow: visible;
+}
+.cobweb-spokes {
+  stroke-width: 0.9;
+}
+.cobweb-rings {
+  stroke-width: 0.6;
+}
+/* Its shadow falls a little down and left on the paper, softened. */
+.cobweb-shadow {
+  stroke: oklch(0.3 0.03 90 / 0.16);
+  translate: -1.5px 3px;
+  filter: blur(0.8px);
+}
+.cobweb-strand {
+  stroke: oklch(0.42 0.02 90 / 0.5);
+}
+.cobweb-shine {
+  stroke: oklch(1 0 0 / 0.8);
+  translate: 0.4px -0.4px;
+}
+.cobweb-shine path {
+  stroke-width: 0.35;
+}
+.cobweb-dew {
+  fill: oklch(1 0 0 / 0.9);
+  stroke: oklch(0.42 0.02 90 / 0.35);
+  stroke-width: 0.4;
 }
 .cobweb-spider {
   position: absolute;
   inset-block-start: 0;
-  inset-inline-end: 22px;
+  inset-inline-end: 38px;
   display: grid;
   place-items: center;
   inline-size: 44px;
@@ -2257,10 +2284,12 @@ main.meeting-page .round-saved {
   block-size: 120px;
   background: oklch(0.3 0.03 90 / 0.35);
 }
+/* It hangs off the page, so its shadow lands lower down and blurred. */
 .cobweb-spider svg {
   position: relative;
   inline-size: 26px;
   block-size: 26px;
+  filter: drop-shadow(-2px 9px 3px oklch(0.3 0.03 90 / 0.28));
 }
 .cobweb-spider:focus-visible {
   outline: 2px solid var(--jade);
