@@ -554,6 +554,79 @@ main {
   line-height: 1.2;
 }
 
+/* A player's tile, on the meeting pages and in the live pill: an ivory face
+   lit from above, and a side that is the face's own outline pushed down, so
+   the seam and the foot curve up at the corners as a solid tile's do. The
+   side is eight thin copies of that outline, each a touch deeper toward warm
+   umber, so it shades smoothly rather than in a few hard bands. */
+.player-tile {
+  /* Each place sets --w for its size; 44px elsewhere. */
+  --d: calc(var(--w, 44px) * 0.1 + 2px); /* deeper on small tiles: 4.6px at 26 */
+  --seam: clamp(0px, var(--w, 44px) * 0.04 - 1px, 2.5px); /* none at 26px */
+  --umber: oklch(0.35 0.08 55);
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: var(--w, 44px);
+  aspect-ratio: 3 / 4;
+  border-radius: calc(var(--w, 44px) * 0.2);
+  background: linear-gradient(#fcfbf7, #f5f1e6);
+  color: var(--g);
+  font: 700 calc(var(--w, 44px) * 0.58) / 1
+    var(--han, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif);
+  box-shadow:
+    inset 0 -1px 0 rgb(255 255 255 / 0.65),
+    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.06),
+    0 var(--seam) 0 #eae3d2,
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 1 / 8) 0 var(--b),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 2 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 4%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 3 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 8%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 4 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 12%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 5 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 16%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 6 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 21%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 7 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 26%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 8 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 32%),
+    0 calc(var(--d) + var(--w, 44px) * 0.03) calc(var(--w, 44px) * 0.04)
+      rgb(45 34 24 / 0.16),
+    0 calc(var(--d) + var(--w, 44px) * 0.08) calc(var(--w, 44px) * 0.18)
+      rgb(45 34 24 / 0.08);
+}
+/* Each picture is cropped to its own ink (PlayerTile.tsx) and fitted to the
+   box a wind character fills, then adjusted by eye, since a bounding box is
+   not optical weight: wide shapes get more room, dense ones less. */
+.player-tile svg {
+  --fit: 0.58;
+  inline-size: calc(var(--w, 44px) * var(--fit));
+  block-size: calc(var(--w, 44px) * var(--fit));
+  translate: calc(var(--w, 44px) * var(--dx, 0))
+    calc(var(--w, 44px) * var(--dy, 0));
+}
+:is([data-face="crown"], [data-face="cloud"]) svg {
+  --fit: 0.64;
+}
+[data-face="coin"] svg {
+  --fit: 0.61;
+}
+:is([data-face="flower"], [data-face="clover"]) svg {
+  --fit: 0.53;
+}
+[data-face="star"] svg {
+  --fit: 0.55;
+}
+[data-face="heart"] svg {
+  --fit: 0.55;
+  --dy: 0.02;
+}
+[data-face="apple"] svg {
+  --dy: -0.02;
+}
+[data-face="moon"] svg {
+  --dx: 0.02;
+}
+.player-tile[data-face="zhong"] {
+  font-size: calc(var(--w, 44px) * 0.6);
+}
+
 /* 5. Sections ============================================================= */
 
 /* Three colour blocks in the palette's own colours. A mark in the whitespace,

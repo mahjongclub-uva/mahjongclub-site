@@ -1914,33 +1914,7 @@ main.meeting-page .round-saved {
   font: var(--t-score-sm);
 }
 
-/* A player's sticker tile: a white face with their glyph, standing on the
-   colour of its back. An open chair is a dashed outline with its wind. */
-.player-tile {
-  /* Each place sets --w for its size; 44px elsewhere. */
-  display: inline-grid;
-  place-items: center;
-  flex-shrink: 0;
-  inline-size: var(--w, 44px);
-  aspect-ratio: 3 / 4;
-  border-radius: calc(var(--w, 44px) * 0.2);
-  /* An ivory face lit from above, a thin rim, and a two-step edge in the
-     back colour, darker below, so even butter and mint read as thickness. */
-  background: linear-gradient(#fff 0 45%, #f7f2e4);
-  color: var(--g);
-  font: 700 calc(var(--w, 44px) * 0.58) / 1 var(--han);
-  box-shadow:
-    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
-    inset 0 calc(var(--w, 44px) * -0.05) 0 var(--tile-face-lo),
-    0 calc(var(--w, 44px) * 0.07) 0 var(--b),
-    0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
-    0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
-      oklch(0.3 0.03 90 / 0.45);
-}
-.player-tile svg {
-  inline-size: 76%;
-  block-size: auto;
-}
+/* The player tile itself is in globals.css, shared with the live pill. */
 /* An open chair: an empty place pressed into the table, the shape of a
    tile, with its wind faint in it. */
 .player-tile[data-empty] {
