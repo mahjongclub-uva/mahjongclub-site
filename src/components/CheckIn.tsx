@@ -52,6 +52,8 @@ import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 const SAY: Partial<Record<Face, string>> = {
   zhong: "red dragon",
   fa: "green dragon",
+  fu: "fortune",
+  flower: "cherry blossom",
 };
 
 /** Sends the tile this phone made, so the rest of the meeting sees it. Fire

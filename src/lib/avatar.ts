@@ -23,20 +23,21 @@ const PICTURES = {
   heart: "oklch(0.57 0.2 12)", // rose
   moon: "oklch(0.45 0.13 275)", // indigo
   sun: "oklch(0.8 0.16 72)", // golden
-  flower: "oklch(0.55 0.19 345)", // magenta
+  flower: "oklch(0.83 0.08 355)", // sakura pink
   clover: "oklch(0.5 0.14 155)", // deep green
   cherry: "oklch(0.5 0.19 22)", // crimson
   crown: "oklch(0.48 0.16 305)", // royal purple
-  cloud: "oklch(0.59 0.12 238)", // sky
+  cloud: "oklch(0.82 0.07 235)", // baby blue
   apple: RED,
-  peach: "oklch(0.82 0.1 50)", // for long life
-  mandarin: "oklch(0.62 0.145 60)", // orange, for luck at New Year
+  peach: "oklch(0.74 0.13 38)", // for long life
+  mandarin: "oklch(0.7 0.17 58)", // orange, for luck at New Year
   coin: "oklch(0.55 0.11 88)", // gold
   sprout: "oklch(0.58 0.15 135)", // leaf green
 } as const;
-// Two of the dragons, as they appear on the tiles. The winds stay off player
-// tiles, since the table page marks each seat with its wind.
-export const CHARACTERS = { zhong: "中", fa: "發" } as const;
+// Two of the dragons, as they appear on the tiles, and 福 for fortune, as
+// pasted on doors at New Year. The winds stay off player tiles, since the
+// table page marks each seat with its wind.
+export const CHARACTERS = { zhong: "中", fa: "發", fu: "福" } as const;
 // Offered only in Halloween week, first in the rack, and never a starter.
 const HALLOWEEN = { pumpkin: ORANGE, ghost: INK, spider: INK } as const;
 export type Face =
@@ -46,11 +47,15 @@ export const INKS: Record<Face, string> = {
   ...PICTURES,
   zhong: RED,
   fa: GREEN,
+  fu: RED,
 };
 export const RIMS: Partial<Record<Face, string>> = {
   star: "oklch(0.6 0.13 80)",
   sun: "oklch(0.6 0.15 55)",
-  peach: "oklch(0.6 0.12 38)",
+  flower: "oklch(0.6 0.13 355)",
+  cloud: "oklch(0.6 0.1 240)",
+  peach: "oklch(0.58 0.13 32)",
+  mandarin: "oklch(0.55 0.15 45)",
 };
 const SEASONAL = Object.keys(HALLOWEEN) as Face[];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */
@@ -72,8 +77,10 @@ export const BACKS = {
   sky: "oklch(0.7 0.13 240)",
   cobalt: "oklch(0.5 0.17 262)", // blue-and-white porcelain
   midnight: "oklch(0.34 0.07 285)",
+  lavender: "oklch(0.7 0.12 300)",
   plum: "oklch(0.48 0.15 330)", // plum and peony are flower tiles
   peony: "oklch(0.7 0.17 355)",
+  walnut: "oklch(0.48 0.08 55)", // a neutral, off the wheel, so last
 } as const;
 
 export type Avatar = { face: Face; back: keyof typeof BACKS };

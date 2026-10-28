@@ -1403,9 +1403,13 @@ main.meeting-page .meeting-matches .meeting-text {
 }
 /* Icons on their own, without a tile under them, so each picture reads at
    its full size and ink. */
+/* At most six icons and seven colours a row, so out of Halloween week the
+   racks are three rows of six and two of seven, and fewer on a small phone. */
 .tile-rack-faces {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  max-inline-size: calc(6 * 52px + 5 * 4px);
+  margin-inline: auto;
   gap: 4px;
   justify-items: center;
   --w: 50px;
@@ -1417,7 +1421,9 @@ main.meeting-page .meeting-matches .meeting-text {
 }
 .tile-rack-backs {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  max-inline-size: calc(7 * 44px + 6 * 4px);
+  margin-inline: auto;
   gap: 4px;
   justify-items: center;
 }
@@ -1430,7 +1436,7 @@ main.meeting-page .meeting-matches .meeting-text {
   place-items: center;
   /* Not the sheet's form labels: these are the choices themselves. */
   margin: 0;
-  min-inline-size: 48px;
+  min-inline-size: 44px;
   min-block-size: 52px;
   border-radius: 14px;
   cursor: pointer;

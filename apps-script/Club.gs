@@ -896,6 +896,7 @@ const TILE_PARTS = {
     "sprout",
     "zhong",
     "fa",
+    "fu",
   ],
   back: [
     "vermilion",
@@ -908,8 +909,10 @@ const TILE_PARTS = {
     "sky",
     "cobalt",
     "midnight",
+    "lavender",
     "plum",
     "peony",
+    "walnut",
   ],
 };
 

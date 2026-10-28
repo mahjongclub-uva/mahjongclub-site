@@ -6,7 +6,6 @@ import {
   IconCloudFilled,
   IconCloverFilled,
   IconCrownFilled,
-  IconFlowerFilled,
   IconGhost2Filled,
   IconHeartFilled,
   IconMoonFilled,
@@ -53,20 +52,21 @@ export function PumpkinFilled() {
 // Leaves and stems keep their own colour on any face; the fruit takes the ink.
 const LEAF = "oklch(0.56 0.14 140)";
 const STEM = "oklch(0.42 0.07 55)";
-// A peach, for long life: round, with a point at the top, a crease down one
-// side and two leaves.
+const VEIN = "oklch(0.42 0.11 145)";
+// A peach, for long life: round, dipped at the top where two leaves grow,
+// with a crease from the dip to its foot.
 function PeachFilled() {
   return (
-    <svg viewBox="3 2.4 18 19.6" fill="currentColor">
-      <path d="M12.4 6.6c3.2-.2 8.2 2.4 8.2 7.6 0 4.6-3.8 7.6-8.6 7.6s-8.6-3-8.6-7.6c0-4.8 4.4-7.2 7-6.8 1 .1 1.5-.2 2-.8z" />
-      <path className="tile-crease" d="M12.4 7.2c-1.8 2.6-2.2 6.6-.6 11" />
+    <svg viewBox="3 2.6 18 19.4" fill="currentColor">
+      <path d="M12 7.6C8.4 6 3.8 8.6 3.8 13.4S7.4 21.4 12 21.4 20.2 18.2 20.2 13.4 15.6 6 12 7.6z" />
+      <path className="tile-crease" d="M12 7.9C10.9 11.2 11 16.8 12.4 21" />
       <path
         fill={LEAF}
-        d="M12.6 6.4c.6-2.4 2.8-3.8 5.6-3.6-.6 2.6-2.8 4-5.6 3.6z"
+        d="M12 7.5C12.6 4.6 15.1 3 18.3 3.2 17.3 6.1 14.9 7.7 12 7.5z"
       />
       <path
         fill={LEAF}
-        d="M12 6.2c-1.2-1.8-3.2-2.4-5.2-1.6 1 1.9 3.1 2.5 5.2 1.6z"
+        d="M11.8 7.3C10.6 5.3 8.6 4.5 6.6 5 7.4 7 9.4 7.9 11.8 7.3z"
       />
     </svg>
   );
@@ -87,12 +87,41 @@ function AppleFilled() {
     </svg>
   );
 }
-// A mandarin, for luck at New Year.
+// A mandarin, for luck at New Year: squat, with a dimple, a stem and a
+// veined leaf.
 function MandarinFilled() {
   return (
-    <svg viewBox="4.2 2 15.6 20.4" fill="currentColor">
-      <circle cx="12" cy="14.6" r="7.4" />
-      <path d="M12.6 6.3c.6-2.6 2.7-4 5.6-3.9-.4 2.8-2.5 4.3-5.6 3.9z" />
+    <svg viewBox="3.6 3 16.8 18" fill="currentColor">
+      <ellipse cx="12" cy="14" rx="8" ry="6.8" />
+      <path className="tile-crease" d="M10.4 7.8q1.6 .9 3.2 0" />
+      <path
+        fill={STEM}
+        d="M11.5 7.6c0-1.1.2-1.9.7-2.6l.9.5c-.4.6-.5 1.2-.5 2.1z"
+      />
+      <path
+        fill={LEAF}
+        d="M12.6 6c1.2-2.4 3.8-3.4 6.4-2.6-1.2 2.4-3.8 3.2-6.4 2.6z"
+      />
+      <path
+        fill="none"
+        stroke={VEIN}
+        strokeWidth="0.7"
+        strokeLinecap="round"
+        d="M13.2 5.7c1.8-.5 3.5-1.1 5.2-2"
+      />
+    </svg>
+  );
+}
+// A cherry blossom: five notched petals round a deeper centre.
+const PETAL =
+  "M12 12C9.6 9.6 9.4 5.8 10.9 3.8L12 5l1.1-1.2c1.5 2 1.3 5.8-1.1 8.2z";
+function SakuraFilled() {
+  return (
+    <svg viewBox="3.6 3.4 16.8 16.4" fill="currentColor">
+      {[0, 72, 144, 216, 288].map((turn) => (
+        <path key={turn} d={PETAL} transform={`rotate(${turn} 12 12)`} />
+      ))}
+      <circle cx="12" cy="12" r="1.7" fill="oklch(0.62 0.16 0)" />
     </svg>
   );
 }
@@ -107,7 +136,7 @@ const PICTURES: Record<
   heart: <IconHeartFilled viewBox="1.6 2.6 20.8 18.8" />,
   moon: <IconMoonFilled viewBox="1.6 1.6 20.1 20.8" />,
   sun: <IconSunFilled viewBox="1.6 1.6 20.8 20.8" />,
-  flower: <IconFlowerFilled viewBox="1.6 0.6 20.8 22.8" />,
+  flower: <SakuraFilled />,
   clover: <IconCloverFilled viewBox="1.6 1.6 20.8 20.8" />,
   cherry: <IconCherryFilled viewBox="2.6 2.6 18.8 19.8" />,
   crown: <IconCrownFilled viewBox="1.6 4.5 20.7 14.9" />,

@@ -612,11 +612,11 @@ main {
 .player-tile svg {
   filter: drop-shadow(var(--carve));
 }
-/* The peach's crease, a shade deeper than the fruit. */
+/* A fruit's crease or dimple, a fine line a shade deeper than the fruit. */
 .tile-crease {
   fill: none;
-  stroke: color-mix(in oklch, currentColor, black 22%);
-  stroke-width: 1.1;
+  stroke: color-mix(in oklch, currentColor, black 25%);
+  stroke-width: 0.75;
   stroke-linecap: round;
 }
 :is([data-face="crown"], [data-face="cloud"]) svg {
@@ -625,8 +625,11 @@ main {
 [data-face="coin"] svg {
   --fit: 0.61;
 }
-:is([data-face="flower"], [data-face="clover"]) svg {
+[data-face="clover"] svg {
   --fit: 0.53;
+}
+[data-face="flower"] svg {
+  --fit: 0.6;
 }
 [data-face="star"] svg {
   --fit: 0.55;
