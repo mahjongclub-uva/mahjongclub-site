@@ -643,7 +643,7 @@ main {
   --fit: 0.64;
 }
 [data-face="banana"] svg {
-  --fit: 0.66;
+  --fit: 0.68;
 }
 [data-face="heart"] svg {
   --fit: 0.55;

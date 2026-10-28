@@ -115,20 +115,18 @@ function MandarinFilled() {
     </svg>
   );
 }
-// A banana, curved from its stem down to a brown tip, with a ridge along it.
+// A banana, thick in the middle, curving from a green stem down to a brown
+// tip, with a ridge along its back.
 function BananaFilled() {
   return (
-    <svg viewBox="4.2 3.2 15.6 16.6" fill="currentColor">
-      <path d="M15.8 6.6C17 5.9 17.9 6.1 18.2 6.6 20.2 11.4 16.8 19 7.6 19.6 6.3 19.7 5.3 19.3 4.9 18.6 7.6 16.8 14 14.2 15.8 6.6z" />
+    <svg viewBox="3.8 2.8 17 18.6" fill="currentColor">
+      <path d="M16.2 6.8C17 6 18.4 6 18.9 6.9 21.6 12.2 18.4 20.6 9 20.9 7 21 5.2 20.4 4.3 19.4 4 19 4.2 18.4 4.8 18.2 11.6 16.4 15.8 12.6 16.2 6.8z" />
+      <path className="tile-crease" d="M18.4 8C19.8 13 16.6 18.6 9.6 19.6" />
       <path
-        className="tile-crease"
-        d="M17.3 7.6C17.9 12.4 14.4 17.2 7.8 18.5"
+        fill="oklch(0.6 0.14 135)"
+        d="M16.6 7 16.9 3.8C17 3.2 18.2 3.2 18.3 3.8L18.6 7z"
       />
-      <path
-        fill="oklch(0.5 0.08 110)"
-        d="M16.4 6.8 16.9 3.6 18.1 3.8 17.9 6.9z"
-      />
-      <circle cx="5.3" cy="18.7" r="0.8" fill={STEM} />
+      <circle cx="4.6" cy="18.9" r="0.7" fill={STEM} />
     </svg>
   );
 }
