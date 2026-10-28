@@ -18,19 +18,21 @@ const ORANGE = "oklch(0.58 0.175 42)"; // pumpkin, the reddest orange
 // sits on a thin shadow of its own ink; one too pale to reach it, like a
 // real peach, keeps its colour and gets a deeper shadow (RIMS) that does.
 const PICTURES = {
+  // Three rows of six with the characters: the sky, then blossom and fruit
+  // from red to yellow, then fortune and growth beside 中 發 福.
   paw: "oklch(0.45 0.07 50)", // brown
+  crown: "oklch(0.78 0.15 82)", // gold
   star: "oklch(0.86 0.16 95)", // yellow
-  heart: "oklch(0.57 0.2 12)", // rose
   moon: "oklch(0.45 0.13 275)", // indigo
   sun: "oklch(0.8 0.16 72)", // golden
-  flower: "oklch(0.83 0.08 355)", // sakura pink
-  clover: "oklch(0.5 0.14 155)", // deep green
-  banana: "oklch(0.86 0.15 100)", // yellow
-  crown: "oklch(0.78 0.15 82)", // gold
   cloud: "oklch(0.82 0.07 235)", // baby blue
+  heart: "oklch(0.57 0.2 12)", // rose
+  flower: "oklch(0.83 0.08 355)", // sakura pink
   apple: RED,
   peach: "oklch(0.74 0.13 28)", // for long life
   mandarin: "oklch(0.7 0.17 58)", // orange, for luck at New Year
+  banana: "oklch(0.86 0.15 100)", // yellow
+  clover: "oklch(0.5 0.14 155)", // deep green
   coin: "oklch(0.6 0.1 62)", // bronze, as old cash coins are
   sprout: "oklch(0.58 0.15 135)", // leaf green
 } as const;
