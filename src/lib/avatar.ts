@@ -8,28 +8,28 @@
 import { halloweenWeek } from "./season.ts";
 
 const RED = "oklch(0.55 0.2 28)";
-const BLUE = "oklch(0.48 0.16 255)";
 const GREEN = "oklch(0.5 0.14 160)";
 const INK = "oklch(0.27 0.03 270)";
-// Dark enough for 4.5:1 on the tile face, which 中 and 發 need as text.
-const GOLD = "oklch(0.52 0.12 75)";
 const ORANGE = "oklch(0.6 0.17 50)";
 
-// Each face keeps one ink, as a real tile does: 中 is always red.
+// Each face keeps one ink, as a real tile does: 中 is always red. Each is
+// its own colour, and every one reaches 3:1 on the ivory face (avatar.test).
 const PICTURES = {
-  paw: INK,
-  star: GOLD,
-  heart: RED,
-  moon: GOLD,
-  sun: GOLD,
-  flower: RED,
-  clover: GREEN,
-  cherry: RED,
-  crown: GOLD,
-  cloud: BLUE,
+  paw: "oklch(0.45 0.07 50)", // brown
+  star: "oklch(0.62 0.14 82)", // gold
+  heart: "oklch(0.57 0.2 12)", // rose
+  moon: "oklch(0.45 0.13 275)", // indigo
+  sun: "oklch(0.64 0.17 58)", // amber
+  flower: "oklch(0.55 0.19 345)", // magenta
+  clover: "oklch(0.5 0.14 155)", // deep green
+  cherry: "oklch(0.5 0.19 22)", // crimson
+  crown: "oklch(0.48 0.16 305)", // royal purple
+  cloud: "oklch(0.62 0.12 238)", // sky
   apple: RED,
-  coin: BLUE,
-  sprout: GREEN,
+  peach: "oklch(0.64 0.15 28)", // for long life
+  mandarin: "oklch(0.64 0.17 55)", // for luck at New Year
+  coin: "oklch(0.57 0.11 78)", // old gold
+  sprout: "oklch(0.6 0.15 135)", // leaf green
 } as const;
 // Two of the dragons, as they appear on the tiles. The winds stay off player
 // tiles, since the table page marks each seat with its wind.

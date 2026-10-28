@@ -890,6 +890,8 @@ const TILE_PARTS = {
     "crown",
     "cloud",
     "apple",
+    "peach",
+    "mandarin",
     "coin",
     "sprout",
     "zhong",
