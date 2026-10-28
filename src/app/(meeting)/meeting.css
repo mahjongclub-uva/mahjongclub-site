@@ -1303,9 +1303,9 @@ main.meeting-page .meeting-matches .meeting-text {
   }
 }
 
-/* The tile maker: the player's tile with a dice on its corner, and behind
-   "Change your tile" a rack of faces, the chosen one lifted as if about to
-   be played, and a row of backs. */
+/* The tile maker: the player's tile with a dice on its corner, and under
+   the Icon and Color tabs a rack of faces, the chosen one lifted as if about
+   to be played, or a rack of face-down backs. */
 .tile-maker {
   display: grid;
   justify-items: start;
@@ -1336,24 +1336,40 @@ main.meeting-page .meeting-matches .meeting-text {
   inline-size: 22px;
   block-size: 22px;
 }
-.tile-rack-toggle {
+/* Icon | Color: one track, the open tab filled in ink. */
+.tile-rack-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  max-inline-size: 320px;
   margin-block-end: 14px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.tile-rack-tabs button {
+  min-block-size: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font: var(--t-control);
+  cursor: pointer;
+}
+.tile-rack-tabs [aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--card);
+}
+.tile-rack-tabs button:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 2px;
 }
 .tile-rack {
-  display: grid;
-  gap: 14px;
-  margin-block: 4px 18px;
-}
-.tile-rack fieldset {
   min-inline-size: 0;
-  margin: 0;
+  margin: 4px 0 18px;
   padding: 0;
   border: 0;
-}
-.tile-rack legend {
-  margin-block-end: 6px;
-  color: var(--ink-soft);
-  font: var(--t-meta);
 }
 .tile-rack-faces {
   display: grid;
@@ -1363,9 +1379,9 @@ main.meeting-page .meeting-matches .meeting-text {
   --w: 38px;
 }
 .tile-rack-backs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px 4px;
 }
 .tile-rack label {
   display: grid;
@@ -1376,24 +1392,37 @@ main.meeting-page .meeting-matches .meeting-text {
   cursor: pointer;
 }
 .tile-rack-backs label {
-  min-block-size: 44px;
+  gap: 8px;
+  padding: 8px 2px 6px;
+  font: var(--t-meta);
+  text-transform: capitalize;
 }
-.tile-rack-swatch {
-  inline-size: 32px;
-  block-size: 32px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px oklch(0.3 0.03 90 / 0.2);
+/* A face-down tile: its back colour all over, lit from the top left. */
+.tile-rack-swatch.player-tile {
+  --w: 30px;
+  background: radial-gradient(
+    120% 90% at 30% 15%,
+    color-mix(in oklch, var(--b), white 22%),
+    var(--b) 60%,
+    color-mix(in oklch, var(--b), black 10%)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 2px 0 color-mix(in oklch, var(--b), black 18%),
+    0 4px 0 #e4dcc8,
+    0 5px 4px rgb(45 34 24 / 0.18);
 }
-/* Chosen: the face rises out of the rack with a jade ring; the back gets an
-   ink ring, so neither choice is shown by colour alone. */
+/* Chosen: the face rises out of the rack with a jade ring; the colour gets an
+   ink outline and a bold name, so neither choice is shown by colour alone. */
 .tile-rack-faces label:has(:checked) .player-tile {
   translate: 0 -6px;
   outline: 3px solid var(--jade);
   outline-offset: 2px;
 }
-.tile-rack-backs :checked + .tile-rack-swatch {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
+.tile-rack-backs label:has(:checked) {
+  background: var(--card);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  font-weight: 900;
 }
 .tile-rack label:has(:focus-visible) {
   outline: 2px solid var(--ink);
