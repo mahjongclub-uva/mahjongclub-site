@@ -14,9 +14,9 @@ const ORANGE = "oklch(0.58 0.175 42)"; // pumpkin, the reddest orange
 
 // Each face keeps one ink, as a real tile does: 中 is always red. Each is
 // its own colour, and every one reaches 3:1 on the ivory face and on the
-// meeting page, where the Icon rack shows it bare (avatar.test). A face too
-// pale to reach it, like a real peach, keeps its colour and gets a darker
-// rim (RIMS) that does.
+// meeting page, where the Icon rack shows it bare (avatar.test). Every face
+// sits on a thin shadow of its own ink; one too pale to reach it, like a
+// real peach, keeps its colour and gets a deeper shadow (RIMS) that does.
 const PICTURES = {
   paw: "oklch(0.45 0.07 50)", // brown
   star: "oklch(0.86 0.16 95)", // yellow

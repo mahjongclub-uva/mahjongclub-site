@@ -601,12 +601,23 @@ main {
   translate: calc(var(--w, 44px) * var(--dx, 0))
     calc(var(--w, 44px) * var(--dy, 0));
 }
-/* A pale face's darker rim, drawn under its fill so it shows outside it. */
-.player-tile svg * {
-  stroke: var(--rim, none);
-  stroke-width: 1.4;
-  stroke-linejoin: round;
-  paint-order: stroke;
+/* Every face sits on a thin shadow in a deeper shade of its own ink, as if
+   carved into the tile; a pale face's (RIMS) is the one that gives it an
+   edge on ivory. */
+.player-tile {
+  --carve: 0 calc(var(--w, 44px) * 0.025) 0
+    var(--rim, color-mix(in oklch, var(--g), black 30%));
+  text-shadow: var(--carve);
+}
+.player-tile svg {
+  filter: drop-shadow(var(--carve));
+}
+/* The peach's crease, a shade deeper than the fruit. */
+.tile-crease {
+  fill: none;
+  stroke: color-mix(in oklch, currentColor, black 22%);
+  stroke-width: 1.1;
+  stroke-linecap: round;
 }
 :is([data-face="crown"], [data-face="cloud"]) svg {
   --fit: 0.64;

@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import {
-  IconAppleFilled,
   IconCherryFilled,
   IconCloudFilled,
   IconCloverFilled,
@@ -51,15 +50,40 @@ export function PumpkinFilled() {
     </svg>
   );
 }
-// A peach, for long life, with its cleft cut through.
+// Leaves and stems keep their own colour on any face; the fruit takes the ink.
+const LEAF = "oklch(0.56 0.14 140)";
+const STEM = "oklch(0.42 0.07 55)";
+// A peach, for long life: round, with a point at the top, a crease down one
+// side and two leaves.
 function PeachFilled() {
   return (
-    <svg viewBox="2.8 2.8 18.4 19.1" fill="currentColor">
+    <svg viewBox="3 2.4 18 19.6" fill="currentColor">
+      <path d="M12.4 6.6c3.2-.2 8.2 2.4 8.2 7.6 0 4.6-3.8 7.6-8.6 7.6s-8.6-3-8.6-7.6c0-4.8 4.4-7.2 7-6.8 1 .1 1.5-.2 2-.8z" />
+      <path className="tile-crease" d="M12.4 7.2c-1.8 2.6-2.2 6.6-.6 11" />
       <path
-        fillRule="evenodd"
-        d="M12 7.2c-4.4-1.6-8.8 1.4-8.8 6.2 0 4.7 3.9 8.1 8.8 8.1s8.8-3.4 8.8-8.1c0-4.8-4.4-7.8-8.8-6.2zm-.7 1.3c-1.5 2.8-1.7 6.3-.3 10l1.5-.6c-1.2-3.2-1-6.3.2-8.6z"
+        fill={LEAF}
+        d="M12.6 6.4c.6-2.4 2.8-3.8 5.6-3.6-.6 2.6-2.8 4-5.6 3.6z"
       />
-      <path d="M12.4 6.6c.9-2.6 3.3-3.8 6-3.3-.7 2.6-3.2 3.8-6 3.3z" />
+      <path
+        fill={LEAF}
+        d="M12 6.2c-1.2-1.8-3.2-2.4-5.2-1.6 1 1.9 3.1 2.5 5.2 1.6z"
+      />
+    </svg>
+  );
+}
+// An apple with a stem and a leaf; Tabler's reads as a tomato.
+function AppleFilled() {
+  return (
+    <svg viewBox="2.8 2.4 18.4 19.6" fill="currentColor">
+      <path d="M12 7.6c-1.4-1-3.4-1.4-5.2-.8-2.6 1-3.8 3.6-3.6 6.6.3 4.2 3.2 8.2 6.2 8.2 1 0 1.6-.5 2.6-.5s1.6.5 2.6.5c3 0 5.9-4 6.2-8.2.2-3-1-5.6-3.6-6.6-1.8-.6-3.8-.2-5.2.8z" />
+      <path
+        fill={STEM}
+        d="M11.4 7.6c0-1.9.4-3.4 1.3-4.8l1 .6c-.8 1.3-1.1 2.6-1.1 4.2z"
+      />
+      <path
+        fill={LEAF}
+        d="M13.2 5.6c.8-2 3-3 5.2-2.6-.7 2.1-2.8 3.2-5.2 2.6z"
+      />
     </svg>
   );
 }
@@ -88,7 +112,7 @@ const PICTURES: Record<
   cherry: <IconCherryFilled viewBox="2.6 2.6 18.8 19.8" />,
   crown: <IconCrownFilled viewBox="1.6 4.5 20.7 14.9" />,
   cloud: <IconCloudFilled viewBox="0.6 3.6 22.8 15.8" />,
-  apple: <IconAppleFilled viewBox="2.6 1.6 18.8 20.8" />,
+  apple: <AppleFilled />,
   peach: <PeachFilled />,
   mandarin: <MandarinFilled />,
   coin: <CoinFilled />,
