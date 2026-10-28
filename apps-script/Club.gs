@@ -861,7 +861,11 @@ function roomsState(meeting, withResults) {
     }
     const rooms = readRooms(meeting.id).map(publicRoom);
     if (saves() === at || attempt >= 5)
-      return { rooms, results: tables, tiles: seatedTiles(meeting, rooms) };
+      return {
+        rooms,
+        results: tables,
+        tiles: seatedTiles(meeting, rooms, tables),
+      };
   }
 }
 
@@ -916,11 +920,14 @@ function saveTile(request) {
   return { status: 200 };
 }
 
-// Both room paths return these, or tiles vanish from the table pages.
-function seatedTiles(meeting, rooms) {
+// Both room paths return these, or tiles vanish from the table pages; saved
+// tables count too, or Tonight's standings lose a tile once its table saves.
+function seatedTiles(meeting, rooms, tables) {
   return tonightTiles(
     meeting,
-    rooms.flatMap((room) => room.seats.map((seat) => seat.id)),
+    [...rooms, ...(tables || [])].flatMap((room) =>
+      room.seats.map((seat) => seat.id),
+    ),
   );
 }
 

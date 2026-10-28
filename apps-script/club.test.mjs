@@ -1125,6 +1125,20 @@ test("a checked-in player's tile shows for tonight only, and nothing else is sto
   assert.equal(tile("p001", "sun.gold.mint"), 423);
 });
 
+test("a saved table keeps its players' tiles on Tonight's standings", () => {
+  const h = harness();
+  const t = seatedTable(h);
+  assert.equal(
+    h.post({ r: "tile", playerId: "p002", tile: "sun.gold.mint" }).status,
+    200,
+  );
+  assert.equal(t.hand("p001", 20).status, 200);
+  assert.equal(t.end().status, 200);
+  const state = h.get({ r: "rooms" });
+  assert.equal(state.results.length, 1);
+  assert.equal(state.tiles.p002, "sun.gold.mint");
+});
+
 test("closing the meeting saves every room with games", () => {
   const h = harness();
   const t = seatedTable(h);
