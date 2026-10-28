@@ -897,7 +897,20 @@ const TILE_PARTS = {
     "zhong",
     "fa",
   ],
-  back: ["coral", "sky", "butter", "lilac", "mint", "midnight"],
+  back: [
+    "jade",
+    "mint",
+    "sea",
+    "sky",
+    "cobalt",
+    "midnight",
+    "plum",
+    "peony",
+    "vermilion",
+    "tangerine",
+    "gold",
+    "bamboo",
+  ],
 };
 
 // A tile a player made for tonight: one property each, "meetingId code", so a

@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import {
   ALL_FACES,
+  BACKS,
   BACK_NAMES,
   CHARACTERS,
   INKS,
@@ -92,5 +93,13 @@ test("every ink reads on the ivory face: 3:1 for pictures, 4.5:1 for characters"
     const ratio = (face + 0.05) / (luminance(ink) + 0.05);
     const floor = name in CHARACTERS ? 4.5 : 3;
     assert.ok(ratio >= floor, `${name} is ${ratio.toFixed(2)}:1`);
+  }
+});
+
+test("every back stands out from the ivory face: 2:1", () => {
+  const face = 0.2126 * 0.9387 + 0.7152 * 0.9216 + 0.0722 * 0.855;
+  for (const [name, back] of Object.entries(BACKS)) {
+    const ratio = (face + 0.05) / (luminance(back) + 0.05);
+    assert.ok(ratio >= 2, `${name} is ${ratio.toFixed(2)}:1`);
   }
 });

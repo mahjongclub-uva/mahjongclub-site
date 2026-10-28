@@ -50,13 +50,21 @@ export const ALL_FACES = Object.keys(INKS) as Face[];
 const FACES = ALL_FACES.filter((face) => !SEASONAL.includes(face));
 /** The faces a player can pick at `now`: Halloween's in Halloween week. */
 export const facesOn = (now: Date) => (halloweenWeek(now) ? ALL_FACES : FACES);
+// Backs from the game and the club: each one at least 2:1 against the ivory
+// face (avatar.test), so a tile's edge never melts into its face.
 export const BACKS = {
-  coral: "oklch(0.74 0.16 30)",
-  sky: "oklch(0.8 0.1 230)",
-  butter: "oklch(0.88 0.15 95)",
-  lilac: "oklch(0.78 0.1 300)",
-  mint: "oklch(0.84 0.12 160)",
-  midnight: "oklch(0.38 0.07 300)",
+  jade: "oklch(0.48 0.08 170)", // the club's own tile backs
+  mint: "oklch(0.74 0.13 165)",
+  sea: "oklch(0.66 0.1 205)", // a deeper celadon glaze
+  sky: "oklch(0.7 0.13 240)",
+  cobalt: "oklch(0.5 0.17 262)", // blue-and-white porcelain
+  midnight: "oklch(0.34 0.07 285)",
+  plum: "oklch(0.48 0.15 330)", // plum and peony are flower tiles
+  peony: "oklch(0.7 0.17 355)",
+  vermilion: "oklch(0.6 0.19 32)", // the ink of 中
+  tangerine: "oklch(0.73 0.17 55)",
+  gold: "oklch(0.76 0.15 82)", // Fuzhou's wildcard
+  bamboo: "oklch(0.72 0.17 130)",
 } as const;
 
 export type Avatar = { face: Face; back: keyof typeof BACKS };
