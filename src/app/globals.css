@@ -632,7 +632,7 @@ main {
 }
 /* Sized so each puts down about the same ink as the median face, measured
    in the rack: solid, wide shapes come in, thin and spiky ones go out. */
-:is([data-face="cloud"], [data-face="flower"], [data-face="skull"]) svg {
+:is([data-face="cloud"], [data-face="flower"]) svg {
   --fit: 0.6;
 }
 :is([data-face="coin"], [data-face="ghost"]) svg {
@@ -644,10 +644,11 @@ main {
 [data-face="clover"] svg {
   --fit: 0.53;
 }
-[data-face="pumpkin"] svg {
-  --fit: 0.54;
+/* Squat and round, so it reads small at its measured size. */
+:is([data-face="pumpkin"], [data-face="skull"], [data-face="paw"]) svg {
+  --fit: 0.63;
 }
-:is([data-face="spider"], [data-face="sprout"], [data-face="paw"]) svg {
+:is([data-face="spider"], [data-face="sprout"]) svg {
   --fit: 0.61;
 }
 [data-face="star"] svg {
@@ -666,7 +667,7 @@ main {
   --dy: 0.02;
 }
 [data-face="banana"] svg {
-  --fit: 0.7;
+  --fit: 0.63;
 }
 [data-face="heart"] svg {
   --fit: 0.55;
@@ -676,8 +677,13 @@ main {
   --fit: 0.55;
   --dy: -0.02;
 }
+/* The sun's rays leave it looking small beside the solid moon. */
 [data-face="moon"] svg {
+  --fit: 0.54;
   --dx: 0.02;
+}
+[data-face="sun"] svg {
+  --fit: 0.65;
 }
 .player-tile[data-face="zhong"] {
   font-size: calc(var(--w, 44px) * 0.6);
