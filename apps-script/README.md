@@ -34,7 +34,7 @@ What players see at a table is in the [officer guide](../OFFICER_GUIDE.md#tables
 - Games can be saved only once all four seats are taken; any of the four can save one. A player can leave alone only while the session has no games; after that, only End table, which releases all four.
 - End table writes the four totals as one `Table N` block in Points Tracking, the same as a typed-totals save, and starts the next session at the same table. A session with no games writes nothing, and one still open when scoring closes is saved on the next request.
 
-The workbook has no per-game rows. Games live in Script Properties (one key per table, `room:<meeting>:<table>`) until the table ends. The scoresheet block number ("scoresheet Table 8") is not the physical table number.
+Games live in Script Properties (one key per table, `room:<meeting>:<table>`) until the table ends. Ending also copies them, one row per game (date, scoresheet table, game number, winner, each), to a `Games` tab the script creates on its first save, for the semester recap; a failure there never blocks the scores. The scoresheet block number ("scoresheet Table 8") is not the physical table number.
 
 ## Who owns what
 
