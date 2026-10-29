@@ -190,7 +190,6 @@ function PawFilled() {
 }
 // Halloween's bat (with ears), witch's hat (floppy tip, buckled band) and
 // skull (round eyes, rounded teeth), drawn as the pumpkin is.
-const ORANGE = "oklch(0.58 0.175 42)";
 const GOLD = "oklch(0.8 0.14 85)";
 function BatFilled() {
   return (
@@ -205,7 +204,7 @@ function HatFilled() {
       <path d="M7.4 16.2C8.6 12.4 9.6 9.6 10.4 7.4 11 5.6 12 4 13.8 3.6 15.2 3.3 16.6 4 17.4 5.6 16.1 4.9 14.8 5.3 14.4 6.6 14 8.4 15.6 12.6 16.6 16.2Z" />
       <path d="M2.2 17.4C3.2 16 6.6 15.4 12 15.4S20.8 16 21.8 17.4C21 19.2 17.2 20 12 20S3 19.2 2.2 17.4Z" />
       <path
-        fill={ORANGE}
+        fill={INKS.pumpkin}
         d="M8.1 13.6C10.6 14.2 13.4 14.2 15.9 13.6L16.5 15.8C13.6 16.4 10.4 16.4 7.5 15.8Z"
       />
       <rect x="10.6" y="13.5" width="2.8" height="2.8" rx="0.7" fill={GOLD} />
@@ -215,7 +214,7 @@ function HatFilled() {
         width="1.3"
         height="1.3"
         rx="0.35"
-        fill={ORANGE}
+        fill={INKS.pumpkin}
       />
     </svg>
   );

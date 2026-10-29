@@ -612,8 +612,8 @@ main {
 .player-tile svg {
   filter: drop-shadow(var(--carve));
 }
-/* The pumpkin's stem, green on a tile; the live badge draws it white. */
-.player-tile .tile-stem {
+/* The pumpkin's stem, green wherever it's drawn; the live badge draws it white. */
+.tile-stem {
   fill: oklch(0.5 0.1 120);
 }
 /* A fruit's crease or dimple, a fine line a shade deeper than the fruit. */

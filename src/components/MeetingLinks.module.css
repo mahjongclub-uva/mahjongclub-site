@@ -106,6 +106,9 @@
   position: relative;
   color: #fff;
 }
+.jack :global(.tile-stem) {
+  fill: currentColor;
+}
 /* The face and ribs are for the tile; here the face is the candle. */
 .jack :global(.tile-rib),
 .jack :global(.tile-carve) {
