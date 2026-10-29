@@ -13,6 +13,9 @@ name: Checks
 on:
   pull_request:
     branches: [main]
+    # edited covers a stacked PR moved onto main when its base merges, which
+    # otherwise never gets a run.
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 permissions:
