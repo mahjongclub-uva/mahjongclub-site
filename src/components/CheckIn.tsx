@@ -11,7 +11,12 @@ import Link from "next/link";
 import { IconPaletteFilled, IconDice5Filled } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
 import Cobweb from "@/components/Cobweb";
-import PlayerTile, { AvatarTile, TileName } from "@/components/PlayerTile";
+import PlayerTile, {
+  AvatarTile,
+  PumpkinFilled,
+  TileName,
+} from "@/components/PlayerTile";
+import { halloweenWeek } from "@/lib/season";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers, { IdBadge } from "@/components/IdStickers";
@@ -222,6 +227,7 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
   );
 }
 
+const pumpkin = <PumpkinFilled />;
 // Whole tiles in one character, so every face that turns up is a real tile.
 const FACES = ["東", "南", "西", "北", "中", "發", "白"];
 type Outcome = "won" | "lost" | null;
@@ -230,11 +236,13 @@ const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * The "…" after "Checking in": three small tiles that turn up random faces
- * while the reply is on its way. Checked in, they land as a pung, 中 中 中;
+ * while the reply is on its way. Checked in, they land as a pung, 中 中 中
+ * (jack-o'-lanterns in Halloween week);
  * refused, they turn face down and shake. A face that changes remounts its
  * tile, which replays the flip-in.
  */
 function WaitTiles({ outcome }: { outcome: Outcome }) {
+  const spooky = halloweenWeek(new Date());
   const [faces, setFaces] = useState<{ face: string; n: number }[]>(() =>
     [0, 1, 2].map((n) => ({ face: "", n })),
   );
@@ -265,7 +273,13 @@ function WaitTiles({ outcome }: { outcome: Outcome }) {
     >
       {faces.map((tile, i) => {
         const face =
-          outcome === "won" ? "中" : outcome === "lost" ? "" : tile.face;
+          outcome === "won"
+            ? spooky
+              ? pumpkin
+              : "中"
+            : outcome === "lost"
+              ? ""
+              : tile.face;
         return (
           <span
             className="wait-tile"

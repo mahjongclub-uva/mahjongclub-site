@@ -1,0 +1,186 @@
+/* Halloween, Oct 24 to 31 (halloweenWeek in src/lib/season.ts). It comes
+   back every year by the date alone; to change or retire it, start here.
+
+   - This file: the web and spider on "You're in", the pumpkin pung while
+     checking in, a ghost over each empty seat, and the moonlit felt. All of
+     it but the web keys off [data-season="halloween"] on the page, which SeasonMark
+     sets on the phone's own date, since the site is built ahead of time.
+   - src/lib/avatar.ts: the six Halloween faces, first in the rack.
+   - src/components/MeetingLinks.module.css: the jack-o'-lantern LIVE badge.
+   Every piece holds still under reduced motion. */
+
+/* Halloween week: a web in the corner beside the tile, and a spider on its
+   thread. Clipped to the corner, so a scared spider runs out of sight. */
+.meeting-receipt {
+  position: relative;
+}
+/* The greeting leaves the web its corner. */
+.meeting-receipt:has(.cobweb) h1 {
+  padding-inline-end: 84px;
+}
+.cobweb {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: -12px;
+  inline-size: 112px;
+  block-size: 150px;
+  overflow: clip;
+  pointer-events: none;
+}
+.cobweb-web {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: 96px;
+  overflow: visible;
+}
+.cobweb-spokes {
+  stroke-width: 0.9;
+}
+.cobweb-rings {
+  stroke-width: 0.6;
+}
+/* Its shadow falls a little down and left on the paper, softened. */
+.cobweb-shadow {
+  stroke: oklch(0.3 0.03 90 / 0.16);
+  translate: -1.5px 3px;
+  filter: blur(0.8px);
+}
+.cobweb-strand {
+  stroke: oklch(0.42 0.02 90 / 0.5);
+}
+.cobweb-shine {
+  stroke: oklch(1 0 0 / 0.8);
+  translate: 0.4px -0.4px;
+}
+.cobweb-shine path {
+  stroke-width: 0.35;
+}
+.cobweb-dew {
+  fill: oklch(1 0 0 / 0.9);
+  stroke: oklch(0.42 0.02 90 / 0.35);
+  stroke-width: 0.4;
+}
+.cobweb-spider {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 38px;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: 50% -40px;
+  translate: 0 56px;
+}
+.cobweb-spider[data-scared] {
+  translate: 0 -48px;
+}
+/* The thread runs from the spider up past the top of the corner. */
+.cobweb-spider::before {
+  content: "";
+  position: absolute;
+  inset-block-end: 60%;
+  inset-inline-start: 50%;
+  inline-size: 1px;
+  block-size: 120px;
+  background: oklch(0.3 0.03 90 / 0.35);
+}
+/* It hangs off the page, so its shadow lands lower down and blurred. */
+.cobweb-spider svg {
+  position: relative;
+  inline-size: 26px;
+  block-size: 26px;
+  filter: drop-shadow(-2px 9px 3px oklch(0.3 0.03 90 / 0.28));
+}
+.cobweb-spider:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 0;
+}
+@keyframes cobweb-sway {
+  50% {
+    rotate: 7deg;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cobweb-spider {
+    animation: cobweb-sway 3.2s ease-in-out infinite;
+    transition: translate 1.2s var(--pop);
+  }
+  .cobweb-spider[data-scared] {
+    animation: none;
+    transition: translate 0.25s ease-in;
+  }
+}
+
+/* Checking in: the pung lands as three jack-o'-lanterns, not 中 中 中. */
+[data-season="halloween"] .wait-tile svg {
+  inline-size: 82%;
+  block-size: 82%;
+  color: oklch(0.58 0.175 42);
+}
+[data-season="halloween"] .wait-tile .tile-stem {
+  fill: oklch(0.5 0.1 120);
+}
+
+/* A ghost peeks over each empty seat, gone once someone sits. */
+[data-season="halloween"]
+  .seat[data-empty]
+  .seat-tile:not([data-sitting])::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -20px;
+  inset-inline-start: -16px;
+  inline-size: 30px;
+  aspect-ratio: 14.8 / 18.8;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='4.6 2.6 14.8 18.8'%3E%3Cpath fill='%23fbf8ef' d='M12 3C7.6 3 5 6.2 5 10.4v9.4c0 .8.8 1.2 1.4.6l1.4-1.2 1.6 1.4c.4.4 1 .4 1.4 0l1.2-1.2 1.2 1.2c.4.4 1 .4 1.4 0l1.6-1.4 1.4 1.2c.6.6 1.4.2 1.4-.6v-9.4C19 6.2 16.4 3 12 3z'/%3E%3Cg fill='%23292722'%3E%3Cellipse cx='9.8' cy='10.4' rx='1.1' ry='1.5'/%3E%3Cellipse cx='14.2' cy='10.4' rx='1.1' ry='1.5'/%3E%3Cellipse cx='12' cy='14.2' rx='.9' ry='1.1'/%3E%3C/g%3E%3C/svg%3E")
+    center / contain no-repeat;
+  filter: drop-shadow(0 1px 0 oklch(0.55 0.03 270))
+    drop-shadow(0 3px 4px oklch(0.3 0.03 90 / 0.25));
+  pointer-events: none;
+}
+
+/* The felt by moonlight: midnight violet, a crescent moon and a bat in one
+   corner, a cat on the rim in the other. Same wooden rim. */
+[data-season="halloween"] main.meeting-page .table-top {
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.42 0.08 290),
+    oklch(0.3 0.07 285)
+  );
+  color: oklch(0.95 0.02 290);
+}
+[data-season="halloween"] main.meeting-page .table-top::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 12px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='1.2 5.8 21.6 12.6'%3E%3Cpath fill='%23161320' d='M12 8.2 10.7 6.2 10.3 8.8C8.4 7.4 5 7 1.6 8.2 3.2 9.8 3.4 12 2.8 14.4 4.6 13.4 6.4 13.6 7.4 15.2 8.6 14 10 14.4 10.8 16.4 11.2 17.4 11.6 18 12 18S12.8 17.4 13.2 16.4C14 14.4 15.4 14 16.6 15.2 17.6 13.6 19.4 13.4 21.2 14.4 20.6 12 20.8 9.8 22.4 8.2 19 7 15.6 7.4 13.7 8.8L13.3 6.2z'/%3E%3C/svg%3E")
+      64% 12% / 18% auto no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23eadb9a' d='M15.5 2.5a9.5 9.5 0 1 0 6 16.9A8 8 0 0 1 15.5 2.5z'/%3E%3C/svg%3E")
+      92% 7% / 16% auto no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23161320' d='M7 22c-.6 0-1-.5-.8-1.1.9-2.6 1.1-5.1.4-7.6-.4-1.4-.4-2.9.1-4.2L5.5 4.6c-.2-.5.3-1 .8-.7l2.6 1.7c.9-.4 1.9-.6 3-.6s2.1.2 3 .6l2.6-1.7c.5-.3 1 .2.8.7l-1.2 4.5c.5 1.3.5 2.8.1 4.2-.7 2.5-.5 5 .4 7.6.2.6-.2 1.1-.8 1.1z'/%3E%3Cpath fill='none' stroke='%23161320' stroke-width='1.6' stroke-linecap='round' d='M17.2 21c2.4-.2 4.4-1.6 4.4-4.2 0-1.6-1-2.6-2.2-2.6'/%3E%3Ccircle cx='9.8' cy='10' r='.9' fill='%23e8c24a'/%3E%3Ccircle cx='14.2' cy='10' r='.9' fill='%23e8c24a'/%3E%3C/svg%3E")
+      6% 96% / 20% auto no-repeat;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-season="halloween"]
+    .seat[data-empty]
+    .seat-tile:not([data-sitting])::after {
+    animation: ghost-bob 2.4s ease-in-out infinite;
+  }
+}
+@keyframes ghost-bob {
+  50% {
+    translate: 0 -4px;
+    rotate: -6deg;
+  }
+}

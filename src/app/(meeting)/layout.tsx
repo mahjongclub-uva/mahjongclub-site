@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 import { MEETING_REHEARSAL } from "@/lib/site";
 import { preconnect } from "react-dom";
 import { nunito } from "@/lib/fonts";
+import SeasonMark from "@/components/SeasonMark";
 import "./meeting.css";
+import "./halloween.css";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -19,6 +21,7 @@ export default function MeetingLayout({ children }: { children: ReactNode }) {
   });
   return (
     <main className={`meeting-page ${nunito.variable}`}>
+      <SeasonMark />
       {MEETING_REHEARSAL && (
         <p className="meeting-rehearsal">
           Rehearsal only. Use fake names and IDs.
