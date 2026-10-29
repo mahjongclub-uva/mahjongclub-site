@@ -4,8 +4,9 @@
    - This file: the web and spider on "You're in", the pumpkin pung while
      checking in, a ghost over each empty seat, and the moonlit felt, on the
      meeting tables and the leaderboard's podium. All of it but the web
-     keys off [data-season="halloween"] on the page, which SeasonMark sets
-     on the phone's own date, since the site is built ahead of time.
+     keys off [data-season="halloween"] on the page, which a line in the
+     root layout's head sets on the phone's own date before the first paint,
+     since the site is built ahead of time.
    - src/lib/avatar.ts: the six Halloween faces, first in the rack.
    - src/components/MeetingLinks.module.css: the jack-o'-lantern LIVE badge.
    Every piece holds still under reduced motion. */
@@ -175,7 +176,7 @@
   inset: 9px;
   background:
     var(--moon) 87% 8% / 14% auto no-repeat,
-    var(--bat) 64% 21% / 14% auto no-repeat,
+    var(--bat) 65% 9% / 12% auto no-repeat,
     var(--bat-tilt) 38% 5% / 10% auto no-repeat,
     var(--bat-tilt) 7% 36% / 9% auto no-repeat,
     var(--bat) 78% 90% / 7% auto no-repeat;
