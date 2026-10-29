@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   ),
   title: FULL_NAME,
   description: `Fuzhou-style 16-tile mahjong at the University of Virginia. ${TAGLINE}`,
+  referrer: "no-referrer",
 };
 
 export default function RootLayout({

@@ -79,10 +79,13 @@ export async function getMeeting(
   const seen = roomChanges;
   const target = new URL(url);
   target.searchParams.set("r", "meeting");
-  const { body, reply } = await readResponse(target.href, {
-    signal,
-    cache: "no-store",
-  });
+  // Short, so people at the door hear "can't reach" and the officer fallback
+  // sooner when the service hangs. Saves keep the long default.
+  const { body, reply } = await readResponse(
+    target.href,
+    { signal, cache: "no-store" },
+    10000,
+  );
   if (reply.status !== 200)
     throw new Error(
       reply.message || "An officer needs to check the meeting settings.",
