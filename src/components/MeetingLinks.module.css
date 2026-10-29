@@ -98,13 +98,18 @@
 .jack::before {
   content: "";
   position: absolute;
-  inset: 40% 22% 16%;
+  inset: 38% 20% 10%;
   border-radius: 40%;
   background: #ffc94a;
 }
 .jack svg {
   position: relative;
   color: #fff;
+}
+/* The face and ribs are for the tile; here the face is the candle. */
+.jack :global(.tile-rib),
+.jack :global(.tile-carve) {
+  display: none;
 }
 .card .jack {
   inline-size: 18px;

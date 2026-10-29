@@ -623,25 +623,38 @@ main {
   stroke-width: 0.75;
   stroke-linecap: round;
 }
+.tile-rib {
+  stroke-width: 0.55;
+}
+/* The jack-o'-lantern's face, dark on a tile. */
+.tile-carve {
+  fill: oklch(0.25 0.02 60);
+}
 /* Sized so each puts down about the same ink as the median face, measured
    in the rack: solid, wide shapes come in, thin and spiky ones go out. */
-:is([data-face="cloud"], [data-face="flower"]) svg {
+:is([data-face="cloud"], [data-face="flower"], [data-face="skull"]) svg {
   --fit: 0.6;
 }
-:is([data-face="coin"], [data-face="star"]) svg {
+:is([data-face="coin"], [data-face="star"], [data-face="ghost"]) svg {
   --fit: 0.57;
 }
-:is([data-face="mandarin"], [data-face="peach"], [data-face="ghost"]) svg {
+:is([data-face="mandarin"], [data-face="peach"]) svg {
   --fit: 0.56;
 }
 [data-face="clover"] svg {
   --fit: 0.53;
 }
-:is([data-face="spider"], [data-face="sprout"]) svg {
+[data-face="pumpkin"] svg {
+  --fit: 0.54;
+}
+:is([data-face="spider"], [data-face="sprout"], [data-face="paw"]) svg {
   --fit: 0.61;
 }
-:is([data-face="bat"], [data-face="hat"]) svg {
-  --fit: 0.6;
+[data-face="hat"] svg {
+  --fit: 0.64;
+}
+[data-face="bat"] svg {
+  --fit: 0.65;
 }
 [data-face="banana"] svg {
   --fit: 0.68;
