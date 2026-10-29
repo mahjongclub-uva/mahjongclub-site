@@ -635,7 +635,7 @@ main {
 :is([data-face="cloud"], [data-face="flower"], [data-face="skull"]) svg {
   --fit: 0.6;
 }
-:is([data-face="coin"], [data-face="star"], [data-face="ghost"]) svg {
+:is([data-face="coin"], [data-face="ghost"]) svg {
   --fit: 0.57;
 }
 :is([data-face="mandarin"], [data-face="peach"]) svg {
@@ -650,14 +650,23 @@ main {
 :is([data-face="spider"], [data-face="sprout"], [data-face="paw"]) svg {
   --fit: 0.61;
 }
+[data-face="star"] svg {
+  --fit: 0.59;
+}
+/* The brim is heavy, so the hat sits a little higher than its box. */
 [data-face="hat"] svg {
-  --fit: 0.64;
+  --fit: 0.66;
+  --dy: -0.035;
 }
 [data-face="bat"] svg {
-  --fit: 0.65;
+  --fit: 0.68;
+}
+/* The leaves are heavy, so the sprout sits a little lower. */
+[data-face="sprout"] svg {
+  --dy: 0.02;
 }
 [data-face="banana"] svg {
-  --fit: 0.68;
+  --fit: 0.7;
 }
 [data-face="heart"] svg {
   --fit: 0.55;
