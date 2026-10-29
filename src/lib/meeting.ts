@@ -1,4 +1,5 @@
 import type { Meeting, Player, Results, Room } from "./meetingSchemas.ts";
+import { addTonightTiles } from "./tiles.ts";
 export type {
   Meeting,
   Player,
@@ -52,6 +53,7 @@ async function readResponse(
   if (!response.ok) throw new Error("Can’t reach the club. Check your signal.");
   const body: unknown = await response.json();
   const reply = (await parsers).replySchema.parse(body);
+  addTonightTiles(reply.tiles);
   return { body, reply };
 }
 // The last meeting reply, kept across client navigation so the next meeting

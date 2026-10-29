@@ -711,8 +711,8 @@ function roomKey(room) {
   return "room:" + room.meetingId + ":" + room.table;
 }
 
-function readRooms(meetingId) {
-  const all = properties().getProperties();
+// `all` lets a reply that also needs tiles read the store once.
+function readRooms(meetingId, all = properties().getProperties()) {
   return Object.keys(all)
     .filter((key) => key.startsWith("room:"))
     .map((key) => JSON.parse(all[key]))
@@ -837,7 +837,11 @@ function meetingLabel(meetingId) {
 // Reads take no lock: a read that overlapped a save waits it out and reads
 // again (see `saves`).
 function roomsState(meeting, withResults) {
-  if (!withResults) return { rooms: readRooms(meeting.id).map(publicRoom) };
+  if (!withResults) {
+    const all = properties().getProperties();
+    const rooms = readRooms(meeting.id, all).map(publicRoom);
+    return { rooms, tiles: seatedTiles(meeting, rooms, null, all) };
+  }
   for (let attempt = 1; ; attempt++) {
     const at = saves();
     // ponytail: gives up after about a second and shows what it read; a save
@@ -856,9 +860,85 @@ function roomsState(meeting, withResults) {
         "Tonight's saved tables could not be read: " + error.message,
       );
     }
-    const rooms = readRooms(meeting.id).map(publicRoom);
-    if (saves() === at || attempt >= 5) return { rooms, results: tables };
+    const all = properties().getProperties();
+    const rooms = readRooms(meeting.id, all).map(publicRoom);
+    if (saves() === at || attempt >= 5)
+      return {
+        rooms,
+        results: tables,
+        tiles: seatedTiles(meeting, rooms, tables, all),
+      };
   }
+}
+
+// The tiles a player can make, matching src/lib/avatar.ts (its test compares
+// them). Halloween's faces are always accepted; the site offers them only that
+// week and draws a starter in their place after it.
+const TILE_PARTS = {
+  face: [
+    "pumpkin",
+    "ghost",
+    "spider",
+    "paw",
+    "star",
+    "heart",
+    "moon",
+    "sun",
+    "flower",
+    "clover",
+    "cherry",
+    "crown",
+    "cloud",
+    "apple",
+    "coin",
+    "sprout",
+    "zhong",
+    "fa",
+  ],
+  back: ["coral", "sky", "butter", "lilac", "mint", "midnight"],
+};
+
+// A tile a player made for tonight: one property each, "meetingId code", so a
+// save needs no lock and the store never holds more tiles than the Roster has
+// players. Only players checked in tonight can save one.
+function saveTile(request) {
+  const meeting = readMeeting();
+  if (!meetingWindow(meeting, Date.now()).open)
+    fail(423, "The meeting is closed.");
+  const parts = typeof request.tile === "string" ? request.tile.split(".") : [];
+  if (
+    parts.length !== 2 ||
+    !["face", "back"].every((part, i) => TILE_PARTS[part].includes(parts[i]))
+  )
+    fail(400, "Unknown tile.");
+  if (!hereTonight(meeting).some((player) => player.id === request.playerId))
+    fail(403, "Check in first.");
+  properties().setProperty(
+    "tile:" + request.playerId,
+    meeting.id + " " + request.tile,
+  );
+  return { status: 200 };
+}
+
+// Both room paths return these, or tiles vanish from the table pages; saved
+// tables count too, or Tonight's standings lose a tile once its table saves.
+function seatedTiles(meeting, rooms, tables, all) {
+  return tonightTiles(
+    meeting,
+    [...rooms, ...(tables || [])].flatMap((room) =>
+      room.seats.map((seat) => seat.id),
+    ),
+    all,
+  );
+}
+
+function tonightTiles(meeting, ids, all = properties().getProperties()) {
+  const tiles = {};
+  for (const id of ids) {
+    const [meetingId, code] = (all["tile:" + id] || "").split(" ");
+    if (meetingId === meeting.id) tiles[id] = code;
+  }
+  return tiles;
 }
 
 function roomAction(request, meeting) {
@@ -1076,7 +1156,13 @@ function doGet(event) {
       };
       if (state.open) {
         response.players = hereTonight(meeting).map(publicPlayer);
-        response.rooms = readRooms(meeting.id).map(publicRoom);
+        const all = properties().getProperties();
+        response.rooms = readRooms(meeting.id, all).map(publicRoom);
+        response.tiles = tonightTiles(
+          meeting,
+          response.players.map((player) => player.id),
+          all,
+        );
       }
       return response;
     }
@@ -1111,8 +1197,11 @@ function doPost(event) {
     if (!request || typeof request !== "object" || Array.isArray(request))
       fail(400, "Invalid request body.");
     timing.request = "POST " + label(request);
-    if (!["checkins", "players", "results", "rooms"].includes(request.r))
+    if (
+      !["checkins", "players", "results", "rooms", "tile"].includes(request.r)
+    )
       fail(404, "Unknown resource.");
+    if (request.r === "tile") return saveTile(request);
     // Check-ins read the Roster before queueing for the lock, and settle
     // unknown IDs and repeat check-ins without queueing at all.
     let roster;

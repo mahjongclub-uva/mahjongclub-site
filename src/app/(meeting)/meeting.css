@@ -1303,6 +1303,131 @@ main.meeting-page .meeting-matches .meeting-text {
   }
 }
 
+/* The tile maker: the player's tile with a dice on its corner, and behind
+   "Change your tile" a rack of faces, the chosen one lifted as if about to
+   be played, and a row of backs. */
+.tile-maker {
+  display: grid;
+  justify-items: start;
+  margin-block: 26px 20px;
+}
+.tile-maker .meeting-hero-tile {
+  position: relative;
+  margin: 0;
+}
+.tile-maker-dice {
+  position: absolute;
+  /* On the tile's corner, clear of its edge. */
+  inset-block-start: -14px;
+  inset-inline-end: -12px;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(0.88 0.15 95);
+  color: var(--ink);
+  box-shadow: var(--clay);
+  cursor: pointer;
+}
+.tile-maker-dice svg {
+  inline-size: 22px;
+  block-size: 22px;
+}
+.tile-rack-toggle {
+  margin-block-end: 14px;
+}
+.tile-rack {
+  display: grid;
+  gap: 14px;
+  margin-block: 4px 18px;
+}
+.tile-rack fieldset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tile-rack legend {
+  margin-block-end: 6px;
+  color: var(--ink-soft);
+  font: var(--t-meta);
+}
+.tile-rack-faces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px 6px;
+  justify-items: center;
+  --w: 38px;
+}
+.tile-rack-backs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tile-rack label {
+  display: grid;
+  place-items: center;
+  min-inline-size: 44px;
+  min-block-size: 54px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.tile-rack-backs label {
+  min-block-size: 44px;
+}
+.tile-rack-swatch {
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px oklch(0.3 0.03 90 / 0.2);
+}
+/* Chosen: the face rises out of the rack with a jade ring; the back gets an
+   ink ring, so neither choice is shown by colour alone. */
+.tile-rack-faces label:has(:checked) .player-tile {
+  translate: 0 -6px;
+  outline: 3px solid var(--jade);
+  outline-offset: 2px;
+}
+.tile-rack-backs :checked + .tile-rack-swatch {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.tile-rack label:has(:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+@keyframes tile-bump-0 {
+  40% {
+    scale: 0.88 1.06;
+  }
+}
+/* The same squish under a second name, so the next tap restarts it. */
+@keyframes tile-bump-1 {
+  40% {
+    scale: 0.88 1.06;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile-maker-dice {
+    transition: rotate 200ms var(--ease-out);
+  }
+  .tile-maker-dice:active {
+    rotate: 90deg;
+  }
+  .tile-rack-faces .player-tile {
+    transition: translate 120ms var(--ease-out);
+  }
+  .tile-maker [data-bump="0"] .player-tile {
+    animation: tile-bump-0 260ms var(--pop);
+  }
+  .tile-maker [data-bump="1"] .player-tile {
+    animation: tile-bump-1 260ms var(--pop);
+  }
+}
+
 /* Tables: a lobby of open tables, and a room that records hand by hand. */
 .room-list {
   list-style: none;
@@ -1811,6 +1936,10 @@ main.meeting-page .round-saved {
     0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
     0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
       oklch(0.3 0.03 90 / 0.45);
+}
+.player-tile svg {
+  inline-size: 76%;
+  block-size: auto;
 }
 /* An open chair: an empty place pressed into the table, the shape of a
    tile, with its wind faint in it. */
