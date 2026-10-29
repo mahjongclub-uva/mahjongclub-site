@@ -1432,6 +1432,8 @@ main.meeting-page .meeting-matches .meeting-text {
   min-block-size: 66px;
 }
 .tile-rack label {
+  /* Holds the hidden radio, which would otherwise widen the sheet. */
+  position: relative;
   display: grid;
   place-items: center;
   /* Not the sheet's form labels: these are the choices themselves. */
