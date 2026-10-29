@@ -1427,10 +1427,6 @@ main.meeting-page .meeting-matches .meeting-text {
   gap: 4px;
   justify-items: center;
 }
-/* Tall enough to hold the chosen tile's ring, clear of the focus outline. */
-.tile-rack .tile-rack-backs label {
-  min-block-size: 66px;
-}
 .tile-rack label {
   /* Holds the hidden radio, which would otherwise widen the sheet. */
   position: relative;
@@ -1460,23 +1456,10 @@ main.meeting-page .meeting-matches .meeting-text {
     0 4px 0 #e4dcc8,
     0 5px 4px rgb(45 34 24 / 0.18);
 }
-/* Chosen: the icon on a jade-ringed disc, and the colour inside a ring that
-   follows the tile's corners and side, past a gap of ivory, in a deep shade
-   of that colour, so it shows on midnight as well as gold. Both are shapes,
-   so neither choice is shown by colour alone. */
-.tile-rack-faces label:has(:checked) .player-tile {
-  border-radius: 50%;
-  background: color-mix(in oklch, var(--jade), var(--card) 86%);
-  box-shadow: inset 0 0 0 3px var(--jade);
-}
-.tile-rack-backs label:has(:checked) .tile-rack-swatch::after {
-  content: "";
-  position: absolute;
-  inset: -6px -6px -10px;
-  border: 3px solid color-mix(in oklch, var(--b), black 35%);
-  border-radius: calc(var(--w) * 0.2 + 6px);
-}
-/* Focus is an outline round the whole choice, outside either ring. */
+/* Chosen: nothing marks it in the rack. The tap squashes what was touched
+   and the tile at the top of the sheet changes and pops, so the change
+   itself is the answer; screen readers hear the radio and the status. */
+/* Focus is an outline round the whole choice. */
 .tile-rack label:has(:focus-visible) {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
