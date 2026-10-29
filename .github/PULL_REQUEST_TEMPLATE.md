@@ -2,14 +2,14 @@
 
 <!-- What problem does this solve, and what should happen instead? -->
 
-## What Changed
+## What changed
 
 <!-- Summarize the final behavior and relevant implementation changes. -->
 
-## Risk
+## Risks
 
 <!-- State concrete risks, limitations, or rollout requirements. -->
 
-## Test/Validation
+## Validation/Tests
 
 <!-- List checks performed and their results. Note anything unverified. -->
