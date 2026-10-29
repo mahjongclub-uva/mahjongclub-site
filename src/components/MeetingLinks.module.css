@@ -127,6 +127,8 @@
 .pill :global(.player-tile) {
   --w: 26px;
   margin-inline-end: -2px;
+  /* Lifted by half its side, so the whole tile sits in the middle. */
+  translate: 0 -3px;
 }
 .card :global(.player-tile) {
   --w: 32px;
