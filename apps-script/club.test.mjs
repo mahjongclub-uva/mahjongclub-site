@@ -228,6 +228,18 @@ function harness() {
   const book = {
     getId: () => "fake",
     getSheetByName: (name) => tabs[name],
+    insertSheet: (name) =>
+      (tabs[name] = {
+        name,
+        grid: [],
+        formulas: {},
+        getRange(...args) {
+          return new Range(this, ...args);
+        },
+        getLastRow() {
+          return this.grid.length;
+        },
+      }),
     getSpreadsheetTimeZone: () => {
       calls.zones++;
       return "America/New_York";
@@ -326,6 +338,7 @@ function harness() {
     cache,
     context,
     tabs,
+    book,
     store,
     meeting,
     config,
@@ -713,6 +726,15 @@ test("a game pays the winner three times each, and End saves one table and relea
   // The game count goes beside "Table 1", in F of the block's own row.
   assert.equal(h.tabs.Points.grid[0][1], "Table 1");
   assert.equal(h.tabs.Points.grid[0][5], 2);
+  // Each game gets its own row in the Games tab, made on the first save.
+  assert.deepEqual(
+    h.tabs.Games.grid.map((row) => row.slice(1)),
+    [
+      ["Table", "Game", "Winner", "Each"],
+      [1, 1, "Alex Amber", 20],
+      [1, 2, "Casey Cedar", 10],
+    ],
+  );
   assert.deepEqual(
     room.ended.totals.map((seat) => [seat.display, seat.total]),
     [
@@ -725,6 +747,7 @@ test("a game pays the winner three times each, and End saves one table and relea
   // A repeated End from a released player returns the same save, once.
   assert.equal(t.end("p003", { session }).saved, 1);
   assert.equal(savedTables(h).length, 1);
+  assert.equal(h.tabs.Games.grid.length, 3, "a repeated End adds no games");
   assert.deepEqual(
     h.get({ r: "results" }).tables[0].seats.map((seat) => seat.total),
     [255, 175, 215, 175],
@@ -745,6 +768,10 @@ test("a game count that cannot be written never blocks the table's save", () => 
   h.tabs.Points.getRange = function (row, column, ...rest) {
     if (column === 6) throw new Error("Merged cell");
     return getRange.call(this, row, column, ...rest);
+  };
+  // Nor can the Games tab, as if the workbook refused a new tab.
+  h.book.insertSheet = () => {
+    throw new Error("Too many tabs");
   };
   assert.equal(t.end("p002").saved, 1);
   assert.equal(h.tabs.Points.grid[0][5] ?? "", "");

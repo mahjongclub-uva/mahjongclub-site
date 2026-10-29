@@ -101,6 +101,7 @@ The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onwa
 Points Tracking needs distinct `Table N` blocks in B:E, a `Player | Points | Net | date` header, and four player rows.
 An empty block can have existing Net formulas evaluating to -205; those formulas are preserved.
 F of each `Table N` row holds how many games that table played; keep it empty in templates.
+The script adds a `Games` tab on its first saved table, one row per game; leave its name and rows as they are.
 Columns G onward are never written.
 When all templates are full, an officer must add another correctly numbered block.
 

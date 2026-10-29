@@ -552,8 +552,9 @@ function checkIn(request, meeting, listed) {
   return markAttendance(meeting, player, players, plannedAttendance);
 }
 
-// `games` comes only from a table ending, never from the request.
-function submitResult(request, meeting, games) {
+// `hands` comes only from a table ending, never from the request.
+function submitResult(request, meeting, hands = []) {
+  const games = hands.length;
   if (
     typeof request.submissionId !== "string" ||
     !/^[a-zA-Z0-9-]{16,80}$/.test(request.submissionId)
@@ -644,6 +645,37 @@ function submitResult(request, meeting, games) {
   } catch (error) {
     console.error("Table " + block.number + "'s game count: " + error.message);
   }
+  // Each game on its own row in a private Games tab, for the semester recap.
+  // Like the count, it never blocks the scores; a failure loses only these rows.
+  try {
+    if (hands.length) {
+      const log =
+        workbook().getSheetByName(GAMES_TAB) ||
+        workbook().insertSheet(GAMES_TAB);
+      if (!log.getLastRow())
+        log
+          .getRange(1, 1, 1, 5)
+          .setValues([["Date", "Table", "Game", "Winner", "Each"]]);
+      const date = Utilities.parseDate(
+        meeting.date,
+        workbookTimeZone(),
+        "yyyy-MM-dd",
+      );
+      log
+        .getRange(log.getLastRow() + 1, 1, hands.length, 5)
+        .setValues(
+          hands.map((hand, index) => [
+            date,
+            block.number,
+            index + 1,
+            players.find((player) => player.id === hand.winner).name,
+            hand.each,
+          ]),
+        );
+    }
+  } catch (error) {
+    console.error("Table " + block.number + "'s games: " + error.message);
+  }
   CacheService.getScriptCache().remove("results:" + meeting.id);
   return {
     status: 201,
@@ -703,6 +735,8 @@ function results(meeting, at = saves()) {
 const MAX_TABLES = 12;
 // Keeps a room, with its ended summary, under the 9 KB Script Properties limit.
 const MAX_HANDS = 60;
+// Each saved game's winner and payment, one row per game.
+const GAMES_TAB = "Games";
 const WINDS = ["East", "South", "West", "North"];
 
 // Keyed by meeting too, so a room that failed to save is never overwritten
@@ -764,7 +798,7 @@ function endRoom(room, meeting, by) {
         seats: roomTotals(room),
       },
       meeting,
-      room.hands.length,
+      room.hands,
     ).table;
   room.ended = {
     session: room.session,
