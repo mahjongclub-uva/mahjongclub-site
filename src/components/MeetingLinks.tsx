@@ -17,7 +17,8 @@ import { formatMeetingTime } from "@/lib/format";
 import { nunito } from "@/lib/fonts";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 import { usePoll } from "@/lib/usePoll";
-import PlayerTile from "./PlayerTile";
+import { halloweenWeek } from "@/lib/season";
+import PlayerTile, { PumpkinFilled } from "./PlayerTile";
 import styles from "./MeetingLinks.module.css";
 
 /**
@@ -51,8 +52,22 @@ function useLiveMeeting(schedule: ScheduledMeeting[]) {
   };
 }
 
+// In Halloween week the pulsing dot becomes a jack-o'-lantern that flickers.
 function Live() {
-  return <span className={styles.live}>Live</span>;
+  const spooky = halloweenWeek(new Date());
+  return (
+    <span
+      className={styles.live}
+      data-season={spooky ? "halloween" : undefined}
+    >
+      {spooky && (
+        <span className={styles.jack} aria-hidden="true">
+          <PumpkinFilled />
+        </span>
+      )}
+      Live
+    </span>
+  );
 }
 
 /** Floats at the bottom of every public page but home while check-in is open. */

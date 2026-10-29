@@ -1,8 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
-import PlayerTile, { TileName } from "@/components/PlayerTile";
+import { IconPaletteFilled, IconDice5Filled } from "@tabler/icons-react";
+import Sheet from "@/components/Sheet";
+import Cobweb from "@/components/Cobweb";
+import PlayerTile, {
+  AvatarTile,
+  PumpkinFilled,
+  TileName,
+} from "@/components/PlayerTile";
+import { halloweenWeek } from "@/lib/season";
 import MeetingAccess from "@/components/MeetingAccess";
 import { useConfirmedPlayer } from "@/components/ContinueAs";
 import IdStickers, { IdBadge } from "@/components/IdStickers";
@@ -19,8 +33,201 @@ import {
 } from "@/lib/meeting";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { tileNames } from "@/lib/format";
+import {
+  BACKS,
+  BACK_NAMES,
+  facesOn,
+  parseTile,
+  tileCode,
+  type Avatar,
+  type Face,
+} from "@/lib/avatar";
+import {
+  addTonightTiles,
+  chooseTile,
+  chosenTile,
+  madeHere,
+  serviceTile,
+  subscribeTiles,
+  tilesVersion,
+} from "@/lib/tiles";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
+// What a screen reader hears for a face whose id isn't a word.
+const SAY: Partial<Record<Face, string>> = {
+  zhong: "red dragon",
+  fa: "green dragon",
+  fu: "fortune",
+  flower: "cherry blossom",
+  hat: "witch's hat",
+};
+
+/** Sends the tile this phone made, so the rest of the meeting sees it. Fire
+ * and forget: a service without tiles answers 404 and nothing changes. */
+function shareTile(id: string) {
+  const tile = madeHere(id);
+  if (!tile || tile === serviceTile(id)) return;
+  postMeeting(MEETING_SERVICE_URL, { r: "tile", playerId: id, tile })
+    .then((reply) => {
+      if (reply.status === 200) addTonightTiles({ [id]: tile });
+    })
+    .catch(() => {});
+}
+
+/** The greeting, then the player's tile with a dice for a random one and
+ * Customize beside it, which opens a sheet with two tabs, Icon and Color,
+ * so a player takes one choice at a time; the page underneath keeps the way
+ * to a table on screen. Kept on this phone until the player moves on. */
+function TileMaker({ id, children }: { id: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"face" | "back">("face");
+  const [bump, setBump] = useState(0);
+  const [said, setSaid] = useState("");
+  useSyncExternalStore(subscribeTiles, tilesVersion, () => -1);
+  const tile = parseTile(chosenTile(id), id);
+  const faces = facesOn(new Date());
+  // Shared on the way out, whichever way the player leaves "You're in".
+  useEffect(() => {
+    shareTile(id);
+    return () => shareTile(id);
+  }, [id]);
+  const pick = (next: Avatar) => {
+    chooseTile(id, tileCode(next));
+    setBump((n) => n + 1);
+    setSaid(`${SAY[next.face] ?? next.face} on ${next.back}`);
+  };
+  const roll = () => {
+    const any = <T,>(list: readonly T[], not: T): T => {
+      const others = list.filter((item) => item !== not);
+      return others[Math.floor(Math.random() * others.length)];
+    };
+    pick({
+      face: any(faces, tile.face),
+      back: any(BACK_NAMES, tile.back),
+    });
+  };
+  const status = (
+    <p className="sr-only" role="status">
+      {said}
+    </p>
+  );
+  // Both racks stay in place, the other one hidden, so the sheet keeps one
+  // height whichever tab is open.
+  const rack = (
+    <div className="tile-rack-panels">
+      <fieldset className="tile-rack" inert={tab !== "face"}>
+        <legend className="sr-only">Icon</legend>
+        <div className="tile-rack-faces">
+          {faces.map((face) => (
+            <label key={face}>
+              <input
+                type="radio"
+                name="tile-face"
+                className="sr-only"
+                checked={tile.face === face}
+                onChange={() => pick({ ...tile, face })}
+              />
+              <AvatarTile tile={{ ...tile, face }} />
+              <span className="sr-only">{SAY[face] ?? face}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="tile-rack" inert={tab !== "back"}>
+        <legend className="sr-only">Color</legend>
+        <div className="tile-rack-backs">
+          {BACK_NAMES.map((back) => (
+            <label key={back}>
+              <input
+                type="radio"
+                name="tile-back"
+                className="sr-only"
+                checked={tile.back === back}
+                onChange={() => pick({ ...tile, back })}
+              />
+              {/* A tile lying face down, which shows only its back. */}
+              <span
+                className="player-tile tile-rack-swatch"
+                style={{ "--b": BACKS[back] } as React.CSSProperties}
+              />
+              <span className="sr-only">{back}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  );
+  return (
+    <>
+      {children}
+      <div className="tile-maker">
+        <span
+          className="meeting-hero-tile"
+          data-bump={bump ? bump % 2 : undefined}
+        >
+          <PlayerTile id={id} />
+          <button
+            type="button"
+            className="tile-maker-dice"
+            aria-label="Random tile"
+            onClick={roll}
+          >
+            <IconDice5Filled aria-hidden="true" />
+          </button>
+        </span>
+        <button
+          type="button"
+          className="meeting-chip tile-customize"
+          onClick={() => {
+            setTab("face");
+            setOpen(true);
+          }}
+        >
+          <IconPaletteFilled aria-hidden="true" />
+          Customize
+        </button>
+        {!open && status}
+      </div>
+      {open && (
+        <Sheet
+          title="Your tile"
+          close={() => setOpen(false)}
+          className="tile-sheet"
+        >
+          <span
+            className="tile-sheet-preview"
+            data-bump={bump ? bump % 2 : undefined}
+          >
+            <PlayerTile id={id} />
+          </span>
+          <div className="tile-rack-tabs">
+            {(["face", "back"] as const).map((part) => (
+              <button
+                key={part}
+                type="button"
+                aria-pressed={tab === part}
+                onClick={() => setTab(part)}
+              >
+                {part === "face" ? "Icon" : "Color"}
+              </button>
+            ))}
+          </div>
+          {rack}
+          {status}
+          <button
+            type="button"
+            className="meeting-primary"
+            onClick={() => setOpen(false)}
+          >
+            Done
+          </button>
+        </Sheet>
+      )}
+    </>
+  );
+}
+
+const pumpkin = <PumpkinFilled />;
 // Whole tiles in one character, so every face that turns up is a real tile.
 const FACES = ["東", "南", "西", "北", "中", "發", "白"];
 type Outcome = "won" | "lost" | null;
@@ -29,11 +236,13 @@ const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * The "…" after "Checking in": three small tiles that turn up random faces
- * while the reply is on its way. Checked in, they land as a pung, 中 中 中;
+ * while the reply is on its way. Checked in, they land as a pung, 中 中 中
+ * (jack-o'-lanterns in Halloween week);
  * refused, they turn face down and shake. A face that changes remounts its
  * tile, which replays the flip-in.
  */
 function WaitTiles({ outcome }: { outcome: Outcome }) {
+  const spooky = halloweenWeek(new Date());
   const [faces, setFaces] = useState<{ face: string; n: number }[]>(() =>
     [0, 1, 2].map((n) => ({ face: "", n })),
   );
@@ -64,7 +273,13 @@ function WaitTiles({ outcome }: { outcome: Outcome }) {
     >
       {faces.map((tile, i) => {
         const face =
-          outcome === "won" ? "中" : outcome === "lost" ? "" : tile.face;
+          outcome === "won"
+            ? spooky
+              ? pumpkin
+              : "中"
+            : outcome === "lost"
+              ? ""
+              : tile.face;
         return (
           <span
             className="wait-tile"
@@ -179,18 +394,17 @@ function CheckInForm({
     const next = playerNext(meeting, player.id);
     return (
       <div className="meeting-receipt">
-        <span className="meeting-hero-tile">
-          <PlayerTile id={player.id} />
-        </span>
         <p className="sr-only" role="status">
           You’re checked in.
         </p>
-        <h1>
-          You’re in,{" "}
-          <span className="meeting-accent">
-            {player.display.split(" ")[0]}!
-          </span>
-        </h1>
+        <TileMaker id={player.id}>
+          <h1>
+            You’re in,{" "}
+            <span className="meeting-accent">
+              {player.display.split(" ")[0]}!
+            </span>
+          </h1>
+        </TileMaker>
         <Link className="meeting-primary" href={next.href}>
           {next.label}
         </Link>
@@ -219,6 +433,8 @@ function CheckInForm({
             </ul>
           </section>
         )}
+        {/* Last, so the spider is the last thing tabbed to. */}
+        <Cobweb />
       </div>
     );
   }

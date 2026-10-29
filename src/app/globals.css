@@ -59,12 +59,9 @@ svg {
   --control-depth: 4px;
   --control-press: 3px;
   --font-han: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  /* The header's three beats. Read by the wordmark and by the tagline that
-     follows it — which is why they live at the root rather than on .wordmark:
-     .tagline is a sibling, not a descendant, and cannot see a variable scoped
-     to an element it isn't inside. */
-  --rise-duration: 550ms;
-  --rise-stagger: 70ms;
+  /* The 3D flip's timing (TileScene.tsx), so the name and tagline fade in as
+     the last tile lands. Change both together. At the root because .tagline
+     is a sibling of the wordmark, not inside it. */
   --flip-start: 520ms;
   --flip-stagger: 150ms;
   --flip-duration: 900ms;
@@ -197,9 +194,7 @@ main {
   border-radius: 1px;
 }
 
-/* 4. Hero and tiles =======================================================
-   .tile-scene moves, .tile rotates. See Wordmark.tsx for why.
-   ======================================================================== */
+/* 4. Hero and tiles ======================================================= */
 
 /* Navigation ------------------------------------------------------------- */
 
@@ -346,12 +341,6 @@ main {
   height: 100% !important;
 }
 
-/* The CSS name remains readable while the decorative canvas loads. */
-.wordmark-tiles {
-  opacity: 1;
-  transition: opacity 420ms ease;
-}
-
 /* No canvas coming — because motion is reduced, WebGL is unavailable, or the
    scene never drew a frame. The flat wordmark is the wordmark. */
 .hero-stage[data-scene="fallback"] .wordmark-tiles {
@@ -381,7 +370,7 @@ main {
   justify-content: center;
   /* At 360px the page leaves ~305px. Seven tiles plus six gaps must fit
      inside that, which is why both are fluid. A fixed 44px tile overflows. */
-  gap: clamp(2px, 0.7vw, 9px);
+  gap: clamp(2px, 0.45vw, 5px);
   /* Every level between the rotated element and the faces has to preserve 3D.
      One `flat` anywhere in the chain collapses the whole box into a plane —
      which is exactly what made the tiles look two-dimensional. */
@@ -396,11 +385,12 @@ main {
      20 x 30 x 15mm — genuinely chunky — but a fifth of the width reads as
      solid without turning the wordmark into a row of bricks. */
   --tile-w: clamp(29px, 9.8vw, 66px);
-  --tile-depth: calc(var(--tile-w) * 0.15);
-  --tile-radius: calc(var(--tile-w) * 0.11);
+  --tile-depth: calc(var(--tile-w) * 0.12);
+  --tile-radius: calc(var(--tile-w) * 0.07);
 
   width: var(--tile-w);
-  aspect-ratio: 44 / 62;
+  /* Matches the 3D tile as its camera sees it, so both headers look alike. */
+  aspect-ratio: 1 / 1.33;
   transform-style: preserve-3d;
 }
 
@@ -415,14 +405,12 @@ main {
   transform-style: preserve-3d;
 }
 
-.tile-back,
 .tile-face {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   border-radius: var(--tile-radius);
-  backface-visibility: hidden;
 }
 
 /* The box occupies z from 0 (face) back to -depth (reverse). Each wall is
@@ -434,12 +422,12 @@ main {
      a wall meets the rounded face. It cannot follow the curve — a flat plane
      never can — but it stops the joint reading as a hard corner. */
   border-radius: 2px;
-  /* Starts at the exact colour the face's edge ends on, so the seam reads as
-     one piece of material rather than two. */
+  /* Starts at the exact colour the face ends on, so the seam reads as one
+     piece of material rather than two. Greys sampled from the 3D tiles. */
   background: linear-gradient(
     to bottom,
-    var(--tile-face-lo) 0%,
-    #ddd3ba 62%,
+    #e4e3df 0%,
+    #d6d4ce 62%,
     var(--tile-edge) 100%
   );
 }
@@ -480,39 +468,35 @@ main {
   bottom: 100%;
   transform-origin: center bottom;
   transform: rotateX(90deg);
-  background: linear-gradient(to bottom, var(--tile-face-lo), var(--tile-face));
+  background: linear-gradient(to bottom, #d6d4ce, #ecebe8);
 }
 
 .tile-side-b {
   top: 100%;
   transform-origin: center top;
   transform: rotateX(-90deg);
-  background: var(--tile-edge);
-}
-
-/* The artwork fills the box; the letter sits on top of it. */
-.tile-art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  background: linear-gradient(to bottom, #d0cec7 65%, var(--tile-edge));
 }
 
 .tile-face {
   color: var(--tile-letter);
-  filter: drop-shadow(0 5px 10px rgba(35, 40, 31, 0.18));
+}
+
+/* One drawn face for the hero's flat tiles and the Instagram tile's
+   fallback, in greys sampled from the 3D tiles. */
+.tile-face,
+.ig-tile[data-scene="fallback"] {
+  background: linear-gradient(to bottom, #ecebe8, #e4e3df);
+  box-shadow:
+    inset 0 -2px 0 #d3d1ca,
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  filter: drop-shadow(0 4px 6px rgba(35, 40, 31, 0.14));
 }
 
 .tile-letter {
   position: relative;
-  font-size: clamp(1rem, 4.2vw, 1.6rem);
+  font-size: calc(var(--tile-w) * 0.5);
   line-height: 1;
-}
-
-.tile-back {
-  /* rotateY first, so the translate runs along the flipped local axis and
-     lands the reverse at z = -depth. */
-  transform: rotateY(180deg) translateZ(var(--tile-depth));
 }
 
 .wordmark-sub {
@@ -552,6 +536,141 @@ main {
   font-size: var(--text-sm);
   font-weight: 650;
   line-height: 1.2;
+}
+
+/* A player's tile, on the meeting pages and in the live pill: an ivory face
+   lit from above, and a side that is the face's own outline pushed down, so
+   the seam and the foot curve up at the corners as a solid tile's do. The
+   side is eight thin copies of that outline, each a touch deeper toward warm
+   umber, so it shades smoothly rather than in a few hard bands. */
+.player-tile {
+  /* Each place sets --w for its size; 44px elsewhere. */
+  --d: calc(var(--w, 44px) * 0.1 + 2px); /* deeper on small tiles: 4.6px at 26 */
+  --seam: clamp(0px, var(--w, 44px) * 0.04 - 1px, 2.5px); /* none at 26px */
+  --umber: oklch(0.35 0.08 55);
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: var(--w, 44px);
+  aspect-ratio: 3 / 4;
+  border-radius: calc(var(--w, 44px) * 0.2);
+  background: linear-gradient(#fcfbf7, #f5f1e6);
+  color: var(--g);
+  font: 700 calc(var(--w, 44px) * 0.58) / 1
+    var(--han, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif);
+  box-shadow:
+    inset 0 -1px 0 rgb(255 255 255 / 0.65),
+    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.06),
+    0 var(--seam) 0 #eae3d2,
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 1 / 8) 0 var(--b),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 2 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 4%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 3 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 8%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 4 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 12%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 5 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 16%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 6 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 21%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 7 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 26%),
+    0 calc(var(--seam) + (var(--d) - var(--seam)) * 8 / 8) 0 color-mix(in oklch, var(--b), var(--umber) 32%),
+    0 calc(var(--d) + var(--w, 44px) * 0.03) calc(var(--w, 44px) * 0.04)
+      rgb(45 34 24 / 0.16),
+    0 calc(var(--d) + var(--w, 44px) * 0.08) calc(var(--w, 44px) * 0.18)
+      rgb(45 34 24 / 0.08);
+}
+/* Each picture is cropped to its own ink (PlayerTile.tsx) and fitted to the
+   box a wind character fills, then adjusted by eye, since a bounding box is
+   not optical weight: wide shapes get more room, dense ones less. */
+.player-tile svg {
+  --fit: 0.58;
+  inline-size: calc(var(--w, 44px) * var(--fit));
+  block-size: calc(var(--w, 44px) * var(--fit));
+  translate: calc(var(--w, 44px) * var(--dx, 0))
+    calc(var(--w, 44px) * var(--dy, 0));
+}
+/* Every face sits on a thin shadow in a deeper shade of its own ink, as if
+   carved into the tile; a pale face's (RIMS) is the one that gives it an
+   edge on ivory. */
+.player-tile {
+  --carve: 0 calc(var(--w, 44px) * 0.025) 0
+    var(--rim, color-mix(in oklch, var(--g), black 30%));
+  text-shadow: var(--carve);
+}
+.player-tile svg {
+  filter: drop-shadow(var(--carve));
+}
+/* The pumpkin's stem, green wherever it's drawn; the live badge draws it white. */
+.tile-stem {
+  fill: oklch(0.5 0.1 120);
+}
+/* A fruit's crease or dimple, a fine line a shade deeper than the fruit. */
+.tile-crease {
+  fill: none;
+  stroke: color-mix(in oklch, currentColor, black 25%);
+  stroke-width: 0.75;
+  stroke-linecap: round;
+}
+.tile-rib {
+  stroke-width: 0.55;
+}
+/* The jack-o'-lantern's face, dark on a tile. */
+.tile-carve {
+  fill: oklch(0.25 0.02 60);
+}
+/* Sized so each puts down about the same ink as the median face, measured
+   in the rack: solid, wide shapes come in, thin and spiky ones go out. */
+:is([data-face="cloud"], [data-face="flower"]) svg {
+  --fit: 0.6;
+}
+:is([data-face="coin"], [data-face="ghost"]) svg {
+  --fit: 0.57;
+}
+:is([data-face="mandarin"], [data-face="peach"]) svg {
+  --fit: 0.56;
+}
+[data-face="clover"] svg {
+  --fit: 0.53;
+}
+/* Squat and round, so it reads small at its measured size. */
+:is([data-face="pumpkin"], [data-face="skull"], [data-face="paw"]) svg {
+  --fit: 0.63;
+}
+:is([data-face="spider"], [data-face="sprout"]) svg {
+  --fit: 0.61;
+}
+[data-face="star"] svg {
+  --fit: 0.59;
+}
+/* The brim is heavy, so the hat sits a little higher than its box. */
+[data-face="hat"] svg {
+  --fit: 0.66;
+  --dy: -0.035;
+}
+[data-face="bat"] svg {
+  --fit: 0.68;
+}
+/* The leaves are heavy, so the sprout sits a little lower. */
+[data-face="sprout"] svg {
+  --dy: 0.02;
+}
+[data-face="banana"] svg {
+  --fit: 0.63;
+}
+[data-face="heart"] svg {
+  --fit: 0.55;
+  --dy: 0.02;
+}
+[data-face="apple"] svg {
+  --fit: 0.55;
+  --dy: -0.02;
+}
+/* The sun's rays leave it looking small beside the solid moon. */
+[data-face="moon"] svg {
+  --fit: 0.54;
+  --dx: 0.02;
+}
+[data-face="sun"] svg {
+  --fit: 0.65;
+}
+.player-tile[data-face="zhong"] {
+  font-size: calc(var(--w, 44px) * 0.6);
 }
 
 /* 5. Sections ============================================================= */
@@ -644,7 +763,6 @@ main {
 
 /* Reuses the wordmark's wall classes, which only need these three custom
    properties to size themselves. */
-/* No CSS box: the artwork is the tile. Only sizing and the lean live here. */
 /* Two layers, as the hero is: the drawn tile underneath, the 3D one over it. */
 .ig-tile {
   position: relative;
@@ -653,12 +771,13 @@ main {
   place-items: center;
   width: 64px;
   aspect-ratio: 44 / 62;
+  border-radius: 5px;
 }
 
 .ig-mark {
   position: relative;
-  width: 27px;
-  height: 27px;
+  width: 36px;
+  height: 36px;
   color: var(--tile-letter);
 }
 
@@ -682,12 +801,10 @@ main {
 
 /* The drawn tile ships hidden so a snapshot of it never flashes before the
    canvas arrives. It appears only if the scene never turns up. */
-.ig-tile .tile-art,
 .ig-tile .ig-mark {
   opacity: 0;
 }
 
-.ig-tile[data-scene="fallback"] .tile-art,
 .ig-tile[data-scene="fallback"] .ig-mark {
   opacity: 1;
 }
@@ -890,8 +1007,6 @@ main {
   gap: var(--space-4);
 }
 
-.hero-stage[data-scene="waiting"] .tile-scene,
-.hero-stage[data-scene="waiting"] .tile { animation: none; }
 .hero-stage[data-scene="waiting"] .hero-scene { visibility: hidden; }
 
 .club-notes { margin-top: 2rem; }
@@ -908,20 +1023,8 @@ h2[id] { scroll-margin-top: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .tile-scene {
-    animation: tile-rise var(--rise-duration) cubic-bezier(0.22, 1, 0.36, 1)
-      backwards;
-    animation-delay: calc(var(--i) * var(--rise-stagger));
-  }
-
-  .tile {
-    animation: tile-flip var(--flip-duration) cubic-bezier(0.65, 0, 0.35, 1)
-      backwards;
-    animation-delay: calc(var(--flip-start) + var(--i) * var(--flip-stagger));
-  }
-
-  /* Derived from the cascade rather than hardcoded, so retuning the tiles
-     above cannot leave the name out of step. */
+  /* Derived from the flip timing rather than hardcoded, so retuning it
+     cannot leave the name out of step. */
   .wordmark-sub,
   .tagline {
     animation: settle-in var(--sub-duration) ease-out backwards;
@@ -982,19 +1085,6 @@ h2[id] { scroll-margin-top: 1.5rem; }
       animation-range: entry calc(6% + var(--i) * 9%) entry
         calc(58% + var(--i) * 9%);
     }
-  }
-}
-
-@keyframes tile-rise {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.9) rotateX(-20deg);
-  }
-}
-
-@keyframes tile-flip {
-  from {
-    transform: rotateY(-180deg);
   }
 }
 
@@ -1291,17 +1381,11 @@ h2[id] { scroll-margin-top: 1.5rem; }
   .photo-slot:nth-child(2n) { padding-top: 0; }
   .photo-slot:nth-child(2n) img { aspect-ratio: 4 / 3; }}
 @media (prefers-reduced-motion: reduce) {
-  .wordmark-tiles { transition: none; }
   .section-title-reveal { clip-path: none; }
 }
 
 .home-page .tagline { max-width: 46ch; }
 .nav a:active { background: #d2decc; }
-
-/* The hero's flat tiles hold still once the 3D scene or its fallback is up. */
-.hero-stage .wordmark-tiles { transition: none; }
-.hero-stage[data-scene="fallback"] .tile,
-.hero-stage[data-scene="fallback"] .tile-scene { animation: none; }
 
 /* Club photography replaces the interactive tile display. */
 .club-photos { margin-top: -7rem; min-width: 0; }

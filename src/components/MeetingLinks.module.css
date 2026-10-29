@@ -51,13 +51,14 @@
 }
 
 .live {
+  --live: var(--tile-letter);
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-block-size: 44px;
   padding: 0 14px 0 12px;
   border-radius: 999px;
-  background: var(--tile-letter);
+  background: var(--live);
   color: #fff;
   font-size: 0.74rem;
   font-weight: 900;
@@ -75,30 +76,62 @@
   min-block-size: 0;
   padding-block: 4px;
   font-size: 0.68rem;
-  background: color-mix(in oklch, var(--tile-letter) 13%, var(--tile-face-hi));
-  color: var(--tile-letter);
+  background: color-mix(in oklch, var(--live) 13%, var(--tile-face-hi));
+  color: var(--live);
 }
 
-/* The player's sticker tile, as on the meeting pages. */
-.pill :global(.player-tile),
-.card :global(.player-tile) {
-  display: inline-grid;
-  place-items: center;
-  flex-shrink: 0;
-  inline-size: var(--w);
-  aspect-ratio: 3 / 4;
-  border-radius: calc(var(--w) * 0.2);
-  background: linear-gradient(#fff 0 45%, #f7f2e4);
-  color: var(--g);
-  font: 700 calc(var(--w) * 0.58) / 1 var(--han);
-  box-shadow:
-    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
-    0 calc(var(--w) * 0.07) 0 var(--b),
-    0 calc(var(--w) * 0.14) 0 color-mix(in oklch, var(--b), black 18%);
+/* Halloween week. White on this pumpkin is 5.6:1. */
+.live[data-season="halloween"] {
+  --live: oklch(0.53 0.15 45);
+  padding-inline-start: 8px;
 }
+.live[data-season="halloween"]::before {
+  display: none;
+}
+/* The carved face shows a candle's glow through it. */
+.jack {
+  position: relative;
+  display: grid;
+  inline-size: 24px;
+  block-size: 24px;
+}
+.jack::before {
+  content: "";
+  position: absolute;
+  inset: 38% 20% 10%;
+  border-radius: 40%;
+  background: #ffc94a;
+}
+.jack svg {
+  position: relative;
+  color: #fff;
+}
+.jack :global(.tile-stem) {
+  fill: currentColor;
+}
+/* The face and ribs are for the tile; here the face is the candle. */
+.jack :global(.tile-rib),
+.jack :global(.tile-carve) {
+  display: none;
+}
+.card .jack {
+  inline-size: 18px;
+  block-size: 18px;
+}
+.card .jack svg {
+  color: inherit;
+}
+/* Darker as text on its tint: 5.9:1. */
+.card .live[data-season="halloween"] {
+  color: oklch(0.47 0.14 45);
+}
+
+/* The player's tile (globals.css), at the pill's and the card's sizes. */
 .pill :global(.player-tile) {
   --w: 26px;
   margin-inline-end: -2px;
+  /* Lifted by half its side, so the whole tile sits in the middle. */
+  translate: 0 -3px;
 }
 .card :global(.player-tile) {
   --w: 32px;
@@ -163,6 +196,18 @@
     opacity: 0.3;
   }
 }
+@keyframes flicker {
+  12% {
+    opacity: 0.45;
+  }
+  16%,
+  56% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.7;
+  }
+}
 @keyframes rise {
   from {
     opacity: 0;
@@ -172,6 +217,9 @@
 @media (prefers-reduced-motion: no-preference) {
   .live::before {
     animation: pulse 1.6s ease-in-out infinite;
+  }
+  .jack::before {
+    animation: flicker 2.4s steps(1) infinite;
   }
   .pill {
     animation: rise 300ms cubic-bezier(0.23, 1, 0.32, 1);

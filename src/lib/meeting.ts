@@ -1,4 +1,5 @@
 import type { Meeting, Player, Results, Room } from "./meetingSchemas.ts";
+import { addTonightTiles } from "./tiles.ts";
 export type {
   Meeting,
   Player,
@@ -52,6 +53,7 @@ async function readResponse(
   if (!response.ok) throw new Error("Can’t reach the club. Check your signal.");
   const body: unknown = await response.json();
   const reply = (await parsers).replySchema.parse(body);
+  addTonightTiles(reply.tiles);
   return { body, reply };
 }
 // The last meeting reply, kept across client navigation so the next meeting
@@ -77,10 +79,13 @@ export async function getMeeting(
   const seen = roomChanges;
   const target = new URL(url);
   target.searchParams.set("r", "meeting");
-  const { body, reply } = await readResponse(target.href, {
-    signal,
-    cache: "no-store",
-  });
+  // Short, so people at the door hear "can't reach" and the officer fallback
+  // sooner when the service hangs. Saves keep the long default.
+  const { body, reply } = await readResponse(
+    target.href,
+    { signal, cache: "no-store" },
+    10000,
+  );
   if (reply.status !== 200)
     throw new Error(
       reply.message || "An officer needs to check the meeting settings.",

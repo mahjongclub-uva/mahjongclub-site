@@ -4,6 +4,7 @@ import { MEETING_REHEARSAL } from "@/lib/site";
 import { preconnect } from "react-dom";
 import { nunito } from "@/lib/fonts";
 import "./meeting.css";
+import "./halloween.css";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },

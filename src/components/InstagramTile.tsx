@@ -2,12 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TileFaceArt } from "@/components/TileArt";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 /**
  * Instagram mark in two layers, same arrangement as the hero: the drawn tile
  * renders first as fallback, and only steps aside once the 3D scene has
  * actually drawn a frame, so a blocked WebGL context leaves it in place.
+ * Under reduced motion the scene never loads, since it turns with the pointer.
  */
 const Scene = dynamic(() => import("@/components/InstagramTileScene"), {
   ssr: false,
@@ -21,6 +22,7 @@ export default function InstagramTile({
   active?: boolean;
   pointer: React.RefObject<{ x: number; y: number }>;
 }) {
+  const still = useReducedMotion();
   const [ready, setReady] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
@@ -45,7 +47,7 @@ export default function InstagramTile({
   // countdown pauses while backgrounded, since a hidden tab draws no frames
   // and would otherwise be wrongly judged a failure.
   useEffect(() => {
-    if (ready || !near) return;
+    if (ready || !near || still) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const start = () => {
       if (document.visibilityState !== "visible" || timer) return;
@@ -57,19 +59,20 @@ export default function InstagramTile({
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", start);
     };
-  }, [ready, near]);
+  }, [ready, near, still]);
 
   return (
     <span
       ref={tile}
       className="ig-tile"
-      data-scene={ready ? "ready" : gaveUp ? "fallback" : "waiting"}
+      data-scene={still || gaveUp ? "fallback" : ready ? "ready" : "waiting"}
       aria-hidden="true"
     >
-      <TileFaceArt />
       <MarkGlyph />
       <span className="ig-tile-scene">
-        {near && <Scene active={active} pointer={pointer} onReady={onReady} />}
+        {near && still === false && (
+          <Scene active={active} pointer={pointer} onReady={onReady} />
+        )}
       </span>
     </span>
   );
