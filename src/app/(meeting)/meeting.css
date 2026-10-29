@@ -1303,13 +1303,16 @@ main.meeting-page .meeting-matches .meeting-text {
   }
 }
 
-/* The tile maker: the player's tile with a dice on its corner, and behind
-   "Change your tile" a rack of faces, the chosen one lifted as if about to
-   be played, and a row of backs. */
+/* The tile maker: the player's tile with a dice on its corner and Customize
+   beside it, which opens a sheet with two tabs, bare icons and face-down
+   backs, the chosen one on a ringed card. */
 .tile-maker {
+  /* The tile and the button that changes it, side by side. */
   display: grid;
-  justify-items: start;
-  margin-block: 26px 20px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  margin-block: 8px 20px;
 }
 .tile-maker .meeting-hero-tile {
   position: relative;
@@ -1336,65 +1339,127 @@ main.meeting-page .meeting-matches .meeting-text {
   inline-size: 22px;
   block-size: 22px;
 }
-.tile-rack-toggle {
+/* Customize, beside the tile; it opens the tile sheet. */
+.tile-customize {
+  justify-self: start;
+}
+.tile-customize svg {
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--jade);
+}
+/* The sheet: the tile up top, changing as you pick, then the tabs. */
+.tile-sheet-preview {
+  display: grid;
+  justify-items: center;
+  margin-block: 4px 18px;
+  --w: 72px;
+}
+/* Icon | Color: the open tab filled in ink, the other bare. */
+.tile-rack-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
   margin-block-end: 14px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.tile-rack-tabs button {
+  min-block-size: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font: var(--t-control);
+  cursor: pointer;
+}
+.tile-rack-tabs [aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--card);
+}
+.tile-rack-tabs button:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 2px;
+}
+.tile-rack-panels {
+  display: grid;
+}
+.tile-rack-panels > * {
+  grid-area: 1 / 1;
+}
+.tile-rack[inert] {
+  visibility: hidden;
+}
+.tile-sheet .meeting-primary {
+  inline-size: 100%;
 }
 .tile-rack {
-  display: grid;
-  gap: 14px;
-  margin-block: 4px 18px;
-}
-.tile-rack fieldset {
   min-inline-size: 0;
-  margin: 0;
+  margin: 4px 0 18px;
   padding: 0;
   border: 0;
 }
-.tile-rack legend {
-  margin-block-end: 6px;
-  color: var(--ink-soft);
-  font: var(--t-meta);
-}
+/* Icons on their own, without a tile under them, so each picture reads at
+   its full size and ink. */
+/* At most six icons and seven colours a row, so out of Halloween week the
+   racks are three rows of six and two of seven, and fewer on a small phone. */
 .tile-rack-faces {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
-  gap: 8px 6px;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  max-inline-size: calc(6 * 52px + 5 * 4px);
+  margin-inline: auto;
+  gap: 4px;
   justify-items: center;
-  --w: 38px;
+  --w: 50px;
+}
+.tile-rack-faces .player-tile {
+  aspect-ratio: 1;
+  background: none;
+  box-shadow: none;
 }
 .tile-rack-backs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  max-inline-size: calc(7 * 44px + 6 * 4px);
+  margin-inline: auto;
+  gap: 4px;
+  justify-items: center;
 }
 .tile-rack label {
+  /* Holds the hidden radio, which would otherwise widen the sheet. */
+  position: relative;
   display: grid;
   place-items: center;
+  /* Not the sheet's form labels: these are the choices themselves. */
+  margin: 0;
   min-inline-size: 44px;
-  min-block-size: 54px;
-  border-radius: 10px;
+  min-block-size: 52px;
+  border-radius: 14px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.tile-rack-backs label {
-  min-block-size: 44px;
+/* A face-down tile: its back colour all over, lit from the top left. */
+.tile-rack-swatch.player-tile {
+  --w: 32px;
+  position: relative;
+  background: radial-gradient(
+    120% 90% at 30% 15%,
+    color-mix(in oklch, var(--b), white 22%),
+    var(--b) 60%,
+    color-mix(in oklch, var(--b), black 10%)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 2px 0 color-mix(in oklch, var(--b), black 18%),
+    0 4px 0 #e4dcc8,
+    0 5px 4px rgb(45 34 24 / 0.18);
 }
-.tile-rack-swatch {
-  inline-size: 32px;
-  block-size: 32px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px oklch(0.3 0.03 90 / 0.2);
-}
-/* Chosen: the face rises out of the rack with a jade ring; the back gets an
-   ink ring, so neither choice is shown by colour alone. */
-.tile-rack-faces label:has(:checked) .player-tile {
-  translate: 0 -6px;
-  outline: 3px solid var(--jade);
-  outline-offset: 2px;
-}
-.tile-rack-backs :checked + .tile-rack-swatch {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
-}
+/* Chosen: nothing marks it in the rack. The tap squashes what was touched
+   and the tile at the top of the sheet changes and pops, so the change
+   itself is the answer; screen readers hear the radio and the status. */
+/* Focus is an outline round the whole choice. */
 .tile-rack label:has(:focus-visible) {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -1417,13 +1482,17 @@ main.meeting-page .meeting-matches .meeting-text {
   .tile-maker-dice:active {
     rotate: 90deg;
   }
-  .tile-rack-faces .player-tile {
-    transition: translate 120ms var(--ease-out);
+  /* A tap squashes what was touched. */
+  .tile-rack label > .player-tile {
+    transition: scale 140ms var(--ease-out);
   }
-  .tile-maker [data-bump="0"] .player-tile {
+  .tile-rack label:active > .player-tile {
+    scale: 0.88;
+  }
+  :is(.tile-maker, .tile-sheet) [data-bump="0"] .player-tile {
     animation: tile-bump-0 260ms var(--pop);
   }
-  .tile-maker [data-bump="1"] .player-tile {
+  :is(.tile-maker, .tile-sheet) [data-bump="1"] .player-tile {
     animation: tile-bump-1 260ms var(--pop);
   }
 }
@@ -1914,33 +1983,7 @@ main.meeting-page .round-saved {
   font: var(--t-score-sm);
 }
 
-/* A player's sticker tile: a white face with their glyph, standing on the
-   colour of its back. An open chair is a dashed outline with its wind. */
-.player-tile {
-  /* Each place sets --w for its size; 44px elsewhere. */
-  display: inline-grid;
-  place-items: center;
-  flex-shrink: 0;
-  inline-size: var(--w, 44px);
-  aspect-ratio: 3 / 4;
-  border-radius: calc(var(--w, 44px) * 0.2);
-  /* An ivory face lit from above, a thin rim, and a two-step edge in the
-     back colour, darker below, so even butter and mint read as thickness. */
-  background: linear-gradient(#fff 0 45%, #f7f2e4);
-  color: var(--g);
-  font: 700 calc(var(--w, 44px) * 0.58) / 1 var(--han);
-  box-shadow:
-    inset 0 0 0 1px oklch(0.3 0.03 90 / 0.08),
-    inset 0 calc(var(--w, 44px) * -0.05) 0 var(--tile-face-lo),
-    0 calc(var(--w, 44px) * 0.07) 0 var(--b),
-    0 calc(var(--w, 44px) * 0.14) 0 color-mix(in oklch, var(--b), black 18%),
-    0 calc(var(--w, 44px) * 0.22) calc(var(--w, 44px) * 0.28) -4px
-      oklch(0.3 0.03 90 / 0.45);
-}
-.player-tile svg {
-  inline-size: 76%;
-  block-size: auto;
-}
+/* The player tile itself is in globals.css, shared with the live pill. */
 /* An open chair: an empty place pressed into the table, the shape of a
    tile, with its wind faint in it. */
 .player-tile[data-empty] {
@@ -2204,6 +2247,7 @@ main.meeting-page .round-saved {
 .meeting-receipt > .meeting-primary {
   margin-block-end: 28px;
 }
+
 main.meeting-page .table-latest {
   justify-items: center;
   padding-block: 2px 14px;

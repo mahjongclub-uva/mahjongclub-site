@@ -1,0 +1,293 @@
+/* Halloween, Oct 24 to 31 (halloweenWeek in src/lib/season.ts). It comes
+   back every year by the date alone; to change or retire it, start here.
+
+   - This file: the web and spider on "You're in", the pumpkin pung while
+     checking in, a ghost over each empty seat, and the moonlit felt, on the
+     meeting tables and the leaderboard's podium. All of it but the web
+     keys off [data-season="halloween"] on the page, which a line in the
+     root layout's head sets on the phone's own date before the first paint,
+     since the site is built ahead of time.
+   - src/lib/avatar.ts: the six Halloween faces, first in the rack.
+   - src/components/MeetingLinks.module.css: the jack-o'-lantern LIVE badge.
+   Every piece holds still under reduced motion. */
+
+/* Halloween week: a web in the corner beside the tile, and a spider on its
+   thread. Clipped to the corner, so a scared spider runs out of sight. */
+.meeting-receipt {
+  position: relative;
+}
+/* The greeting leaves the web its corner. */
+.meeting-receipt:has(.cobweb) h1 {
+  padding-inline-end: 84px;
+}
+.cobweb {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: -12px;
+  inline-size: 112px;
+  block-size: 150px;
+  overflow: clip;
+  pointer-events: none;
+}
+.cobweb-web {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: 96px;
+  overflow: visible;
+}
+.cobweb-spokes {
+  stroke-width: 0.9;
+}
+.cobweb-rings {
+  stroke-width: 0.6;
+}
+/* Its shadow falls a little down and left on the paper, softened. */
+.cobweb-shadow {
+  stroke: oklch(0.3 0.03 90 / 0.16);
+  translate: -1.5px 3px;
+  filter: blur(0.8px);
+}
+.cobweb-strand {
+  stroke: oklch(0.42 0.02 90 / 0.5);
+}
+.cobweb-shine {
+  stroke: oklch(1 0 0 / 0.8);
+  translate: 0.4px -0.4px;
+}
+.cobweb-shine path {
+  stroke-width: 0.35;
+}
+.cobweb-dew {
+  fill: oklch(1 0 0 / 0.9);
+  stroke: oklch(0.42 0.02 90 / 0.35);
+  stroke-width: 0.4;
+}
+.cobweb-spider {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 38px;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: 50% -40px;
+  translate: 0 56px;
+}
+.cobweb-spider[data-scared] {
+  translate: 0 -48px;
+}
+/* The thread runs from the spider up past the top of the corner. */
+.cobweb-spider::before {
+  content: "";
+  position: absolute;
+  inset-block-end: 60%;
+  inset-inline-start: 50%;
+  inline-size: 1px;
+  block-size: 120px;
+  background: oklch(0.3 0.03 90 / 0.35);
+}
+/* It hangs off the page, so its shadow lands lower down and blurred. */
+.cobweb-spider svg {
+  position: relative;
+  inline-size: 26px;
+  block-size: 26px;
+  filter: drop-shadow(-2px 9px 3px oklch(0.3 0.03 90 / 0.28));
+}
+.cobweb-spider:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 0;
+}
+@keyframes cobweb-sway {
+  50% {
+    rotate: 7deg;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cobweb-spider {
+    animation: cobweb-sway 3.2s ease-in-out infinite;
+    transition: translate 1.2s var(--pop);
+  }
+  .cobweb-spider[data-scared] {
+    animation: none;
+    transition: translate 0.25s ease-in;
+  }
+}
+
+/* Checking in: the pung lands as three jack-o'-lanterns, not 中 中 中. */
+[data-season="halloween"] .wait-tile svg {
+  inline-size: 82%;
+  block-size: 82%;
+  color: oklch(0.58 0.175 42);
+}
+
+/* The ghost and bat, drawn as the tiles' are, and the felt's moon. */
+[data-season="halloween"] {
+  --ghost: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2.4 2.6 19.2 18.8'%3E%3Cpath fill='%23fbf8ef' d='M6 9A6 6 0 0 1 18 9V11.6C19.5 11.2 20.9 11.9 21.3 13 20 13 18.9 13.6 18.2 14.4L18.4 18.6C18.5 20 17.4 20.6 16.2 19.8 15 19 14 19.4 13.4 20.2 12.8 21 11.2 21 10.6 20.2 10 19.4 9 19 7.8 19.8 6.6 20.6 5.5 20 5.6 18.6L5.8 14.4C5.1 13.6 4 13 2.7 13 3.1 11.9 4.5 11.2 6 11.6Z'/%3E%3Cpath fill='%23262230' d='M9.1 9.8A1 1.35 0 1 0 11.1 9.8 1 1.35 0 1 0 9.1 9.8ZM12.9 9.8A1 1.35 0 1 0 14.9 9.8 1 1.35 0 1 0 12.9 9.8ZM10.7 12.2H13.3C13.2 13.9 10.8 13.9 10.7 12.2Z'/%3E%3C/svg%3E");
+  --moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23eadb9a' d='M15.5 2.5a9.5 9.5 0 1 0 6 16.9A8 8 0 0 1 15.5 2.5z'/%3E%3C/svg%3E");
+  --bat: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='1.2 5.2 21.6 13.2'%3E%3Cpath fill='%23161320' d='M10.2 8.6 10.5 5.6 11.4 7.5H12.6L13.5 5.6 13.8 8.6C16 7.4 20 7.2 22.6 8.8Q20.6 10.4 19.8 12.6 18 11.4 16.6 13.4 14.4 13 13.4 16.2Q12.8 17.8 12 18.2 11.2 17.8 10.6 16.2 9.6 13 7.4 13.4 6 11.4 4.2 12.6 3.4 10.4 1.4 8.8C4 7.2 8 7.4 10.2 8.6Z'/%3E%3C/svg%3E");
+  --bat-tilt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 1 24 22'%3E%3Cg transform='rotate(-20 12 11.8)'%3E%3Cpath fill='%23161320' d='M10.2 8.6 10.5 5.6 11.4 7.5H12.6L13.5 5.6 13.8 8.6C16 7.4 20 7.2 22.6 8.8Q20.6 10.4 19.8 12.6 18 11.4 16.6 13.4 14.4 13 13.4 16.2Q12.8 17.8 12 18.2 11.2 17.8 10.6 16.2 9.6 13 7.4 13.4 6 11.4 4.2 12.6 3.4 10.4 1.4 8.8C4 7.2 8 7.4 10.2 8.6Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Every ghost: the drawing, its shape, and an edge that holds on the page. */
+[data-season="halloween"]
+  .seat[data-empty]
+  .seat-tile:not([data-sitting])::after,
+[data-season="halloween"] main.meeting-page .table-square::before,
+[data-season="halloween"] main.meeting-page .table-square::after,
+[data-season="halloween"] .lb-spot:not([data-step="1"]) .lb-step::before {
+  content: "";
+  aspect-ratio: 19.2 / 18.8;
+  background: var(--ghost) center / contain no-repeat;
+  filter: drop-shadow(0 1px 0 oklch(0.55 0.03 270))
+    drop-shadow(0 3px 4px oklch(0.3 0.03 90 / 0.25));
+  pointer-events: none;
+}
+/* A ghost peeks over each empty seat, gone once someone sits. */
+[data-season="halloween"]
+  .seat[data-empty]
+  .seat-tile:not([data-sitting])::after {
+  position: absolute;
+  inset-block-start: -20px;
+  inset-inline-start: -16px;
+  inline-size: 34px;
+}
+
+/* The felt by moonlight: midnight violet, same wooden rim. */
+[data-season="halloween"] main.meeting-page .table-top {
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.42 0.08 290),
+    oklch(0.3 0.07 285)
+  );
+  color: oklch(0.95 0.02 290);
+}
+/* A moon and a few bats, scattered off centre at odd sizes and angles. */
+[data-season="halloween"] main.meeting-page .table-top::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  background:
+    var(--moon) 94% 4% / max(13%, 18px) auto no-repeat,
+    var(--bat) 65% 9% / 12% auto no-repeat,
+    var(--bat-tilt) 38% 5% / 10% auto no-repeat,
+    var(--bat-tilt) 7% 36% / 9% auto no-repeat;
+  pointer-events: none;
+}
+/* The moon and bats stay behind the game number. */
+[data-season="halloween"] main.meeting-page .table-top > * {
+  position: relative;
+  z-index: 1;
+}
+/* Two ghosts hiding behind the table, one peeking out at a top corner and a
+   smaller one at the opposite bottom, each at its own size, tilt and pace. */
+[data-season="halloween"] main.meeting-page .table-square {
+  isolation: isolate;
+}
+[data-season="halloween"] main.meeting-page .table-square::before,
+[data-season="halloween"] main.meeting-page .table-square::after {
+  grid-area: table;
+  position: relative;
+  /* Behind the felt and every seat, and only them. */
+  z-index: -1;
+  inline-size: 24%;
+}
+[data-season="halloween"] main.meeting-page .table-square::before {
+  align-self: start;
+  justify-self: start;
+  translate: -34% -40%;
+  rotate: -16deg;
+}
+/* While a seat is empty its own ghost is enough. */
+[data-season="halloween"]
+  main.meeting-page
+  .table-square:has(.seat[data-empty])::before,
+[data-season="halloween"]
+  main.meeting-page
+  .table-square:has(.seat[data-empty])::after {
+  display: none;
+}
+[data-season="halloween"] main.meeting-page .table-square::after {
+  inline-size: 17%;
+  align-self: end;
+  justify-self: end;
+  translate: 50% 16%;
+  rotate: 12deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-season="halloween"]
+    .seat[data-empty]
+    .seat-tile:not([data-sitting])::after {
+    animation: ghost-bob 2.4s ease-in-out infinite;
+  }
+  [data-season="halloween"] main.meeting-page .table-square::before {
+    animation: ghost-bob 3.1s ease-in-out infinite;
+  }
+  [data-season="halloween"] main.meeting-page .table-square::after {
+    animation: ghost-bob 2.3s ease-in-out -1s infinite;
+  }
+  [data-season="halloween"] .lb-spot:not([data-step="1"]) .lb-step::before {
+    animation: ghost-bob 2.8s ease-in-out infinite;
+  }
+  [data-season="halloween"] .lb-spot[data-place="3"] .lb-step::before {
+    animation-duration: 2.2s;
+    animation-delay: -0.9s;
+  }
+}
+/* By transform, so it adds to wherever each ghost was placed. */
+@keyframes ghost-bob {
+  50% {
+    transform: translateY(-14%) rotate(-5deg);
+  }
+}
+
+/* The leaderboard's podium in the same moonlight: the moon and scattered
+   bats clear of the crown, and a ghost hiding behind each lower step. */
+[data-season="halloween"] .lb-podium {
+  position: relative;
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    oklch(0.42 0.08 290),
+    oklch(0.3 0.07 285)
+  );
+}
+[data-season="halloween"] .lb-podium::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  background:
+    var(--moon) 95% 4% / max(8%, 26px) auto no-repeat,
+    var(--bat) 80% 11% / 6% auto no-repeat,
+    var(--bat-tilt) 67% 3% / 4% auto no-repeat,
+    var(--bat-tilt) 8% 6% / 5% auto no-repeat,
+    var(--bat) 30% 15% / 3.5% auto no-repeat;
+  pointer-events: none;
+}
+[data-season="halloween"] .lb-spot {
+  z-index: 1;
+}
+/* Behind the step (the spot is its own layer), so only the head shows. */
+[data-season="halloween"] .lb-spot:not([data-step="1"]) .lb-step {
+  position: relative;
+}
+[data-season="halloween"] .lb-spot:not([data-step="1"]) .lb-step::before {
+  position: absolute;
+  z-index: -1;
+  inset-block-end: calc(100% - 12px);
+  inset-inline-start: 8%;
+  inline-size: 30px;
+  rotate: -10deg;
+}
+[data-season="halloween"] .lb-spot[data-place="3"] .lb-step::before {
+  inset-inline: auto 6%;
+  inline-size: 22px;
+  rotate: 14deg;
+}

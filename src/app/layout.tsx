@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import { getMeetings } from "@/lib/data";
+import { halloweenWeek } from "@/lib/season";
 import "./globals.css";
 
 const display = Barlow_Condensed({
@@ -38,6 +39,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <head>
+        {/* Marks Halloween week on the phone's own date before anything
+            paints, so halloween.css applies from the first frame. The page
+            keeps this element across in-site links. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if((${halloweenWeek})(new Date()))document.documentElement.dataset.season="halloween"`,
+          }}
+        />
+      </head>
       <body>
         {/*
           No JavaScript means no canvas is coming and no fallback timer will

@@ -12,6 +12,7 @@ import { podium } from "@/lib/live";
 import PlayerSearch from "@/components/PlayerSearch";
 import CountUp from "@/components/CountUp";
 import { Delta, RankTile, StandingRow } from "@/components/StandingParts";
+import "../(meeting)/halloween.css";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
 const SHOWN = 9;

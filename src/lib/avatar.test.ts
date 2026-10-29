@@ -4,7 +4,11 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import {
   ALL_FACES,
+  BACKS,
   BACK_NAMES,
+  CHARACTERS,
+  INKS,
+  RIMS,
   facesOn,
   parseTile,
   starterAvatar,
@@ -66,4 +70,40 @@ test("Halloween's faces are offered that week only and are never a starter", () 
     face: starterAvatar("p014").face,
     back: "midnight",
   });
+});
+
+// Relative luminance of an "oklch(L C H)" ink, through OKLab to linear sRGB.
+function luminance(ink: string) {
+  const [l, c, h] = ink.match(/[\d.]+/g)!.map(Number);
+  const a = c * Math.cos((h * Math.PI) / 180);
+  const b = c * Math.sin((h * Math.PI) / 180);
+  const L = (l + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const M = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const S = (l - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  const r = clamp(4.0767416621 * L - 3.3077115913 * M + 0.2309699292 * S);
+  const g = clamp(-1.2684380046 * L + 2.6097574011 * M - 0.3413193965 * S);
+  const bl = clamp(-0.0041960863 * L - 0.7034186147 * M + 1.707614701 * S);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+}
+
+test("every ink reads on the face and the page: 3:1 for pictures, 4.5:1 for characters", () => {
+  // The Icon rack shows faces bare on the meeting page, which is darker than
+  // a tile's face: its oklch(0.95 0.025 88) a step deeper, for the grain.
+  const face = luminance("oklch(0.93 0.025 88)");
+  for (const [name, ink] of Object.entries(INKS)) {
+    // A pale face is read by its rim.
+    const edge = RIMS[name as keyof typeof RIMS] ?? ink;
+    const ratio = (face + 0.05) / (luminance(edge) + 0.05);
+    const floor = name in CHARACTERS ? 4.5 : 3;
+    assert.ok(ratio >= floor, `${name} is ${ratio.toFixed(2)}:1`);
+  }
+});
+
+test("every back stands out from the ivory face: 2:1", () => {
+  const face = 0.2126 * 0.9387 + 0.7152 * 0.9216 + 0.0722 * 0.855;
+  for (const [name, back] of Object.entries(BACKS)) {
+    const ratio = (face + 0.05) / (luminance(back) + 0.05);
+    assert.ok(ratio >= 2, `${name} is ${ratio.toFixed(2)}:1`);
+  }
 });
