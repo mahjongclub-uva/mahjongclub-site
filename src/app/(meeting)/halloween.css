@@ -188,13 +188,15 @@
 }
 /* Two ghosts hiding behind the table, one peeking out at a top corner and a
    smaller one at the opposite bottom, each at its own size, tilt and pace. */
-[data-season="halloween"] main.meeting-page .table-top {
-  z-index: 1;
+[data-season="halloween"] main.meeting-page .table-square {
+  isolation: isolate;
 }
 [data-season="halloween"] main.meeting-page .table-square::before,
 [data-season="halloween"] main.meeting-page .table-square::after {
   grid-area: table;
   position: relative;
+  /* Behind the felt and every seat, and only them. */
+  z-index: -1;
   inline-size: 24%;
 }
 [data-season="halloween"] main.meeting-page .table-square::before {
