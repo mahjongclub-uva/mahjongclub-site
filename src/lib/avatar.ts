@@ -47,7 +47,7 @@ const HALLOWEEN = {
   spider: INK,
   bat: "oklch(0.36 0.09 295)", // deep violet
   hat: INK, // a witch's, with an orange band
-  potion: "oklch(0.58 0.12 185)", // teal
+  skull: "oklch(0.6 0.03 75)", // weathered bone
 } as const;
 export type Face =
   keyof typeof PICTURES | keyof typeof CHARACTERS | keyof typeof HALLOWEEN;

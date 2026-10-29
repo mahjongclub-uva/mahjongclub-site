@@ -881,7 +881,7 @@ const TILE_PARTS = {
     "spider",
     "bat",
     "hat",
-    "potion",
+    "skull",
     "paw",
     "crown",
     "star",

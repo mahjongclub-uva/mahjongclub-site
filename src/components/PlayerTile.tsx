@@ -155,7 +155,7 @@ function SakuraFilled() {
     </svg>
   );
 }
-// Halloween's bat, witch's hat and potion, drawn as the pumpkin is.
+// Halloween's bat, witch's hat and skull, drawn as the pumpkin is.
 function BatFilled() {
   return (
     <svg viewBox="1.2 5.8 21.6 12.6" fill="currentColor">
@@ -185,18 +185,13 @@ function HatFilled() {
     </svg>
   );
 }
-function PotionFilled() {
+function SkullFilled() {
   return (
-    <svg viewBox="5.4 2.4 13.2 19" fill="currentColor">
-      <circle cx="12" cy="15" r="6" />
-      <path d="M10.3 6.6h3.4v5h-3.4z" />
-      <rect x="9.6" y="5.6" width="4.8" height="1.6" rx="0.8" />
-      <path fill={STEM} d="M10.6 2.8h2.8v3h-2.8z" />
-      <g fill="oklch(0.45 0.1 185)">
-        <circle cx="10" cy="14" r="1.1" />
-        <circle cx="13.6" cy="16.6" r="0.8" />
-        <circle cx="12.6" cy="12.6" r="0.55" />
-      </g>
+    <svg viewBox="4 2.6 16 17.8" fill="currentColor">
+      <path
+        fillRule="evenodd"
+        d="M12 3C7.4 3 4.4 6.2 4.4 10.4c0 2.6 1.2 4.6 3 5.6v2.6c0 .8.6 1.4 1.4 1.4h6.4c.8 0 1.4-.6 1.4-1.4V16c1.8-1 3-3 3-5.6C19.6 6.2 16.6 3 12 3zM7.1 10.8a1.9 2.1 0 1 0 3.8 0 1.9 2.1 0 1 0-3.8 0zm6 0a1.9 2.1 0 1 0 3.8 0 1.9 2.1 0 1 0-3.8 0zM12 13.4l-1 2h2zM10.1 17.4h.6V20h-.6zm1.6 0h.6V20h-.6zm1.6 0h.6V20h-.6z"
+      />
     </svg>
   );
 }
@@ -232,7 +227,7 @@ const PICTURES: Record<
   spider: <IconSpiderFilled viewBox="1.1 2.6 21.8 17.8" />,
   bat: <BatFilled />,
   hat: <HatFilled />,
-  potion: <PotionFilled />,
+  skull: <SkullFilled />,
 };
 
 /** A tile drawn as given, for the tile maker. */

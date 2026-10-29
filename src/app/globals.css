@@ -643,9 +643,6 @@ main {
 :is([data-face="bat"], [data-face="hat"]) svg {
   --fit: 0.6;
 }
-[data-face="potion"] svg {
-  --fit: 0.64;
-}
 [data-face="banana"] svg {
   --fit: 0.68;
 }
