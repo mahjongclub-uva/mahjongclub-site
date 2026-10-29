@@ -12,7 +12,6 @@ import { podium } from "@/lib/live";
 import PlayerSearch from "@/components/PlayerSearch";
 import CountUp from "@/components/CountUp";
 import { Delta, RankTile, StandingRow } from "@/components/StandingParts";
-import SeasonMark from "@/components/SeasonMark";
 import "../(meeting)/halloween.css";
 
 /** Homepage-sized standings; the data file retains every ranked player. */
@@ -27,7 +26,6 @@ export default function Leaderboard() {
 
   return (
     <main className="leaderboard-page">
-      <SeasonMark />
       <header className="page-head">
         <div className="section-wrap">
           <h1 className="page-title">Leaderboard</h1>
