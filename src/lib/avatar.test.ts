@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import vm from "node:vm";
 import {
   ALL_FACES,
@@ -8,7 +8,7 @@ import {
   BACK_NAMES,
   CHARACTERS,
   INKS,
-  RIMS,
+  collabOf,
   facesOn,
   parseTile,
   starterAvatar,
@@ -38,6 +38,11 @@ test("a code with a part this site does not know keeps the starter's part", () =
     back: "mint",
   });
   assert.deepEqual(parseTile(undefined, "p014"), starter);
+});
+
+test("the rack fills rows of six, so no icon sits alone on the last row", () => {
+  for (const now of [new Date(2026, 10, 7), new Date(2026, 10, 6, 19)])
+    assert.equal(facesOn(now).length % 6, 0);
 });
 
 test("the Apps Script accepts exactly the tiles this site can draw", () => {
@@ -72,6 +77,35 @@ test("Halloween's faces are offered that week only and are never a starter", () 
   });
 });
 
+test("a partner's faces are offered on its night only, first, and are never a starter", () => {
+  const hksa = new Date(2026, 10, 6, 19);
+  const halloween = new Date(2026, 9, 30, 18);
+  const after = new Date(2026, 10, 7, 12);
+  assert.deepEqual(facesOn(hksa).slice(0, 6), [
+    "bauhinia",
+    "eggtart",
+    "fishball",
+    "dolphin",
+    "tram",
+    "neon",
+  ]);
+  assert.equal(collabOf("eggtart"), "hksa");
+  assert.equal(collabOf("apple"), undefined);
+  assert.ok(!facesOn(halloween).includes("eggtart"));
+  assert.ok(!facesOn(hksa).includes("ghost"));
+  assert.ok(!facesOn(after).includes("eggtart"));
+  for (let i = 1; i <= 200; i++)
+    assert.equal(
+      collabOf(starterAvatar(`p${String(i).padStart(3, "0")}`).face),
+      undefined,
+    );
+  assert.equal(parseTile("eggtart.jade", "p014", hksa).face, "eggtart");
+  assert.equal(
+    parseTile("eggtart.jade", "p014", after).face,
+    starterAvatar("p014").face,
+  );
+});
+
 // Relative luminance of an "oklch(L C H)" ink, through OKLab to linear sRGB.
 function luminance(ink: string) {
   const [l, c, h] = ink.match(/[\d.]+/g)!.map(Number);
@@ -87,17 +121,25 @@ function luminance(ink: string) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
 }
 
-test("every ink reads on the face and the page: 3:1 for pictures, 4.5:1 for characters", () => {
+const PAGE = luminance("oklch(0.93 0.025 88)");
+
+test("every character reads on the face and the page: 4.5:1", () => {
   // The Icon rack shows faces bare on the meeting page, which is darker than
   // a tile's face: its oklch(0.95 0.025 88) a step deeper, for the grain.
-  const face = luminance("oklch(0.93 0.025 88)");
   for (const [name, ink] of Object.entries(INKS)) {
-    // A pale face is read by its rim.
-    const edge = RIMS[name as keyof typeof RIMS] ?? ink;
-    const ratio = (face + 0.05) / (luminance(edge) + 0.05);
-    const floor = name in CHARACTERS ? 4.5 : 3;
-    assert.ok(ratio >= floor, `${name} is ${ratio.toFixed(2)}:1`);
+    const ratio = (PAGE + 0.05) / (luminance(ink) + 0.05);
+    assert.ok(ratio >= 4.5, `${name} is ${ratio.toFixed(2)}:1`);
   }
+});
+
+test("every picture face has its painting, since a missing file is a blank tile", () => {
+  for (const name of ALL_FACES.filter((face) => !(face in CHARACTERS)))
+    assert.ok(
+      existsSync(
+        new URL(`../../public/tiles/painted/${name}.webp`, import.meta.url),
+      ),
+      name,
+    );
 });
 
 test("every back stands out from the ivory face: 2:1", () => {
