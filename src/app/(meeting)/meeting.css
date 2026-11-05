@@ -2011,6 +2011,14 @@ main.meeting-page .round-saved {
   transform: translateY(2px);
   box-shadow: 0 3px 8px -4px oklch(0.3 0.03 90 / 0.3);
 }
+/* A supporting action beside a main one: an outline, with no lift. */
+.meeting-page .meeting-chip.meeting-chip-quiet,
+.meeting-calculator .meeting-chip.meeting-chip-quiet,
+.meeting-page .meeting-chip.meeting-chip-quiet:active:not(:disabled) {
+  border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+  background: none;
+  box-shadow: none;
+}
 
 /* The winner's moment, after a game is saved on any phone at the table. */
 .meeting-page .seat {
@@ -2242,6 +2250,10 @@ main.meeting-page .round-saved {
   margin-block-end: 28px;
 }
 
+.meeting-page .ended-find {
+  display: flex;
+  margin-block: -12px 24px;
+}
 main.meeting-page .table-latest {
   justify-items: center;
   padding-block: 2px 14px;

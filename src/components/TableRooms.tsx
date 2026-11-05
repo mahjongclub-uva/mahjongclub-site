@@ -16,7 +16,6 @@ import {
   IconHistory,
   IconLayoutGrid,
   IconPencil,
-  IconPlayerPlayFilled,
   IconTrophy,
 } from "@tabler/icons-react";
 import MeetingAccess from "@/components/MeetingAccess";
@@ -732,10 +731,10 @@ function SeatedTable({
                 <div className="calculator-footer">
                   <button
                     type="button"
-                    className="meeting-chip"
+                    className="meeting-chip meeting-chip-quiet"
                     onClick={clearDraft}
                   >
-                    <IconEraser aria-hidden="true" /> Clear
+                    <IconEraser aria-hidden="true" /> Start over
                   </button>
                 </div>
               )}
@@ -750,7 +749,7 @@ function SeatedTable({
                 </strong>
                 <button
                   type="button"
-                  className="meeting-chip"
+                  className="meeting-chip meeting-chip-quiet"
                   onClick={() => setStep("winner")}
                 >
                   Change<span className="sr-only"> winner</span>
@@ -792,13 +791,13 @@ function SeatedTable({
                 </button>
                 <button
                   type="button"
-                  className="meeting-chip"
+                  className="meeting-chip meeting-chip-quiet"
                   onClick={() => {
                     clearDraft();
                     setStep("winner");
                   }}
                 >
-                  <IconEraser aria-hidden="true" /> Clear
+                  <IconEraser aria-hidden="true" /> Start over
                 </button>
               </div>
             </>
@@ -927,6 +926,9 @@ function SeatedTable({
                 </WinCard>
               )}
               <ChangeRows room={room} ranked />
+              <p className="quiet end-note">
+                Saves these scores. Everyone leaves the table.
+              </p>
             </>
           ) : (
             <p className="quiet end-note">No games yet. Everyone leaves.</p>
@@ -948,7 +950,7 @@ function SeatedTable({
                   setLayer(null);
               }}
             >
-              {busy ? "Ending…" : "End table"}
+              {busy ? "Ending…" : "End table for everyone"}
             </button>
             <button
               type="button"
@@ -956,7 +958,7 @@ function SeatedTable({
               disabled={busy}
               onClick={() => setLayer(null)}
             >
-              <IconPlayerPlayFilled aria-hidden="true" /> Keep playing
+              Keep playing
             </button>
           </div>
         </Sheet>
@@ -977,6 +979,9 @@ function SeatedTable({
             </p>
           )}
           <p className="quiet end-note">
+            {leaving.id === player.id
+              ? "Only you leave. "
+              : `Only ${tileNames(room.seats).get(leaving.id)} leaves. `}
             {games
               ? "Games stay saved. The seat opens up."
               : "The seat opens up."}
@@ -1014,7 +1019,7 @@ function SeatedTable({
               disabled={busy}
               onClick={() => setLayer(null)}
             >
-              <IconPlayerPlayFilled aria-hidden="true" /> Keep playing
+              Keep playing
             </button>
           </div>
         </Sheet>
@@ -1408,6 +1413,12 @@ function Tables({
               >
                 See tonight’s standings
               </Link>
+              <Link
+                className="meeting-chip ended-find"
+                href={MEETING_PATHS.tables}
+              >
+                Find a table
+              </Link>
             </>
           )}
           {!here && (
@@ -1416,7 +1427,9 @@ function Tables({
                 ? "This table is full."
                 : mine
                   ? `Finish Table ${mine.table} first.`
-                  : "Tap the wind tile where you’re sitting."}
+                  : ended?.ended && ended.table === table
+                    ? "Or start another round here: tap the wind tile where you’re sitting."
+                    : "Tap the wind tile where you’re sitting."}
             </p>
           )}
           <TableSquare
