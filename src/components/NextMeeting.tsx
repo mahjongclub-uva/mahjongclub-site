@@ -20,6 +20,11 @@ export default function NextMeeting() {
       ...option,
       timeZone: CLUB_TZ,
     });
+  // A plain "Chem 206" stays a chip; a room or an address needs the fuller block.
+  const hasDetail = meeting.room || meeting.address;
+  // Google gives some places no street number, only the city.
+  const street = meeting.address?.split(",")[0] ?? "";
+  const mapLabel = /^\d/.test(street) ? street : "Open in Maps";
 
   return (
     <div className="next-meeting">
@@ -41,13 +46,34 @@ export default function NextMeeting() {
             <IconClock size={16} aria-hidden="true" />
             {formatMeetingTime(meeting.start, meeting.end)}
           </span>
-          {meeting.location && (
+          {!hasDetail && meeting.location && (
             <span>
               <IconMapPin size={16} aria-hidden="true" />
               {meeting.location}
             </span>
           )}
         </p>
+        {hasDetail && (
+          <div className="next-meeting-where">
+            <IconMapPin size={16} aria-hidden="true" />
+            <div>
+              {meeting.room && <b>{meeting.room}</b>}
+              {meeting.location && <span>{meeting.location}</span>}
+              {meeting.address && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    [meeting.location, meeting.address]
+                      .filter(Boolean)
+                      .join(", "),
+                  )}`}
+                  aria-label={`${mapLabel}, open in Google Maps`}
+                >
+                  {mapLabel}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

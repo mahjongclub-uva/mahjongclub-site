@@ -313,10 +313,13 @@ export const meetingsSchema = z
             start: z.iso.datetime({ offset: true }),
             end: z.iso.datetime({ offset: true }).nullable(),
             summary: z.string().min(1),
-            // Whatever the calendar event's Location field says, or null when
-            // it is blank. Published as written, so what goes in that field on
-            // the calendar is a privacy decision every time.
+            // From the parentheses closing the event's title, or null.
+            room: z.string().min(1).nullable(),
+            // The calendar event's Location field, or null when it is blank,
+            // with any Google Maps address moved to `address`. Published, so
+            // what goes in that field is a privacy decision every time.
             location: z.string().min(1).nullable(),
+            address: z.string().min(1).nullable(),
           })
           .strict(),
       )

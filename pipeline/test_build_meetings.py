@@ -61,6 +61,38 @@ END:VEVENT
                 self.assertEqual(rows[1]["end"], "2026-10-23T21:00:00-04:00")
                 self.assertEqual(rows[1]["location"], "Room 2")
 
+    def test_location_separates_a_google_address_from_the_place(self):
+        street = "550 Brandon Ave, Charlottesville, VA 22903, USA"
+        for typed, split in (
+            (f"Student Health, {street}", ("Student Health", street)),
+            ("Newcomb Hall, Charlottesville, VA 22903, USA",
+             ("Newcomb Hall", "Charlottesville, VA 22903, USA")),
+            ("Chem 206", ("Chem 206", None)),
+            ("Rice Hall, 130", ("Rice Hall, 130", None)),
+            ("", (None, None)),
+        ):
+            with self.subTest(typed=typed):
+                self.assertEqual(meetings.split_location(typed), split)
+
+    def test_room_comes_from_the_titles_closing_parentheses(self):
+        for title, room in (
+            ("Mahjong Meeting (MPR 100A)", "MPR 100A"),
+            ("Mahjong Meeting", None),
+            ("Mahjong (for real) Meeting", None),
+        ):
+            with self.subTest(title=title):
+                self.assertEqual(meetings.room_from_title(title), room)
+
+    def test_published_row_has_room_place_and_address(self):
+        feed = MASTER.replace("SUMMARY:Club meeting", "SUMMARY:Club meeting (MPR 100A)").replace(
+            "LOCATION:Room 1",
+            "LOCATION:Student Health\\, 550 Brandon Ave\\, Charlottesville\\, VA 22903\\, USA",
+        )
+        row = self.publish(feed)[0]
+        self.assertEqual(row["room"], "MPR 100A")
+        self.assertEqual(row["location"], "Student Health")
+        self.assertEqual(row["address"], "550 Brandon Ave, Charlottesville, VA 22903, USA")
+
     def test_cancelled_instance_without_start_removes_original(self):
         cancelled = """BEGIN:VEVENT
 UID:club-weekly
