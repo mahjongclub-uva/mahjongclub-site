@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import { TileArtDefs } from "@/components/TileArt";
 import { FULL_NAME, TAGLINE } from "@/lib/site";
 import { getMeetings } from "@/lib/data";
-import { halloweenWeek } from "@/lib/season";
+import { COLLAB_NIGHTS, seasonOn } from "@/lib/season";
 import "./globals.css";
 
 const display = Barlow_Condensed({
@@ -51,14 +51,20 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    // The head script below sets data-season before React hydrates.
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Marks Halloween week on the phone's own date before anything
-            paints, so halloween.css applies from the first frame. The page
-            keeps this element across in-site links. */}
+        {/* Marks Halloween week or a collab night on the phone's own date
+            before anything paints, so halloween.css and collab.css apply
+            from the first frame. The page keeps this element across
+            in-site links. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `if((${halloweenWeek})(new Date()))document.documentElement.dataset.season="halloween"`,
+            __html: `{let s=(${seasonOn})(new Date(),${JSON.stringify(COLLAB_NIGHTS)});if(s)document.documentElement.dataset.season=s}`,
           }}
         />
       </head>

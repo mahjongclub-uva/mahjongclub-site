@@ -5,6 +5,7 @@ import { preconnect } from "react-dom";
 import { nunito } from "@/lib/fonts";
 import "./meeting.css";
 import "./halloween.css";
+import "./collab.css";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
