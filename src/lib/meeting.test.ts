@@ -237,7 +237,14 @@ test("the meeting shortcut names a table only for a seated, confirmed player", (
 test("check-in starts from the calendar only for a phone without tonight's player", () => {
   const start = "2026-10-16T17:30:00-04:00";
   const schedule = [
-    { start, end: "2026-10-16T20:00:00-04:00", summary: "", room: null, location: null, address: null },
+    {
+      start,
+      end: "2026-10-16T20:00:00-04:00",
+      summary: "",
+      room: null,
+      location: null,
+      address: null,
+    },
   ];
   const saved = new Map<string, string>();
   Object.defineProperty(globalThis, "localStorage", {

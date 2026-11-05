@@ -130,7 +130,11 @@ export function HomeMeeting({
       ) : (
         tonight && (
           <p className={styles.where}>
-            {[tonight.room, tonight.location, formatMeetingTime(tonight.start, tonight.end)]
+            {[
+              tonight.room,
+              tonight.location,
+              formatMeetingTime(tonight.start, tonight.end),
+            ]
               .filter(Boolean)
               .join(" · ")}
           </p>

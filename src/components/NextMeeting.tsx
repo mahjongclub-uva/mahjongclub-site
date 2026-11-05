@@ -62,7 +62,9 @@ export default function NextMeeting() {
               {meeting.address && (
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    [meeting.location, meeting.address].filter(Boolean).join(", "),
+                    [meeting.location, meeting.address]
+                      .filter(Boolean)
+                      .join(", "),
                   )}`}
                   aria-label={`${mapLabel}, open in Google Maps`}
                 >
