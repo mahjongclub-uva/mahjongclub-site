@@ -59,3 +59,8 @@ __pycache__/
 
 # Local screenshots from visual review.
 /output/
+
+# Playwright state and recordings: can hold cookies and request payloads.
+.playwright-mcp/
+storageState.json
+*.har
