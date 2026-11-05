@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { BACKS, CHARACTERS, INKS, parseTile, type Avatar } from "@/lib/avatar";
+import { BACKS, parseTile, type Avatar } from "@/lib/avatar";
 import { chosenTile, subscribeTiles, tilesVersion } from "@/lib/tiles";
 
 // The Halloween decorations' pumpkin, not a player's painted one.
@@ -35,28 +35,18 @@ export function AvatarTile({ tile }: { tile: Avatar }) {
   return (
     <span
       className="player-tile"
-      data-face={tile.face}
       aria-hidden="true"
-      style={
-        {
-          "--g": INKS[tile.face as keyof typeof INKS],
-          "--b": BACKS[tile.back],
-        } as React.CSSProperties
-      }
+      style={{ "--b": BACKS[tile.back] } as React.CSSProperties}
     >
-      {tile.face in CHARACTERS ? (
-        CHARACTERS[tile.face as keyof typeof CHARACTERS]
-      ) : (
-        // A painted face is a static file the browser caches, so no path data
-        // sits in a page's HTML and a page fetches only the faces it shows.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`/tiles/painted/${tile.face}.webp`}
-          alt=""
-          width={256}
-          height={256}
-        />
-      )}
+      {/* A painted face is a static file the browser caches, so no path data
+          sits in a page's HTML and a page fetches only the faces it shows. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/tiles/painted/${tile.face}.webp`}
+        alt=""
+        width={256}
+        height={256}
+      />
     </span>
   );
 }

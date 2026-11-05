@@ -1,14 +1,11 @@
 /**
- * A player's tile on the meeting pages: a painted face or a character, on the
+ * A player's tile on the meeting pages: a painted face on the
  * colour of the tile's back. Every player starts with a tile picked
  * from their opaque id, so every phone draws the same one, and can make their
  * own for the night. A tile travels as a code, "face.back"; the Apps Script
  * keeps the same lists in TILE_PARTS.
  */
 import { COLLAB_NIGHTS, seasonOn, type Collab } from "./season.ts";
-
-const RED = "oklch(0.52 0.2 28)";
-const GREEN = "oklch(0.48 0.14 160)";
 
 // Painted faces, one file each in public/tiles/painted, in their own colours.
 // Six to a row: symbols, fruit, animals, then fortune with 中 發 福. A starter is
@@ -39,14 +36,9 @@ const PICTURES = [
 ] as const;
 // Two of the dragons, as they appear on the tiles, and 福 for fortune, as
 // pasted on doors at New Year. The winds stay off player tiles, since the
-// table page marks each seat with its wind. Real text, each in one ink, as a
-// real tile is: 中 is always red.
-export const CHARACTERS = { zhong: "中", fa: "發", fu: "福" } as const;
-export const INKS: Record<keyof typeof CHARACTERS, string> = {
-  zhong: RED,
-  fa: GREEN,
-  fu: RED,
-};
+// table page marks each seat with its wind. Painted too, and a Chinese reader
+// checks any new one before it goes in, since a wrong stroke reads as a mistake.
+const CHARACTERS = ["zhong", "fa", "fu"] as const;
 // Offered only in Halloween week, first in the rack, and never a starter.
 const HALLOWEEN = [
   "pumpkin",
@@ -70,13 +62,10 @@ const HKSA = [
 const COLLAB_FACES: Record<Collab, readonly Face[]> = { hksa: HKSA };
 export type Face =
   | (typeof PICTURES)[number]
-  | keyof typeof CHARACTERS
+  | (typeof CHARACTERS)[number]
   | (typeof HALLOWEEN)[number]
   | (typeof HKSA)[number];
-const FACES: readonly Face[] = [
-  ...PICTURES,
-  ...(Object.keys(CHARACTERS) as Face[]),
-];
+const FACES: readonly Face[] = [...PICTURES, ...CHARACTERS];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */
 export const ALL_FACES: readonly Face[] = [...HALLOWEEN, ...HKSA, ...FACES];
 /** The faces a player can pick at `now`: Halloween's in Halloween week, a

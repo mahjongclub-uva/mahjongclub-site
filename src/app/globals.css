@@ -555,7 +555,6 @@ main {
   aspect-ratio: 3 / 4;
   border-radius: calc(var(--w, 44px) * 0.2);
   background: linear-gradient(#fcfbf7, #f5f1e6);
-  color: var(--g);
   font: 700 calc(var(--w, 44px) * 0.58) / 1
     var(--han, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif);
   box-shadow:
@@ -584,12 +583,6 @@ main {
      image, so iOS shows no save-image menu. */
   pointer-events: none;
 }
-/* A character sits on a thin shadow in a deeper shade of its own ink, as if
-   carved into the tile. */
-.player-tile {
-  text-shadow: 0 calc(var(--w, 44px) * 0.025) 0
-    color-mix(in oklch, var(--g), black 30%);
-}
 /* The pumpkin's stem, green wherever it's drawn; the live badge draws it white. */
 .tile-stem {
   fill: oklch(0.5 0.1 120);
@@ -604,9 +597,6 @@ main {
 /* The jack-o'-lantern's face, dark on a tile. */
 .tile-carve {
   fill: oklch(0.25 0.02 60);
-}
-.player-tile[data-face="zhong"] {
-  font-size: calc(var(--w, 44px) * 0.6);
 }
 
 /* 5. Sections ============================================================= */

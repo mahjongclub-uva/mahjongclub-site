@@ -6,8 +6,6 @@ import {
   ALL_FACES,
   BACKS,
   BACK_NAMES,
-  CHARACTERS,
-  INKS,
   collabOf,
   facesOn,
   parseTile,
@@ -121,19 +119,8 @@ function luminance(ink: string) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
 }
 
-const PAGE = luminance("oklch(0.93 0.025 88)");
-
-test("every character reads on the face and the page: 4.5:1", () => {
-  // The Icon rack shows faces bare on the meeting page, which is darker than
-  // a tile's face: its oklch(0.95 0.025 88) a step deeper, for the grain.
-  for (const [name, ink] of Object.entries(INKS)) {
-    const ratio = (PAGE + 0.05) / (luminance(ink) + 0.05);
-    assert.ok(ratio >= 4.5, `${name} is ${ratio.toFixed(2)}:1`);
-  }
-});
-
-test("every picture face has its painting, since a missing file is a blank tile", () => {
-  for (const name of ALL_FACES.filter((face) => !(face in CHARACTERS)))
+test("every face has its painting, since a missing file is a blank tile", () => {
+  for (const name of ALL_FACES)
     assert.ok(
       existsSync(
         new URL(`../../public/tiles/painted/${name}.webp`, import.meta.url),
