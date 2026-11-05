@@ -79,7 +79,6 @@ svg {
   --tile-edge: #3f8871;
   --tile-back-hi: #58a992;
   --tile-back: #2f6656;            /* 6.0:1 against the face */
-  --tile-back-lo: #1b4437;
   --tile-side: #a9d2c3;            /* celadon side of an illustrated tile */
   --tile-body: #ddd4bd;            /* ivory body, seen on a tile's side */
 
