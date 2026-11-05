@@ -16,7 +16,7 @@ export default function NextMeeting() {
   const meeting = getNextMeeting();
   if (!meeting) return null;
   const part = (option: Intl.DateTimeFormatOptions) =>
-    new Date(meeting.start).toLocaleDateString("en-GB", {
+    new Date(meeting.start).toLocaleDateString("en-US", {
       ...option,
       timeZone: CLUB_TZ,
     });

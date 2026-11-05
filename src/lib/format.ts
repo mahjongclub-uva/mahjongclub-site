@@ -8,9 +8,9 @@ export const NUMERALS = ["", ..."一二三四伍六七八九"];
 export const formatPoints = (points: number) =>
   String(points).replace("-", "−");
 
-/** "2025-11-22" -> "22 November 2025". Parsed as UTC so it cannot slip a day. */
+/** "2025-11-22" -> "November 22, 2025". Parsed as UTC so it cannot slip a day. */
 export function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -18,9 +18,9 @@ export function formatDate(iso: string): string {
   });
 }
 
-/** "2026-09-30" -> "Wed 30 Sept", for the meeting header. */
+/** "2026-09-30" -> "Wed, Sep 30", for the meeting header. */
 export function formatShortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -32,9 +32,9 @@ export function formatShortDate(iso: string): string {
  * GitHub runner in UTC and meeting times must render in the club's zone. */
 export const CLUB_TZ = "America/New_York";
 
-/** "2026-09-18T17:30:00-04:00" -> "Friday 18 September". */
+/** "2026-09-18T17:30:00-04:00" -> "Friday, September 18". */
 export function formatMeetingDay(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+  return new Date(iso).toLocaleDateString("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
