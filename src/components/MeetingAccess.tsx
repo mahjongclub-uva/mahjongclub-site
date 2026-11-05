@@ -33,7 +33,8 @@ import {
   type SavedPlayer,
   MEETING_PATHS,
 } from "@/lib/meeting";
-import { LOGO, MEETING_SERVICE_URL } from "@/lib/site";
+import { LOGO, MEETING_SERVICE_URL, PARTNERS } from "@/lib/site";
+import { collabOn } from "@/lib/season";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -295,6 +296,9 @@ export default function MeetingAccess({
   // Waits for "Continue as" on a phone reopened in a new session.
   const player =
     meeting?.open && playerConfirmed() ? savedPlayer(meeting) : null;
+  // A collab night by the meeting's own date, so it matches every phone.
+  const collab = collabOn(meeting?.open ? meeting.date : null);
+  const partner = collab && PARTNERS[collab];
   return (
     <div className="meeting-access">
       <header className="meeting-header">
@@ -302,10 +306,29 @@ export default function MeetingAccess({
           {LOGO && <Image src={LOGO} alt="" width={32} height={32} />}
           <span className="sr-only">Mahjong Club @ UVA website</span>
         </Link>
+        {partner && (
+          <Image
+            className="meeting-partner"
+            src={partner.logo}
+            alt=""
+            width={34}
+            height={34}
+          />
+        )}
         <p className="meeting-status">
           {meeting?.open && meeting.date ? (
             <>
-              {!player && <small>Mahjong Club @ UVA</small>}
+              {partner ? (
+                // Short enough to stay beside the menu.
+                <small>
+                  <span aria-hidden="true">MJC × {partner.name}</span>
+                  <span className="sr-only">
+                    Mahjong Club @ UVA with the {partner.fullName}
+                  </span>
+                </small>
+              ) : (
+                !player && <small>Mahjong Club @ UVA</small>
+              )}
               <b>{formatShortDate(meeting.date)}</b>
             </>
           ) : (

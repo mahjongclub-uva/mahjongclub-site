@@ -1,4 +1,5 @@
 import siteContent from "../../data/site.json";
+import type { Collab } from "./season";
 
 /** Everything about the club that isn't scores, in one file so it's not scattered across components. */
 
@@ -38,6 +39,20 @@ export const MEETING_REHEARSAL = false;
  * the path, e.g. "/logo.png"; a centered square image works best. Leave null
  * for an empty circle placeholder. */
 export const LOGO: string | null = "/logo.webp";
+
+/** Clubs we host a night with; the dates are COLLAB_NIGHTS in season.ts.
+ * `logo` sits beside the club's in the meeting header, over "MJC × name"; `fullName` is read to
+ * screen readers. */
+export const PARTNERS: Record<
+  Collab,
+  { name: string; fullName: string; logo: string }
+> = {
+  hksa: {
+    name: "HKSA",
+    fullName: "Hong Kong Student Association",
+    logo: "/partners/hksa.webp",
+  },
+};
 
 /** Handle only, no @ and no URL. Leave null to hide the link entirely. */
 export const INSTAGRAM: string | null = siteContent.instagram || null;
