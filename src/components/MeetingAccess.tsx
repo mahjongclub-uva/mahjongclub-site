@@ -12,10 +12,13 @@ import {
   IconChevronRight,
   IconDoorExit,
   IconMenu2,
+  IconPaletteFilled,
   IconRefresh,
   IconTrophy,
+  IconUsers,
 } from "@tabler/icons-react";
 import Sheet from "@/components/Sheet";
+import TileSheet from "@/components/TileSheet";
 import {
   getMeeting,
   getRooms,
@@ -70,6 +73,7 @@ function PlayerSheet({
   // Trailing slashes come and go with the router; the paths keep theirs.
   const path = usePathname().replace(/\/?$/, "/");
   const router = useRouter();
+  const [customizing, setCustomizing] = useState(false);
   const mine = seatedRoom(meeting.rooms, player.id);
   const seatNames = tileNames(mine?.seats ?? []);
   const tablePath = mine && MEETING_PATHS.table(mine.table);
@@ -80,6 +84,8 @@ function PlayerSheet({
   );
   // The menu only offers what the page you're on doesn't already show.
   const findCard = !mine && meeting.rooms && path !== MEETING_PATHS.tables;
+  // The shortcut back to a table skips this page, so the menu is the way there.
+  const hub = path !== MEETING_PATHS.hub && path !== MEETING_PATHS.checkin;
   const standings = path !== MEETING_PATHS.tonight;
   const leaveHere = leave && path === tablePath;
   // Your night so far, across every table, read once when the menu opens.
@@ -105,6 +111,8 @@ function PlayerSheet({
       : me
         ? `· ${ORDINAL(me.rank)} tonight`
         : "No games yet";
+  if (customizing)
+    return <TileSheet id={player.id} close={() => setCustomizing(false)} />;
   return (
     <Sheet title="Menu" close={close} className="menu-sheet">
       <div className="menu-me">
@@ -117,6 +125,14 @@ function PlayerSheet({
             </small>
           )}
         </p>
+        <button
+          type="button"
+          className="meeting-text"
+          aria-label="Customize your tile"
+          onClick={() => setCustomizing(true)}
+        >
+          <IconPaletteFilled aria-hidden="true" />
+        </button>
         <button
           type="button"
           className="meeting-text"
@@ -204,8 +220,17 @@ function PlayerSheet({
           </Link>
         </section>
       )}
-      {(standings || leaveHere) && (
+      {(hub || standings || leaveHere) && (
         <ul className="menu-links">
+          {hub && (
+            <li>
+              <Link href={MEETING_PATHS.hub} onClick={close}>
+                <IconUsers aria-hidden="true" />
+                <span>Back to lobby</span>
+                <IconChevronRight aria-hidden="true" />
+              </Link>
+            </li>
+          )}
           {standings && (
             <li>
               <Link href={MEETING_PATHS.tonight} onClick={close}>

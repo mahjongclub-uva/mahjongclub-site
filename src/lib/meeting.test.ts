@@ -227,7 +227,7 @@ test("the meeting shortcut names a table only for a seated, confirmed player", (
   });
   assert.equal(meetingShortcut(meeting, players[0]).href, "/meeting/table/3/");
   assert.equal(meetingShortcut(meeting, players[0]).label, "Table 3");
-  assert.equal(meetingShortcut(meeting, players[1]).href, "/meeting/tables/");
+  assert.equal(meetingShortcut(meeting, players[1]).href, "/meeting/");
   assert.equal(
     meetingShortcut({ ...meeting, rooms: undefined }, players[0]).href,
     "/meeting/",

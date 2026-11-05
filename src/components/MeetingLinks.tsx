@@ -100,7 +100,6 @@ function MeetingPill({ schedule }: { schedule: ScheduledMeeting[] }) {
 const ACTIONS: Record<string, string> = {
   "Check in": "Check in",
   Meeting: "Open the meeting",
-  Tables: "Find a table",
 };
 
 /** The hero's buttons, swapped for the meeting while check-in is open. */

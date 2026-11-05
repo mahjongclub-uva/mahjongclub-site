@@ -313,12 +313,10 @@ export function playerNext(meeting: Meeting, id: string) {
 export function meetingShortcut(meeting: Meeting, player: Player | null) {
   if (!player)
     return { player, label: "Check in", href: MEETING_PATHS.checkin };
-  if (!meeting.rooms)
-    return { player, label: "Meeting", href: MEETING_PATHS.hub };
   const table = seatedRoom(meeting.rooms, player.id)?.table;
   return table
     ? { player, label: `Table ${table}`, href: MEETING_PATHS.table(table) }
-    : { player, label: "Tables", href: MEETING_PATHS.tables };
+    : { player, label: "Meeting", href: MEETING_PATHS.hub };
 }
 export async function getResults(
   url: string,
