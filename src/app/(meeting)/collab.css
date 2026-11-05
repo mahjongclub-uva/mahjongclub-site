@@ -2,22 +2,20 @@
    Each keys off [data-season] on the page, which the root layout sets on
    the phone's own date before the first paint, as for Halloween. */
 
-/* A partner's face in the Icon rack: the club's name in a small pill under
-   it. Not keyed to the season: the rack offers these faces only that night. */
-.tile-rack label:has(.tile-rack-club) {
-  padding-block-end: 14px;
+/* The Icon rack's heading on a partner's night. Not keyed to the season: the
+   rack offers these faces only that night. */
+.tile-rack-set {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Lines up with the rack of icons below it. */
+  max-inline-size: calc(6 * 52px + 5 * 4px);
+  margin: 12px auto 4px;
+  color: var(--ink);
+  font: var(--t-label);
 }
-.tile-rack-club {
-  position: absolute;
-  inset-block-end: 0;
-  padding: 2px 5px;
-  border-radius: 999px;
-  background: oklch(0.47 0.17 15);
-  color: oklch(0.99 0.01 90);
-  font-size: 0.56rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.04em;
+.tile-rack-set img {
+  border-radius: 50%;
 }
 
 /* The partner's logo beside the club's in the header. The club's sits in a

@@ -26,8 +26,8 @@ import { tileNames } from "@/lib/format";
 import { BACK_NAMES, facesOn } from "@/lib/avatar";
 import type { Meeting as ScheduledMeeting } from "@/lib/schema";
 
-/** The greeting, then the player's tile with a dice for a random one and
- * Customize beside it; the page underneath keeps the way to a table on screen.
+/** The greeting, then the player's tile with Customize and Randomize beside
+ * it; the page underneath keeps the way to a table on screen.
  * Kept on this phone until the player moves on. */
 function TileMaker({ id, children }: { id: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -56,23 +56,25 @@ function TileMaker({ id, children }: { id: string; children: ReactNode }) {
           data-bump={bump ? bump % 2 : undefined}
         >
           <PlayerTile id={id} />
+        </span>
+        <div className="tile-maker-actions">
           <button
             type="button"
-            className="tile-maker-dice"
-            aria-label="Random tile"
+            className="meeting-chip"
+            onClick={() => setOpen(true)}
+          >
+            <IconPaletteFilled aria-hidden="true" />
+            Customize
+          </button>
+          <button
+            type="button"
+            className="meeting-chip tile-randomize"
             onClick={roll}
           >
             <IconDice5Filled aria-hidden="true" />
+            Randomize
           </button>
-        </span>
-        <button
-          type="button"
-          className="meeting-chip tile-customize"
-          onClick={() => setOpen(true)}
-        >
-          <IconPaletteFilled aria-hidden="true" />
-          Customize
-        </button>
+        </div>
         <p className="sr-only" role="status">
           {said}
         </p>

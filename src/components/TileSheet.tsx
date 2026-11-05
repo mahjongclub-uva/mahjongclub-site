@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Sheet from "@/components/Sheet";
 import PlayerTile, { AvatarTile } from "@/components/PlayerTile";
@@ -80,6 +81,15 @@ export default function TileSheet({
   const [tab, setTab] = useState<"face" | "back">("face");
   const { tile, bump, said, pick } = useTileChoice(id);
   const faces = facesOn(new Date());
+  const club = faces.map(collabOf).find(Boolean);
+  const partner = club && PARTNERS[club];
+  // On a partner's night, their set under their name, then the club's own.
+  const sets = partner
+    ? [
+        { name: partner.name, faces: faces.filter((f) => collabOf(f)) },
+        { name: "Classic", faces: faces.filter((f) => !collabOf(f)) },
+      ]
+    : [{ name: "", faces }];
   useEffect(() => () => shareTile(id), [id]);
   return (
     <Sheet title="Your tile" close={close} className="tile-sheet">
@@ -106,34 +116,38 @@ export default function TileSheet({
       <div className="tile-rack-panels">
         <fieldset className="tile-rack" inert={tab !== "face"}>
           <legend className="sr-only">Icon</legend>
-          <div className="tile-rack-faces">
-            {faces.map((face) => {
-              const club = collabOf(face);
-              const partner = club && PARTNERS[club];
-              return (
-                <label key={face}>
-                  <input
-                    type="radio"
-                    name="tile-face"
-                    className="sr-only"
-                    checked={tile.face === face}
-                    onChange={() => pick({ ...tile, face })}
-                  />
-                  <AvatarTile tile={{ ...tile, face }} />
-                  {/* A partner's face carries the club's name for the night. */}
-                  {partner && (
-                    <span className="tile-rack-club" aria-hidden="true">
-                      {partner.name}
-                    </span>
+          {sets.map((set) => (
+            <div key={set.name}>
+              {set.name && (
+                <h3 className="tile-rack-set">
+                  {partner && set.name === partner.name && (
+                    <Image src={partner.logo} alt="" width={24} height={24} />
                   )}
-                  <span className="sr-only">
-                    {SAY[face] ?? face}
-                    {partner && `, for tonight with the ${partner.fullName}`}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
+                  {set.name}
+                </h3>
+              )}
+              <div className="tile-rack-faces">
+                {set.faces.map((face) => (
+                  <label key={face}>
+                    <input
+                      type="radio"
+                      name="tile-face"
+                      className="sr-only"
+                      checked={tile.face === face}
+                      onChange={() => pick({ ...tile, face })}
+                    />
+                    <AvatarTile tile={{ ...tile, face }} />
+                    <span className="sr-only">
+                      {SAY[face] ?? face}
+                      {partner &&
+                        collabOf(face) &&
+                        `, for tonight with the ${partner.fullName}`}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
         </fieldset>
         <fieldset className="tile-rack" inert={tab !== "back"}>
           <legend className="sr-only">Color</legend>

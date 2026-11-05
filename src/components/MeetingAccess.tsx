@@ -13,6 +13,7 @@ import {
   IconDoorExit,
   IconMenu2,
   IconPaletteFilled,
+  IconUserFilled,
   IconRefresh,
   IconTrophy,
   IconUsers,
@@ -74,25 +75,24 @@ function PlayerSheet({
   const path = usePathname().replace(/\/?$/, "/");
   const router = useRouter();
   const [customizing, setCustomizing] = useState(false);
-  const mine = seatedRoom(meeting.rooms, player.id);
+  // Newer than the page's copy right after you sit or leave.
+  const rooms = latestMeeting()?.rooms ?? meeting.rooms;
+  const mine = seatedRoom(rooms, player.id);
   const seatNames = tileNames(mine?.seats ?? []);
   const tablePath = mine && MEETING_PATHS.table(mine.table);
   // The table page does the leaving, and asks first once games are saved.
   const leave = mine && MEETING_PATHS.leave(mine.table);
-  const openTables = (meeting.rooms ?? []).filter(
-    (room) => room.seats.length < 4,
-  );
   // The menu only offers what the page you're on doesn't already show.
-  const findCard = !mine && meeting.rooms && path !== MEETING_PATHS.tables;
   // The shortcut back to a table skips this page, so the menu is the way there.
   const hub = path !== MEETING_PATHS.hub && path !== MEETING_PATHS.checkin;
+  const findCard = !mine && rooms && hub && path !== MEETING_PATHS.tables;
   const standings = path !== MEETING_PATHS.tonight;
   const leaveHere = leave && path === tablePath;
   // Your night so far, across every table, read once when the menu opens.
   const [night, setNight] = useState<ReturnType<
     typeof tonightStandings
   > | null>(null);
-  const hasRooms = !!meeting.rooms;
+  const hasRooms = !!rooms;
   useEffect(() => {
     if (!hasRooms) return;
     const controller = new AbortController();
@@ -104,13 +104,6 @@ function PlayerSheet({
     return () => controller.abort();
   }, [hasRooms]);
   const me = night?.find((row) => row.id === player.id);
-  const tonight = !hasRooms
-    ? null
-    : !night
-      ? "…"
-      : me
-        ? `· ${ORDINAL(me.rank)} tonight`
-        : "No games yet";
   if (customizing)
     return <TileSheet id={player.id} close={() => setCustomizing(false)} />;
   return (
@@ -119,30 +112,33 @@ function PlayerSheet({
         <PlayerTile id={player.id} />
         <p>
           <strong>{player.display}</strong>
-          {tonight && (
+          {me && (
             <small>
-              {me && <NetScore net={me.net} />} {tonight}
+              <NetScore net={me.net} /> · {ORDINAL(me.rank)} tonight
             </small>
           )}
         </p>
-        <button
-          type="button"
-          className="meeting-text"
-          aria-label="Customize your tile"
-          onClick={() => setCustomizing(true)}
-        >
-          <IconPaletteFilled aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="meeting-text"
-          onClick={() => {
-            rememberPlayer(meeting, null);
-            window.location.assign(MEETING_PATHS.checkin);
-          }}
-        >
-          Switch<span className="sr-only"> player</span>
-        </button>
+        <div className="menu-me-actions">
+          <button
+            type="button"
+            className="meeting-chip"
+            onClick={() => setCustomizing(true)}
+          >
+            <IconPaletteFilled aria-hidden="true" />
+            Customize
+          </button>
+          <button
+            type="button"
+            className="meeting-chip"
+            onClick={() => {
+              rememberPlayer(meeting, null);
+              window.location.assign(MEETING_PATHS.checkin);
+            }}
+          >
+            <IconUserFilled aria-hidden="true" />
+            Switch<span className="sr-only"> player</span>
+          </button>
+        </div>
       </div>
       {mine && path !== tablePath && (
         // Away from your table: its four players and scores, and the way back.
@@ -199,17 +195,7 @@ function PlayerSheet({
         </section>
       )}
       {findCard && (
-        <section className="menu-card" aria-label="Find a table">
-          <h3>Open seats</h3>
-          {openTables.length > 0 && (
-            <ul className="menu-card-open">
-              {openTables.slice(0, 3).map((room) => (
-                <li key={room.table}>
-                  Table {room.table} · {4 - room.seats.length} open
-                </li>
-              ))}
-            </ul>
-          )}
+        <section className="menu-card menu-card-bare" aria-label="Find a table">
           <Link
             className="meeting-primary"
             href={MEETING_PATHS.tables}
