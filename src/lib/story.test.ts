@@ -36,7 +36,7 @@ test("story shows the top nine, movement chips and the biggest climb anywhere on
   const board = storyBoard(
     semester(changes.map((c, i) => player(i + 1, i + 1, 100 - i * 10, c))),
   );
-  assert.equal(board.date, "Fri 16 Oct");
+  assert.equal(board.date, "Fri, Oct 16");
   assert.deepEqual(
     board.podium.map((e) => [e.rank, e.score]),
     [

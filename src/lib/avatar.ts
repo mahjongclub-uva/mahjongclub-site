@@ -87,7 +87,7 @@ export const facesOn = (now: Date) => {
     season === "halloween" ? HALLOWEEN : (COLLAB_FACES[season as Collab] ?? []);
   return [...tonight, ...FACES];
 };
-/** The partner whose night a face belongs to, for its tag in the rack. */
+/** The partner whose night a face belongs to, for its set in the rack. */
 export const collabOf = (face: Face) =>
   (Object.keys(COLLAB_FACES) as Collab[]).find((collab) =>
     COLLAB_FACES[collab].includes(face),

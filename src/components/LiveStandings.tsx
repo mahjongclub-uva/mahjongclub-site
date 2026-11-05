@@ -145,13 +145,15 @@ function LiveTable({
         </Link>
       )}
       {/* Live until an officer publishes tonight, then official. */}
-      <p
-        className="live-badge"
-        data-official={!matching || alreadyCounted || undefined}
-        aria-hidden="true"
-      >
-        {!matching || alreadyCounted ? "Official" : "Live"}
-      </p>
+      {tonight.length > 0 && (
+        <p
+          className="live-badge"
+          data-official={!matching || alreadyCounted || undefined}
+          aria-hidden="true"
+        >
+          {!matching || alreadyCounted ? "Official" : "Live"}
+        </p>
+      )}
       <h1 className="meeting-title live-title">Standings</h1>
       <p
         // The badge says live or official; only loading and delays still

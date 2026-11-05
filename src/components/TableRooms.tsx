@@ -52,6 +52,11 @@ import {
 
 // Unsaved game entry, restored only if the table has not changed since.
 const GAME_DRAFT = "club-game-draft";
+const GAME_STEPS = [
+  { id: "winner", label: "Winner" },
+  { id: "amount", label: "Amount" },
+  { id: "review", label: "Review" },
+] as const;
 
 /** A phone that didn't check in names its player by computing ID, never by picking from a list. */
 function WhoAreYou({ choose }: { choose: (player: Player) => void }) {
@@ -709,9 +714,16 @@ function SeatedTable({
 
       {layer === "game" && (
         <Sheet title={`Game ${games + 1}`} close={() => setLayer(null)}>
+          <ol className="game-steps">
+            {GAME_STEPS.map(({ id, label }) => (
+              <li key={id} aria-current={step === id ? "step" : undefined}>
+                {label}
+              </li>
+            ))}
+          </ol>
           {step === "winner" ? (
             <>
-              <p className="pick-prompt">Who won? Tap their tile.</p>
+              <p className="pick-prompt">Tap the winner.</p>
               <TableSquare
                 room={room}
                 table={room.table}
@@ -755,7 +767,7 @@ function SeatedTable({
                   Change<span className="sr-only"> winner</span>
                 </button>
               </div>
-              <label htmlFor="hand-each">Each other player pays</label>
+              <label htmlFor="hand-each">Each pays</label>
               <input
                 id="hand-each"
                 className="hand-each"
@@ -773,9 +785,7 @@ function SeatedTable({
               />
               <details className="meeting-more">
                 <summary>What counts?</summary>
-                <p>
-                  Include flowers and gold. The winner gains three times this.
-                </p>
+                <p>Count the number of flowers and gold.</p>
               </details>
               <div className="calculator-footer">
                 <button
@@ -787,7 +797,7 @@ function SeatedTable({
                     setStep("review");
                   }}
                 >
-                  Review game
+                  Review
                 </button>
                 <button
                   type="button"
@@ -926,12 +936,10 @@ function SeatedTable({
                 </WinCard>
               )}
               <ChangeRows room={room} ranked />
-              <p className="quiet end-note">
-                Saves these scores. Everyone leaves the table.
-              </p>
+              <p className="quiet end-note">Saves scores. Everyone leaves.</p>
             </>
           ) : (
-            <p className="quiet end-note">No games yet. Everyone leaves.</p>
+            <p className="quiet end-note">Everyone leaves.</p>
           )}
           {errorLine}
           <div className="calculator-footer">
@@ -950,7 +958,7 @@ function SeatedTable({
                   setLayer(null);
               }}
             >
-              {busy ? "Ending…" : "End table for everyone"}
+              {busy ? "Ending…" : "End table"}
             </button>
             <button
               type="button"
@@ -979,12 +987,7 @@ function SeatedTable({
             </p>
           )}
           <p className="quiet end-note">
-            {leaving.id === player.id
-              ? "Only you leave. "
-              : `Only ${tileNames(room.seats).get(leaving.id)} leaves. `}
-            {games
-              ? "Games stay saved. The seat opens up."
-              : "The seat opens up."}
+            {games ? "Games stay saved." : "The seat opens up."}
           </p>
           {games > 0 && <ChangeRows room={room} ranked />}
           {errorLine}
@@ -1145,7 +1148,7 @@ function Lobby({
         </Link>
       )}
       <Link className="meeting-text lobby-fallback" href={MEETING_PATHS.score}>
-        No app table? Enter totals
+        Kept score by hand? Enter totals
       </Link>
     </>
   );
@@ -1346,9 +1349,6 @@ function Tables({
   if (prompt) return prompt;
   const room = table ? rooms.find((item) => item.table === table) : undefined;
   const here = table !== undefined && mine?.table === table;
-  const openElsewhere = rooms.filter(
-    (other) => other.table !== table && other.seats.length < 4,
-  ).length;
   // A game saved at this table, by any phone, cheers its winner. Compared
   // with the last render rather than an id, so Undo never cheers.
   const session = room ? `${room.table}-${room.session}` : "";
@@ -1428,8 +1428,8 @@ function Tables({
                 : mine
                   ? `Finish Table ${mine.table} first.`
                   : ended?.ended && ended.table === table
-                    ? "Or start another round here: tap the wind tile where you’re sitting."
-                    : "Tap the wind tile where you’re sitting."}
+                    ? "Or start another round here: tap your seat."
+                    : "Tap your seat."}
             </p>
           )}
           <TableSquare
@@ -1464,14 +1464,7 @@ function Tables({
           {!mine && (
             <Link className="go-row go-tables" href={MEETING_PATHS.tables}>
               <IconLayoutGrid aria-hidden="true" />
-              <span>
-                Find another table
-                <small>
-                  {openElsewhere
-                    ? `${openElsewhere} ${openElsewhere === 1 ? "table has" : "tables have"} open seats`
-                    : "See every table tonight"}
-                </small>
-              </span>
+              <span>Find another table</span>
               <IconChevronRight aria-hidden="true" />
             </Link>
           )}
