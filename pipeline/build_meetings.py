@@ -11,8 +11,10 @@ The deploy runs this before every build and at least daily, so a change
 to the calendar reaches the site within a day. Cancel by removing the event
 (and say so on Instagram if it matters).
 
-The event's Location is published as typed, so keep it to a building and
-room, never anything that reads as a person's whereabouts.
+Officers pick the place from Google's suggestions in Location and put the room
+in the title's parentheses: "Mahjong Meeting (MPR 100A)". A plain "Chem 206" in
+Location works too. All of it is published, so keep it to a building and room,
+never anything that reads as a person's whereabouts.
 
 Only stdlib is used, so there is nothing to install.
 """
@@ -94,6 +96,26 @@ def parse_datetime(value: str, params: dict[str, str]) -> dt.datetime:
     stamp = dt.datetime.strptime(value, "%Y%m%dT%H%M%S")
     tz = ZoneInfo(params["TZID"]) if "TZID" in params else CLUB_TZ
     return stamp.replace(tzinfo=tz)
+
+
+def split_location(location: str) -> tuple[str | None, str | None]:
+    """Separate the address Google Maps appends to a place it recognises:
+    "Student Health, 550 Brandon Ave, Charlottesville, VA 22903, USA" becomes
+    ("Student Health", "550 Brandon Ave, Charlottesville, VA 22903, USA").
+    Anything not ending like that address is left alone, so "Rice Hall, 130"
+    keeps its room."""
+    match = re.search(
+        r",\s*((?:\d|Charlottesville\b).*,\s*[A-Z]{2}\s+\d{5}(?:,\s*USA)?)$", location
+    )
+    if match:
+        return location[: match.start()], match.group(1)
+    return location or None, None
+
+
+def room_from_title(summary: str) -> str | None:
+    """The room in a title's closing parentheses: "Meeting (MPR 100A)"."""
+    match = re.search(r"\(([^()]+)\)\s*$", summary)
+    return match.group(1).strip() if match else None
 
 
 class Event:
@@ -278,12 +300,15 @@ def main() -> None:
     for start in upcoming:
         event = by_start[start]
         length = (event.end - event.start) if event.end and event.start else None
+        location, address = split_location(event.location)
         meetings.append(
             {
                 "start": start.isoformat(),
                 "end": (start + length).isoformat() if length else None,
                 "summary": event.summary or "Mahjong Meeting",
-                "location": event.location or None,
+                "room": room_from_title(event.summary),
+                "location": location,
+                "address": address,
             }
         )
 
