@@ -12,6 +12,7 @@ import {
   meetingShortcut,
   playerNext,
   postMeeting,
+  liveShortcut,
   provisionalMeeting,
   tableError,
 } from "./meeting.ts";
@@ -228,6 +229,7 @@ test("the meeting shortcut names a table only for a seated, confirmed player", (
   assert.equal(meetingShortcut(meeting, players[0]).href, "/meeting/table/3/");
   assert.equal(meetingShortcut(meeting, players[0]).label, "Table 3");
   assert.equal(meetingShortcut(meeting, players[1]).href, "/meeting/");
+  assert.equal(meetingShortcut(meeting, players[1]).label, "Find a table");
   assert.equal(
     meetingShortcut({ ...meeting, rooms: undefined }, players[0]).href,
     "/meeting/",
@@ -269,6 +271,66 @@ test("check-in starts from the calendar only for a phone without tonight's playe
     }),
   );
   assert.equal(at("2026-10-16T17:05:00-04:00"), null);
+});
+
+test("the live shortcut comes from the calendar, then the service, and outlasts check-in for a player", () => {
+  const start = "2026-10-16T17:30:00-04:00";
+  const schedule = [
+    {
+      start,
+      end: "2026-10-16T20:00:00-04:00",
+      summary: "",
+      room: null,
+      location: null,
+      address: null,
+    },
+  ];
+  const during = Date.parse("2026-10-16T18:00:00-04:00");
+  const after = Date.parse("2026-10-16T20:30:00-04:00");
+  const local = new Map<string, string>();
+  const session = new Map<string, string>();
+  const storage = (map: Map<string, string>) => ({
+    configurable: true,
+    value: { getItem: (key: string) => map.get(key) ?? null },
+  });
+  Object.defineProperty(globalThis, "localStorage", storage(local));
+  Object.defineProperty(globalThis, "sessionStorage", storage(session));
+  const meetingId = "evt:" + Date.parse(start);
+  const reply = {
+    status: 200 as const,
+    open: true,
+    checkinsOpen: true,
+    meetingId,
+    date: "2026-10-16",
+    semester: "Fall 2026",
+    players,
+  };
+  const label = (
+    now: number,
+    meeting: typeof reply | null,
+    unreachable = false,
+  ) => liveShortcut(schedule, now, meeting, unreachable)?.label ?? null;
+
+  // A newcomer sees it from the calendar, down or not, until check-in ends.
+  assert.equal(label(during, null), "Check in");
+  assert.equal(label(during, null, true), "Check in");
+  assert.equal(label(after, null), null);
+  assert.equal(label(during, { ...reply, checkinsOpen: false }), null);
+
+  // Tonight's player waits for the reply, unless the service is unreachable.
+  local.set(
+    "club-checked-in",
+    JSON.stringify({ meetingId, player: players[0] }),
+  );
+  session.set("club-player-confirmed", "1");
+  assert.equal(label(during, null), null);
+  assert.equal(label(during, null, true), "Check in");
+  assert.equal(label(during, reply), "Find a table");
+
+  // Once check-in closes they keep the way back until the meeting closes.
+  const closed = { ...reply, checkinsOpen: false };
+  assert.equal(label(after, closed), "Find a table");
+  assert.equal(label(after, { ...closed, open: false }), null);
 });
 
 test("after a lost reply, each table action is recognised only once it took effect", () => {

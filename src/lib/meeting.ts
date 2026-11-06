@@ -163,6 +163,13 @@ export function inCheckIn(meeting: ScheduledMeeting, now: number) {
     now < Date.parse(meeting.end ?? meeting.start)
   );
 }
+// Matches the backend's meeting window: check-in, then an hour to save tables.
+export function inMeeting(meeting: ScheduledMeeting, now: number) {
+  return (
+    now >= Date.parse(meeting.start) - 30 * 60000 &&
+    now < Date.parse(meeting.end ?? meeting.start) + 60 * 60000
+  );
+}
 /**
  * Tonight's meeting as the calendar has it, so check-in can start while the
  * meeting service wakes up. Not for a phone that already has tonight's
@@ -306,17 +313,45 @@ export function playerNext(meeting: Meeting, id: string) {
       ? { href: MEETING_PATHS.tables, label: "Find a table" }
       : { href: MEETING_PATHS.score, label: "Record a table" };
 }
+const CHECK_IN = {
+  player: null,
+  label: "Check in",
+  href: MEETING_PATHS.checkin,
+};
 /**
  * Where the site's meeting shortcut leads this phone. Only a confirmed player
  * is named, so a shared phone never offers the last person's table.
  */
 export function meetingShortcut(meeting: Meeting, player: Player | null) {
-  if (!player)
-    return { player, label: "Check in", href: MEETING_PATHS.checkin };
+  if (!player) return CHECK_IN;
   const table = seatedRoom(meeting.rooms, player.id)?.table;
   return table
     ? { player, label: `Table ${table}`, href: MEETING_PATHS.table(table) }
-    : { player, label: "Meeting", href: MEETING_PATHS.hub };
+    : { player, label: "Find a table", href: MEETING_PATHS.hub };
+}
+/**
+ * Where the public site's live pill and card send this phone, or null to hide.
+ * The service's last reply decides: a player keeps their way back until the
+ * meeting closes, everyone else until check-in does. With no reply yet the
+ * calendar decides, except a phone with tonight's player, which waits for the
+ * reply that knows its table unless the service can't be reached.
+ */
+export function liveShortcut(
+  schedule: ScheduledMeeting[],
+  now: number,
+  meeting: Meeting | null,
+  unreachable: boolean,
+) {
+  if (meeting) {
+    const player = playerConfirmed() ? savedPlayer(meeting) : null;
+    return meeting.checkinsOpen || (meeting.open && player)
+      ? meetingShortcut(meeting, player)
+      : null;
+  }
+  return schedule.some((m) => inCheckIn(m, now)) &&
+    (unreachable || provisionalMeeting(schedule, now))
+    ? CHECK_IN
+    : null;
 }
 export async function getResults(
   url: string,
