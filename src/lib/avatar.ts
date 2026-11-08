@@ -48,9 +48,10 @@ const HALLOWEEN = [
   "hat",
   "skull",
 ] as const;
-// A partner's faces, offered only on its collab night, first in the rack,
-// tagged with the club's name, and never a starter. TILE_PARTS in Club.gs must
-// list them too, so new picks mean redeploying the Apps Script.
+// A partner's faces: first in the rack on its collab night, after the club's
+// own from then on, always under the club's name, and never a starter.
+// TILE_PARTS in Club.gs must list them too, so new picks mean redeploying the
+// Apps Script.
 const HKSA = [
   "bauhinia",
   "eggtart",
@@ -69,12 +70,17 @@ const FACES: readonly Face[] = [...PICTURES, ...CHARACTERS];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */
 export const ALL_FACES: readonly Face[] = [...HALLOWEEN, ...HKSA, ...FACES];
 /** The faces a player can pick at `now`: Halloween's in Halloween week, a
- * partner's on its collab night, first. */
+ * partner's on its collab night, first; past partners' kept at the end. */
 export const facesOn = (now: Date) => {
   const season = seasonOn(now, COLLAB_NIGHTS);
   const tonight =
     season === "halloween" ? HALLOWEEN : (COLLAB_FACES[season as Collab] ?? []);
-  return [...tonight, ...FACES];
+  const kept = Object.entries(COLLAB_NIGHTS)
+    .filter(
+      ([date, club]) => club !== season && new Date(`${date}T00:00`) < now,
+    )
+    .flatMap(([, club]) => COLLAB_FACES[club]);
+  return [...tonight, ...FACES, ...kept];
 };
 /** The partner whose night a face belongs to, for its set in the rack. */
 export const collabOf = (face: Face) =>

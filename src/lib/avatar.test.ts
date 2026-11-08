@@ -75,7 +75,7 @@ test("Halloween's faces are offered that week only and are never a starter", () 
   });
 });
 
-test("a partner's faces are offered on its night only, first, and are never a starter", () => {
+test("a partner's faces come first on its night, last after it, never before it, and are never a starter", () => {
   const hksa = new Date(2026, 10, 6, 19);
   const halloween = new Date(2026, 9, 30, 18);
   const after = new Date(2026, 10, 7, 12);
@@ -91,15 +91,16 @@ test("a partner's faces are offered on its night only, first, and are never a st
   assert.equal(collabOf("apple"), undefined);
   assert.ok(!facesOn(halloween).includes("eggtart"));
   assert.ok(!facesOn(hksa).includes("ghost"));
-  assert.ok(!facesOn(after).includes("eggtart"));
+  assert.deepEqual(facesOn(after).slice(-6), facesOn(hksa).slice(0, 6));
   for (let i = 1; i <= 200; i++)
     assert.equal(
       collabOf(starterAvatar(`p${String(i).padStart(3, "0")}`).face),
       undefined,
     );
   assert.equal(parseTile("eggtart.jade", "p014", hksa).face, "eggtart");
+  assert.equal(parseTile("eggtart.jade", "p014", after).face, "eggtart");
   assert.equal(
-    parseTile("eggtart.jade", "p014", after).face,
+    parseTile("eggtart.jade", "p014", halloween).face,
     starterAvatar("p014").face,
   );
 });

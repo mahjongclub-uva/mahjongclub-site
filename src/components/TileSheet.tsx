@@ -16,6 +16,7 @@ import {
   type Avatar,
   type Face,
 } from "@/lib/avatar";
+import { COLLAB_NIGHTS, seasonOn, type Collab } from "@/lib/season";
 import {
   addTonightTiles,
   chooseTile,
@@ -81,15 +82,16 @@ export default function TileSheet({
   const [tab, setTab] = useState<"face" | "back">("face");
   const { tile, bump, said, pick } = useTileChoice(id);
   const faces = facesOn(new Date());
-  const club = faces.map(collabOf).find(Boolean);
-  const partner = club && PARTNERS[club];
-  // On a partner's night, their set under their name, then the club's own.
-  const sets = partner
-    ? [
-        { name: partner.name, faces: faces.filter((f) => collabOf(f)) },
-        { name: "Classic", faces: faces.filter((f) => !collabOf(f)) },
-      ]
-    : [{ name: "", faces }];
+  // Each partner's faces under its name and logo; the club's own are Classic
+  // once a partner's set is in the rack.
+  const sets: { club?: Collab; faces: Face[] }[] = [];
+  for (const face of faces) {
+    const club = collabOf(face);
+    const last = sets.at(-1);
+    if (last && last.club === club) last.faces.push(face);
+    else sets.push({ club, faces: [face] });
+  }
+  const tonight = seasonOn(new Date(), COLLAB_NIGHTS);
   useEffect(() => () => shareTile(id), [id]);
   return (
     <Sheet title="Your tile" close={close} className="tile-sheet">
@@ -117,13 +119,18 @@ export default function TileSheet({
         <fieldset className="tile-rack" inert={tab !== "face"}>
           <legend className="sr-only">Icon</legend>
           {sets.map((set) => (
-            <div key={set.name}>
-              {set.name && (
+            <div key={set.club ?? "classic"}>
+              {sets.length > 1 && (
                 <h3 className="tile-rack-set">
-                  {partner && set.name === partner.name && (
-                    <Image src={partner.logo} alt="" width={24} height={24} />
+                  {set.club && (
+                    <Image
+                      src={PARTNERS[set.club].logo}
+                      alt=""
+                      width={24}
+                      height={24}
+                    />
                   )}
-                  {set.name}
+                  {set.club ? PARTNERS[set.club].name : "Classic"}
                 </h3>
               )}
               <div className="tile-rack-faces">
@@ -139,9 +146,10 @@ export default function TileSheet({
                     <AvatarTile tile={{ ...tile, face }} />
                     <span className="sr-only">
                       {SAY[face] ?? face}
-                      {partner &&
-                        collabOf(face) &&
-                        `, for tonight with the ${partner.fullName}`}
+                      {set.club &&
+                        (set.club === tonight
+                          ? `, for tonight with the ${PARTNERS[set.club].fullName}`
+                          : `, from the night with the ${PARTNERS[set.club].fullName}`)}
                     </span>
                   </label>
                 ))}
