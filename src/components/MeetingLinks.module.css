@@ -243,28 +243,38 @@
   font-weight: 900;
   white-space: nowrap;
 }
+.card[data-collab] {
+  color: #fff;
+}
+.card[data-collab] :is(.where, .you, .you b) {
+  color: #fff;
+}
+.card[data-collab] .live {
+  flex-shrink: 0;
+  background: #fff;
+}
+.card[data-collab] .go {
+  background: var(--tile-face-hi);
+  color: var(--ink);
+  box-shadow: inset 0 -4px 0 oklch(0 0 0 / 0.08);
+}
+.card[data-collab] .go svg {
+  color: var(--jade);
+}
 .card[data-collab="hksa"] {
   background: radial-gradient(
     circle at 50% 40%,
     oklch(0.52 0.14 48),
     oklch(0.43 0.13 42)
   );
-  color: #fff;
 }
-.card[data-collab="hksa"] :is(.where, .you, .you b) {
-  color: #fff;
-}
-.card[data-collab="hksa"] .live {
-  flex-shrink: 0;
-  background: #fff;
-}
-.card[data-collab="hksa"] .go {
-  background: var(--tile-face-hi);
-  color: var(--ink);
-  box-shadow: inset 0 -4px 0 oklch(0 0 0 / 0.08);
-}
-.card[data-collab="hksa"] .go svg {
-  color: var(--jade);
+/* CSA: the table's red felt; white text is 9.8:1 at its brightest. */
+.card[data-collab="csa"] {
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.4 0.13 25),
+    oklch(0.29 0.1 22)
+  );
 }
 
 @keyframes pulse {

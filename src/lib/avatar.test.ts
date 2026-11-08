@@ -88,6 +88,18 @@ test("a partner's faces come first on its night, last after it, never before it,
     "neon",
   ]);
   assert.equal(collabOf("eggtart"), "hksa");
+  const csa = new Date(2026, 10, 15, 19);
+  assert.deepEqual(facesOn(csa).slice(0, 6), [
+    "panda",
+    "mooncake",
+    "xiaolongbao",
+    "teapot",
+    "fan",
+    "koi",
+  ]);
+  assert.deepEqual(facesOn(csa).slice(-6), facesOn(hksa).slice(0, 6));
+  assert.ok(!facesOn(hksa).includes("koi"));
+  assert.equal(collabOf("koi"), "csa");
   assert.equal(collabOf("apple"), undefined);
   assert.ok(!facesOn(halloween).includes("eggtart"));
   assert.ok(!facesOn(hksa).includes("ghost"));
