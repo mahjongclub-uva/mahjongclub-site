@@ -18,6 +18,9 @@
   inset-block-end: calc(1.25rem + env(safe-area-inset-bottom));
   inset-inline-start: 50%;
   translate: -50% 0;
+  /* Left at 50%, the box would be capped at half the screen; iOS Safari then
+     ran the label and arrow out past the pill's rounded end. */
+  inline-size: max-content;
   display: flex;
   align-items: center;
   gap: 10px;
