@@ -20,6 +20,7 @@ import {
 import { draftSchema, pendingSchema } from "@/lib/meetingSchemas";
 import { MEETING_SERVICE_URL } from "@/lib/site";
 import { SEASON_START as START, clock, signed, tileNames } from "@/lib/format";
+import { scoreView, type ScoreFlow, type ScorePhase } from "@/lib/scoreFlow";
 
 // The last confirmed save, so a reload shows the receipt instead of an empty form.
 const RECEIPT_STORAGE = "club-table-receipt";
@@ -76,17 +77,11 @@ function ScoreForm({
 }) {
   const [ids, setIds] = useState(["", "", "", ""]);
   const [totals, setTotals] = useState(["", "", "", ""]);
-  const [phase, setPhase] = useState<"pick" | "score" | "review">("pick");
-  const [pending, setPending] = useState<Submission | null>(null);
-  const [ready, setReady] = useState(false);
-  const [restoreFailed, setRestoreFailed] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [flow, setFlow] = useState<ScoreFlow>({ name: "restoring" });
+  const { ready, restoreFailed, busy, pending, receipt, stage, locked } =
+    scoreView(flow);
   const [error, setError] = useState("");
   const [draftError, setDraftError] = useState(false);
-  const [receipt, setReceipt] = useState<{
-    table: number;
-    savedAt: string;
-  } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const players = meeting.players || [];
   const seatedAt = (id: string) => seatedRoom(meeting.rooms, id)?.table;
@@ -100,15 +95,13 @@ function ScoreForm({
     0,
   );
   const check = balance(seats.map((seat) => seat.total));
-  const locked = busy || Boolean(pending) || !ready || restoreFailed;
-  const stage = pending ? "review" : phase;
   const name = (id: string) =>
     players.find((p) => p.id === id)?.display || `Player ${id}`;
   const seatNames = tileNames(
     ids.filter(Boolean).map((id) => ({ id, display: name(id) })),
   );
-  function changePhase(next: typeof phase) {
-    setPhase(next);
+  function changePhase(next: ScorePhase) {
+    setFlow({ name: "editing", phase: next });
     heading.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
@@ -121,10 +114,9 @@ function ScoreForm({
         const saved = sessionStorage.getItem(PENDING_STORAGE);
         if (saved) {
           const parsed = pendingSchema.parse(JSON.parse(saved));
-          setPending(parsed);
+          setFlow({ name: "unconfirmed", submission: parsed });
           setIds(parsed.seats.map((s) => s.id));
           setTotals(parsed.seats.map((s) => String(s.total)));
-          setPhase("review");
           setError("A save wasn’t confirmed. Try it again first.");
         } else {
           const kept = receiptSchema.safeParse(
@@ -134,28 +126,37 @@ function ScoreForm({
           if (kept.success && kept.data.meetingId === meeting.meetingId) {
             setIds(kept.data.ids);
             setTotals(kept.data.totals);
-            setReceipt({ table: kept.data.table, savedAt: kept.data.savedAt });
-          } else if (draft) {
-            const parsed = draftSchema.safeParse(JSON.parse(draft));
-            if (parsed.success && parsed.data.meetingId === meeting.meetingId) {
+            setFlow({
+              name: "saved",
+              table: kept.data.table,
+              savedAt: kept.data.savedAt,
+            });
+          } else {
+            let phase: ScorePhase = "pick";
+            const parsed = draft && draftSchema.safeParse(JSON.parse(draft));
+            if (
+              parsed &&
+              parsed.success &&
+              parsed.data.meetingId === meeting.meetingId
+            ) {
               setIds(parsed.data.ids);
               setTotals(parsed.data.totals);
-              if (parsed.data.ids.every(Boolean)) setPhase("score");
+              if (parsed.data.ids.every(Boolean)) phase = "score";
             }
+            setFlow({ name: "editing", phase });
           }
         }
       } catch {
-        setRestoreFailed(true);
+        setFlow({ name: "broken" });
         setError(
           "Couldn’t restore the last save. Ask an officer before saving another table.",
         );
       }
-      setReady(true);
     }
     void restore();
   }, [meeting.meetingId]);
   useEffect(() => {
-    if (!ready || pending || receipt !== null || restoreFailed) return;
+    if (flow.name !== "editing") return;
     try {
       sessionStorage.setItem(
         DRAFT_STORAGE,
@@ -165,7 +166,7 @@ function ScoreForm({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Report an external storage failure, not derived render state.
       setDraftError(true);
     }
-  }, [ready, pending, receipt, restoreFailed, meeting.meetingId, ids, totals]);
+  }, [flow.name, meeting.meetingId, ids, totals]);
   async function submit() {
     if (busy || !ready || restoreFailed) return;
     if (!pending && validation) {
@@ -186,8 +187,7 @@ function ScoreForm({
       );
       return;
     }
-    setPending(submission);
-    setBusy(true);
+    setFlow({ name: "sending", submission });
     setError("");
     try {
       const reply = await postMeeting(MEETING_SERVICE_URL, submission);
@@ -197,21 +197,20 @@ function ScoreForm({
         );
         if (reply.status === 400) {
           sessionStorage.removeItem(PENDING_STORAGE);
-          setPending(null);
-        }
+          setFlow({ name: "editing", phase: "review" });
+        } else setFlow({ name: "unconfirmed", submission });
         if (reply.status === 423) refresh();
         return;
       }
       if (![200, 201].includes(reply.status) || !reply.table)
         throw new Error("Save not confirmed. Try again.");
       sessionStorage.removeItem(PENDING_STORAGE);
-      setPending(null);
       // The time this browser received the confirmation, not a server clock.
       const kept = {
         table: reply.table,
         savedAt: clock(),
       };
-      setReceipt(kept);
+      setFlow({ name: "saved", ...kept });
       try {
         sessionStorage.setItem(
           RECEIPT_STORAGE,
@@ -228,19 +227,20 @@ function ScoreForm({
       sessionStorage.removeItem(DRAFT_STORAGE);
       refresh();
     } catch (failure) {
+      // A throw after the save was confirmed keeps the receipt.
+      setFlow((flow) =>
+        flow.name === "sending" ? { name: "unconfirmed", submission } : flow,
+      );
       setError(requestError(failure) + " Try again; it won’t save twice.");
-    } finally {
-      setBusy(false);
     }
   }
 
   function reset() {
     sessionStorage.removeItem(RECEIPT_STORAGE);
-    setReceipt(null);
+    setFlow({ name: "editing", phase: "pick" });
     setIds(["", "", "", ""]);
     setTotals(["", "", "", ""]);
     setError("");
-    setPhase("pick");
     refresh();
   }
   const resultRows = (
@@ -592,8 +592,6 @@ function ScoreForm({
             type="button"
             onClick={() => {
               sessionStorage.removeItem(PENDING_STORAGE);
-              setPending(null);
-              setRestoreFailed(false);
               reset();
             }}
           >
