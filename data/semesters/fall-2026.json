@@ -2,83 +2,85 @@
   "schema_version": 1,
   "id": "fall-2026",
   "label": "Fall 2026",
-  "sessions": 6,
-  "last_session": "2026-11-06",
+  "sessions": 7,
+  "last_session": "2026-11-13",
   "min_tables_to_rank": 1,
   "standings": [
     {
       "id": "p038",
       "rank": 1,
       "display": "Robi L.",
-      "tables_played": 6,
+      "tables_played": 8,
       "best_table": 265,
-      "total_net": 444,
-      "avg_net": 74.0,
+      "total_net": 485,
+      "avg_net": 60.6,
+      "games_played": 12,
       "rank_change": 0
     },
     {
       "id": "p010",
       "rank": 2,
       "display": "Eddie Z.",
-      "tables_played": 8,
+      "tables_played": 9,
       "best_table": 290,
-      "total_net": 327,
-      "avg_net": 40.9,
-      "games_played": 25,
+      "total_net": 369,
+      "avg_net": 41.0,
+      "games_played": 35,
       "rank_change": 0
     },
     {
       "id": "p007",
       "rank": 3,
       "display": "Benjamin L.",
-      "tables_played": 4,
+      "tables_played": 5,
       "best_table": 285,
-      "total_net": 264,
-      "avg_net": 66.0,
-      "rank_change": 0
-    },
-    {
-      "id": "p020",
-      "rank": 4,
-      "display": "Lily P.",
-      "tables_played": 7,
-      "best_table": 277,
-      "total_net": 237,
-      "avg_net": 33.9,
-      "games_played": 11,
+      "total_net": 298,
+      "avg_net": 59.6,
+      "games_played": 10,
       "rank_change": 0
     },
     {
       "id": "p035",
-      "rank": 5,
+      "rank": 4,
       "display": "Jun L.",
       "tables_played": 3,
       "best_table": 95,
       "total_net": 191,
       "avg_net": 63.7,
-      "rank_change": 0
+      "rank_change": 1
+    },
+    {
+      "id": "p020",
+      "rank": 5,
+      "display": "Lily P.",
+      "tables_played": 8,
+      "best_table": 277,
+      "total_net": 147,
+      "avg_net": 18.4,
+      "games_played": 21,
+      "rank_change": -1
+    },
+    {
+      "id": "p092",
+      "rank": 6,
+      "display": "Marko C.",
+      "tables_played": 1,
+      "best_table": 82,
+      "total_net": 82,
+      "avg_net": 82.0,
+      "games_played": 5,
+      "rank_change": null
     },
     {
       "id": "p027",
-      "rank": 6,
+      "rank": 7,
       "display": "Sean P.",
       "tables_played": 7,
       "best_table": 103,
       "total_net": 56,
       "avg_net": 8.0,
       "games_played": 14,
-      "rank_change": 8
-    },
-    {
-      "id": "p036",
-      "rank": 7,
-      "display": "Kevin L.",
-      "tables_played": 8,
-      "best_table": 143,
-      "total_net": 26,
-      "avg_net": 3.2,
-      "games_played": 5,
-      "rank_change": 12
+      "rank_change": -1
     },
     {
       "id": "p073",
@@ -89,7 +91,7 @@
       "total_net": 23,
       "avg_net": 11.5,
       "games_played": 8,
-      "rank_change": null
+      "rank_change": 0
     },
     {
       "id": "p058",
@@ -99,7 +101,7 @@
       "best_table": 11,
       "total_net": 5,
       "avg_net": 1.7,
-      "rank_change": -3
+      "rank_change": 0
     },
     {
       "id": "p039",
@@ -109,7 +111,7 @@
       "best_table": -3,
       "total_net": -3,
       "avg_net": -3.0,
-      "rank_change": -3
+      "rank_change": 0
     },
     {
       "id": "p032",
@@ -119,7 +121,7 @@
       "best_table": -12,
       "total_net": -12,
       "avg_net": -12.0,
-      "rank_change": -2
+      "rank_change": 0
     },
     {
       "id": "p060",
@@ -129,7 +131,7 @@
       "best_table": -13,
       "total_net": -13,
       "avg_net": -13.0,
-      "rank_change": -2
+      "rank_change": 0
     },
     {
       "id": "p034",
@@ -139,7 +141,7 @@
       "best_table": -16,
       "total_net": -16,
       "avg_net": -16.0,
-      "rank_change": -2
+      "rank_change": 0
     },
     {
       "id": "p037",
@@ -149,7 +151,7 @@
       "best_table": -17,
       "total_net": -17,
       "avg_net": -17.0,
-      "rank_change": -2
+      "rank_change": 0
     },
     {
       "id": "p057",
@@ -159,7 +161,7 @@
       "best_table": 29,
       "total_net": -23,
       "avg_net": -7.7,
-      "rank_change": -2
+      "rank_change": 0
     },
     {
       "id": "p088",
@@ -170,64 +172,75 @@
       "total_net": -36,
       "avg_net": -36.0,
       "games_played": 3,
-      "rank_change": null
+      "rank_change": 0
+    },
+    {
+      "id": "p062",
+      "rank": 17,
+      "display": "Jess Z.",
+      "tables_played": 4,
+      "best_table": 26,
+      "total_net": -45,
+      "avg_net": -11.2,
+      "games_played": 14,
+      "rank_change": 2
     },
     {
       "id": "p042",
-      "rank": 17,
+      "rank": 18,
       "display": "Gabe D.",
       "tables_played": 2,
       "best_table": -22,
       "total_net": -49,
       "avg_net": -24.5,
-      "rank_change": -2
+      "rank_change": -1
+    },
+    {
+      "id": "p036",
+      "rank": 19,
+      "display": "Kevin L.",
+      "tables_played": 10,
+      "best_table": 143,
+      "total_net": -49,
+      "avg_net": -4.9,
+      "games_played": 12,
+      "rank_change": -12
     },
     {
       "id": "p074",
-      "rank": 18,
+      "rank": 20,
       "display": "Gavin A.",
       "tables_played": 2,
       "best_table": -33,
       "total_net": -69,
       "avg_net": -34.5,
       "games_played": 8,
-      "rank_change": null
-    },
-    {
-      "id": "p062",
-      "rank": 19,
-      "display": "Jess Z.",
-      "tables_played": 3,
-      "best_table": 8,
-      "total_net": -71,
-      "avg_net": -23.7,
-      "games_played": 9,
-      "rank_change": -11
+      "rank_change": -2
     },
     {
       "id": "p043",
-      "rank": 20,
+      "rank": 21,
       "display": "Mingxi L.",
       "tables_played": 2,
       "best_table": -3,
       "total_net": -76,
       "avg_net": -38.0,
-      "rank_change": -3
+      "rank_change": -1
     },
     {
       "id": "p024",
-      "rank": 21,
+      "rank": 22,
       "display": "Nathan F.",
       "tables_played": 3,
       "best_table": 18,
       "total_net": -90,
       "avg_net": -30.0,
       "games_played": 8,
-      "rank_change": -3
+      "rank_change": -1
     },
     {
       "id": "p017",
-      "rank": 22,
+      "rank": 23,
       "display": "Kevin J.",
       "tables_played": 4,
       "best_table": 115,
@@ -237,35 +250,36 @@
       "rank_change": -1
     },
     {
-      "id": "p033",
-      "rank": 23,
-      "display": "Daniel S.",
-      "tables_played": 5,
-      "best_table": 220,
-      "total_net": -170,
-      "avg_net": -34.0,
-      "rank_change": -3
-    },
-    {
       "id": "p056",
       "rank": 24,
       "display": "XiaoYi L.",
-      "tables_played": 7,
+      "tables_played": 8,
       "best_table": 53,
-      "total_net": -180,
-      "avg_net": -25.7,
-      "games_played": 25,
-      "rank_change": -8
+      "total_net": -165,
+      "avg_net": -20.6,
+      "games_played": 27,
+      "rank_change": 0
+    },
+    {
+      "id": "p033",
+      "rank": 25,
+      "display": "Daniel S.",
+      "tables_played": 7,
+      "best_table": 220,
+      "total_net": -245,
+      "avg_net": -35.0,
+      "games_played": 7,
+      "rank_change": -2
     },
     {
       "id": "p008",
-      "rank": 25,
+      "rank": 26,
       "display": "Brittney M.",
       "tables_played": 7,
       "best_table": -3,
       "total_net": -612,
       "avg_net": -87.4,
-      "rank_change": -3
+      "rank_change": -1
     }
   ],
   "unranked": [],
