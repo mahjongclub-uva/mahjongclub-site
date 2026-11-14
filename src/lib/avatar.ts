@@ -60,15 +60,29 @@ const HKSA = [
   "tram",
   "neon",
 ] as const;
-const COLLAB_FACES: Record<Collab, readonly Face[]> = { hksa: HKSA };
+const CSA = [
+  "panda",
+  "mooncake",
+  "xiaolongbao",
+  "teapot",
+  "fan",
+  "koi",
+] as const;
+const COLLAB_FACES: Record<Collab, readonly Face[]> = { hksa: HKSA, csa: CSA };
 export type Face =
   | (typeof PICTURES)[number]
   | (typeof CHARACTERS)[number]
   | (typeof HALLOWEEN)[number]
-  | (typeof HKSA)[number];
+  | (typeof HKSA)[number]
+  | (typeof CSA)[number];
 const FACES: readonly Face[] = [...PICTURES, ...CHARACTERS];
 /** Every face the service accepts; TILE_PARTS in the Apps Script matches it. */
-export const ALL_FACES: readonly Face[] = [...HALLOWEEN, ...HKSA, ...FACES];
+export const ALL_FACES: readonly Face[] = [
+  ...HALLOWEEN,
+  ...HKSA,
+  ...CSA,
+  ...FACES,
+];
 /** The faces a player can pick at `now`: Halloween's in Halloween week, a
  * partner's on its collab night, first; past partners' kept at the end. */
 export const facesOn = (now: Date) => {

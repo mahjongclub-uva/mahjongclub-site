@@ -118,44 +118,42 @@ export default function TileSheet({
       <div className="tile-rack-panels">
         <fieldset className="tile-rack" inert={tab !== "face"}>
           <legend className="sr-only">Icon</legend>
-          {sets.map((set) => (
-            <div key={set.club ?? "classic"}>
-              {sets.length > 1 && (
-                <h3 className="tile-rack-set">
-                  {set.club && (
-                    <Image
-                      src={PARTNERS[set.club].logo}
-                      alt=""
-                      width={24}
-                      height={24}
-                    />
-                  )}
-                  {set.club ? PARTNERS[set.club].name : "Classic"}
-                </h3>
-              )}
-              <div className="tile-rack-faces">
-                {set.faces.map((face) => (
-                  <label key={face}>
-                    <input
-                      type="radio"
-                      name="tile-face"
-                      className="sr-only"
-                      checked={tile.face === face}
-                      onChange={() => pick({ ...tile, face })}
-                    />
-                    <AvatarTile tile={{ ...tile, face }} />
-                    <span className="sr-only">
-                      {SAY[face] ?? face}
-                      {set.club &&
-                        (set.club === tonight
-                          ? `, for tonight with the ${PARTNERS[set.club].fullName}`
-                          : `, from the night with the ${PARTNERS[set.club].fullName}`)}
-                    </span>
-                  </label>
-                ))}
+          {sets.map((set) => {
+            const partner = set.club && PARTNERS[set.club];
+            return (
+              <div key={set.club ?? "classic"}>
+                {sets.length > 1 && (
+                  <h3 className="tile-rack-set">
+                    {partner?.logo && (
+                      <Image src={partner.logo} alt="" width={24} height={24} />
+                    )}
+                    {partner ? partner.name : "Classic"}
+                  </h3>
+                )}
+                <div className="tile-rack-faces">
+                  {set.faces.map((face) => (
+                    <label key={face}>
+                      <input
+                        type="radio"
+                        name="tile-face"
+                        className="sr-only"
+                        checked={tile.face === face}
+                        onChange={() => pick({ ...tile, face })}
+                      />
+                      <AvatarTile tile={{ ...tile, face }} />
+                      <span className="sr-only">
+                        {SAY[face] ?? face}
+                        {partner &&
+                          (set.club === tonight
+                            ? `, for tonight with the ${partner.fullName}`
+                            : `, from the night with the ${partner.fullName}`)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </fieldset>
         <fieldset className="tile-rack" inert={tab !== "back"}>
           <legend className="sr-only">Color</legend>
