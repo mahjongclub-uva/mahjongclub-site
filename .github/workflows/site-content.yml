@@ -86,12 +86,21 @@ jobs:
         if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
         with:
           node-version: 22
-          cache: npm
+
+      # npm's own cache still unpacks 408 packages (~35s); restoring the folder skips that.
+      - uses: actions/cache@v6
+        id: modules
+        if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-node22-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true' && steps.modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Check the site builds with this content
         if: steps.change.outputs.changed == 'true' && steps.change.outputs.pending != 'true'
         run: |
-          npm ci
           npm run lint
           npm test
           npm run test:pipeline
