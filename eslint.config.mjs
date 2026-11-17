@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
           "CacheService",
           "ContentService",
           "ScriptApp",
+          "UrlFetchApp",
           "console",
           "HtmlService",
           "fail",

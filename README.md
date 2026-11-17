@@ -107,7 +107,7 @@ The wording comes from a public Google Sheet. Every Monday, a workflow reads it 
 
 Scores are counted with playing cards at the table and recorded in the private score workbook. How scoring works is in the [officer guide](OFFICER_GUIDE.md#how-scoring-works).
 
-After scoring closes on Friday night, `.github/workflows/sync-scores.yml` reads the workbook and opens a pull request with the new standings. Review the changes under `data/` and merge it to publish.
+After scoring closes on Friday night, `.github/workflows/sync-scores.yml` reads the workbook and opens a pull request with the new standings. The meeting service starts it a minute after scoring closes; the Friday schedule is the backup ([setup](OFFICER_GUIDE.md#publishing-the-nights-scores)). Review the changes under `data/` and merge it to publish.
 
 To run the same update by hand:
 

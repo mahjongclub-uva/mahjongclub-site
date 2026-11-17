@@ -159,7 +159,70 @@ function startMeeting(id, start, end) {
     closed: false,
   };
   saveMeeting(meeting);
+  scheduleFinish(meeting);
   return meeting;
+}
+
+const SYNC_URL =
+  "https://api.github.com/repos/mahjongclub-uva/mahjongclub-site/actions/workflows/sync-scores.yml/dispatches";
+
+// A minute after scoring closes, clubFinish closes the meeting and starts the
+// score sync, so the leaderboard updates that night rather than whenever
+// GitHub gets round to the Friday cron. Never blocks a meeting from opening.
+// getProjectTriggers lists only this user's timers, so one another officer
+// left can survive here; the once-per-meeting flag in requestSync covers it.
+function scheduleFinish(meeting) {
+  try {
+    ScriptApp.getProjectTriggers()
+      .filter((trigger) => trigger.getHandlerFunction() === "clubFinish")
+      .forEach((trigger) => ScriptApp.deleteTrigger(trigger));
+    ScriptApp.newTrigger("clubFinish")
+      .timeBased()
+      .at(new Date(meeting.closes + 60000))
+      .create();
+  } catch (error) {
+    console.error("Close timer: " + error.message);
+  }
+}
+
+function clubFinish() {
+  let meeting = readMeeting();
+  try {
+    meeting = withLock(updateMeeting) || meeting;
+  } catch (error) {
+    // The sync asks the meeting service to save open tables again first.
+    console.error("Closing the meeting: " + error.message);
+  }
+  if (meeting && Date.now() >= meeting.closes) requestSync(meeting);
+}
+
+// Once per meeting, and only with a token: without one the Friday cron
+// still publishes, just later. Logs the status, never the token.
+function requestSync(meeting) {
+  const token = properties().getProperty("githubToken");
+  if (!token || properties().getProperty("syncRequested") === meeting.id)
+    return;
+  let response;
+  try {
+    response = UrlFetchApp.fetch(SYNC_URL, {
+      method: "post",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + token,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      payload: JSON.stringify({ ref: "main" }),
+      muteHttpExceptions: true,
+    });
+  } catch (error) {
+    console.error("Score sync request failed: " + error.message);
+    return;
+  }
+  const status = response.getResponseCode();
+  if (status >= 200 && status < 300)
+    properties().setProperty("syncRequested", meeting.id);
+  else console.error("Score sync request failed: HTTP " + status);
 }
 
 // Cache upcoming events, not whether they are open yet. Recheck their windows
