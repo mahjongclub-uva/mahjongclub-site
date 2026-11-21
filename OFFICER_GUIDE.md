@@ -82,7 +82,7 @@ If the pages misbehave during a meeting, record attendance and tables in the She
 8. Deploy a new **Web app**, executing as yourself with access for **Anyone**, and save its `/exec` URL privately.
 
 Set the workbook timezone to America/New_York.
-There is no timer. A meeting opens when the first person visits during its window, and may open up to five minutes late because the calendar is checked at most every five minutes. Every timed event is a meeting; all-day events are ignored.
+No timer opens a meeting. A meeting opens when the first person visits during its window, and may open up to five minutes late because the calendar is checked at most every five minutes. Every timed event is a meeting; all-day events are ignored.
 The website's meeting banner follows `data/meetings.json`, so a meeting opened with **Open now** works from the QR or `/checkin/` link but shows no banner.
 Overlapping meeting windows are refused.
 Set up is safe to repeat. It removes the every-minute `clubTick` timer that earlier versions created and leaves other timers alone.
@@ -96,6 +96,20 @@ After a change to `apps-script/` merges, deploy it outside a meeting from a comp
 2. Run `npm run deploy:apps-script`. It deploys `origin/main`, never your working copy, refuses while a meeting is open, shows what the push will replace, and asks before it pushes. The push replaces every file in the script project with `Rules`, `Club`, `Settings` and `appsscript.json`, and the deployment keeps its `/exec` URL.
 
 Without clasp, paste each file from `origin/main` into the editor, then use **Deploy > Manage deployments**, edit the web app, and choose **New version**.
+
+### Publishing the night's scores
+
+Opening a meeting sets a one-off `clubFinish` timer for a minute after scoring closes. It closes the meeting, saves any open tables and starts the score sync, so the leaderboard and `/story.png` update about ten minutes later. It starts the sync once per meeting. Without a token it still closes the meeting and saves tables, but starts no sync, and the scheduled Friday sync publishes in the early hours instead.
+
+To set it up, outside a meeting and not on a Friday:
+
+1. On GitHub, create a fine-grained personal access token: resource owner `mahjongclub-uva`, only the `mahjongclub-site` repository, and **Actions: Read and write** as its only permission. If the organisation requires approval for these tokens, an owner approves it. Note its expiry date.
+2. In the Apps Script editor, under **Project Settings > Script properties**, add `githubToken` with the token as its value. Anyone who can edit the script can read it, so give it no other permissions.
+3. Deploy the script as in [Updating the script](#updating-the-script). This version asks for one new permission, to connect to external services.
+4. Straight away, choose `properties` in the editor's function list, click **Run**, and accept the permission prompt. It only reads a setting. Until someone does, the web app may refuse every request.
+5. Open `/meeting/` on the site and confirm it loads.
+
+**Executions** shows `Score sync request failed: HTTP 401` once the token has expired or been revoked. Make a new one and replace `githubToken`; until then, the scheduled sync still publishes.
 
 The Attendance tab needs `Member` and `# Meets` in A/B, date headers from D onward, checkbox cells, and at least one member row with a `# Meets` formula.
 Points Tracking needs distinct `Table N` blocks in B:E, a `Player | Points | Net | date` header, and four player rows.

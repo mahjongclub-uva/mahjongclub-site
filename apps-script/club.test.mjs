@@ -250,9 +250,16 @@ function harness() {
   const events = [];
   const triggers = [];
   const logs = [];
+  const fetches = [];
+  const errors = [];
+  let fetchStatus = 204;
+  let triggerError = null;
   const context = vm.createContext({
     Date,
-    console: { error() {}, log: (line) => logs.push(JSON.parse(line)) },
+    console: {
+      error: (line) => errors.push(line),
+      log: (line) => logs.push(JSON.parse(line)),
+    },
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => store[key] || null,
@@ -300,6 +307,22 @@ function harness() {
     ScriptApp: {
       getProjectTriggers: () => triggers,
       deleteTrigger: (trigger) => triggers.splice(triggers.indexOf(trigger), 1),
+      newTrigger: (name) => ({
+        timeBased: () => ({
+          at: (when) => ({
+            create: () => {
+              if (triggerError) throw new Error(triggerError);
+              triggers.push({ getHandlerFunction: () => name, at: +when });
+            },
+          }),
+        }),
+      }),
+    },
+    UrlFetchApp: {
+      fetch: (url, options) => {
+        fetches.push({ url, options });
+        return { getResponseCode: () => fetchStatus };
+      },
     },
     Utilities: {
       getUuid: () => crypto.randomUUID(),
@@ -345,7 +368,15 @@ function harness() {
     events,
     triggers,
     logs,
+    fetches,
+    errors,
     now,
+    fetchReturns: (status) => {
+      fetchStatus = status;
+    },
+    triggersThrow: (message) => {
+      triggerError = message;
+    },
     interruptWrite: () => {
       failWrite = true;
     },
@@ -622,6 +653,79 @@ test("calendar windows open once, close check-in before scores, and respect Clos
   h.context.clubClose();
   assert.equal(h.get({ r: "meeting" }).open, false);
   assert.equal(JSON.parse(h.store.meeting).closed, true);
+});
+
+function calendarMeeting(h) {
+  h.store.meeting = "null";
+  h.events.push({
+    isAllDayEvent: () => false,
+    getId: () => "calendar-event",
+    getStartTime: () => new h.context.Date(h.now + 15 * 60000),
+    getEndTime: () => new h.context.Date(h.now + 75 * 60000),
+  });
+  h.get({ r: "meeting" });
+  return JSON.parse(h.store.meeting);
+}
+
+test("opening a meeting sets one close timer a minute after scoring closes", () => {
+  const h = harness();
+  h.triggers.push({ getHandlerFunction: () => "clubFinish", at: 0 });
+  const meeting = calendarMeeting(h);
+  assert.deepEqual(
+    h.triggers.map((trigger) => [trigger.getHandlerFunction(), trigger.at]),
+    [["clubFinish", meeting.closes + 60000]],
+  );
+});
+
+test("a failed close timer never stops a meeting opening", () => {
+  const h = harness();
+  h.triggersThrow("Too many triggers");
+  assert.equal(calendarMeeting(h).id, "calendar-event:" + (h.now + 15 * 60000));
+  assert.equal(h.get({ r: "meeting" }).checkinsOpen, true);
+  assert.match(h.errors.join("\n"), /Close timer: Too many triggers/);
+});
+
+test("the close timer closes the meeting and starts the score sync once", () => {
+  const h = harness();
+  h.store.githubToken = "fake-token";
+  h.context.Date.now = () => h.now + 30000;
+  h.context.clubFinish();
+  assert.equal(JSON.parse(h.store.meeting).closed, true);
+  assert.equal(h.fetches.length, 1);
+  const { url, options } = h.fetches[0];
+  assert.match(url, /\/actions\/workflows\/sync-scores\.yml\/dispatches$/);
+  assert.equal(options.method, "post");
+  assert.equal(options.headers.Authorization, "Bearer fake-token");
+  assert.deepEqual(JSON.parse(options.payload), { ref: "main" });
+  h.context.clubFinish();
+  assert.equal(h.fetches.length, 1);
+});
+
+test("the close timer waits for scoring to close, and needs a token", () => {
+  const h = harness();
+  h.store.githubToken = "fake-token";
+  h.context.clubFinish();
+  assert.equal(JSON.parse(h.store.meeting).closed, false);
+  delete h.store.githubToken;
+  h.context.Date.now = () => h.now + 30000;
+  h.context.clubFinish();
+  assert.equal(JSON.parse(h.store.meeting).closed, true);
+  assert.equal(h.fetches.length, 0);
+});
+
+test("a refused score sync request is logged without the token and can retry", () => {
+  const h = harness();
+  h.store.githubToken = "fake-token";
+  h.context.Date.now = () => h.now + 30000;
+  h.fetchReturns(401);
+  h.context.clubFinish();
+  assert.equal(h.store.syncRequested, undefined);
+  assert.match(h.errors.join("\n"), /HTTP 401/);
+  assert.doesNotMatch(h.errors.join("\n"), /fake-token/);
+  h.fetchReturns(204);
+  h.context.clubFinish();
+  assert.equal(h.fetches.length, 2);
+  assert.equal(h.store.syncRequested, "fake-meeting");
 });
 
 test("Set up is repeatable, and malformed settings do not replace valid settings", () => {
