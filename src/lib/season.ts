@@ -3,6 +3,8 @@
  * the partner's theme (collab.css) and offer its faces (avatar.ts). */
 export const COLLAB_NIGHTS = {
   "2026-11-06": "hksa",
+  // Not yet confirmed with CSA.
+  "2026-11-15": "csa",
 } as const;
 export type Collab = (typeof COLLAB_NIGHTS)[keyof typeof COLLAB_NIGHTS];
 

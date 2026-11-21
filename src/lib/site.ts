@@ -42,16 +42,29 @@ export const LOGO: string | null = "/logo.webp";
 
 /** Clubs we host a night with; the dates are COLLAB_NIGHTS in season.ts.
  * `logo` sits beside the club's in the meeting header, over "MJC × name"; `fullName` is read to
- * screen readers; `emblem` is a white mark for the home card. */
+ * screen readers; `emblem` is a white mark for the home card. A null logo
+ * waits for the club's permission; a null emblem leaves the card plain. */
 export const PARTNERS: Record<
   Collab,
-  { name: string; fullName: string; logo: string; emblem: string }
+  {
+    name: string;
+    fullName: string;
+    logo: string | null;
+    emblem: string | null;
+  }
 > = {
   hksa: {
     name: "HKSA",
     fullName: "Hong Kong Student Association",
     logo: "/partners/hksa.webp",
     emblem: "/tiles/bauhinia.svg",
+  },
+  // Name not yet confirmed with CSA; no logo until they say yes.
+  csa: {
+    name: "CSA",
+    fullName: "Chinese Student Association",
+    logo: null,
+    emblem: null,
   },
 };
 

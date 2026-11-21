@@ -56,3 +56,34 @@
     left bottom / 50% auto no-repeat;
   pointer-events: none;
 }
+
+/* CSA: deep red, deep enough for the white game number (9.8:1 at its
+   brightest), with a gold window-lattice bracket in each corner, 5px inside
+   the rim. The number stays centred. */
+[data-season="csa"] main.meeting-page .table-top {
+  --lattice: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M2 38V2h36M8 32V8h24M8 20h8v-12M20 8v8h-12' fill='none' stroke='%23e3bd63' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+  --lattice-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath transform='rotate(90 20 20)' d='M2 38V2h36M8 32V8h24M8 20h8v-12M20 8v8h-12' fill='none' stroke='%23e3bd63' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+  background: radial-gradient(
+    circle at 50% 40%,
+    oklch(0.4 0.13 25),
+    oklch(0.29 0.1 22)
+  );
+}
+[data-season="csa"] main.meeting-page .table-top > * {
+  position: relative;
+  z-index: 1;
+}
+/* The top pair, and the same pair turned round into the bottom corners. */
+[data-season="csa"] main.meeting-page .table-top::before,
+[data-season="csa"] main.meeting-page .table-top::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  background:
+    var(--lattice) 0 0 / max(26%, 30px) auto no-repeat,
+    var(--lattice-right) 100% 0 / max(26%, 30px) auto no-repeat;
+  pointer-events: none;
+}
+[data-season="csa"] main.meeting-page .table-top::after {
+  rotate: 180deg;
+}

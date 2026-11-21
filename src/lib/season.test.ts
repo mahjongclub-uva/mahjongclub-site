@@ -9,6 +9,8 @@ test("the pages wear Halloween that week and a partner's theme on its night only
   assert.equal(on(2026, 10, 6), "hksa");
   assert.equal(on(2026, 10, 6, 23), "hksa");
   assert.equal(on(2026, 10, 7), null);
+  assert.equal(on(2026, 10, 15), "csa");
+  assert.equal(on(2026, 10, 16), null);
   assert.equal(on(2026, 10, 13), null);
   assert.ok(halloweenWeek(new Date(2026, 9, 24)));
   assert.ok(!halloweenWeek(new Date(2026, 10, 6)));
@@ -24,5 +26,6 @@ test("the head script runs the season check as a string, so it needs nothing fro
 test("a meeting's date names its partner", () => {
   assert.equal(collabOn("2026-11-06"), "hksa");
   assert.equal(collabOn("2026-11-07"), undefined);
+  assert.equal(collabOn("2026-11-15"), "csa");
   assert.equal(collabOn(null), undefined);
 });

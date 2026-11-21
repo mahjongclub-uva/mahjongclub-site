@@ -142,22 +142,26 @@ export function HomeMeeting({
     >
       {collab ? (
         <>
-          <Image
-            className={styles.cardEmblem}
-            src={PARTNERS[collab].emblem}
-            alt=""
-            width={150}
-            height={150}
-          />
+          {PARTNERS[collab].emblem && (
+            <Image
+              className={styles.cardEmblem}
+              src={PARTNERS[collab].emblem}
+              alt=""
+              width={150}
+              height={150}
+            />
+          )}
           <div className={styles.night}>
             <span className={styles.lockup}>
               {LOGO && <Image src={LOGO} alt="" width={40} height={40} />}
-              <Image
-                src={PARTNERS[collab].logo}
-                alt=""
-                width={40}
-                height={40}
-              />
+              {PARTNERS[collab].logo && (
+                <Image
+                  src={PARTNERS[collab].logo}
+                  alt=""
+                  width={40}
+                  height={40}
+                />
+              )}
               <b>
                 <NightName collab={collab} />
               </b>
